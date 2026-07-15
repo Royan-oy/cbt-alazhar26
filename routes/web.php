@@ -13,6 +13,7 @@ use App\Http\Controllers\AdminJenjangController;
 use App\Http\Controllers\GuruController;
 use App\Http\Controllers\GuruMapelController;
 use App\Http\Controllers\WaliKelasController;
+use App\Http\Controllers\SiswaController;
 
 
 // Halaman awal langsung menampilkan form login
@@ -75,5 +76,10 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('wali-kelas', WaliKelasController::class)
     ->parameters(['wali-kelas' => 'wali_kelas'])
     ->except('show');
+
+    Route::get('siswa-template-download', [SiswaController::class, 'downloadTemplate'])->name('siswa.template');
+    Route::post('siswa-import', [SiswaController::class, 'import'])->name('siswa.import');
+
+    Route::resource('siswa', SiswaController::class);
     
 });
