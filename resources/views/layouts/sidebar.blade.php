@@ -461,12 +461,12 @@
                     </a>
                 </li>
 
-                <li>
+                <!-- <li>
                     <a href="#" class="nav-link">
                         <i class="fa-solid fa-square-poll-vertical me-3"></i>
                         Nilai Saya
                     </a>
-                </li>
+                </li> -->
 
             </ul>
 
