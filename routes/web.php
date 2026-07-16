@@ -13,6 +13,7 @@ use App\Http\Controllers\AdminJenjangController;
 use App\Http\Controllers\GuruController;
 use App\Http\Controllers\GuruMapelController;
 use App\Http\Controllers\WaliKelasController;
+use App\Http\Controllers\PengaturanAkunController;
 
 
 // Halaman awal langsung menampilkan form login
@@ -23,6 +24,7 @@ Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 // Rute Dashboard Utama (Hanya bisa diakses jika sudah login)
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/pengaturan-akun', [PengaturanAkunController::class, 'index'])->name('pengaturan-akun.index');
     Route::resource('jenjang', JenjangController::class);
     Route::resource('tahun-ajaran', TahunAjaranController::class);
 
