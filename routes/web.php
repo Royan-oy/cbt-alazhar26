@@ -16,6 +16,7 @@ use App\Http\Controllers\WaliKelasController;
 use App\Http\Controllers\PengaturanAkunController;
 use App\Http\Controllers\SiswaController;
 use App\Http\Controllers\BankSoalController;
+use App\Http\Controllers\SoalController;
 
 
 
@@ -122,5 +123,22 @@ Route::middleware(['auth'])->group(function () {
     Route::get('bank-soal/{bankSoal}', [BankSoalController::class, 'show'])->name('bank-soal.show');
     Route::patch('bank-soal/{bankSoal}/toggle-publish', [BankSoalController::class, 'togglePublish'])->name('bank-soal.toggle-publish');
     Route::delete('bank-soal/{bankSoal}', [BankSoalController::class, 'destroy'])->name('bank-soal.destroy');
+
+
+    Route::prefix('guru')->name('guru.')->group(function () {
+        
+        // Kita gunakan nama rute yang berbeda agar tidak bentrok dengan rute bank-soal milik Admin
+        Route::resource('bank-soal', GuruBankSoalController::class); // Sebaiknya pisahkan controllernya
+
+        Route::prefix('bank-soal/{bank_soal}')->name('bank-soal.')->group(function () {
+            Route::get('soal', [SoalController::class, 'index'])->name('soal.index');
+            Route::get('soal/create', [SoalController::class, 'create'])->name('soal.create');
+            Route::post('soal', [SoalController::class, 'store'])->name('soal.store');
+            Route::get('soal/{soal}/edit', [SoalController::class, 'edit'])->name('soal.edit');
+            Route::put('soal/{soal}', [SoalController::class, 'update'])->name('soal.update');
+            Route::delete('soal/{soal}', [SoalController::class, 'destroy'])->name('soal.destroy');
+            Route::post('soal/import', [SoalController::class, 'import'])->name('soal.import');
+        });
+    });
 
 });

@@ -23,13 +23,19 @@ class Soal extends Model
         return $this->belongsTo(BankSoal::class);
     }
 
+    // Relasi ke Pilihan Jawaban
+    public function pilihanJawabans()
+    {
+        return $this->hasMany(PilihanJawaban::class, 'soal_id');
+    }
+
     /**
      * Label ramah-baca untuk tiap jenis soal.
      */
     public static function jenisLabel($jenis)
     {
         $labels = [
-            'pilihan_ganda'          => 'Pilihan Ganda',
+            'pilihan_ganda' => 'Pilihan Ganda',
             // 'pilihan_ganda_kompleks' => 'Pilihan Ganda Kompleks',
             // 'benar_salah'            => 'Benar/Salah',
             'essay'                  => 'Essay',
