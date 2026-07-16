@@ -129,13 +129,11 @@
     .status-badge.published .dot { background: #16a34a; }
     .status-badge.draft .dot { background: #d97706; }
 
-    /* ===== ADD BUTTON ===== */
-    .btn-add-soal {
+    /* ===== HEADER ACTION BUTTONS ===== */
+    .header-btn {
         display: inline-flex;
         align-items: center;
         gap: 8px;
-        background: linear-gradient(135deg, #0ea5e9, #0284c7);
-        color: #fff;
         border: none;
         border-radius: 14px;
         padding: 11px 22px;
@@ -143,6 +141,12 @@
         font-size: 0.9rem;
         text-decoration: none;
         transition: 0.25s ease;
+        cursor: pointer;
+    }
+
+    .btn-add-soal {
+        background: linear-gradient(135deg, #0ea5e9, #0284c7);
+        color: #fff;
         box-shadow: 0 8px 20px rgba(14, 165, 233, 0.3);
     }
 
@@ -153,6 +157,75 @@
         box-shadow: 0 14px 28px rgba(14, 165, 233, 0.4);
         text-decoration: none;
     }
+
+    .btn-import-soal {
+        background: linear-gradient(135deg, #16a34a, #15803d);
+        color: #fff;
+        box-shadow: 0 8px 20px rgba(22, 163, 74, 0.3);
+    }
+
+    .btn-import-soal:hover {
+        color: #fff;
+        background: linear-gradient(135deg, #15803d, #166534);
+        transform: translateY(-3px);
+        box-shadow: 0 14px 28px rgba(22, 163, 74, 0.4);
+        text-decoration: none;
+    }
+
+    /* ===== IMPORT MODAL ===== */
+    #importSoalModal .modal-content {
+        border: none;
+        border-radius: 24px;
+        overflow: hidden;
+        box-shadow: 0 25px 60px rgba(15, 23, 42, 0.18);
+    }
+
+    #importSoalModal .modal-header {
+        background: linear-gradient(135deg, #15803d, #16a34a);
+        border: none;
+        padding: 22px 28px;
+    }
+
+    #importSoalModal .modal-body {
+        padding: 28px;
+        background: #f8fafc;
+    }
+
+    #importSoalModal .modal-footer {
+        background: #fff;
+        border-top: 1px solid #edf2f7;
+        padding: 18px 28px;
+    }
+
+    .upload-box {
+        border: 2px dashed #16a34a;
+        border-radius: 18px;
+        background: white;
+        padding: 32px;
+        text-align: center;
+        transition: 0.3s;
+    }
+
+    .upload-box:hover {
+        background: #f0fdf4;
+        border-color: #15803d;
+    }
+
+    .upload-box i { font-size: 48px; color: #16a34a; margin-bottom: 14px; }
+    .upload-box h6 { font-weight: 700; margin-bottom: 6px; }
+    .upload-box p { color: #64748b; font-size: 13px; margin-bottom: 16px; }
+
+    .import-info-box {
+        background: #eef9f1;
+        border: 1px solid #b7e4c7;
+        border-radius: 14px;
+        padding: 16px 20px;
+        margin-bottom: 20px;
+    }
+
+    .import-info-box strong { color: #166534; font-size: 13px; }
+    .import-info-box ul { margin-top: 8px; padding-left: 18px; margin-bottom: 0; }
+    .import-info-box li { color: #475569; font-size: 13px; margin-bottom: 4px; }
 
     /* ===== EMPTY STATE ===== */
     .empty-state {
@@ -200,7 +273,8 @@
             gap: 18px;
         }
 
-        .btn-add-soal { width: 100%; justify-content: center; }
+        .btn-add-soal, .btn-import-soal { width: 100%; justify-content: center; }
+        .header-btn-group { flex-direction: column; width: 100%; gap: 10px !important; }
 
         .content-card { padding: 4px; border-radius: 18px; }
 
@@ -261,8 +335,10 @@
         .table-responsive tbody td:nth-of-type(2)::before { content: "Nama Bank Soal"; }
         .table-responsive tbody td:nth-of-type(3)::before { content: "Mapel"; }
         .table-responsive tbody td:nth-of-type(4)::before { content: "Jenjang"; }
-        .table-responsive tbody td:nth-of-type(5)::before { content: "Status"; }
-        .table-responsive tbody td:nth-of-type(6)::before { content: "Aksi"; }
+        .table-responsive tbody td:nth-of-type(5)::before { content: "Deskripsi"; }
+        .table-responsive tbody td:nth-of-type(6)::before { content: "Dibuat"; }
+        .table-responsive tbody td:nth-of-type(7)::before { content: "Status"; }
+        .table-responsive tbody td:nth-of-type(8)::before { content: "Aksi"; }
 
         .soal-name { text-align: right; }
         .soal-meta { text-align: right; }
@@ -287,8 +363,15 @@
                 </p>
             </div>
 
-            <div>
-                <a href="{{ route('dashboard-guru.bank-soal.create') }}" class="btn-add-soal">
+            <div class="d-flex gap-2 flex-wrap header-btn-group">
+                {{-- <button type="button"
+                        class="header-btn btn-import-soal"
+                        data-bs-toggle="modal"
+                        data-bs-target="#importSoalModal">
+                    <i class="fa-solid fa-file-excel"></i>
+                    Import Excel
+                </button> --}}
+                <a href="{{ route('dashboard-guru.bank-soal.create') }}" class="header-btn btn-add-soal">
                     <i class="fa-solid fa-plus"></i>
                     Tambah Bank Soal
                 </a>
@@ -318,12 +401,14 @@
                 <table class="table align-middle mb-0">
                     <thead>
                         <tr>
-                            <th style="width: 56px;">No</th>
+                            <th style="width: 50px;">No</th>
                             <th>Nama Bank Soal</th>
                             <th>Mapel</th>
                             <th>Jenjang</th>
+                            <th>Deskripsi</th>
+                            <th>Dibuat</th>
                             <th>Status</th>
-                            <th style="width: 120px;" class="text-end">Aksi</th>
+                            <th style="width: 110px;" class="text-end">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -350,6 +435,24 @@
                             <td>
                                 <span class="badge bg-dark bg-opacity-10 text-dark px-2 py-1 rounded-3 fw-semibold" style="font-size: 12px;">
                                     {{ $bs->jenjang->nama_jenjang ?? '-' }}
+                                </span>
+                            </td>
+
+                            {{-- Deskripsi --}}
+                            <td>
+                                @if($bs->deskripsi)
+                                    <span class="text-muted" style="font-size: 13px;">
+                                        {{ Str::limit($bs->deskripsi, 40, '...') }}
+                                    </span>
+                                @else
+                                    <span class="text-muted fst-italic" style="font-size: 12px;">—</span>
+                                @endif
+                            </td>
+
+                            {{-- Dibuat --}}
+                            <td>
+                                <span class="text-muted" style="font-size: 12px;">
+                                    {{ $bs->created_at->format('d M Y') }}
                                 </span>
                             </td>
 
@@ -393,7 +496,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="6">
+                            <td colspan="8">
                                 <div class="empty-state">
                                     <div class="empty-icon-wrap">
                                         <i class="fa-solid fa-folder-open"></i>
@@ -403,7 +506,7 @@
                                         Anda belum membuat bank soal apapun.<br>
                                         Mulai dengan menambahkan bank soal baru.
                                     </p>
-                                    <a href="{{ route('dashboard-guru.bank-soal.create') }}" class="btn-add-soal">
+                                    <a href="{{ route('dashboard-guru.bank-soal.create') }}" class="header-btn btn-add-soal">
                                         <i class="fa-solid fa-plus"></i>
                                         Tambah Bank Soal Pertama
                                     </a>
@@ -416,8 +519,62 @@
             </div>
         </div>
     </div>
-
 </div>
+
+{{-- Modal Import Excel --}}
+{{-- <div class="modal fade" id="importSoalModal" tabindex="-1" aria-labelledby="importSoalModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 600px;">
+        <div class="modal-content" id="importSoalModal">
+            <div class="modal-header">
+                <h5 class="modal-title text-white fw-bold d-flex align-items-center gap-2" id="importSoalModalLabel">
+                    <span style="width:38px;height:38px;border-radius:10px;background:rgba(255,255,255,.15);display:inline-flex;align-items:center;justify-content:center;">
+                        <i class="fa-solid fa-file-excel"></i>
+                    </span>
+                    Import Bank Soal dari Excel
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="import-info-box">
+                    <strong><i class="fa-solid fa-circle-info me-2"></i>Petunjuk Import</strong>
+                    <ul>
+                        <li>Gunakan template Excel yang tersedia sebagai panduan format data.</li>
+                        <li>Kolom yang wajib diisi: <strong>Nama Bank Soal, Mata Pelajaran, Jenjang</strong>.</li>
+                        <li>Kolom <strong>Deskripsi</strong> bersifat opsional.</li>
+                        <li>Format file yang diterima: <strong>.xlsx, .xls</strong>.</li>
+                    </ul>
+                </div>
+
+                <form action="#" method="POST" enctype="multipart/form-data" id="form-import-soal">
+                    @csrf
+                    <div class="upload-box">
+                        <i class="fa-solid fa-cloud-arrow-up"></i>
+                        <h6>Pilih File Excel</h6>
+                        <p>Seret & lepas file ke sini, atau klik tombol di bawah</p>
+                        <input type="file"
+                               name="file_excel"
+                               id="file_excel"
+                               accept=".xlsx,.xls"
+                               class="form-control"
+                               style="max-width: 340px; margin: auto;"
+                               required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button"
+                        class="btn btn-light border rounded-3 px-4 fw-semibold"
+                        data-bs-dismiss="modal">Batal</button>
+                <button type="submit"
+                        form="form-import-soal"
+                        class="btn fw-semibold rounded-3 px-4 text-white"
+                        style="background: linear-gradient(135deg, #16a34a, #15803d); border: none;">
+                    <i class="fa-solid fa-upload me-2"></i>Import Sekarang
+                </button>
+            </div>
+        </div>
+    </div>
+</div> --}}
 
 {{-- SweetAlert2 Konfirmasi Hapus --}}
 <script>
