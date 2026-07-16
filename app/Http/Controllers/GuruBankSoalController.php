@@ -35,4 +35,15 @@ class GuruBankSoalController extends Controller
 
         return redirect()->route('guru.bank-soal.index')->with('success', 'Bank Soal berhasil dibuat');
     }
+
+    // Tambahkan metode ini di GuruBankSoalController.php
+public function create()
+{
+    // Mengambil data referensi untuk dropdown (misal: Mapel, Jenjang)
+    // Sesuaikan dengan model yang Anda gunakan
+    $mataPelajaran = \App\Models\MataPelajaran::all();
+    $jenjang = \App\Models\Jenjang::all();
+    
+    return view('guru.bank-soal.create', compact('mataPelajaran', 'jenjang'));
+}
 }
