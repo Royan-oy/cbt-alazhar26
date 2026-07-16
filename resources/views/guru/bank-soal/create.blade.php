@@ -365,7 +365,7 @@
                     @enderror
                 </div>
 
-                {{-- Mata Pelajaran & Jenjang - 2 Kolom --}}
+                {{-- Mata Pelajaran (guru_mapel) & Jenjang - 2 Kolom --}}
                 <div class="row">
                     <div class="col-md-6">
                         <div class="form-group">
@@ -373,50 +373,44 @@
                                 <span class="required-dot"></span>
                                 Mata Pelajaran
                             </label>
-                            <select name="mata_pelajaran_id"
-                                    class="form-select-modern @error('mata_pelajaran_id') is-invalid @enderror"
+                            <select name="guru_mapel_id"
+                                    class="form-select-modern @error('guru_mapel_id') is-invalid @enderror"
                                     required>
                                 <option value="">— Pilih Mata Pelajaran —</option>
-                                @foreach($mataPelajaran as $mapel)
-                                    <option value="{{ $mapel->id }}" {{ old('mata_pelajaran_id') == $mapel->id ? 'selected' : '' }}>
-                                        {{ $mapel->nama_mapel }}
+                                @foreach($guruMapels as $gm)
+                                    <option value="{{ $gm->id }}" {{ old('guru_mapel_id') == $gm->id ? 'selected' : '' }}>
+                                        {{ $gm->mataPelajaran->nama_mapel }}
                                     </option>
                                 @endforeach
                             </select>
-                            @error('mata_pelajaran_id')
+                            @error('guru_mapel_id')
                                 <div class="field-error">
                                     <i class="fa-solid fa-circle-exclamation"></i> {{ $message }}
                                 </div>
                             @enderror
+                            @if($guruMapels->isEmpty())
+                                <div class="field-error">
+                                    <i class="fa-solid fa-circle-exclamation"></i> Anda belum ditugaskan mata pelajaran apapun. Hubungi admin jenjang.
+                                </div>
+                            @endif
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="form-group">
                             <label class="form-label-custom">
-                                <span class="required-dot"></span>
                                 Jenjang
                             </label>
-                            <select name="jenjang_id"
-                                    class="form-select-modern @error('jenjang_id') is-invalid @enderror"
-                                    required>
-                                <option value="">— Pilih Jenjang —</option>
-                                @foreach($jenjang as $j)
-                                    <option value="{{ $j->id }}" {{ old('jenjang_id') == $j->id ? 'selected' : '' }}>
-                                        {{ $j->nama_jenjang }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            @error('jenjang_id')
-                                <div class="field-error">
-                                    <i class="fa-solid fa-circle-exclamation"></i> {{ $message }}
-                                </div>
-                            @enderror
+                            <input type="text"
+                                   class="form-control-modern"
+                                   value="{{ $jenjang->nama_jenjang ?? '-' }}"
+                                   disabled>
+                            {{-- Read-only, diambil dari data guru yang login. Tidak dikirim ke server (bukan input yang bernilai untuk form ini) --}}
                         </div>
                     </div>
                 </div>
 
                 {{-- Deskripsi --}}
-                <div class="form-group">
+                <div class="form-group mt-3">
                     <label class="form-label-custom">
                         Deskripsi
                         <span class="label-hint">Opsional</span>

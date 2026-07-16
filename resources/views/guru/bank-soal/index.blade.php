@@ -364,13 +364,13 @@
             </div>
 
             <div class="d-flex gap-2 flex-wrap header-btn-group">
-                <button type="button"
+                {{-- <button type="button"
                         class="header-btn btn-import-soal"
                         data-bs-toggle="modal"
                         data-bs-target="#importSoalModal">
                     <i class="fa-solid fa-file-excel"></i>
                     Import Excel
-                </button>
+                </button> --}}
                 <a href="{{ route('dashboard-guru.bank-soal.create') }}" class="header-btn btn-add-soal">
                     <i class="fa-solid fa-plus"></i>
                     Tambah Bank Soal
@@ -519,11 +519,10 @@
             </div>
         </div>
     </div>
-
 </div>
 
 {{-- Modal Import Excel --}}
-<div class="modal fade" id="importSoalModal" tabindex="-1" aria-labelledby="importSoalModalLabel" aria-hidden="true">
+{{-- <div class="modal fade" id="importSoalModal" tabindex="-1" aria-labelledby="importSoalModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" style="max-width: 600px;">
         <div class="modal-content" id="importSoalModal">
             <div class="modal-header">
@@ -575,7 +574,7 @@
             </div>
         </div>
     </div>
-</div>
+</div> --}}
 
 {{-- SweetAlert2 Konfirmasi Hapus --}}
 <script>
