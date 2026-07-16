@@ -30,7 +30,11 @@ class CreateUjiansTable extends Migration
 
             $table->dateTime('waktu_selesai');
 
-            $table->integer('durasi');
+            $table->integer('durasi_minimal');
+
+            $table->string('token', 6)->nullable()->unique();
+
+            $table->boolean('token_aktif')->default(false);
 
             $table->boolean('acak_soal')->default(true);
 

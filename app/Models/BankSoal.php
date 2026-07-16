@@ -41,4 +41,9 @@ class BankSoal extends Model
     {
         return $this->hasMany(Soal::class);
     }
+
+    public function ujians()
+    {
+        return $this->hasMany(Ujian::class);
+    }
 }

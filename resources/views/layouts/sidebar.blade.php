@@ -356,12 +356,10 @@
             </li>
 
             <li>
-                <a href="javascript:void(0)"
-                class="nav-link disabled"
-                style="opacity:.6;cursor:not-allowed;">
+                <a href="{{ route('ujian.index') }}"
+                    class="nav-link {{ request()->routeIs('ujian.*') ? 'active' : '' }}">
                     <i class="fa-solid fa-calendar-check me-3"></i>
                     Jadwal Ujian
-                    <span class="ms-auto badge bg-secondary rounded-pill">Soon</span>
                 </a>
             </li>
 

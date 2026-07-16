@@ -17,6 +17,7 @@ use App\Http\Controllers\PengaturanAkunController;
 use App\Http\Controllers\SiswaController;
 use App\Http\Controllers\BankSoalController;
 use App\Http\Controllers\SoalController;
+use App\Http\Controllers\UjianController;
 
 
 
@@ -118,6 +119,11 @@ Route::middleware(['auth'])->group(function () {
     Route::post('siswa-import', [SiswaController::class, 'import'])->name('siswa.import');
 
     Route::resource('siswa', SiswaController::class);
+
+    Route::patch('ujian/{ujian}/toggle-token', [UjianController::class, 'toggleToken'])->name('ujian.toggle-token');
+    Route::patch('ujian/{ujian}/regenerate-token', [UjianController::class, 'regenerateToken'])->name('ujian.regenerate-token');
+
+    Route::resource('ujian', UjianController::class);
    
     Route::get('bank-soal', [BankSoalController::class, 'index'])->name('bank-soal.index');
     Route::get('bank-soal/{bankSoal}', [BankSoalController::class, 'show'])->name('bank-soal.show');
