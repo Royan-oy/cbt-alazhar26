@@ -270,21 +270,61 @@
                 </div>
 
                 @forelse($soals as $soal)
-                <div class="soal-item">
-                    <div class="d-flex align-items-start gap-3">
-                        <div class="soal-number">{{ $soal->urutan }}</div>
-                        <div class="flex-grow-1">
-                            <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
-                                <span class="jenis-badge">{{ \App\Models\Soal::jenisLabel($soal->jenis_soal) }}</span>
-                                <span class="text-muted small">Bobot: {{ $soal->bobot }}</span>
+                    <div class="soal-item">
+                        <div class="d-flex align-items-start gap-3">
+                            <div class="soal-number">{{ $soal->urutan }}</div>
+                            <div class="flex-grow-1">
+                                <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
+                                    <span class="jenis-badge">{{ \App\Models\Soal::jenisLabel($soal->jenis_soal) }}</span>
+                                    <span class="text-muted small">Bobot: {{ $soal->bobot }}</span>
+                                </div>
+                                <div class="text-dark mb-2">{{ \Illuminate\Support\Str::limit(strip_tags($soal->teks_soal), 200) }}</div>
+
+                                @if(in_array($soal->jenis_soal, ['pilihan_ganda', 'pilihan_ganda_kompleks', 'benar_salah']))
+                                    <ul class="list-unstyled mt-2 mb-0">
+                                        @foreach($soal->pilihanJawabans as $pilihan)
+                                        <li class="d-flex align-items-center gap-2 py-1 {{ $pilihan->is_benar ? 'text-success fw-semibold' : 'text-muted' }}">
+                                            @if($pilihan->is_benar)
+                                                <i class="fa-solid fa-circle-check"></i>
+                                            @else
+                                                <i class="fa-regular fa-circle"></i>
+                                            @endif
+                                            {{ $pilihan->kode ? $pilihan->kode.'. ' : '' }}{{ $pilihan->teks_pilihan }}
+                                        </li>
+                                        @endforeach
+                                    </ul>
+
+                                @elseif($soal->jenis_soal == 'menjodohkan')
+                                    <ul class="list-unstyled mt-2 mb-0">
+                                        @foreach($soal->pilihanJawabans as $pilihan)
+                                        <li class="py-1">
+                                            <span class="fw-semibold">{{ $pilihan->teks_pilihan }}</span>
+                                            <i class="fa-solid fa-arrow-right-long mx-2 text-muted"></i>
+                                            <span>{{ $pilihan->pasangan }}</span>
+                                        </li>
+                                        @endforeach
+                                    </ul>
+
+                                @elseif($soal->jenis_soal == 'mengurutkan')
+                                    <ol class="mt-2 mb-0">
+                                        @foreach($soal->pilihanJawabans->sortBy('urutan') as $pilihan)
+                                        <li>{{ $pilihan->teks_pilihan }}</li>
+                                        @endforeach
+                                    </ol>
+
+                                @elseif(in_array($soal->jenis_soal, ['essay', 'isian']))
+                                    <div class="text-muted small fst-italic mt-2">
+                                        <i class="fa-solid fa-circle-info me-1"></i>
+                                        Soal tipe {{ \App\Models\Soal::jenisLabel($soal->jenis_soal) }} — dinilai manual oleh guru
+                                    </div>
+                                @endif
+
+                                @if($soal->gambar)
+                                    <img src="{{ asset('storage/' . $soal->gambar) }}" alt="Gambar soal" class="mt-2 rounded-3" style="max-width: 200px;">
+                                @endif
                             </div>
-                            <div class="text-dark">{{ \Illuminate\Support\Str::limit(strip_tags($soal->teks_soal), 200) }}</div>
-                            @if($soal->gambar)
-                                <img src="{{ asset('storage/' . $soal->gambar) }}" alt="Gambar soal" class="mt-2 rounded-3" style="max-width: 200px;">
-                            @endif
                         </div>
                     </div>
-                </div>
                 @empty
                 <div class="text-center py-5">
                     <i class="fa-solid fa-circle-question fa-3x text-muted mb-3 opacity-50"></i>
