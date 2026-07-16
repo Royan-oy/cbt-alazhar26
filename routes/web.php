@@ -13,6 +13,8 @@ use App\Http\Controllers\AdminJenjangController;
 use App\Http\Controllers\GuruController;
 use App\Http\Controllers\GuruMapelController;
 use App\Http\Controllers\WaliKelasController;
+use App\Http\Controllers\PengaturanAkunController;
+use App\Http\Controllers\SiswaController;
 
 
 // Halaman awal langsung menampilkan form login
