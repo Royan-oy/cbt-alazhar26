@@ -20,17 +20,17 @@ class CreateSoalsTable extends Migration
 
                 'pilihan_ganda',
 
-                'pilihan_ganda_kompleks',
+                // 'pilihan_ganda_kompleks',
 
-                'benar_salah',
+                // 'benar_salah',
 
                 'essay',
 
                 'isian',
 
-                'menjodohkan',
+                // 'menjodohkan',
 
-                'mengurutkan'
+                // 'mengurutkan'
 
             ]);
 
