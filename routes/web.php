@@ -17,6 +17,7 @@ use App\Http\Controllers\PengaturanAkunController;
 use App\Http\Controllers\SiswaController;
 use App\Http\Controllers\BankSoalController;
 use App\Http\Controllers\SoalController;
+use App\Http\Controllers\GuruBankSoalController;
 
 
 
@@ -125,7 +126,7 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('bank-soal/{bankSoal}', [BankSoalController::class, 'destroy'])->name('bank-soal.destroy');
 
 
-    Route::prefix('guru')->name('guru.')->group(function () {
+    Route::prefix('dashboard-guru')->name('dashboard-guru.')->group(function () {
         
         // Kita gunakan nama rute yang berbeda agar tidak bentrok dengan rute bank-soal milik Admin
         Route::resource('bank-soal', GuruBankSoalController::class); // Sebaiknya pisahkan controllernya
