@@ -74,7 +74,7 @@ class BankSoalController extends Controller
     {
         $this->authorizeJenjang($bankSoal);
 
-        $bankSoal->load(['guruMapel.guru', 'mataPelajaran', 'jenjang']);
+        $bankSoal->load(['guruMapel.guru', 'mataPelajaran', 'jenjang', 'soals.pilihanJawabans']);
 
         $soals = $bankSoal->soals()->orderBy('urutan', 'asc')->paginate(15);
 
