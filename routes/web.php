@@ -15,6 +15,8 @@ use App\Http\Controllers\GuruMapelController;
 use App\Http\Controllers\WaliKelasController;
 use App\Http\Controllers\PengaturanAkunController;
 use App\Http\Controllers\SiswaController;
+use App\Http\Controllers\BankSoalController;
+
 
 
 // Halaman awal langsung menampilkan form login
@@ -95,10 +97,30 @@ Route::middleware(['auth'])->group(function () {
     ->parameters(['wali-kelas' => 'wali_kelas'])
     ->except('show');
 
+    Route::get(
+        'wali-kelas/template',
+        [WaliKelasController::class, 'downloadTemplate']
+    )->name('wali-kelas.template');
+
+    Route::get(
+        'wali-kelas/export',
+        [WaliKelasController::class, 'export']
+    )->name('wali-kelas.export');
+
+    Route::post(
+        'wali-kelas/import',
+        [WaliKelasController::class, 'import']
+    )->name('wali-kelas.import');
+
     Route::get('siswa-export', [SiswaController::class, 'export'])->name('siswa.export');
     Route::get('siswa-template-download', [SiswaController::class, 'downloadTemplate'])->name('siswa.template');
     Route::post('siswa-import', [SiswaController::class, 'import'])->name('siswa.import');
 
     Route::resource('siswa', SiswaController::class);
-    
+   
+    Route::get('bank-soal', [BankSoalController::class, 'index'])->name('bank-soal.index');
+    Route::get('bank-soal/{bankSoal}', [BankSoalController::class, 'show'])->name('bank-soal.show');
+    Route::patch('bank-soal/{bankSoal}/toggle-publish', [BankSoalController::class, 'togglePublish'])->name('bank-soal.toggle-publish');
+    Route::delete('bank-soal/{bankSoal}', [BankSoalController::class, 'destroy'])->name('bank-soal.destroy');
+
 });

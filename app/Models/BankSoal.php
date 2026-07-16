@@ -7,27 +7,38 @@ use Illuminate\Database\Eloquent\Model;
 
 class BankSoal extends Model
 {
+    use HasFactory;
+
+    protected $fillable = [
+        'guru_mapel_id',
+        'mata_pelajaran_id',
+        'jenjang_id',
+        'nama_bank_soal',
+        'deskripsi',
+        'is_publish',
+    ];
+
+    protected $casts = [
+        'is_publish' => 'boolean',
+    ];
+
     public function guruMapel()
     {
-        return $this->belongsTo(
-            GuruMapel::class,
-            'guru_mapel_id'
-        );
-    }
-
-    public function jenjang()
-    {
-        return $this->belongsTo(
-            Jenjang::class,
-            'jenjang_id'
-        );
+        return $this->belongsTo(GuruMapel::class);
     }
 
     public function mataPelajaran()
     {
-        return $this->belongsTo(
-            MataPelajaran::class,
-            'mata_pelajaran_id'
-        );
+        return $this->belongsTo(MataPelajaran::class);
+    }
+
+    public function jenjang()
+    {
+        return $this->belongsTo(Jenjang::class);
+    }
+
+    public function soals()
+    {
+        return $this->hasMany(Soal::class);
     }
 }

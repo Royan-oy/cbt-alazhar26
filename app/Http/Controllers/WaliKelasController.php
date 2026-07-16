@@ -10,51 +10,143 @@ use App\Models\Jenjang;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
+use App\Exports\WaliKelasExport;
+use App\Imports\WaliKelasImport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class WaliKelasController extends Controller
 {
     public function index(Request $request)
     {
-        $jenjangAdmin = optional(Auth::user()->admin)->jenjang_id;
+        $user = Auth::user();
+        $jenjangAdmin = optional($user->admin)->jenjang_id;
 
-        $waliKelas = WaliKelas::with(['guru.jenjang', 'kelas.tingkat', 'tahunAjaran'])
-            ->when(Auth::user()->role == 'admin_jenjang', function ($query) use ($jenjangAdmin) {
-                $query->whereHas('guru', function ($q) use ($jenjangAdmin) {
-                    $q->where('jenjang_id', $jenjangAdmin);
+        /*
+        |--------------------------------------------------------------------------
+        | Tahun Ajaran Aktif
+        |--------------------------------------------------------------------------
+        */
+
+        $tahunAktif = TahunAjaran::where('is_aktif', 1)->first();
+
+        /*
+        |--------------------------------------------------------------------------
+        | Query
+        |--------------------------------------------------------------------------
+        */
+
+        $query = WaliKelas::with([
+            'guru.jenjang',
+            'kelas.tingkat',
+            'tahunAjaran'
+        ]);
+
+        /*
+        |--------------------------------------------------------------------------
+        | Role Admin Jenjang
+        |--------------------------------------------------------------------------
+        */
+
+        if ($user->role == 'admin_jenjang') {
+
+            $query->whereHas('guru', function ($q) use ($jenjangAdmin) {
+                $q->where('jenjang_id', $jenjangAdmin);
+            });
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Search
+        |--------------------------------------------------------------------------
+        */
+
+        if ($request->filled('search')) {
+
+            $search = $request->search;
+
+            $query->where(function ($q) use ($search) {
+
+                $q->whereHas('guru', function ($guru) use ($search) {
+                    $guru->where('nama', 'like', "%{$search}%");
+                })
+
+                ->orWhereHas('kelas', function ($kelas) use ($search) {
+                    $kelas->where('nama_kelas', 'like', "%{$search}%");
                 });
-            })
-            ->when($request->filled('search'), function ($query) use ($request) {
-                $query->where(function ($q) use ($request) {
-                    $q->whereHas('guru', function ($guru) use ($request) {
-                        $guru->where('nama', 'like', '%' . $request->search . '%');
-                    })
-                    ->orWhereHas('kelas', function ($kelas) use ($request) {
-                        $kelas->where('nama_kelas', 'like', '%' . $request->search . '%');
-                    });
-                });
-            })
-            ->when($request->filled('jenjang') && Auth::user()->role != 'admin_jenjang', function ($query) use ($request) {
-                $query->whereHas('guru', function ($q) use ($request) {
-                    $q->where('jenjang_id', $request->jenjang);
-                });
-            })
-            ->when($request->filled('tahun_ajaran'), function ($query) use ($request) {
-                $query->where('tahun_ajaran_id', $request->tahun_ajaran);
-            })
-            ->latest()
+
+            });
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Filter Jenjang
+        |--------------------------------------------------------------------------
+        */
+
+        if ($request->filled('jenjang') && $user->role != 'admin_jenjang') {
+
+            $query->whereHas('guru', function ($q) use ($request) {
+                $q->where('jenjang_id', $request->jenjang);
+            });
+
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Filter Tahun Ajaran
+        |--------------------------------------------------------------------------
+        */
+
+        if ($request->filled('tahun_ajaran')) {
+
+            $query->where('tahun_ajaran_id', $request->tahun_ajaran);
+
+        } elseif ($tahunAktif) {
+
+            // Default tampilkan tahun ajaran aktif
+            $query->where('tahun_ajaran_id', $tahunAktif->id);
+
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Data
+        |--------------------------------------------------------------------------
+        */
+
+        $waliKelas = $query
+            ->orderByDesc('tahun_ajaran_id')
+            ->orderBy('kelas_id')
             ->paginate(10)
             ->withQueryString();
 
-        $totalWaliKelas = WaliKelas::when(Auth::user()->role == 'admin_jenjang', function ($query) use ($jenjangAdmin) {
-                $query->whereHas('guru', function ($q) use ($jenjangAdmin) {
-                    $q->where('jenjang_id', $jenjangAdmin);
-                });
-            })->count();
+        /*
+        |--------------------------------------------------------------------------
+        | Statistik
+        |--------------------------------------------------------------------------
+        */
 
-        $jenjangs = Jenjang::orderBy('nama_jenjang', 'asc')->get();
-        $tahunAjarans = TahunAjaran::orderByDesc('is_aktif')->orderByDesc('nama_tahun')->get();
+        $totalWaliKelas = (clone $query)->count();
 
-        return view('wali-kelas.index', compact('waliKelas', 'totalWaliKelas', 'jenjangs', 'tahunAjarans'));
+        /*
+        |--------------------------------------------------------------------------
+        | Filter
+        |--------------------------------------------------------------------------
+        */
+
+        $jenjangs = Jenjang::orderBy('nama_jenjang')->get();
+
+        $tahunAjarans = TahunAjaran::orderByDesc('is_aktif')
+            ->orderByDesc('nama_tahun')
+            ->get();
+
+        return view('wali-kelas.index', compact(
+            'waliKelas',
+            'totalWaliKelas',
+            'jenjangs',
+            'tahunAjarans',
+            'tahunAktif'
+        ));
     }
 
     public function create()
@@ -243,5 +335,117 @@ class WaliKelasController extends Controller
                 abort(403, 'Anda tidak memiliki akses ke data ini.');
             }
         }
+    }
+
+    public function export(Request $request)
+    {
+        $filters = $request->only([
+            'search',
+            'jenjang',
+            'tahun_ajaran',
+        ]);
+
+        /*
+        |--------------------------------------------------------------------------
+        | Jenjang
+        |--------------------------------------------------------------------------
+        */
+
+        if (Auth::user()->role == 'admin_jenjang') {
+
+            $namaJenjang = optional(optional(Auth::user()->admin)->jenjang)->nama_jenjang ?? 'Jenjang';
+
+        } elseif ($request->filled('jenjang')) {
+
+            $jenjang = Jenjang::find($request->jenjang);
+
+            $namaJenjang = $jenjang
+                ? $jenjang->nama_jenjang
+                : 'Semua_Jenjang';
+
+        } else {
+
+            $namaJenjang = 'Semua_Jenjang';
+
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Tahun Ajaran
+        |--------------------------------------------------------------------------
+        */
+
+        if ($request->filled('tahun_ajaran')) {
+
+            $tahun = TahunAjaran::find($request->tahun_ajaran);
+
+        } else {
+
+            // Default mengikuti tahun ajaran aktif
+            $tahun = TahunAjaran::where('is_aktif', 1)->first();
+
+        }
+
+        if ($tahun) {
+
+            $namaTahun = str_replace('/', '-', $tahun->nama_tahun)
+                .'_'
+                .ucfirst($tahun->semester);
+
+        } else {
+
+            $namaTahun = 'Semua_Tahun';
+
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Bersihkan karakter nama file
+        |--------------------------------------------------------------------------
+        */
+
+        $namaJenjang = str_replace([' ', '/'], ['_', '-'], $namaJenjang);
+
+        /*
+        |--------------------------------------------------------------------------
+        | Nama File
+        |--------------------------------------------------------------------------
+        */
+
+        $namaFile = sprintf(
+            'wali_kelas_%s_%s_%s.xlsx',
+            $namaJenjang,
+            $namaTahun,
+            now()->format('Ymd_His')
+        );
+
+        return Excel::download(
+            new WaliKelasExport($filters),
+            $namaFile
+        );
+    }
+
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls,csv',
+        ], [
+            'file.required' => 'Silakan pilih file Excel.',
+            'file.mimes' => 'File harus berupa Excel (.xlsx, .xls, .csv).',
+        ]);
+
+        $import = new WaliKelasImport();
+
+        Excel::import($import, $request->file('file'));
+
+        return redirect()
+            ->route('wali-kelas.index')
+            ->with([
+                'success' => "Import selesai. {$import->success} data berhasil diimport.",
+                'import_success' => $import->success,
+                'import_skipped' => $import->skipped,
+                'import_failed' => count($import->failed),
+                'import_errors' => $import->failed,
+            ]);
     }
 }

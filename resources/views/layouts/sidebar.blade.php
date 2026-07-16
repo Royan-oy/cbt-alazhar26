@@ -348,12 +348,10 @@
         <ul class="nav flex-column mb-2">
 
             <li>
-                <a href="javascript:void(0)"
-                class="nav-link disabled"
-                style="opacity:.6;cursor:not-allowed;">
+                <a href="{{ route('bank-soal.index') }}"
+                    class="nav-link {{ request()->routeIs('bank-soal.*') ? 'active' : '' }}">
                     <i class="fa-solid fa-folder-open me-3"></i>
                     Bank Soal
-                    <span class="ms-auto badge bg-secondary rounded-pill">Soon</span>
                 </a>
             </li>
 

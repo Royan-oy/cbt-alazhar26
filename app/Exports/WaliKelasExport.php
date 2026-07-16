@@ -2,21 +2,21 @@
 
 namespace App\Exports;
 
-use App\Models\GuruMapel;
+use App\Models\Guru;
+use App\Models\Jenjang;
+use App\Models\TahunAjaran;
+use App\Models\WaliKelas;
 use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Concerns\FromCollection;
+use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithStyles;
-use Maatwebsite\Excel\Concerns\ShouldAutoSize;
-use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class GuruMapelExport implements FromCollection, WithHeadings, WithMapping, WithStyles, ShouldAutoSize
+class WaliKelasExport implements FromCollection, WithHeadings, WithMapping, WithStyles, ShouldAutoSize
 {
-    /**
-     * Filter dari halaman index (search, jenjang, tahun_ajaran).
-     */
     protected $filters;
 
     public function __construct(array $filters = [])
@@ -27,26 +27,31 @@ class GuruMapelExport implements FromCollection, WithHeadings, WithMapping, With
     public function collection()
     {
         $user = Auth::user();
+
         $isAdminJenjang = $user->role == 'admin_jenjang';
+
         $jenjangAdmin = optional($user->admin)->jenjang_id;
 
-        $query = GuruMapel::with([
+        $query = WaliKelas::with([
             'guru.jenjang',
-            'mataPelajaran',
             'kelas.tingkat',
             'tahunAjaran'
         ]);
 
         /*
         |--------------------------------------------------------------------------
-        | ROLE FILTER
+        | ROLE
         |--------------------------------------------------------------------------
         */
 
         if ($isAdminJenjang) {
+
             $query->whereHas('guru', function ($q) use ($jenjangAdmin) {
+
                 $q->where('jenjang_id', $jenjangAdmin);
+
             });
+
         }
 
         /*
@@ -62,14 +67,19 @@ class GuruMapelExport implements FromCollection, WithHeadings, WithMapping, With
             $query->where(function ($q) use ($search) {
 
                 $q->whereHas('guru', function ($guru) use ($search) {
+
                     $guru->where('nama', 'like', "%{$search}%");
+
                 })
 
-                ->orWhereHas('mataPelajaran', function ($mapel) use ($search) {
-                    $mapel->where('nama_mapel', 'like', "%{$search}%");
+                ->orWhereHas('kelas', function ($kelas) use ($search) {
+
+                    $kelas->where('nama_kelas', 'like', "%{$search}%");
+
                 });
 
             });
+
         }
 
         /*
@@ -81,7 +91,9 @@ class GuruMapelExport implements FromCollection, WithHeadings, WithMapping, With
         if (!$isAdminJenjang && !empty($this->filters['jenjang'])) {
 
             $query->whereHas('guru', function ($q) {
+
                 $q->where('jenjang_id', $this->filters['jenjang']);
+
             });
 
         }
@@ -94,59 +106,91 @@ class GuruMapelExport implements FromCollection, WithHeadings, WithMapping, With
 
         if (!empty($this->filters['tahun_ajaran'])) {
 
-            $query->where('tahun_ajaran_id', $this->filters['tahun_ajaran']);
+            $query->where(
+                'tahun_ajaran_id',
+                $this->filters['tahun_ajaran']
+            );
 
         } else {
 
-            // Sama seperti halaman index
-            $tahunAktif = \App\Models\TahunAjaran::where('is_aktif', 1)->first();
+            $tahunAktif = TahunAjaran::where('is_aktif', 1)->first();
 
             if ($tahunAktif) {
-                $query->where('tahun_ajaran_id', $tahunAktif->id);
+
+                $query->where(
+                    'tahun_ajaran_id',
+                    $tahunAktif->id
+                );
+
             }
+
         }
 
         return $query
             ->orderByDesc('tahun_ajaran_id')
-            ->orderBy('guru_id')
+            ->orderBy('kelas_id')
             ->get();
     }
 
     /**
-     * Header PERSIS sama dengan yang dibaca GuruMapelImport,
-     * supaya hasil export bisa langsung diimport ulang.
+     * Header Excel
      */
+
     public function headings(): array
     {
-        return ['nip_guru', 'nama_guru', 'jenjang', 'mata_pelajaran', 'kelas', 'tahun_ajaran', 'semester'];
+        return [
+            'nip_guru',
+            'nama_guru',
+            'jenjang',
+            'tingkat',
+            'kelas',
+            'tahun_ajaran',
+            'semester'
+        ];
     }
+
+    /**
+     * Isi Baris
+     */
 
     public function map($item): array
     {
-        // Gabungkan semua kelas jadi satu string dipisah koma:
-        // "Kelas VII - VII A, Kelas VII - VII B"
-        $kelasText = $item->kelas->map(function ($kelas) {
-            return optional($kelas->tingkat)->nama_tingkat . ' - ' . $kelas->nama_kelas;
-        })->implode(', ');
-
         return [
+
             optional($item->guru)->nip,
+
             optional($item->guru)->nama,
+
             optional(optional($item->guru)->jenjang)->nama_jenjang,
-            optional($item->mataPelajaran)->nama_mapel,
-            $kelasText,
+
+            optional(optional($item->kelas)->tingkat)->nama_tingkat,
+
+            optional($item->kelas)->nama_kelas,
+
             optional($item->tahunAjaran)->nama_tahun,
+
             optional($item->tahunAjaran)->semester,
+
         ];
     }
+
+    /**
+     * Styling
+     */
 
     public function styles(Worksheet $sheet)
     {
         $sheet->getStyle('A1:G1')->getFont()->setBold(true);
+
         $sheet->getStyle('A1:G1')->getFont()->getColor()->setRGB('FFFFFF');
+
         $sheet->getStyle('A1:G1')->getFill()
+
             ->setFillType(Fill::FILL_SOLID)
-            ->getStartColor()->setRGB('0F172A');
+
+            ->getStartColor()
+
+            ->setRGB('0F172A');
 
         return [];
     }

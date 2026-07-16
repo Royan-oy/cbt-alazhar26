@@ -237,10 +237,44 @@
                 </p>
             </div>
 
-            <a href="{{ route('wali-kelas.create') }}" class="btn btn-info text-white btn-add d-inline-flex align-items-center">
-                <i class="fa-solid fa-plus me-2"></i>
-                Tambah Wali Kelas
-            </a>
+            <div class="d-flex flex-wrap gap-2">
+
+                {{-- Download Template --}}
+                <a href="{{ route('wali-kelas.template') }}"
+                    class="btn btn-light btn-add border d-inline-flex align-items-center">
+                    <i class="fa-solid fa-file-arrow-down me-2 text-primary"></i>
+                    Template
+                </a>
+
+                {{-- Export --}}
+                <a href="{{ route('wali-kelas.export', request()->only([
+                    'search',
+                    'jenjang',
+                    'tahun_ajaran'
+                ])) }}"
+                    class="btn btn-success btn-add d-inline-flex align-items-center">
+                    <i class="fa-solid fa-file-excel me-2"></i>
+                    Export Excel
+                </a>
+
+                {{-- Import --}}
+                <button
+                    type="button"
+                    class="btn btn-warning text-dark btn-add d-inline-flex align-items-center"
+                    data-bs-toggle="modal"
+                    data-bs-target="#importModal">
+                    <i class="fa-solid fa-file-import me-2"></i>
+                    Import Excel
+                </button>
+
+                {{-- Tambah --}}
+                <a href="{{ route('wali-kelas.create') }}"
+                    class="btn btn-info text-white btn-add d-inline-flex align-items-center">
+                    <i class="fa-solid fa-plus me-2"></i>
+                    Tambah Wali Kelas
+                </a>
+
+            </div>
         </div>
     </div>
 
@@ -259,15 +293,71 @@
         </div>
     </div>
 
-    @if(session('success'))
-    <div class="alert alert-success rounded-4 border-0 shadow-sm d-flex align-items-center p-3 mb-4">
-        <i class="fa-solid fa-circle-check fs-5 me-2"></i>
-        <div>{{ session('success') }}</div>
-    </div>
-    @endif
-
     {{-- Main Content Card --}}
     <div class="card content-card">
+        @if(session('import_errors') && count(session('import_errors')))
+
+        <div class="alert alert-danger rounded-4 border-0 shadow-sm mb-4">
+
+            <h5 class="fw-bold mb-3">
+
+                <i class="fa fa-circle-exclamation me-2"></i>
+
+                Detail Error Import
+
+            </h5>
+
+            <div class="table-responsive">
+
+                <table class="table table-sm align-middle">
+
+                    <thead>
+
+                        <tr>
+
+                            <th width="80">Baris</th>
+
+                            <th>Keterangan</th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                    @foreach(session('import_errors') as $item)
+
+                        <tr>
+
+                            <td>
+
+                                <span class="badge bg-danger">
+
+                                    {{ $item['baris'] }}
+
+                                </span>
+
+                            </td>
+
+                            <td>
+
+                                {{ $item['pesan'] }}
+
+                            </td>
+
+                        </tr>
+
+                    @endforeach
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+        @endif
         <div class="card-body">
 
             {{-- Filter & Search Form --}}
@@ -298,12 +388,28 @@
 
                     <div class="col-lg-3">
                         <select name="tahun_ajaran" class="form-select form-control-custom">
-                            <option value="">-- Semua Tahun Ajaran --</option>
+                            <option value="">
+                                {{ $tahunAktif
+                                    ? 'Tahun Aktif : '.$tahunAktif->nama_tahun.' - '.ucfirst($tahunAktif->semester)
+                                    : '-- Semua Tahun Ajaran --'
+                                }}
+                            </option>
+                            @php
+                                $selectedTahun = request('tahun_ajaran') ?? optional($tahunAktif)->id;
+                            @endphp
+
                             @foreach($tahunAjarans as $tahun)
-                                <option value="{{ $tahun->id }}" {{ request('tahun_ajaran') == $tahun->id ? 'selected' : '' }}>
-                                    {{ $tahun->nama_tahun }} - {{ ucfirst($tahun->semester) }}
-                                    @if($tahun->is_aktif) ⭐ @endif
-                                </option>
+                            <option
+                                value="{{ $tahun->id }}"
+                                {{ $selectedTahun == $tahun->id ? 'selected' : '' }}>
+
+                                {{ $tahun->nama_tahun }} - {{ ucfirst($tahun->semester) }}
+
+                                @if($tahun->is_aktif)
+                                    ⭐ Aktif
+                                @endif
+
+                            </option>
                             @endforeach
                         </select>
                     </div>
@@ -442,15 +548,149 @@ document.querySelectorAll('.form-delete').forEach(function(form){
 });
 </script>
 
-@if(session('success'))
+@if(session('import_success') !== null)
+
 <script>
+
 Swal.fire({
-    icon: 'success',
-    title: 'Berhasil',
-    text: "{{ session('success') }}",
-    confirmButtonColor: '#0f172a'
+
+    icon:'success',
+
+    title:'Import Selesai',
+
+    html:`
+
+        <div style="text-align:left">
+
+            <table class="table table-bordered">
+
+                <tr>
+
+                    <th>Berhasil</th>
+
+                    <td><b>{{ session('import_success') }}</b></td>
+
+                </tr>
+
+                <tr>
+
+                    <th>Skip</th>
+
+                    <td><b>{{ session('import_skipped') }}</b></td>
+
+                </tr>
+
+                <tr>
+
+                    <th>Gagal</th>
+
+                    <td><b>{{ session('import_failed') }}</b></td>
+
+                </tr>
+
+            </table>
+
+        </div>
+
+    `,
+
+    confirmButtonColor:'#0f172a'
+
 });
+
 </script>
+
 @endif
 
+<!-- Modal Import -->
+<div class="modal fade" id="importModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <form
+            id="formImport"
+            action="{{ route('wali-kelas.import') }}"
+            method="POST"
+            enctype="multipart/form-data"
+            class="modal-content rounded-4 border-0 shadow">
+
+            @csrf
+
+            <div class="modal-header bg-warning">
+                <h5 class="modal-title fw-bold">
+                    <i class="fa-solid fa-file-import me-2"></i>
+                    Import Wali Kelas
+                </h5>
+
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal">
+                </button>
+            </div>
+
+            <div class="modal-body">
+
+                <div class="alert alert-info rounded-3">
+
+                    <i class="fa-solid fa-circle-info me-2"></i>
+
+                    Gunakan file hasil export atau template yang telah disediakan.
+
+                </div>
+
+                <label class="form-label fw-semibold">
+
+                    File Excel
+
+                </label>
+
+                <input
+                    type="file"
+                    name="file"
+                    class="form-control"
+                    accept=".xlsx,.xls,.csv"
+                    required>
+
+            </div>
+
+            <div class="modal-footer">
+
+                <button
+                    type="button"
+                    class="btn btn-light"
+                    data-bs-dismiss="modal">
+
+                    Batal
+
+                </button>
+
+                <button
+                    class="btn btn-warning">
+
+                    <i class="fa-solid fa-upload me-2"></i>
+
+                    Import Data
+
+                </button>
+
+            </div>
+
+        </form>
+    </div>
+</div>
+
+<script>
+document.getElementById('formImport').addEventListener('submit', function(){
+
+    Swal.fire({
+        title: 'Mengimport Data...',
+        html: 'Mohon tunggu, sistem sedang memproses file Excel.',
+        allowOutsideClick:false,
+        allowEscapeKey:false,
+        didOpen: () => {
+            Swal.showLoading();
+        }
+    });
+
+});
+</script>
 @endsection

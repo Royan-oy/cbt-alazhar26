@@ -37,4 +37,9 @@ class GuruMapel extends Model
     {
         return $this->belongsTo(TahunAjaran::class);
     }
+
+    public function bankSoals()
+    {
+        return $this->hasMany(BankSoal::class);
+    }
 }

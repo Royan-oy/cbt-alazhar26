@@ -36,7 +36,8 @@ class GuruMapelController extends Controller
             'tahunAjaran'
         ]);
 
-
+        // Ambil tahun ajaran aktif
+        $tahunAktif = TahunAjaran::where('is_aktif', 1)->first();
 
         /*
         |--------------------------------------------------------------------------
@@ -194,14 +195,14 @@ class GuruMapelController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        if($request->filled('tahun_ajaran')){
+        // Secara default tampilkan hanya tahun ajaran aktif
+        if ($request->filled('tahun_ajaran')) {
 
+            $query->where('tahun_ajaran_id', $request->tahun_ajaran);
 
-            $query->where(
-                'tahun_ajaran_id',
-                $request->tahun_ajaran
-            );
+        } elseif ($tahunAktif) {
 
+            $query->where('tahun_ajaran_id', $tahunAktif->id);
 
         }
 
@@ -272,18 +273,6 @@ class GuruMapelController extends Controller
             ->unique()
 
             ->count();
-
-
-
-
-        $tahunAktif = TahunAjaran::where('is_aktif',1)
-
-            ->first();
-
-
-
-
-
 
 
         return view('guru-mapel.index',compact(
@@ -828,11 +817,61 @@ class GuruMapelController extends Controller
 
     public function export(Request $request)
     {
-        $filters = $request->only(['search', 'jenjang', 'tahun_ajaran']);
+        $filters = $request->only([
+            'search',
+            'jenjang',
+            'tahun_ajaran'
+        ]);
 
-        $namaFile = 'data_guru_mapel_' . now()->format('Y-m-d_His') . '.xlsx';
+        // Nama Jenjang
+        if ($request->filled('jenjang')) {
 
-        return Excel::download(new GuruMapelExport($filters), $namaFile);
+            $jenjang = Jenjang::find($request->jenjang);
+            $namaJenjang = $jenjang
+                ? str_replace(' ', '_', $jenjang->nama_jenjang)
+                : 'Semua_Jenjang';
+
+        } elseif (Auth::user()->role == 'admin_jenjang') {
+
+            $namaJenjang = str_replace(
+                ' ',
+                '_',
+                optional(optional(Auth::user()->admin)->jenjang)->nama_jenjang ?? 'Jenjang'
+            );
+
+        } else {
+
+            $namaJenjang = 'Semua_Jenjang';
+
+        }
+
+        // Tahun Ajaran
+        if ($request->filled('tahun_ajaran')) {
+
+            $tahun = TahunAjaran::find($request->tahun_ajaran);
+
+        } else {
+
+            // Sama seperti halaman index
+            $tahun = TahunAjaran::where('is_aktif', 1)->first();
+
+        }
+
+        $namaTahun = $tahun
+            ? str_replace(['/', ' '], ['-', '_'], $tahun->nama_tahun) . '_' . ucfirst($tahun->semester)
+            : 'Semua_Tahun';
+
+        $namaFile = sprintf(
+            'guru_mapel_%s_%s_%s.xlsx',
+            $namaJenjang,
+            $namaTahun,
+            now()->format('Ymd_His')
+        );
+
+        return Excel::download(
+            new GuruMapelExport($filters),
+            $namaFile
+        );
     }
 
     public function import(Request $request)
@@ -867,8 +906,15 @@ class GuruMapelController extends Controller
 
     public function downloadTemplate()
     {
-        $path = storage_path('app/templates/template_import_guru_mapel.xlsx');
+        $path = public_path('storage/app/templates/template_import_guru_mapel.xlsx');
 
-        return response()->download($path, 'template_import_guru_mapel.xlsx');
+        if (!file_exists($path)) {
+            abort(404, 'Template tidak ditemukan.');
+        }
+
+        return response()->download(
+            $path,
+            'template_import_guru_mapel.xlsx'
+        );
     }
 }

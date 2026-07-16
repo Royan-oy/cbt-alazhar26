@@ -259,8 +259,13 @@
                     Template
                 </a>
 
-                <a href="{{ route('guru-mapel.export', request()->only(['search', 'jenjang', 'tahun_ajaran'])) }}"
-                    class="btn btn-success btn-add">
+                <a href="{{ route('guru-mapel.export', request()->only([
+                    'search',
+                    'jenjang',
+                    'guru',
+                    'tahun_ajaran'
+                ])) }}"
+                class="btn btn-success btn-add">
                     <i class="fa fa-file-excel me-2"></i>
                     Export Excel
                 </a>
@@ -400,8 +405,11 @@
                     <div class="col-lg-3">
                         <select name="tahun_ajaran" class="form-select form-control-custom">
                             <option value="">-- Semua Tahun Ajaran --</option>
+
                             @foreach($tahunAjarans as $tahun)
-                                <option value="{{ $tahun->id }}" {{ request('tahun_ajaran') == $tahun->id ? 'selected' : '' }}>
+                                <option
+                                    value="{{ $tahun->id }}"
+                                    {{ request('tahun_ajaran', optional($tahunAktif)->id) == $tahun->id ? 'selected' : '' }}>
                                     {{ $tahun->nama_tahun }} - {{ ucfirst($tahun->semester) }}
                                     @if($tahun->is_aktif) ⭐ @endif
                                 </option>
