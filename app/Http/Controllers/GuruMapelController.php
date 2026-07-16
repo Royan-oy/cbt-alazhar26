@@ -194,7 +194,6 @@ class GuruMapelController extends Controller
         |--------------------------------------------------------------------------
         */
 
-
         if($request->filled('tahun_ajaran')){
 
 
@@ -205,10 +204,6 @@ class GuruMapelController extends Controller
 
 
         }
-
-
-
-
 
         /*
         |--------------------------------------------------------------------------
