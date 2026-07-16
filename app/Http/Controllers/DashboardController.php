@@ -14,12 +14,16 @@ class DashboardController extends Controller
         $data = [];
 
         $isGuru = $user->role == 'guru';
-
         $isWaliKelas = false;
+        
+        // Ambil tahun ajaran yang sedang aktif
+        $activeTahunAjaran = DB::table('tahun_ajarans')->where('is_aktif', true)->first();
 
-        if ($isGuru && $user->guru) {
+        // 1. Tentukan status Wali Kelas berdasarkan Tahun Ajaran Aktif
+        if ($isGuru && $user->guru && $activeTahunAjaran) {
             $isWaliKelas = DB::table('wali_kelas')
                 ->where('guru_id', $user->guru->id)
+                ->where('tahun_ajaran_id', $activeTahunAjaran->id)
                 ->exists();
         }
 
@@ -39,58 +43,52 @@ class DashboardController extends Controller
         } 
         
         elseif ($user->role == 'guru') {
-
             $guru = $user->guru;
 
-
             if ($guru) {
+                // Dapatkan seluruh ID pemetaan mata pelajaran yang diajar oleh guru pada tahun ajaran aktif
+                $guruMapelQuery = DB::table('guru_mapels')
+                    ->where('guru_id', $guru->id);
+                
+                if ($activeTahunAjaran) {
+                    $guruMapelQuery->where('tahun_ajaran_id', $activeTahunAjaran->id);
+                }
+                
+                $guruMapelIds = $guruMapelQuery->pluck('id');
 
-                $guruMapel = DB::table('guru_mapels')
-                    ->where('guru_id', $guru->id)
+                // Hitung akumulasi bank soal dari semua mapel yang diajar
+                $data['total_bank_soal'] = DB::table('bank_soals')
+                    ->whereIn('guru_mapel_id', $guruMapelIds)
+                    ->count();
+            } else {
+                $data['total_bank_soal'] = 0;
+            }
+
+            // 3. LOGIKA TAMBAHAN: Jika Guru juga merupakan Wali Kelas, hitung data kelasnya
+            if ($isWaliKelas && $activeTahunAjaran) {
+                $wali = DB::table('wali_kelas')
+                    ->where('guru_id', $user->guru->id)
+                    ->where('tahun_ajaran_id', $activeTahunAjaran->id)
                     ->first();
 
+                if ($wali) {
+                    // Ambil daftar siswa_id yang terdaftar di kelas yang diwalikan pada tahun ajaran aktif
+                    $siswaIds = DB::table('siswa_kelas')
+                        ->where('kelas_id', $wali->kelas_id)
+                        ->where('tahun_ajaran_id', $activeTahunAjaran->id)
+                        ->pluck('siswa_id');
 
-                if ($guruMapel) {
-
-                    $data['total_bank_soal'] = DB::table('bank_soals')
-                        ->where('guru_mapel_id', $guruMapel->id)
+                    $data['siswa_ujian'] = DB::table('nilais')
+                        ->whereIn('siswa_id', $siswaIds)
+                        ->where('status', 'mengerjakan')
                         ->count();
 
-                } else {
-
-                    $data['total_bank_soal'] = 0;
-
+                    $data['siswa_selesai'] = DB::table('nilais')
+                        ->whereIn('siswa_id', $siswaIds)
+                        ->where('status', 'selesai')
+                        ->count();
                 }
-
-
-            } else {
-
-                $data['total_bank_soal'] = 0;
-
             }
-
-        }
-
-        elseif ($isWaliKelas) {
-
-            $wali = DB::table('wali_kelas')
-                ->where('guru_id', $user->guru->id)
-                ->first();
-
-            if ($wali) {
-
-                $data['siswa_ujian'] = DB::table('nilais')
-                    ->where('kelas_id',$wali->kelas_id)
-                    ->where('status','mengerjakan')
-                    ->count();
-
-                $data['siswa_selesai'] = DB::table('nilais')
-                    ->where('kelas_id',$wali->kelas_id)
-                    ->where('status','selesai')
-                    ->count();
-
-            }
-
         }
         
         elseif ($user->role == 'siswa') {
