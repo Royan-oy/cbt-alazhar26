@@ -230,6 +230,11 @@
             </div>
 
             <div class="d-flex gap-2 flex-wrap">
+                <a href="{{ route('siswa.export', request()->only(['search', 'jenjang', 'kelas'])) }}" class="btn btn-light border btn-add d-inline-flex align-items-center">
+                    <i class="fa-solid fa-file-export me-2"></i>
+                    Export
+                </a>
+
                 <a href="{{ route('siswa.template') }}" class="btn btn-light border btn-add d-inline-flex align-items-center">
                     <i class="fa-solid fa-download me-2"></i>
                     Template

@@ -27,19 +27,24 @@ class SiswaImport extends DefaultValueBinder implements ToCollection, WithHeadin
     use SkipsFailures;
 
     /**
-     * Jumlah data berhasil.
+     * Jumlah siswa BARU yang berhasil dibuat (akun + profil baru).
      */
     public $berhasil = 0;
 
     /**
-     * Baris yang dilewati (duplikat NIS/NISN, atau kelas tidak ditemukan).
+     * Jumlah siswa LAMA yang berhasil dipindah/diperbarui kelasnya
+     * (akun login tidak disentuh sama sekali).
+     */
+    public $diperbarui = 0;
+
+    /**
+     * Baris yang dilewati (kelas tidak ditemukan, dsb).
      */
     public $gagalLainnya = [];
 
     /**
      * Paksa semua cell dibaca sebagai string, supaya NIS/NISN yang berupa
-     * angka murni tidak otomatis dikonversi jadi int oleh Excel
-     * (pelajaran dari kasus import Guru sebelumnya).
+     * angka murni tidak otomatis dikonversi jadi int oleh Excel.
      */
     public function bindValue(Cell $cell, $value)
     {
@@ -99,7 +104,7 @@ class SiswaImport extends DefaultValueBinder implements ToCollection, WithHeadin
 
             /*
             |--------------------------------------------------------------------------
-            | Cari Kelas berdasarkan tingkat + nama kelas + jenjang
+            | Cari Kelas tujuan berdasarkan tingkat + nama kelas + jenjang
             |--------------------------------------------------------------------------
             */
 
@@ -116,25 +121,49 @@ class SiswaImport extends DefaultValueBinder implements ToCollection, WithHeadin
 
             /*
             |--------------------------------------------------------------------------
-            | Cek Duplikat
+            | CEK: siswa dengan NIS ini sudah terdaftar sebelumnya?
             |--------------------------------------------------------------------------
             */
 
-            if (User::where('nis', $nis)->exists() || Siswa::where('nis', $nis)->exists()) {
-                $this->gagalLainnya[] = $nama . ' (NIS sudah digunakan)';
-                continue;
-            }
+            $siswaLama = Siswa::where('nis', $nis)->first();
 
-            if ($nisn != '' && Siswa::where('nisn', $nisn)->exists()) {
-                $this->gagalLainnya[] = $nama . ' (NISN sudah digunakan)';
+            if ($siswaLama) {
+
+                // ==========================================================
+                // SISWA LAMA -> HANYA PINDAHKAN/PERBARUI KELASNYA.
+                // Akun login (users: nis + password) TIDAK disentuh sama sekali.
+                // ==========================================================
+
+                SiswaKelas::updateOrCreate(
+                    [
+                        'siswa_id'        => $siswaLama->id,
+                        'tahun_ajaran_id' => $tahunAktif->id,
+                    ],
+                    [
+                        'kelas_id' => $kelas->id,
+                    ]
+                );
+
+                // Opsional: sinkronkan nama/NISN kalau ada perubahan di excel
+                $siswaLama->update([
+                    'nama' => $nama != '' ? $nama : $siswaLama->nama,
+                    'nisn' => $nisn != '' ? $nisn : $siswaLama->nisn,
+                ]);
+
+                $this->diperbarui++;
                 continue;
             }
 
             /*
             |--------------------------------------------------------------------------
-            | Simpan Data
+            | SISWA BARU -> buat akun (users) + profil (siswas) + siswa_kelas
             |--------------------------------------------------------------------------
             */
+
+            if ($nisn != '' && Siswa::where('nisn', $nisn)->exists()) {
+                $this->gagalLainnya[] = $nama . ' (NISN sudah digunakan siswa lain)';
+                continue;
+            }
 
             DB::transaction(function () use ($nama, $nis, $nisn, $password, $kelas, $tahunAktif) {
 
@@ -144,7 +173,7 @@ class SiswaImport extends DefaultValueBinder implements ToCollection, WithHeadin
                     'role'     => 'siswa',
                 ]);
 
-                $siswa = Siswa::create([
+                $siswaBaru = Siswa::create([
                     'user_id' => $user->id,
                     'nama'    => $nama,
                     'nis'     => $nis,
@@ -152,7 +181,7 @@ class SiswaImport extends DefaultValueBinder implements ToCollection, WithHeadin
                 ]);
 
                 SiswaKelas::create([
-                    'siswa_id'        => $siswa->id,
+                    'siswa_id'        => $siswaBaru->id,
                     'kelas_id'        => $kelas->id,
                     'tahun_ajaran_id' => $tahunAktif->id,
                 ]);

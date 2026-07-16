@@ -12,6 +12,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\GuruMapelExport;
+use App\Imports\GuruMapelImport;
 
 class GuruMapelController extends Controller
 {
@@ -826,5 +829,51 @@ class GuruMapelController extends Controller
                 abort(403, 'Anda tidak memiliki akses ke penugasan ini.');
             }
         }
+    }
+
+    public function export(Request $request)
+    {
+        $filters = $request->only(['search', 'jenjang', 'tahun_ajaran']);
+
+        $namaFile = 'data_guru_mapel_' . now()->format('Y-m-d_His') . '.xlsx';
+
+        return Excel::download(new GuruMapelExport($filters), $namaFile);
+    }
+
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls,csv|max:5120',
+        ], [
+            'file.required' => 'File Excel wajib diunggah.',
+            'file.mimes'    => 'File harus berformat xlsx, xls, atau csv.',
+            'file.max'      => 'Ukuran file maksimal 5MB.',
+        ]);
+
+        $import = new GuruMapelImport();
+
+        Excel::import($import, $request->file('file'));
+
+        $pesan = $import->berhasilBaru . ' penugasan baru ditambahkan, ' . $import->berhasilUpdate . ' penugasan diperbarui.';
+
+        if (count($import->failures()) > 0) {
+            $pesan .= ' ' . count($import->failures()) . ' baris gagal validasi.';
+        }
+
+        if (count($import->gagalLainnya) > 0) {
+            $pesan .= ' ' . count($import->gagalLainnya) . ' catatan perlu dicek.';
+        }
+
+        return redirect()->route('guru-mapel.index')
+            ->with('success', $pesan)
+            ->with('import_failures', $import->failures())
+            ->with('import_gagal', $import->gagalLainnya);
+    }
+
+    public function downloadTemplate()
+    {
+        $path = storage_path('app/templates/template_import_guru_mapel.xlsx');
+
+        return response()->download($path, 'template_import_guru_mapel.xlsx');
     }
 }

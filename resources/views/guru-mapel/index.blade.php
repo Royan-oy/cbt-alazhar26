@@ -251,10 +251,35 @@
                 </p>
             </div>
 
-            <a href="{{ route('guru-mapel.create') }}" class="btn btn-info text-white btn-add d-inline-flex align-items-center">
-                <i class="fa-solid fa-plus me-2"></i>
-                Tambah Penugasan
-            </a>
+            <div class="d-flex flex-wrap gap-2">
+
+                <a href="{{ route('guru-mapel.template') }}"
+                    class="btn btn-light border btn-add">
+                    <i class="fa fa-download me-2"></i>
+                    Template
+                </a>
+
+                <a href="{{ route('guru-mapel.export', request()->only(['search', 'jenjang', 'tahun_ajaran'])) }}"
+                    class="btn btn-success btn-add">
+                    <i class="fa fa-file-excel me-2"></i>
+                    Export Excel
+                </a>
+
+                <button
+                    class="btn btn-warning btn-add"
+                    data-bs-toggle="modal"
+                    data-bs-target="#importModal">
+                    <i class="fa fa-upload me-2"></i>
+                    Import Excel
+                </button>
+
+                <a href="{{ route('guru-mapel.create') }}"
+                    class="btn btn-info text-white btn-add">
+                    <i class="fa fa-plus me-2"></i>
+                    Tambah Penugasan
+                </a>
+
+            </div>
         </div>
     </div>
 
@@ -317,6 +342,28 @@
     <div class="alert alert-success rounded-4 border-0 shadow-sm d-flex align-items-center p-3 mb-4">
         <i class="fa-solid fa-circle-check fs-5 me-2"></i>
         <div>{{ session('success') }}</div>
+    </div>
+    @endif
+
+    @if(session('import_failures') && count(session('import_failures')) > 0)
+    <div class="alert alert-warning rounded-4 border-0 shadow-sm p-3 mb-4">
+        <div class="fw-bold mb-2"><i class="fa-solid fa-triangle-exclamation me-2"></i>Baris gagal divalidasi:</div>
+        <ul class="mb-0 small">
+            @foreach(session('import_failures') as $failure)
+                <li>Baris {{ $failure->row() }}: {{ implode(', ', $failure->errors()) }}</li>
+            @endforeach
+        </ul>
+    </div>
+    @endif
+
+    @if(session('import_gagal') && count(session('import_gagal')) > 0)
+    <div class="alert alert-secondary rounded-4 border-0 shadow-sm p-3 mb-4">
+        <div class="fw-bold mb-2"><i class="fa-solid fa-circle-info me-2"></i>Catatan perlu dicek:</div>
+        <ul class="mb-0 small">
+            @foreach(session('import_gagal') as $item)
+                <li>{{ $item }}</li>
+            @endforeach
+        </ul>
     </div>
     @endif
 
@@ -524,4 +571,80 @@ Swal.fire({
 </script>
 @endif
 
+<div class="modal fade" id="importModal">
+
+    <div class="modal-dialog">
+
+        <div class="modal-content rounded-4">
+
+            <form
+                action="{{ route('guru-mapel.import') }}"
+                method="POST"
+                enctype="multipart/form-data">
+
+                @csrf
+
+                <div class="modal-header">
+
+                    <h5>Import Guru Mapel</h5>
+
+                    <button
+                        type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal">
+                    </button>
+
+                </div>
+
+                <div class="modal-body">
+
+                    <p class="text-muted small">
+                        Format kolom: <code>nip_guru, nama_guru, jenjang, mata_pelajaran, kelas, tahun_ajaran, semester</code>.
+                        Kolom <code>kelas</code> boleh diisi lebih dari satu, dipisah koma, contoh:
+                        <em>"Kelas VII - VII A, Kelas VII - VII B"</em>.
+                        Unduh <a href="{{ route('guru-mapel.template') }}">Template Excel</a> untuk contoh formatnya,
+                        atau klik <strong>Export Excel</strong> untuk mengunduh data yang sudah ada (lalu edit dan upload ulang).
+                    </p>
+
+                    <label class="form-label">
+                        File Excel
+                    </label>
+
+                    <input
+                        type="file"
+                        name="file"
+                        class="form-control"
+                        accept=".xlsx,.xls,.csv"
+                        required>
+
+                    <small class="text-muted">
+                        Format: xlsx, xls, atau csv. Maksimal 5MB.
+                    </small>
+
+                </div>
+
+                <div class="modal-footer">
+
+                    <button
+                        type="button"
+                        class="btn btn-secondary"
+                        data-bs-dismiss="modal">
+                        Batal
+                    </button>
+
+                    <button
+                        type="submit"
+                        class="btn btn-primary">
+                        Import
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
 @endsection

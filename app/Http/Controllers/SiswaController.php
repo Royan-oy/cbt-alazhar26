@@ -9,6 +9,7 @@ use App\Models\Kelas;
 use App\Models\Jenjang;
 use App\Models\TahunAjaran;
 use App\Imports\SiswaImport;
+use App\Exports\SiswaExport;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -262,20 +263,29 @@ class SiswaController extends Controller
 
         Excel::import($import, $request->file('file'));
 
-        $pesan = $import->berhasil . ' data siswa berhasil diimpor.';
+        $pesan = $import->berhasil . ' siswa baru berhasil ditambahkan, ' . $import->diperbarui . ' siswa berhasil dipindahkan kelasnya.';
 
         if (count($import->failures()) > 0) {
             $pesan .= ' ' . count($import->failures()) . ' baris gagal validasi.';
         }
 
         if (count($import->gagalLainnya) > 0) {
-            $pesan .= ' ' . count($import->gagalLainnya) . ' baris dilewati (duplikat/kelas tidak ditemukan).';
+            $pesan .= ' ' . count($import->gagalLainnya) . ' baris dilewati (lihat detail di bawah).';
         }
 
         return redirect()->route('siswa.index')
             ->with('success', $pesan)
             ->with('import_failures', $import->failures())
             ->with('import_gagal', $import->gagalLainnya);
+    }
+
+    public function export(Request $request)
+    {
+        $filters = $request->only(['jenjang', 'kelas', 'search']);
+
+        $namaFile = 'data_siswa_' . now()->format('Y-m-d_His') . '.xlsx';
+
+        return Excel::download(new SiswaExport($filters), $namaFile);
     }
 
     public function downloadTemplate()

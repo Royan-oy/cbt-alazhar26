@@ -69,6 +69,22 @@ Route::middleware(['auth'])->group(function () {
 
     Route::resource('guru', GuruController::class);
 
+    Route::get(
+        'guru-mapel/template',
+        [GuruMapelController::class, 'downloadTemplate']
+    )->name('guru-mapel.template');
+
+
+    Route::get(
+        'guru-mapel/export',
+        [GuruMapelController::class,'export']
+    )->name('guru-mapel.export');
+
+    Route::post(
+        'guru-mapel/import',
+        [GuruMapelController::class,'import']
+    )->name('guru-mapel.import');
+
     Route::resource('guru-mapel', GuruMapelController::class)
     ->parameters(['guru-mapel' => 'guru_mapel'])
     ->except('show');
@@ -77,6 +93,7 @@ Route::middleware(['auth'])->group(function () {
     ->parameters(['wali-kelas' => 'wali_kelas'])
     ->except('show');
 
+    Route::get('siswa-export', [SiswaController::class, 'export'])->name('siswa.export');
     Route::get('siswa-template-download', [SiswaController::class, 'downloadTemplate'])->name('siswa.template');
     Route::post('siswa-import', [SiswaController::class, 'import'])->name('siswa.import');
 
