@@ -408,7 +408,7 @@
 
         @endif
 
-        @if(Auth::user()->guru && Auth::user()->guru->waliKelas)
+         @if(Auth::user()->guru && Auth::user()->guru->waliKelas)
 
         <span class="menu-group-label">Wali Kelas</span>
 
@@ -439,6 +439,20 @@
 
         @endif
 
+        @if(Auth::user()->role == 'guru')
+        <span class="menu-group-label">Pengaturan</span>
+        <ul class="nav flex-column mb-2">
+            <li>
+                <a href="{{ route('pengaturan-akun.index') }}" class="nav-link {{ request()->routeIs('pengaturan-akun.*') ? 'active' : '' }}">
+                    <i class="fa-solid fa-user-gear me-3"></i>
+                    Pengaturan Akun
+                </a>
+            </li>
+        </ul>
+        @endif
+
+       
+
         @if(Auth::user()->role == 'siswa')
 
             <span class="menu-group-label">Ujian</span>
@@ -459,12 +473,12 @@
                     </a>
                 </li>
 
-                <li>
+                <!-- <li>
                     <a href="#" class="nav-link">
                         <i class="fa-solid fa-square-poll-vertical me-3"></i>
                         Nilai Saya
                     </a>
-                </li>
+                </li> -->
 
             </ul>
 
