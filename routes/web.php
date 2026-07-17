@@ -21,6 +21,7 @@ use App\Http\Controllers\UjianController;
 use App\Http\Controllers\GuruBankSoalController;
 
 
+
 // Halaman awal langsung menampilkan form login
 Route::get('/', [LoginController::class, 'showLogin'])->name('login');
 Route::post('/login', [LoginController::class, 'login']);
