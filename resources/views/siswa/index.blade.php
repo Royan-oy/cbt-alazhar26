@@ -356,6 +356,38 @@
                 </div>
             </form>
 
+            <div class="alert alert-primary border-0 rounded-4 d-flex align-items-center justify-content-between flex-wrap mb-4"
+                style="background:#eff6ff;">
+
+                <div class="d-flex align-items-center">
+                    <i class="fa-solid fa-calendar-days text-primary me-3 fs-4"></i>
+
+                    <div>
+                        <div class="fw-bold text-dark">
+                            Data siswa yang ditampilkan menggunakan kelas aktif.
+                        </div>
+
+                        <small class="text-muted">
+                            Tahun Ajaran
+                            <span class="fw-semibold text-dark">
+                                {{ $tahunAktif->nama_tahun ?? '-' }}
+                            </span>
+                            • Semester
+                            <span class="fw-semibold text-dark">
+                                {{ isset($tahunAktif) ? ucfirst($tahunAktif->semester) : '-' }}
+                            </span>
+                        </small>
+                    </div>
+                </div>
+
+                @if($tahunAktif)
+                    <span class="badge {{ $tahunAktif->semester == 'ganjil' ? 'bg-primary' : 'bg-success' }} px-3 py-2 rounded-pill mt-3 mt-md-0">
+                        Semester {{ ucfirst($tahunAktif->semester) }}
+                    </span>
+                @endif
+
+            </div>
+
             {{-- Table --}}
             <div class="table-responsive">
                 <table class="table align-middle">

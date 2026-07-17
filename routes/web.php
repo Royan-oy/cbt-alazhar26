@@ -17,12 +17,8 @@ use App\Http\Controllers\PengaturanAkunController;
 use App\Http\Controllers\SiswaController;
 use App\Http\Controllers\BankSoalController;
 use App\Http\Controllers\SoalController;
-<<<<<<< HEAD
 use App\Http\Controllers\UjianController;
-=======
 use App\Http\Controllers\GuruBankSoalController;
->>>>>>> da06dfe8d1393b50c7f959ab2bc825b84cfdb1b9
-
 
 
 // Halaman awal langsung menampilkan form login
