@@ -266,8 +266,12 @@
                 <form action="{{ route('ujian.toggle-token', $ujian->id) }}" method="POST">
                     @csrf
                     @method('PATCH')
-                    <button type="submit" class="btn {{ $ujian->token_aktif ? 'btn-warning' : 'btn-success' }} text-white btn-toggle-token">
+
+                    <button type="submit" 
+                        class="btn {{ $ujian->token_aktif ? 'btn-warning' : 'btn-success' }} text-white btn-toggle-token">
+
                         <i class="fa-solid {{ $ujian->token_aktif ? 'fa-lock' : 'fa-unlock' }} me-2"></i>
+
                         {{ $ujian->token_aktif ? 'Nonaktifkan Token' : 'Aktifkan Token' }}
                     </button>
                 </form>

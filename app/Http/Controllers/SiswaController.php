@@ -24,6 +24,8 @@ class SiswaController extends Controller
         $jenjangAdmin = optional(Auth::user()->admin)->jenjang_id;
         $isAdminJenjang = Auth::user()->role == 'admin_jenjang';
 
+        $tahunAktif = TahunAjaran::where('is_aktif', true)->first();
+
         $siswas = Siswa::with(['user', 'kelasAktif.kelas.tingkat.jenjang'])
             ->when($isAdminJenjang, function ($query) use ($jenjangAdmin) {
                 $query->whereHas('kelasAktif.kelas.tingkat', function ($q) use ($jenjangAdmin) {
@@ -42,12 +44,12 @@ class SiswaController extends Controller
             })
             ->when($request->filled('search'), function ($query) use ($request) {
                 $query->where(function ($q) use ($request) {
-                    $q->where('nama', 'like', '%' . $request->search . '%')
-                      ->orWhere('nis', 'like', '%' . $request->search . '%')
-                      ->orWhere('nisn', 'like', '%' . $request->search . '%');
+                    $q->where('nama', 'like', "%{$request->search}%")
+                    ->orWhere('nis', 'like', "%{$request->search}%")
+                    ->orWhere('nisn', 'like', "%{$request->search}%");
                 });
             })
-            ->orderBy('nama', 'asc')
+            ->orderBy('nama')
             ->paginate(10)
             ->withQueryString();
 
@@ -57,7 +59,7 @@ class SiswaController extends Controller
                 });
             })->count();
 
-        $jenjangs = Jenjang::orderBy('nama_jenjang', 'asc')->get();
+        $jenjangs = Jenjang::orderBy('nama_jenjang')->get();
 
         $kelasList = Kelas::with('tingkat')
             ->when($isAdminJenjang, function ($query) use ($jenjangAdmin) {
@@ -65,10 +67,16 @@ class SiswaController extends Controller
                     $q->where('jenjang_id', $jenjangAdmin);
                 });
             })
-            ->orderBy('nama_kelas', 'asc')
+            ->orderBy('nama_kelas')
             ->get();
 
-        return view('siswa.index', compact('siswas', 'totalSiswa', 'jenjangs', 'kelasList'));
+        return view('siswa.index', compact(
+            'siswas',
+            'totalSiswa',
+            'jenjangs',
+            'kelasList',
+            'tahunAktif'
+        ));
     }
 
     public function create()

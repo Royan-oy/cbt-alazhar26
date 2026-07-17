@@ -19,6 +19,7 @@ use App\Http\Controllers\BankSoalController;
 use App\Http\Controllers\SoalController;
 use App\Http\Controllers\UjianController;
 use App\Http\Controllers\GuruBankSoalController;
+>>>>>>> da06dfe8d1393b50c7f959ab2bc825b84cfdb1b9
 
 
 
