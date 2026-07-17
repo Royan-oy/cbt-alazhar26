@@ -299,11 +299,13 @@ class UjianController extends Controller
     {
         $this->authorizeJenjang($ujian);
 
-        $ujian->update(['token_aktif' => !$ujian->token_aktif]);
+        $ujian->update([
+            'token_aktif' => !$ujian->token_aktif
+        ]);
 
         $pesan = $ujian->token_aktif
-            ? 'Token diaktifkan, siswa sudah bisa masuk ujian.'
-            : 'Token dinonaktifkan.';
+            ? 'Token berhasil diaktifkan. Siswa dapat masuk menggunakan token.'
+            : 'Token berhasil dinonaktifkan. Siswa tidak dapat masuk meskipun mengetahui token.';
 
         return back()->with('success', $pesan);
     }
