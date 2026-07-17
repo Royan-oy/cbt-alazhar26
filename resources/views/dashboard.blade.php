@@ -199,7 +199,7 @@
     </div>
     @endif
 
-    @if(Auth::user()->role == 'guru')
+    {{-- @if(Auth::user()->role == 'guru')
     <h5 class="fw-bold text-dark mb-3" style="font-size: 14px; letter-spacing: 0.3px;">Ringkasan Tugas Mengajar</h5>
     <div class="row g-3 mb-4">
         <div class="col-12 col-sm-6 col-lg-6">
@@ -212,9 +212,9 @@
             </div>
         </div>
     </div>
-    @endif
+    @endif --}}
 
-    @if($isWaliKelas)
+    {{-- @if($isWaliKelas)
     <h5 class="fw-bold text-dark mb-3" style="font-size: 14px; letter-spacing: 0.3px;">Pemantauan Ruang Kelas Anda</h5>
     <div class="row g-3 mb-4">
         <div class="col-12 col-sm-6 col-lg-6">
@@ -236,7 +236,7 @@
             </div>
         </div>
     </div>
-    @endif
+    @endif --}}
 
     @if(Auth::user()->role == 'siswa')
     <h5 class="fw-bold text-dark mb-3" style="font-size: 14px; letter-spacing: 0.3px;">Lembar Informasi Evaluasi</h5>
@@ -326,7 +326,7 @@
                         <a href="#" class="btn shortcut-btn bg-white text-secondary font-medium px-3 py-2 rounded-3 small text-decoration-none"><i class="fa-solid fa-user-plus me-2"></i> Tambah Siswa Baru</a>
                     @endif
 
-                    @if(Auth::user()->role == 'guru')
+                    {{-- @if(Auth::user()->role == 'guru')
 
                     <a href="#" class="btn shortcut-btn">
                         <i class="fa-solid fa-circle-plus me-2"></i>
@@ -338,16 +338,16 @@
                         Jadwalkan Ujian
                     </a>
 
-                    @endif
+                    @endif --}}
 
-                    @if($isWaliKelas)
+                    {{-- @if($isWaliKelas)
 
                     <a href="#" class="btn shortcut-btn">
                         <i class="fa-solid fa-file-export me-2"></i>
                         Rekap Kelas
                     </a>
 
-                    @endif
+                    @endif --}}
 
                     @if(Auth::user()->role == 'siswa')
                         <a href="#" class="btn btn-primary font-bold px-4 py-2 rounded-3 small shadow-sm text-decoration-none text-white"><i class="fa-solid fa-play me-2"></i> Masuk Ruang Ujian</a>

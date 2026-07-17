@@ -19,7 +19,7 @@ use App\Http\Controllers\BankSoalController;
 use App\Http\Controllers\SoalController;
 use App\Http\Controllers\UjianController;
 use App\Http\Controllers\GuruBankSoalController;
->>>>>>> da06dfe8d1393b50c7f959ab2bc825b84cfdb1b9
+use App\Http\Controllers\GuruDashboardController;
 
 
 
@@ -135,11 +135,13 @@ Route::middleware(['auth'])->group(function () {
 
     Route::prefix('dashboard-guru')->name('dashboard-guru.')->group(function () {
         
+        // Rute dashboard utama guru
+        Route::get('/', [GuruDashboardController::class, 'index'])->name('index');
+        
         // Kita gunakan nama rute yang berbeda agar tidak bentrok dengan rute bank-soal milik Admin
-        Route::resource('bank-soal', GuruBankSoalController::class); // Sebaiknya pisahkan controllernya
+        Route::resource('bank-soal', GuruBankSoalController::class);
 
         // Guru butuh cara sendiri untuk unpublish bank soal miliknya
-        // (diperlukan karena destroy() menolak hapus bank soal yang masih published).
         Route::patch(
             'bank-soal/{bank_soal}/toggle-publish',
             [GuruBankSoalController::class, 'togglePublish']
