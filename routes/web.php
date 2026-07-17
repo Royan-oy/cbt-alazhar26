@@ -23,6 +23,7 @@ use App\Http\Controllers\GuruDashboardController;
 
 
 
+
 // Halaman awal langsung menampilkan form login
 Route::get('/', [LoginController::class, 'showLogin'])->name('login');
 Route::post('/login', [LoginController::class, 'login']);
