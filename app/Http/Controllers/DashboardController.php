@@ -11,6 +11,11 @@ class DashboardController extends Controller
     public function index()
     {
         $user = Auth::user();
+
+        if ($user->role === 'guru') {
+            return redirect()->route('dashboard-guru.index');
+        }
+
         $data = [];
 
         $isGuru = $user->role == 'guru';

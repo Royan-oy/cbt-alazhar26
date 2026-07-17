@@ -383,6 +383,7 @@
     </div>
     @endif
 
+    {{-- @if(Auth::user()->role == 'guru')
     {{-- ============================================================ --}}
     {{-- GURU --}}
     {{-- ============================================================ --}}
@@ -399,8 +400,9 @@
             </div>
         </div>
     </div>
-    @endif
+    @endif --}}
 
+    {{-- @if($isWaliKelas)
     {{-- ============================================================ --}}
     {{-- WALI KELAS --}}
     {{-- ============================================================ --}}
@@ -426,7 +428,7 @@
             </div>
         </div>
     </div>
-    @endif
+    @endif --}}
 
     {{-- ============================================================ --}}
     {{-- SISWA -- REDESIGN --}}
@@ -636,6 +638,28 @@
                     </div>
                     @endif
 
+                    {{-- @if(Auth::user()->role == 'guru')
+
+                    <a href="#" class="btn shortcut-btn">
+                        <i class="fa-solid fa-circle-plus me-2"></i>
+                        Buat Bank Soal
+                    </a>
+
+                    <a href="#" class="btn shortcut-btn">
+                        <i class="fa-solid fa-calendar-days me-2"></i>
+                        Jadwalkan Ujian
+                    </a>
+
+                    @endif --}}
+
+                    {{-- @if($isWaliKelas)
+
+                    <a href="#" class="btn shortcut-btn">
+                        <i class="fa-solid fa-file-export me-2"></i>
+                        Rekap Kelas
+                    </a>
+
+                    @endif --}}
                     @if(Auth::user()->role == 'guru')
                     <div class="col-6 col-md-3">
                         <a href="#" class="quick-action-btn">
