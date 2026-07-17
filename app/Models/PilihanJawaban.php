@@ -13,10 +13,15 @@ class PilihanJawaban extends Model
 
     protected $fillable = [
         'soal_id',
-        'opsi', // A, B, C, D, E
+        'kode',         // A, B, C, ... — digenerate otomatis dari urutan opsi
         'teks_pilihan',
-        'file_pendukung', // Jika opsi berupa gambar
-        'is_correct' // 1 untuk jawaban benar, 0 untuk salah
+        'pasangan',     // dipakai kalau nanti ada jenis soal menjodohkan
+        'is_benar',     // true untuk jawaban benar, false untuk salah
+        'urutan',
+    ];
+
+    protected $casts = [
+        'is_benar' => 'boolean',
     ];
 
     // Relasi kembali ke Soal
