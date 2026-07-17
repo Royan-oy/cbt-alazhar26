@@ -26,8 +26,9 @@ class Soal extends Model
     // Relasi ke Pilihan Jawaban
     public function pilihanJawabans()
     {
-        return $this->hasMany(PilihanJawaban::class, 'soal_id');
-    }
+        return $this->hasMany(PilihanJawaban::class)
+                    ->orderBy('urutan');
+    }   
 
     /**
      * Label ramah-baca untuk tiap jenis soal.

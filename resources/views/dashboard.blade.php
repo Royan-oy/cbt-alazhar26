@@ -383,10 +383,6 @@
     </div>
     @endif
 
-    {{-- @if(Auth::user()->role == 'guru')
-    {{-- ============================================================ --}}
-    {{-- GURU --}}
-    {{-- ============================================================ --}}
     @if(Auth::user()->role == 'guru')
     <h5 class="fw-bold text-dark mb-3" style="font-size: 14px; letter-spacing: 0.3px;">Ringkasan Tugas Mengajar</h5>
     <div class="row g-3 mb-4">
@@ -400,12 +396,8 @@
             </div>
         </div>
     </div>
-    @endif --}}
+    @endif
 
-    {{-- @if($isWaliKelas)
-    {{-- ============================================================ --}}
-    {{-- WALI KELAS --}}
-    {{-- ============================================================ --}}
     @if($isWaliKelas ?? false)
     <h5 class="fw-bold text-dark mb-3" style="font-size: 14px; letter-spacing: 0.3px;">Pemantauan Ruang Kelas Anda</h5>
     <div class="row g-3 mb-4">
@@ -428,7 +420,7 @@
             </div>
         </div>
     </div>
-    @endif --}}
+    @endif
 
     {{-- ============================================================ --}}
     {{-- SISWA -- REDESIGN --}}
