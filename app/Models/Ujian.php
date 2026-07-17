@@ -82,6 +82,15 @@ class Ujian extends Model
 
         return 'berlangsung';
     }
+
+    // TAMBAHKAN FUNGSI INI
+    public function mataPelajaran()
+    {
+        // Sesuaikan 'mata_pelajaran_id' dengan nama foreign key di tabel ujians Anda
+        return $this->belongsTo(MataPelajaran::class, 'mata_pelajaran_id');
+    }
+
+    
     
     public function autoUpdateTokenStatus()
     {
@@ -105,5 +114,6 @@ class Ujian extends Model
                 'token_aktif' => false
             ]);
         }
+        
     }
 }
