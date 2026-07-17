@@ -89,11 +89,17 @@
 
     .action-icon-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,0.12); }
 
-    .btn-icon-view   { background: #eff6ff; color: #2563eb; }
-    .btn-icon-view:hover { background: #2563eb; color: white; }
+    .btn-icon-view   { background: #fbf6deff; color: #ebba25ff; }
+    .btn-icon-view:hover { background: #ebba25ff; color: white; }
+
+    .btn-icon-edit   { background: #eff6ff; color: #2563eb; }
+    .btn-icon-edit:hover { background: #2563eb; color: white; }
 
     .btn-icon-delete { background: #fff1f2; color: #e11d48; }
     .btn-icon-delete:hover { background: #e11d48; color: white; }
+
+    .btn-icon-publish { background: #e4ffeeff; color: #0f3310ff; }
+    .btn-icon-publish:hover { background: #2ca530ff; color: #ffffff; }
 
     /* ===== BADGE STATUS ===== */
     .status-badge {
@@ -401,45 +407,45 @@
                 <table class="table align-middle mb-0">
                     <thead>
                         <tr>
-                            <th style="width: 50px;">No</th>
-                            <th>Nama Bank Soal</th>
-                            <th>Mapel</th>
-                            <th>Jenjang</th>
-                            <th>Deskripsi</th>
-                            <th>Dibuat</th>
-                            <th>Status</th>
-                            <th style="width: 110px;" class="text-end">Aksi</th>
+                            <th class="text-center" style="width: 50px;">No</th>
+                            <th class="text-center">Nama Bank Soal</th>
+                            <th class="text-center">Mapel</th>
+                            <th class="text-center">Jenjang</th>
+                            <th class="text-center">Deskripsi</th>
+                            <th class="text-center">Dibuat</th>
+                            <th class="text-center">Status</th>
+                            <th style="width: 110px;" class="text-center">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse($bankSoals as $index => $bs)
                         <tr>
                             {{-- No --}}
-                            <td>
+                            <td class="text-center">
                                 <span class="text-secondary fw-semibold">{{ $index + 1 }}</span>
                             </td>
 
                             {{-- Nama Bank Soal --}}
-                            <td>
+                            <td class="text-center">
                                 <div class="soal-name">{{ $bs->nama_bank_soal }}</div>
                             </td>
 
                             {{-- Mapel --}}
-                            <td>
+                            <td class="text-center">
                                 <span class="text-dark fw-medium">
                                     {{ $bs->mataPelajaran->nama_mapel ?? '-' }}
                                 </span>
                             </td>
 
                             {{-- Jenjang --}}
-                            <td>
+                            <td class="text-center">
                                 <span class="badge bg-dark bg-opacity-10 text-dark px-2 py-1 rounded-3 fw-semibold" style="font-size: 12px;">
                                     {{ $bs->jenjang->nama_jenjang ?? '-' }}
                                 </span>
                             </td>
 
                             {{-- Deskripsi --}}
-                            <td>
+                            <td class="text-center">
                                 @if($bs->deskripsi)
                                     <span class="text-muted" style="font-size: 13px;">
                                         {{ Str::limit($bs->deskripsi, 40, '...') }}
@@ -450,14 +456,14 @@
                             </td>
 
                             {{-- Dibuat --}}
-                            <td>
+                            <td class="text-center">
                                 <span class="text-muted" style="font-size: 12px;">
                                     {{ $bs->created_at->format('d M Y') }}
                                 </span>
                             </td>
 
                             {{-- Status --}}
-                            <td>
+                            <td class="text-center">
                                 @if($bs->is_publish)
                                     <span class="status-badge published">
                                         <span class="dot"></span>
@@ -479,7 +485,25 @@
                                        title="Lihat Detail">
                                         <i class="fa-solid fa-eye"></i>
                                     </a>
-
+ 
+                                    <a href="{{ route('dashboard-guru.bank-soal.edit', $bs->id) }}"
+                                       class="action-icon-btn btn-icon-edit"
+                                       title="Edit">
+                                        <i class="fa-solid fa-pen"></i>
+                                    </a>
+ 
+                                    <form action="{{ route('dashboard-guru.bank-soal.toggle-publish', $bs->id) }}"
+                                          method="POST"
+                                          class="d-inline">
+                                        @csrf
+                                        @method('PATCH')
+                                        <button type="submit"
+                                                class="action-icon-btn btn-icon-publish"
+                                                title="{{ $bs->is_publish ? 'Unpublish' : 'Publish' }}">
+                                            <i class="fa-solid {{ $bs->is_publish ? 'fa-eye-slash' : 'fa-upload' }}"></i>
+                                        </button>
+                                    </form>
+ 
                                     <form action="{{ route('dashboard-guru.bank-soal.destroy', $bs->id) }}"
                                           method="POST"
                                           class="d-inline form-delete">
