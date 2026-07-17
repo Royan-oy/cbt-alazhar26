@@ -19,8 +19,8 @@ use App\Http\Controllers\BankSoalController;
 use App\Http\Controllers\SoalController;
 use App\Http\Controllers\UjianController;
 use App\Http\Controllers\GuruBankSoalController;
-<<<<<<<<< Temporary merge branch 1
-=========
+use App\Http\Controllers\GuruDashboardController;
+
 
 
 
