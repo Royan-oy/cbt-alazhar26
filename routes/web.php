@@ -20,6 +20,7 @@ use App\Http\Controllers\SoalController;
 use App\Http\Controllers\UjianController;
 use App\Http\Controllers\GuruBankSoalController;
 use App\Http\Controllers\GuruDashboardController;
+use App\Http\Controllers\GuruJadwalUjianController;
 
 
 
@@ -141,6 +142,9 @@ Route::middleware(['auth'])->group(function () {
         
         // Kita gunakan nama rute yang berbeda agar tidak bentrok dengan rute bank-soal milik Admin
         Route::resource('bank-soal', GuruBankSoalController::class);
+
+        Route::get('jadwal-ujian', [GuruJadwalUjianController::class, 'index'])->name('jadwal-ujian.index');
+        Route::get('jadwal-ujian/{id}', [GuruJadwalUjianController::class, 'show'])->name('jadwal-ujian.show');
 
         // Guru butuh cara sendiri untuk unpublish bank soal miliknya
         Route::patch(

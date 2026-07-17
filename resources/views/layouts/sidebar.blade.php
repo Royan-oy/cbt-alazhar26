@@ -381,10 +381,13 @@
 
         <span class="menu-group-label">Ujian & Nilai</span>
         <ul class="nav flex-column mb-2">
-            <li><a href="#" class="nav-link">
-                <i class="fa-solid fa-calendar-check me-3"></i>
-                Jadwal Ujian
-            </a></li>
+            <li>
+                <a href="{{ route('dashboard-guru.jadwal-ujian.index') }}" 
+                   class="nav-link {{ request()->routeIs('dashboard-guru.jadwal-ujian.index') ? 'active' : '' }}">
+                    <i class="fa-solid fa-calendar-check me-3"></i>
+                    Jadwal Ujian
+                </a>
+            </li>
             <li><a href="#" class="nav-link">
                 <i class="fa-solid fa-square-poll-vertical me-3"></i>
                 Nilai Siswa
