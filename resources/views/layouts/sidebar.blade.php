@@ -374,10 +374,11 @@
 
         <ul class="nav flex-column mb-2">
 
-            <li><a href="#" class="nav-link">
-                <i class="fa-solid fa-folder-open me-3"></i>
-                Bank Soal Saya
-            </a></li>
+            <li>
+                <a href="{{ route('dashboard-guru.bank-soal.index') }}" class="nav-link {{ request()->is('dashboard-guru/bank-soal*') ? 'active' : '' }}">
+                    <i class="fa-solid fa-book-open me-3"></i> Bank Soal
+                </a>
+            </li>
 
             <li><a href="#" class="nav-link">
                 <i class="fa-solid fa-file-circle-plus me-3"></i>
@@ -400,6 +401,18 @@
                 Nilai Siswa
             </a></li>
 
+            
+        </ul>
+
+        
+        <span class="menu-group-label">Pengaturan</span>
+        <ul class="nav flex-column mb-2">
+            <li>
+                <a href="{{ route('pengaturan-akun.index') }}" class="nav-link {{ request()->routeIs('pengaturan-akun.*') ? 'active' : '' }}">
+                    <i class="fa-solid fa-user-gear me-3"></i>
+                    Pengaturan Akun
+                </a>
+            </li>
         </ul>
 
         @endif
@@ -434,20 +447,6 @@
         </ul>
 
         @endif
-
-        @if(Auth::user()->role == 'guru')
-        <span class="menu-group-label">Pengaturan</span>
-        <ul class="nav flex-column mb-2">
-            <li>
-                <a href="{{ route('pengaturan-akun.index') }}" class="nav-link {{ request()->routeIs('pengaturan-akun.*') ? 'active' : '' }}">
-                    <i class="fa-solid fa-user-gear me-3"></i>
-                    Pengaturan Akun
-                </a>
-            </li>
-        </ul>
-        @endif
-
-       
 
         @if(Auth::user()->role == 'siswa')
 
