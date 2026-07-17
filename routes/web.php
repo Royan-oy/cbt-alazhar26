@@ -20,8 +20,8 @@ use App\Http\Controllers\SoalController;
 use App\Http\Controllers\UjianController;
 use App\Http\Controllers\GuruBankSoalController;
 use App\Http\Controllers\GuruDashboardController;
-
-
+use App\Http\Controllers\Siswa\UjianHariIniController;
+use App\Http\Controllers\Siswa\RuangUjianController;
 
 
 // Halaman awal langsung menampilkan form login
@@ -158,5 +158,44 @@ Route::middleware(['auth'])->group(function () {
             Route::post('soal/import', [SoalController::class, 'import'])->name('soal.import');
         });
     });
+
+    /*
+    |--------------------------------------------------------------------------
+    | Dashboard Siswa
+    |--------------------------------------------------------------------------
+    */
+
+    Route::prefix('dashboard-siswa')
+    ->name('dashboard-siswa.')
+    ->group(function () {
+
+        Route::get('ujian-hari-ini', [UjianHariIniController::class, 'index'])->name('ujian-hari-ini');
+
+        /*
+        |--------------------------------------------------------------------------
+        | Ruang Ujian
+        |--------------------------------------------------------------------------
+        */
+        Route::get('ujian/{ujian}/mulai', [RuangUjianController::class, 'mulai'])->name('ujian.mulai');
+        
+        // Tambahkan Route POST untuk verifikasi token / masuk ke lembar soal
+        Route::post('ujian/{ujian}/proses-masuk', [RuangUjianController::class, 'prosesMasuk'])->name('ujian.proses-masuk');
+        
+        // Route untuk Lembar Kerja Ujian (Halaman Soal)
+        Route::get('ujian/{ujian}/kerja', [RuangUjianController::class, 'kerja'])->name('ujian.kerja');
+
+        Route::post(
+            'ujian/{ujian}/submit',
+            [RuangUjianController::class, 'submit']
+        )->name('ujian.submit');
+
+        Route::post('ujian/autosave', [RuangUjianController::class, 'autoSave'])
+        ->name('ujian.autosave');
+
+        Route::post('ujian/current-question',
+            [RuangUjianController::class, 'saveCurrentQuestion']
+        )->name('ujian.current-question');
+    });
+
 
 });

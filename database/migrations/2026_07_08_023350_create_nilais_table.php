@@ -42,6 +42,15 @@ class CreateNilaisTable extends Migration
 
             $table->timestamps();
 
+            // soal terakhir yang sedang dibuka
+            $table->unsignedInteger('current_question')->default(0);
+
+            // waktu terakhir autosave
+            $table->timestamp('last_autosave')->nullable();
+
+            // jumlah pelanggaran anti cheat
+            $table->unsignedTinyInteger('violation_count')->default(0);
+
         });
     }
 
