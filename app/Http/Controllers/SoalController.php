@@ -2,58 +2,177 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\BankSoal;
 use App\Models\Soal;
 use App\Models\PilihanJawaban;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class SoalController extends Controller
 {
-    public function store(Request $request, $bank_soal_id)
+    /**
+     * Pastikan bank soal ini benar-benar milik guru yang sedang login.
+     * (pola sama seperti GuruBankSoalController::authorizeOwnership)
+     */
+    private function authorizeBankSoal(BankSoal $bankSoal)
     {
+        $guru = Auth::user()->guru;
+
+        abort_unless(
+            $guru->guruMapels()->where('id', $bankSoal->guru_mapel_id)->exists(),
+            403,
+            'Anda tidak memiliki akses ke bank soal ini.'
+        );
+    }
+
+    public function index(BankSoal $bank_soal)
+    {
+        $this->authorizeBankSoal($bank_soal);
+
+        $soals = $bank_soal->soals()->orderBy('urutan')->withCount('pilihanJawabans')->get();
+
+        return view('guru.bank-soal.soal.index', compact('bank_soal', 'soals'));
+    }
+
+    public function create(BankSoal $bank_soal)
+    {
+        $this->authorizeBankSoal($bank_soal);
+
+        return view('guru.bank-soal.soal.create', compact('bank_soal'));
+    }
+
+    public function store(Request $request, BankSoal $bank_soal)
+    {
+        $this->authorizeBankSoal($bank_soal);
+
         $request->validate([
             'jenis_soal' => 'required|in:pilihan_ganda,essay,isian',
-            'teks_soal' => 'required',
-            'bobot' => 'required|numeric',
+            'teks_soal' => 'required|string',
+            'bobot' => 'required|numeric|min:1',
         ]);
+
+        if ($request->jenis_soal === 'pilihan_ganda') {
+            $request->validate([
+                'teks_pilihan' => 'required|array|min:2',
+                'teks_pilihan.*' => 'required|string',
+                'jawaban_benar' => 'required|integer',
+            ]);
+        }
 
         DB::beginTransaction();
         try {
-            // 1. Simpan Soal
             $soal = Soal::create([
-                'bank_soal_id' => $bank_soal_id,
-                'jenis_soal'   => $request->jenis_soal,
-                'teks_soal'    => $request->teks_soal,
-                'bobot'        => $request->bobot,
-                'urutan'       => Soal::where('bank_soal_id', $bank_soal_id)->count() + 1,
+                'bank_soal_id' => $bank_soal->id,
+                'jenis_soal' => $request->jenis_soal,
+                'teks_soal' => $request->teks_soal,
+                'bobot' => $request->bobot,
+                'urutan' => $bank_soal->soals()->count() + 1,
             ]);
 
-            // 2. Jika Pilihan Ganda, Simpan Opsi Jawaban
             if ($request->jenis_soal === 'pilihan_ganda') {
-                $opsiList = ['A', 'B', 'C', 'D', 'E'];
-                foreach ($opsiList as $opsi) {
-                    PilihanJawaban::create([
-                        'soal_id' => $soal->id,
-                        'opsi' => $opsi,
-                        'teks_pilihan' => $request->input("teks_pilihan_{$opsi}"),
-                        'is_correct' => ($request->kunci_jawaban == $opsi) ? 1 : 0,
-                    ]);
-                }
+                $this->simpanPilihanJawaban($soal, $request->teks_pilihan, $request->jawaban_benar);
             }
 
             DB::commit();
-            return redirect()->back()->with('success', 'Soal berhasil ditambahkan');
 
+            return redirect()
+                ->route('dashboard-guru.bank-soal.soal.index', $bank_soal->id)
+                ->with('success', 'Soal berhasil ditambahkan');
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+            return redirect()->back()->withInput()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
 
-    public function destroy($bank_soal_id, $soal_id)
+    public function edit(BankSoal $bank_soal, Soal $soal)
     {
-        // Pilihan jawaban akan terhapus otomatis jika di migration diset onDelete('cascade')
-        Soal::where('id', $soal_id)->delete();
-        return redirect()->back()->with('success', 'Soal berhasil dihapus');
+        $this->authorizeBankSoal($bank_soal);
+        abort_unless($soal->bank_soal_id === $bank_soal->id, 404);
+
+        $soal->load(['pilihanJawabans' => function ($q) {
+            $q->orderBy('urutan');
+        }]);
+
+        return view('guru.bank-soal.soal.edit', compact('bank_soal', 'soal'));
+    }
+
+    public function update(Request $request, BankSoal $bank_soal, Soal $soal)
+    {
+        $this->authorizeBankSoal($bank_soal);
+        abort_unless($soal->bank_soal_id === $bank_soal->id, 404);
+
+        $request->validate([
+            'jenis_soal' => 'required|in:pilihan_ganda,essay,isian',
+            'teks_soal' => 'required|string',
+            'bobot' => 'required|numeric|min:1',
+        ]);
+
+        if ($request->jenis_soal === 'pilihan_ganda') {
+            $request->validate([
+                'teks_pilihan' => 'required|array|min:2',
+                'teks_pilihan.*' => 'required|string',
+                'jawaban_benar' => 'required|integer',
+            ]);
+        }
+
+        DB::beginTransaction();
+        try {
+            $soal->update([
+                'jenis_soal' => $request->jenis_soal,
+                'teks_soal' => $request->teks_soal,
+                'bobot' => $request->bobot,
+            ]);
+
+            // Opsi lama dihapus & diganti baru — supaya tidak ada opsi "nyangkut"
+            // kalau guru mengubah jumlah opsi atau mengganti jenis soal.
+            $soal->pilihanJawabans()->delete();
+
+            if ($request->jenis_soal === 'pilihan_ganda') {
+                $this->simpanPilihanJawaban($soal, $request->teks_pilihan, $request->jawaban_benar);
+            }
+
+            DB::commit();
+
+            return redirect()
+                ->route('dashboard-guru.bank-soal.soal.index', $bank_soal->id)
+                ->with('success', 'Soal berhasil diperbarui');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->withInput()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+        }
+    }
+
+    public function destroy(BankSoal $bank_soal, Soal $soal)
+    {
+        $this->authorizeBankSoal($bank_soal);
+        abort_unless($soal->bank_soal_id === $bank_soal->id, 404);
+
+        // pilihan_jawabans ikut terhapus otomatis (cascadeOnDelete di migration)
+        $soal->delete();
+
+        return redirect()
+            ->route('dashboard-guru.bank-soal.soal.index', $bank_soal->id)
+            ->with('success', 'Soal berhasil dihapus');
+    }
+
+    /**
+     * Simpan opsi pilihan ganda. Kode opsi (A, B, C, ...) digenerate otomatis
+     * dari urutan input — supaya jumlah opsi fleksibel (2-26), tidak dihardcode
+     * 5 opsi seperti implementasi sebelumnya.
+     */
+    private function simpanPilihanJawaban(Soal $soal, array $teksPilihan, $jawabanBenarIndex)
+    {
+        $kodeList = range('A', 'Z');
+
+        foreach (array_values($teksPilihan) as $index => $teks) {
+            PilihanJawaban::create([
+                'soal_id' => $soal->id,
+                'kode' => $kodeList[$index] ?? null,
+                'teks_pilihan' => $teks,
+                'is_benar' => ((int) $jawabanBenarIndex === $index),
+                'urutan' => $index + 1,
+            ]);
+        }
     }
 }

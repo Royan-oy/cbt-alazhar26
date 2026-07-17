@@ -140,6 +140,13 @@ Route::middleware(['auth'])->group(function () {
         // Kita gunakan nama rute yang berbeda agar tidak bentrok dengan rute bank-soal milik Admin
         Route::resource('bank-soal', GuruBankSoalController::class); // Sebaiknya pisahkan controllernya
 
+        // Guru butuh cara sendiri untuk unpublish bank soal miliknya
+        // (diperlukan karena destroy() menolak hapus bank soal yang masih published).
+        Route::patch(
+            'bank-soal/{bank_soal}/toggle-publish',
+            [GuruBankSoalController::class, 'togglePublish']
+        )->name('bank-soal.toggle-publish');
+
         Route::prefix('bank-soal/{bank_soal}')->name('bank-soal.')->group(function () {
             Route::get('soal', [SoalController::class, 'index'])->name('soal.index');
             Route::get('soal/create', [SoalController::class, 'create'])->name('soal.create');
