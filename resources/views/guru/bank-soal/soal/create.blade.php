@@ -253,6 +253,99 @@
         .btn-back, .btn-submit { width: 100%; justify-content: center; }
         .opsi-row { padding: 6px 8px; }
     }
+
+    /* ===== UPLOAD GAMBAR CUSTOM ===== */
+    .upload-container {
+        width: 100%;
+        margin-top: 8px;
+    }
+
+    .upload-box {
+        border: 2px dashed var(--border-color);
+        border-radius: 16px;
+        background-color: #f8fafc;
+        padding: 32px 20px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .upload-box:hover {
+        border-color: var(--accent-blue);
+        background-color: #f0f9ff;
+    }
+
+    .upload-box.has-file {
+        padding: 0;
+        border-style: solid;
+        background-color: #fff;
+    }
+
+    .upload-content {
+        pointer-events: none;
+    }
+
+    .upload-icon {
+        font-size: 32px;
+        color: #94a3b8;
+        margin-bottom: 12px;
+        transition: color 0.3s;
+    }
+    .upload-box:hover .upload-icon { color: var(--accent-blue); }
+
+    .upload-text {
+        font-size: 14px;
+        color: var(--primary-dark);
+        font-weight: 600;
+        margin-bottom: 4px;
+    }
+
+    .upload-hint {
+        font-size: 12px;
+        color: var(--text-muted);
+    }
+
+    .image-preview-wrapper {
+        position: relative;
+        width: 100%;
+        display: none;
+        background: #f8fafc;
+    }
+
+    .image-preview {
+        max-height: 300px;
+        width: 100%;
+        object-fit: contain;
+        border-radius: 14px;
+        padding: 8px;
+    }
+
+    .btn-remove-image {
+        position: absolute;
+        top: 16px;
+        right: 16px;
+        background: rgba(225, 29, 72, 0.9);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        padding: 8px 14px;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(225, 29, 72, 0.3);
+        transition: 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        backdrop-filter: blur(4px);
+    }
+
+    .btn-remove-image:hover {
+        background: #be123c;
+        transform: scale(1.05);
+    }
 </style>
 
 <div class="container-fluid py-2">
@@ -291,7 +384,7 @@
             <p>Kolom bertanda <span style="color: #ef4444;">●</span> wajib diisi.</p>
         </div>
 
-        <form action="{{ route('dashboard-guru.bank-soal.soal.store', $bank_soal->id) }}" method="POST" id="formSoal">
+        <form action="{{ route('dashboard-guru.bank-soal.soal.store', $bank_soal->id) }}" method="POST" id="formSoal" enctype="multipart/form-data">
             @csrf
 
             <div class="form-card-body">
@@ -334,8 +427,37 @@
                     @enderror
                 </div>
 
+                {{-- INPUT GAMBAR SOAL BARU --}}
+                <div class="form-group">
+                    <label class="form-label-custom">Gambar Pendukung (Opsional)</label>
+                    
+                    <div class="upload-container">
+                        <input type="file" name="gambar" id="gambarInput" class="d-none" accept="image/jpeg, image/png, image/jpg, image/gif">
+                        
+                        <div class="upload-box" id="uploadBox" onclick="document.getElementById('gambarInput').click()">
+                            <!-- Tampilan Saat Belum Ada Gambar -->
+                            <div class="upload-content" id="uploadContent">
+                                <div class="upload-icon"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+                                <div class="upload-text">Klik atau seret gambar ke area ini</div>
+                                <div class="upload-hint">Maksimal ukuran 2MB (JPG, PNG, GIF)</div>
+                            </div>
+
+                            <!-- Tampilan Preview Gambar -->
+                            <div class="image-preview-wrapper" id="previewWrapper">
+                                <img src="" id="imagePreview" class="image-preview" alt="Preview Gambar">
+                                <button type="button" class="btn-remove-image" onclick="removeImage(event)">
+                                    <i class="fa-solid fa-trash-can"></i> Hapus Gambar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    @error('gambar')
+                        <div class="field-error"><i class="fa-solid fa-circle-exclamation"></i> {{ $message }}</div>
+                    @enderror
+                </div>
+
                 {{-- Pilihan Jawaban (khusus Pilihan Ganda) --}}
-                <div class="form-group mb-0">
+                <div class="form-group mb-0" id="pilihanJawabanWrapper">
                     <label class="form-label-custom"><span class="required-dot"></span> Opsi Jawaban</label>
 
                     <div id="pilihanJawabanSection">
@@ -391,8 +513,10 @@
 
     function toggleJenisSoal() {
         const jenis = document.getElementById('jenisSoal').value;
-        const section = document.getElementById('pilihanJawabanSection');
-        section.classList.toggle('active', jenis === 'pilihan_ganda');
+        const wrapper = document.getElementById('pilihanJawabanWrapper');
+        const isPilgan = jenis === 'pilihan_ganda';
+        wrapper.style.display = isPilgan ? 'block' : 'none';
+        document.getElementById('pilihanJawabanSection').classList.toggle('active', isPilgan);
     }
 
     function renumberOpsi() {
@@ -433,6 +557,68 @@
         toggleJenisSoal();
         renumberOpsi();
     });
+
+    // ===== SCRIPT KHUSUS PREVIEW GAMBAR =====
+    const gambarInput = document.getElementById('gambarInput');
+    const uploadBox = document.getElementById('uploadBox');
+    const uploadContent = document.getElementById('uploadContent');
+    const previewWrapper = document.getElementById('previewWrapper');
+    const imagePreview = document.getElementById('imagePreview');
+
+    // Menangani saat gambar dipilih
+    gambarInput.addEventListener('change', function(e) {
+        const file = this.files[0];
+        
+        if (file) {
+            // Validasi tipe file secara instan di sisi client
+            if (!file.type.match('image.*')) {
+                alert('File harus berupa gambar (JPG, PNG, GIF)!');
+                resetImage();
+                return;
+            }
+
+            // Validasi ukuran instan (Max 2MB)
+            if (file.size > 2 * 1024 * 1024) {
+                alert('Ukuran gambar terlalu besar! Maksimal 2MB.');
+                resetImage();
+                return;
+            }
+
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                imagePreview.src = e.target.result;
+                uploadContent.style.display = 'none';
+                previewWrapper.style.display = 'block';
+                uploadBox.classList.add('has-file');
+                uploadBox.style.cursor = 'default';
+                // Nonaktifkan klik pada kotak jika sudah ada gambar
+                uploadBox.onclick = null; 
+            }
+            
+            reader.readAsDataURL(file);
+        }
+    });
+
+    // Menangani penghapusan gambar
+    function removeImage(event) {
+        event.stopPropagation(); // Mencegah memicu klik pada uploadBox
+        resetImage();
+    }
+
+    function resetImage() {
+        gambarInput.value = ''; // Kosongkan input
+        imagePreview.src = '';
+        uploadContent.style.display = 'block';
+        previewWrapper.style.display = 'none';
+        uploadBox.classList.remove('has-file');
+        uploadBox.style.cursor = 'pointer';
+        
+        // Kembalikan event klik pada kotak
+        uploadBox.onclick = function() {
+            document.getElementById('gambarInput').click();
+        };
+    }
 </script>
 
 @endsection

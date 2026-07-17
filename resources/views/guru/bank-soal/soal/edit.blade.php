@@ -4,6 +4,7 @@
 @section('content')
 
 <style>
+    /* ... (CSS Bawaan) ... */
     :root {
         --primary-dark: #0f172a;
         --secondary-dark: #1e293b;
@@ -13,236 +14,62 @@
         --border-color: #e2e8f0;
     }
 
-    .page-header-create {
-        background: linear-gradient(135deg, var(--primary-dark), var(--secondary-dark));
-        border-radius: 24px;
-        padding: 32px;
-        color: white;
-        position: relative;
-        overflow: hidden;
-        box-shadow: 0 20px 40px rgba(15, 23, 42, 0.08);
-        border: 1px solid rgba(255, 255, 255, 0.05);
-    }
-
-    .page-header-create::after {
-        content: '';
-        position: absolute;
-        width: 320px;
-        height: 320px;
-        border-radius: 50%;
-        right: -60px;
-        top: -90px;
-        background: radial-gradient(circle, rgba(14, 165, 233, 0.18) 0%, rgba(14, 165, 233, 0) 70%);
-        pointer-events: none;
-    }
-
+    .page-header-create { background: linear-gradient(135deg, var(--primary-dark), var(--secondary-dark)); border-radius: 24px; padding: 32px; color: white; position: relative; overflow: hidden; box-shadow: 0 20px 40px rgba(15, 23, 42, 0.08); border: 1px solid rgba(255, 255, 255, 0.05); }
+    .page-header-create::after { content: ''; position: absolute; width: 320px; height: 320px; border-radius: 50%; right: -60px; top: -90px; background: radial-gradient(circle, rgba(14, 165, 233, 0.18) 0%, rgba(14, 165, 233, 0) 70%); pointer-events: none; }
     .breadcrumb-nav a { color: #94a3b8; text-decoration: none; font-size: 13px; transition: color 0.2s; }
     .breadcrumb-nav a:hover { color: #e2e8f0; }
     .breadcrumb-nav span { color: #64748b; font-size: 13px; }
-
-    .form-card {
-        background: var(--surface-white);
-        border-radius: 24px;
-        border: 1px solid var(--border-color);
-        box-shadow: 0 12px 34px rgba(15, 23, 42, 0.03);
-        overflow: hidden;
-    }
-
+    .form-card { background: var(--surface-white); border-radius: 24px; border: 1px solid var(--border-color); box-shadow: 0 12px 34px rgba(15, 23, 42, 0.03); overflow: hidden; }
     .form-card-header { padding: 24px 28px; border-bottom: 1px solid var(--border-color); background: #f8fafc; }
     .form-card-header h5 { font-weight: 700; color: var(--primary-dark); margin-bottom: 4px; font-size: 1.05rem; }
     .form-card-header p { font-size: 13px; color: var(--text-muted); margin-bottom: 0; }
     .form-card-body { padding: 28px; }
-
     .form-group { margin-bottom: 24px; }
     .form-group:last-child { margin-bottom: 0; }
-
-    .form-label-custom {
-        font-weight: 600;
-        color: var(--primary-dark);
-        font-size: 14px;
-        margin-bottom: 8px;
-        display: flex;
-        align-items: center;
-        gap: 6px;
-    }
+    .form-label-custom { font-weight: 600; color: var(--primary-dark); font-size: 14px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
     .form-label-custom .required-dot { width: 6px; height: 6px; background: #ef4444; border-radius: 50%; flex-shrink: 0; }
-
-    .form-control-modern, .form-select-modern {
-        border-radius: 14px;
-        border: 1.5px solid var(--border-color);
-        padding: 12px 16px;
-        font-size: 14px;
-        background-color: #f8fafc;
-        transition: all 0.2s ease;
-        color: var(--primary-dark);
-        width: 100%;
-    }
-
-    .form-control-modern:focus, .form-select-modern:focus {
-        background-color: #fff;
-        border-color: var(--accent-blue);
-        box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.1);
-        outline: none;
-    }
-
+    .form-control-modern, .form-select-modern { border-radius: 14px; border: 1.5px solid var(--border-color); padding: 12px 16px; font-size: 14px; background-color: #f8fafc; transition: all 0.2s ease; color: var(--primary-dark); width: 100%; }
+    .form-control-modern:focus, .form-select-modern:focus { background-color: #fff; border-color: var(--accent-blue); box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.1); outline: none; }
     .form-control-modern::placeholder { color: #94a3b8; }
     textarea.form-control-modern { resize: vertical; min-height: 120px; }
-
-    .form-select-modern {
-        appearance: none;
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748b' d='M2.22 4.47a.75.75 0 011.06 0L6 7.19l2.72-2.72a.75.75 0 011.06 1.06l-3.25 3.25a.75.75 0 01-1.06 0L2.22 5.53a.75.75 0 010-1.06z'/%3E%3C/svg%3E");
-        background-repeat: no-repeat;
-        background-position: right 16px center;
-        background-size: 12px;
-        padding-right: 40px;
-    }
-
+    .form-select-modern { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748b' d='M2.22 4.47a.75.75 0 011.06 0L6 7.19l2.72-2.72a.75.75 0 011.06 1.06l-3.25 3.25a.75.75 0 01-1.06 0L2.22 5.53a.75.75 0 010-1.06z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 16px center; background-size: 12px; padding-right: 40px; }
     .field-error { color: #ef4444; font-size: 12px; margin-top: 6px; display: flex; align-items: center; gap: 4px; }
     .is-invalid { border-color: #fca5a5 !important; background-color: #fef2f2 !important; }
-
-    .form-footer {
-        padding: 20px 28px;
-        border-top: 1px solid var(--border-color);
-        background: #f8fafc;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 12px;
-    }
-
-    .btn-back {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        background: #fff;
-        color: var(--text-muted);
-        border: 1.5px solid var(--border-color);
-        border-radius: 14px;
-        padding: 11px 22px;
-        font-weight: 600;
-        font-size: 14px;
-        text-decoration: none;
-        transition: 0.2s ease;
-    }
+    .form-footer { padding: 20px 28px; border-top: 1px solid var(--border-color); background: #f8fafc; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .btn-back { display: inline-flex; align-items: center; gap: 8px; background: #fff; color: var(--text-muted); border: 1.5px solid var(--border-color); border-radius: 14px; padding: 11px 22px; font-weight: 600; font-size: 14px; text-decoration: none; transition: 0.2s ease; }
     .btn-back:hover { color: var(--primary-dark); border-color: #cbd5e1; background: #f1f5f9; text-decoration: none; }
-
-    .btn-submit {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        background: linear-gradient(135deg, #0ea5e9, #0284c7);
-        color: #fff;
-        border: none;
-        border-radius: 14px;
-        padding: 12px 28px;
-        font-weight: 600;
-        font-size: 14px;
-        cursor: pointer;
-        transition: 0.25s ease;
-        box-shadow: 0 8px 20px rgba(14, 165, 233, 0.25);
-    }
+    .btn-submit { display: inline-flex; align-items: center; gap: 8px; background: linear-gradient(135deg, #0ea5e9, #0284c7); color: #fff; border: none; border-radius: 14px; padding: 12px 28px; font-weight: 600; font-size: 14px; cursor: pointer; transition: 0.25s ease; box-shadow: 0 8px 20px rgba(14, 165, 233, 0.25); }
     .btn-submit:hover { background: linear-gradient(135deg, #0284c7, #0369a1); transform: translateY(-2px); box-shadow: 0 14px 28px rgba(14, 165, 233, 0.35); }
-
+    
     /* ===== PILIHAN JAWABAN ===== */
-    #pilihanJawabanSection {
-        display: none;
-        border: 1.5px dashed #bfdbfe;
-        background: #f8fbff;
-        border-radius: 16px;
-        padding: 18px;
-        margin-top: 8px;
-    }
+    #pilihanJawabanSection { display: none; border: 1.5px dashed #bfdbfe; background: #f8fbff; border-radius: 16px; padding: 18px; margin-top: 8px; }
     #pilihanJawabanSection.active { display: block; }
-
-    .pilihan-hint {
-        font-size: 12px;
-        color: #3b82f6;
-        margin-bottom: 14px;
-        display: flex;
-        align-items: center;
-        gap: 6px;
-    }
-
-    .opsi-row {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        margin-bottom: 10px;
-        background: #fff;
-        border: 1.5px solid var(--border-color);
-        border-radius: 12px;
-        padding: 8px 12px;
-    }
-
-    .opsi-radio-wrap {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 30px;
-        height: 30px;
-        flex-shrink: 0;
-    }
-
+    .pilihan-hint { font-size: 12px; color: #3b82f6; margin-bottom: 14px; display: flex; align-items: center; gap: 6px; }
+    .opsi-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; background: #fff; border: 1.5px solid var(--border-color); border-radius: 12px; padding: 8px 12px; }
+    .opsi-radio-wrap { display: flex; align-items: center; justify-content: center; width: 30px; height: 30px; flex-shrink: 0; }
     .opsi-radio-wrap input[type="radio"] { width: 18px; height: 18px; accent-color: #16a34a; cursor: pointer; }
-
-    .opsi-kode-badge {
-        width: 28px;
-        height: 28px;
-        border-radius: 8px;
-        background: #eff6ff;
-        color: #2563eb;
-        font-weight: 700;
-        font-size: 12px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        flex-shrink: 0;
-    }
-
-    .opsi-row input[type="text"] {
-        border: none;
-        background: transparent;
-        flex: 1;
-        font-size: 13.5px;
-        padding: 6px 4px;
-        outline: none;
-        min-width: 0;
-    }
-
-    .btn-remove-opsi {
-        width: 30px;
-        height: 30px;
-        border-radius: 8px;
-        border: none;
-        background: #fff1f2;
-        color: #e11d48;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        flex-shrink: 0;
-        cursor: pointer;
-        transition: 0.2s;
-        font-size: 12px;
-    }
+    .opsi-kode-badge { width: 28px; height: 28px; border-radius: 8px; background: #eff6ff; color: #2563eb; font-weight: 700; font-size: 12px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .opsi-row input[type="text"] { border: none; background: transparent; flex: 1; font-size: 13.5px; padding: 6px 4px; outline: none; min-width: 0; }
+    .btn-remove-opsi { width: 30px; height: 30px; border-radius: 8px; border: none; background: #fff1f2; color: #e11d48; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; cursor: pointer; transition: 0.2s; font-size: 12px; }
     .btn-remove-opsi:hover:not(:disabled) { background: #e11d48; color: #fff; }
     .btn-remove-opsi:disabled { opacity: 0.35; cursor: not-allowed; }
-
-    .btn-add-opsi {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        background: #fff;
-        border: 1.5px dashed #93c5fd;
-        color: #2563eb;
-        border-radius: 12px;
-        padding: 9px 16px;
-        font-weight: 600;
-        font-size: 13px;
-        cursor: pointer;
-        transition: 0.2s;
-        margin-top: 4px;
-    }
+    .btn-add-opsi { display: inline-flex; align-items: center; gap: 6px; background: #fff; border: 1.5px dashed #93c5fd; color: #2563eb; border-radius: 12px; padding: 9px 16px; font-weight: 600; font-size: 13px; cursor: pointer; transition: 0.2s; margin-top: 4px; }
     .btn-add-opsi:hover { background: #eff6ff; border-color: #2563eb; }
+
+    /* ===== UPLOAD GAMBAR CUSTOM ===== */
+    .upload-container { width: 100%; margin-top: 8px; }
+    .upload-box { border: 2px dashed var(--border-color); border-radius: 16px; background-color: #f8fafc; padding: 32px 20px; text-align: center; cursor: pointer; transition: all 0.3s ease; position: relative; overflow: hidden; }
+    .upload-box:hover { border-color: var(--accent-blue); background-color: #f0f9ff; }
+    .upload-box.has-file { padding: 0; border-style: solid; background-color: #fff; }
+    .upload-content { pointer-events: none; }
+    .upload-icon { font-size: 32px; color: #94a3b8; margin-bottom: 12px; transition: color 0.3s; }
+    .upload-box:hover .upload-icon { color: var(--accent-blue); }
+    .upload-text { font-size: 14px; color: var(--primary-dark); font-weight: 600; margin-bottom: 4px; }
+    .upload-hint { font-size: 12px; color: var(--text-muted); }
+    .image-preview-wrapper { position: relative; width: 100%; display: none; background: #f8fafc; }
+    .image-preview { max-height: 300px; width: 100%; object-fit: contain; border-radius: 14px; padding: 8px; }
+    .btn-remove-image { position: absolute; top: 16px; right: 16px; background: rgba(225, 29, 72, 0.9); color: white; border: none; border-radius: 10px; padding: 8px 14px; font-size: 12px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 12px rgba(225, 29, 72, 0.3); transition: 0.2s; display: flex; align-items: center; gap: 6px; backdrop-filter: blur(4px); }
+    .btn-remove-image:hover { background: #be123c; transform: scale(1.05); }
 
     @media (max-width: 767.98px) {
         .page-header-create { padding: 24px 20px; border-radius: 18px; }
@@ -291,7 +118,7 @@
             <p>Kolom bertanda <span style="color: #ef4444;">●</span> wajib diisi.</p>
         </div>
 
-        <form action="{{ route('dashboard-guru.bank-soal.soal.update', [$bank_soal->id, $soal->id]) }}" method="POST" id="formSoal">
+        <form action="{{ route('dashboard-guru.bank-soal.soal.update', [$bank_soal->id, $soal->id]) }}" method="POST" id="formSoal" enctype="multipart/form-data">
             @csrf
             @method('PUT')
 
@@ -325,6 +152,8 @@
                     @enderror
                 </div>
 
+                
+
                 {{-- Teks Soal --}}
                 <div class="form-group">
                     <label class="form-label-custom"><span class="required-dot"></span> Teks Soal</label>
@@ -335,8 +164,44 @@
                     @enderror
                 </div>
 
+                {{-- GAMBAR SOAL --}}
+                <div class="form-group">
+                    <label class="form-label-custom">Gambar Pendukung (Opsional)</label>
+                    <!-- Input rahasia untuk mendeteksi penghapusan gambar lama -->
+                    <input type="hidden" name="remove_gambar" id="removeGambar" value="0">
+                    
+                    <div class="upload-container">
+                        <input type="file" name="gambar" id="gambarInput" class="d-none" accept="image/jpeg, image/png, image/jpg, image/gif">
+                        
+                        @php $hasImage = $soal->gambar ? true : false; @endphp
+                        
+                        <div class="upload-box {{ $hasImage ? 'has-file' : '' }}" id="uploadBox" 
+                             @if(!$hasImage) onclick="document.getElementById('gambarInput').click()" @endif
+                             style="{{ $hasImage ? 'cursor: default;' : 'cursor: pointer;' }}">
+                            
+                            <!-- Tampilan Saat Belum Ada Gambar -->
+                            <div class="upload-content" id="uploadContent" style="display: {{ $hasImage ? 'none' : 'block' }};">
+                                <div class="upload-icon"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+                                <div class="upload-text">Klik atau seret gambar ke area ini</div>
+                                <div class="upload-hint">Maksimal ukuran 2MB (JPG, PNG, GIF)</div>
+                            </div>
+
+                            <!-- Tampilan Preview Gambar Lama/Baru -->
+                            <div class="image-preview-wrapper" id="previewWrapper" style="display: {{ $hasImage ? 'block' : 'none' }};">
+                                <img src="{{ $hasImage ? asset('storage/' . $soal->gambar) : '' }}" id="imagePreview" class="image-preview" alt="Preview Gambar">
+                                <button type="button" class="btn-remove-image" onclick="removeImage(event)">
+                                    <i class="fa-solid fa-trash-can"></i> Hapus Gambar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    @error('gambar')
+                        <div class="field-error"><i class="fa-solid fa-circle-exclamation"></i> {{ $message }}</div>
+                    @enderror
+                </div>
+
                 {{-- Pilihan Jawaban (khusus Pilihan Ganda) --}}
-                <div class="form-group mb-0">
+                <div class="form-group mb-0" id="pilihanJawabanWrapper">
                     <label class="form-label-custom"><span class="required-dot"></span> Opsi Jawaban</label>
 
                     <div id="pilihanJawabanSection">
@@ -346,14 +211,17 @@
                         </div>
 
                         @php
-                            $pilihanCollection = $soal->pilihanJawabans; // sudah diurutkan berdasarkan 'urutan' dari controller
+                            $pilihanCollection = $soal->pilihanJawabans;
                             $existingOpsi = old('teks_pilihan', $pilihanCollection->pluck('teks_pilihan')->toArray());
-                            $benarIndex = $pilihanCollection->search(fn ($p) => $p->is_benar);
+                            $benarIndex = $pilihanCollection->search(function ($p) {
+                                return $p->is_benar;
+                            });
                             $existingBenar = old('jawaban_benar', $benarIndex !== false ? $benarIndex : 0);
                             if (empty($existingOpsi)) {
                                 $existingOpsi = ['', ''];
                             }
                         @endphp
+                        
                         <div id="opsiContainer">
                             @foreach ($existingOpsi as $i => $teks)
                                 <div class="opsi-row">
@@ -401,8 +269,10 @@
 
     function toggleJenisSoal() {
         const jenis = document.getElementById('jenisSoal').value;
-        const section = document.getElementById('pilihanJawabanSection');
-        section.classList.toggle('active', jenis === 'pilihan_ganda');
+        const wrapper = document.getElementById('pilihanJawabanWrapper');
+        const isPilgan = jenis === 'pilihan_ganda';
+        wrapper.style.display = isPilgan ? 'block' : 'none';
+        document.getElementById('pilihanJawabanSection').classList.toggle('active', isPilgan);
     }
 
     function renumberOpsi() {
@@ -443,6 +313,65 @@
         toggleJenisSoal();
         renumberOpsi();
     });
+
+    // ===== SCRIPT KHUSUS PREVIEW & HAPUS GAMBAR =====
+    const gambarInput = document.getElementById('gambarInput');
+    const uploadBox = document.getElementById('uploadBox');
+    const uploadContent = document.getElementById('uploadContent');
+    const previewWrapper = document.getElementById('previewWrapper');
+    const imagePreview = document.getElementById('imagePreview');
+    const removeGambarInput = document.getElementById('removeGambar');
+
+    gambarInput.addEventListener('change', function(e) {
+        const file = this.files[0];
+        
+        if (file) {
+            if (!file.type.match('image.*')) {
+                alert('File harus berupa gambar (JPG, PNG, GIF)!');
+                resetImageState();
+                return;
+            }
+
+            if (file.size > 2 * 1024 * 1024) {
+                alert('Ukuran gambar terlalu besar! Maksimal 2MB.');
+                resetImageState();
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                imagePreview.src = e.target.result;
+                uploadContent.style.display = 'none';
+                previewWrapper.style.display = 'block';
+                uploadBox.classList.add('has-file');
+                uploadBox.style.cursor = 'default';
+                uploadBox.onclick = null; 
+                removeGambarInput.value = '0'; // User upload foto baru, jadi jangan hapus by logic
+            }
+            reader.readAsDataURL(file);
+        }
+    });
+
+    function removeImage(event) {
+        event.stopPropagation();
+        
+        // Beri tahu backend untuk menghapus gambar lama di database
+        removeGambarInput.value = '1'; 
+        resetImageState();
+    }
+
+    function resetImageState() {
+        gambarInput.value = ''; 
+        imagePreview.src = '';
+        uploadContent.style.display = 'block';
+        previewWrapper.style.display = 'none';
+        uploadBox.classList.remove('has-file');
+        uploadBox.style.cursor = 'pointer';
+        
+        uploadBox.onclick = function() {
+            document.getElementById('gambarInput').click();
+        };
+    }
 </script>
 
 @endsection

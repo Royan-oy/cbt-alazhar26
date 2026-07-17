@@ -47,7 +47,19 @@
     }
 
     /* ===== TABLE STYLING ===== */
-    .table-responsive { border-radius: 16px; overflow: hidden; }
+    /* ===== TABLE STYLING ===== */
+    .table-responsive { 
+        border-radius: 16px; 
+        overflow: visible !important; /* Ubah ke visible agar dropdown tidak terpotong */
+    }
+
+    /* Menjaga sudut header tabel tetap melengkung rapi karena overflow sudah tidak hidden */
+    .table thead tr th:first-child {
+        border-top-left-radius: 16px;
+    }
+    .table thead tr th:last-child {
+        border-top-right-radius: 16px;
+    }
 
     .table thead th {
         font-size: 11px;
@@ -349,6 +361,47 @@
         .soal-name { text-align: right; }
         .soal-meta { text-align: right; }
     }
+
+    /* ===== DROPDOWN AKSI ===== */
+    .dropdown-action-btn {
+        width: 32px;
+        height: 32px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        border: 1px solid transparent;
+        background: transparent;
+        color: var(--text-muted);
+        transition: all 0.2s;
+    }
+    .dropdown-action-btn:hover, .dropdown-action-btn:focus {
+        background: #f1f5f9;
+        border-color: var(--border-color);
+        color: var(--primary-dark);
+    }
+    .dropdown-menu-custom {
+        border: none;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        border-radius: 12px;
+        padding: 8px;
+        min-width: 160px;
+    }
+    .dropdown-menu-custom .dropdown-item {
+        border-radius: 8px;
+        padding: 8px 12px;
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--secondary-dark);
+        transition: all 0.2s;
+    }
+    .dropdown-menu-custom .dropdown-item:hover {
+        background-color: #f8fafc;
+    }
+    .dropdown-menu-custom .dropdown-item.text-danger:hover {
+        background-color: #fff1f2;
+        color: #e11d48 !important;
+    }
 </style>
 
 <div class="container-fluid py-2">
@@ -414,7 +467,7 @@
                             <th class="text-center">Deskripsi</th>
                             <th class="text-center">Dibuat</th>
                             <th class="text-center">Status</th>
-                            <th style="width: 110px;" class="text-center">Aksi</th>
+                            <th style="width: 60px;" class="text-center">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -478,43 +531,64 @@
                             </td>
 
                             {{-- Aksi --}}
-                            <td class="text-end">
-                                <div class="d-inline-flex align-items-center">
-                                    <a href="{{ route('dashboard-guru.bank-soal.show', $bs->id) }}"
-                                       class="action-icon-btn btn-icon-view"
-                                       title="Lihat Detail">
-                                        <i class="fa-solid fa-eye"></i>
-                                    </a>
- 
-                                    <a href="{{ route('dashboard-guru.bank-soal.edit', $bs->id) }}"
-                                       class="action-icon-btn btn-icon-edit"
-                                       title="Edit">
-                                        <i class="fa-solid fa-pen"></i>
-                                    </a>
- 
-                                    <form action="{{ route('dashboard-guru.bank-soal.toggle-publish', $bs->id) }}"
-                                          method="POST"
-                                          class="d-inline">
-                                        @csrf
-                                        @method('PATCH')
-                                        <button type="submit"
-                                                class="action-icon-btn btn-icon-publish"
-                                                title="{{ $bs->is_publish ? 'Unpublish' : 'Publish' }}">
-                                            <i class="fa-solid {{ $bs->is_publish ? 'fa-eye-slash' : 'fa-upload' }}"></i>
-                                        </button>
-                                    </form>
- 
-                                    <form action="{{ route('dashboard-guru.bank-soal.destroy', $bs->id) }}"
-                                          method="POST"
-                                          class="d-inline form-delete">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit"
-                                                class="action-icon-btn btn-icon-delete"
-                                                title="Hapus">
-                                            <i class="fa-solid fa-trash"></i>
-                                        </button>
-                                    </form>
+                            <td class="text-center">
+                                <div class="dropdown">
+                                    <button class="dropdown-action-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="fa-solid fa-ellipsis-vertical"></i>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end dropdown-menu-custom">
+                                        {{-- Lihat Detail --}}
+                                        <li>
+                                            <a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('dashboard-guru.bank-soal.show', $bs->id) }}">
+                                                <i class="fa-solid fa-eye text-warning" style="width: 16px;"></i> 
+                                                Lihat Detail
+                                            </a>
+                                        </li>
+                                        
+                                        {{-- Edit --}}
+                                        <li>
+                                            <a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('dashboard-guru.bank-soal.edit', $bs->id) }}">
+                                                <i class="fa-solid fa-pen text-primary" style="width: 16px;"></i> 
+                                                Edit
+                                            </a>
+                                        </li>
+
+                                        {{-- Tambah / Kelola Soal --}}
+                                        <li>
+                                            {{-- Catatan: Sesuaikan nama route di bawah ini jika di file web.php Anda namanya berbeda --}}
+                                            <a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('dashboard-guru.bank-soal.soal.index', $bs->id) }}">
+                                                <i class="fa-solid fa-file-circle-plus text-info" style="width: 16px;"></i> 
+                                                Tambah Soal
+                                            </a>
+                                        </li>
+                                        
+                                        {{-- Publish/Unpublish --}}
+                                        <li>
+                                            <form action="{{ route('dashboard-guru.bank-soal.toggle-publish', $bs->id) }}" method="POST" class="d-inline w-100">
+                                                @csrf
+                                                @method('PATCH')
+                                                <button type="submit" class="dropdown-item d-flex align-items-center gap-2 w-100 text-start border-0 bg-transparent">
+                                                    {{-- Ikon diganti: fa-paper-plane untuk publish, fa-box-archive untuk unpublish --}}
+                                                    <i class="fa-solid {{ $bs->is_publish ? 'fa-box-archive text-secondary' : 'fa-paper-plane text-success' }}" style="width: 16px;"></i>
+                                                    {{ $bs->is_publish ? 'Unpublish' : 'Publish' }}
+                                                </button>
+                                            </form>
+                                        </li>
+                                        
+                                        <li><hr class="dropdown-divider my-1"></li>
+                                        
+                                        {{-- Hapus --}}
+                                        <li>
+                                            <form action="{{ route('dashboard-guru.bank-soal.destroy', $bs->id) }}" method="POST" class="form-delete d-inline w-100">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="dropdown-item text-danger d-flex align-items-center gap-2 w-100 text-start border-0 bg-transparent">
+                                                    <i class="fa-solid fa-trash" style="width: 16px;"></i> 
+                                                    Hapus
+                                                </button>
+                                            </form>
+                                        </li>
+                                    </ul>
                                 </div>
                             </td>
                         </tr>

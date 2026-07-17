@@ -2,12 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\SoalTemplateExport;
+use App\Imports\SoalImport;
 use App\Models\BankSoal;
 use App\Models\Soal;
 use App\Models\PilihanJawaban;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Maatwebsite\Excel\Facades\Excel;
 
 class SoalController extends Controller
 {
@@ -42,6 +46,44 @@ class SoalController extends Controller
         return view('guru.bank-soal.soal.create', compact('bank_soal'));
     }
 
+    public function downloadTemplate(BankSoal $bank_soal)
+    {
+        $this->authorizeBankSoal($bank_soal);
+
+        return Excel::download(new SoalTemplateExport, 'template-import-soal.xlsx');
+    }
+
+    public function import(Request $request, BankSoal $bank_soal)
+    {
+        $this->authorizeBankSoal($bank_soal);
+
+        $request->validate([
+            'file_import' => 'required|file|mimes:xlsx,xls|max:2048',
+        ]);
+
+        $urutanAwal = $bank_soal->soals()->count() + 1;
+        $import = new SoalImport($bank_soal, $urutanAwal);
+
+        try {
+            Excel::import($import, $request->file('file_import'));
+        } catch (\Exception $e) {
+            return redirect()
+                ->route('dashboard-guru.bank-soal.soal.index', $bank_soal->id)
+                ->with('error', 'Gagal membaca file: pastikan formatnya sesuai template. (' . $e->getMessage() . ')');
+        }
+
+        $message = "{$import->successCount} soal berhasil diimport.";
+
+        if (!empty($import->errors)) {
+            session()->flash('import_errors', $import->errors);
+            $message .= ' ' . count($import->errors) . ' baris dilewati karena tidak valid — lihat rinciannya di bawah.';
+        }
+
+        return redirect()
+            ->route('dashboard-guru.bank-soal.soal.index', $bank_soal->id)
+            ->with($import->successCount > 0 ? 'success' : 'error', $message);
+    }
+
     public function store(Request $request, BankSoal $bank_soal)
     {
         $this->authorizeBankSoal($bank_soal);
@@ -50,6 +92,7 @@ class SoalController extends Controller
             'jenis_soal' => 'required|in:pilihan_ganda,essay,isian',
             'teks_soal' => 'required|string',
             'bobot' => 'required|numeric|min:1',
+            'gambar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
         if ($request->jenis_soal === 'pilihan_ganda') {
@@ -62,10 +105,16 @@ class SoalController extends Controller
 
         DB::beginTransaction();
         try {
+            $gambarPath = null;
+            if ($request->hasFile('gambar')) {
+                $gambarPath = $request->file('gambar')->store('soal-gambar', 'public');
+            }
+
             $soal = Soal::create([
                 'bank_soal_id' => $bank_soal->id,
                 'jenis_soal' => $request->jenis_soal,
                 'teks_soal' => $request->teks_soal,
+                'gambar' => $gambarPath,
                 'bobot' => $request->bobot,
                 'urutan' => $bank_soal->soals()->count() + 1,
             ]);
@@ -106,6 +155,7 @@ class SoalController extends Controller
             'jenis_soal' => 'required|in:pilihan_ganda,essay,isian',
             'teks_soal' => 'required|string',
             'bobot' => 'required|numeric|min:1',
+            'gambar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
         if ($request->jenis_soal === 'pilihan_ganda') {
@@ -118,11 +168,28 @@ class SoalController extends Controller
 
         DB::beginTransaction();
         try {
-            $soal->update([
+            $dataUpdate = [
                 'jenis_soal' => $request->jenis_soal,
                 'teks_soal' => $request->teks_soal,
                 'bobot' => $request->bobot,
-            ]);
+            ];
+
+            if ($request->hasFile('gambar')) {
+                // Ganti gambar: hapus file lama (kalau ada), simpan yang baru
+                if ($soal->gambar) {
+                    Storage::disk('public')->delete($soal->gambar);
+                }
+                $dataUpdate['gambar'] = $request->file('gambar')->store('soal-gambar', 'public');
+            } elseif ($request->boolean('remove_gambar')) {
+                // Guru menekan "Hapus Gambar" tanpa upload gambar baru
+                if ($soal->gambar) {
+                    Storage::disk('public')->delete($soal->gambar);
+                }
+                $dataUpdate['gambar'] = null;
+            }
+            // Kalau tidak ada file baru & remove_gambar=0, gambar lama dibiarkan apa adanya.
+
+            $soal->update($dataUpdate);
 
             // Opsi lama dihapus & diganti baru — supaya tidak ada opsi "nyangkut"
             // kalau guru mengubah jumlah opsi atau mengganti jenis soal.
@@ -147,6 +214,11 @@ class SoalController extends Controller
     {
         $this->authorizeBankSoal($bank_soal);
         abort_unless($soal->bank_soal_id === $bank_soal->id, 404);
+
+        // Hapus file gambar dari storage (kalau ada) sebelum baris DB-nya dihapus
+        if ($soal->gambar) {
+            Storage::disk('public')->delete($soal->gambar);
+        }
 
         // pilihan_jawabans ikut terhapus otomatis (cascadeOnDelete di migration)
         $soal->delete();

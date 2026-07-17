@@ -371,53 +371,27 @@
         @if(Auth::user()->role == 'guru')
 
         <span class="menu-group-label">Manajemen Soal</span>
-
         <ul class="nav flex-column mb-2">
-
             <li>
                 <a href="{{ route('dashboard-guru.bank-soal.index') }}" class="nav-link {{ request()->is('dashboard-guru/bank-soal*') ? 'active' : '' }}">
-                    <i class="fa-solid fa-book-open me-3"></i> Bank Soal
+                    <i class="fa-solid fa-book-open me-3"></i> Bank Soal Anda
                 </a>
             </li>
-
-            <li><a href="#" class="nav-link">
-                <i class="fa-solid fa-file-circle-plus me-3"></i>
-                Buat Paket Soal
-            </a></li>
-
         </ul>
 
-        <span class="menu-group-label">Ujian</span>
-
+        <span class="menu-group-label">Ujian & Nilai</span>
         <ul class="nav flex-column mb-2">
-
             <li><a href="#" class="nav-link">
                 <i class="fa-solid fa-calendar-check me-3"></i>
                 Jadwal Ujian
             </a></li>
-
             <li><a href="#" class="nav-link">
                 <i class="fa-solid fa-square-poll-vertical me-3"></i>
                 Nilai Siswa
             </a></li>
-
-            
         </ul>
 
-        
-        <span class="menu-group-label">Pengaturan</span>
-        <ul class="nav flex-column mb-2">
-            <li>
-                <a href="{{ route('pengaturan-akun.index') }}" class="nav-link {{ request()->routeIs('pengaturan-akun.*') ? 'active' : '' }}">
-                    <i class="fa-solid fa-user-gear me-3"></i>
-                    Pengaturan Akun
-                </a>
-            </li>
-        </ul>
-
-        @endif
-
-         @if(Auth::user()->guru && Auth::user()->guru->waliKelas)
+        @if(Auth::user()->guru && Auth::user()->guru->waliKelas)
 
         <span class="menu-group-label">Wali Kelas</span>
 
@@ -447,6 +421,20 @@
         </ul>
 
         @endif
+        
+        <span class="menu-group-label">Pengaturan</span>
+        <ul class="nav flex-column mb-2">
+            <li>
+                <a href="{{ route('pengaturan-akun.index') }}" class="nav-link {{ request()->routeIs('pengaturan-akun.*') ? 'active' : '' }}">
+                    <i class="fa-solid fa-user-gear me-3"></i>
+                    Pengaturan Akun
+                </a>
+            </li>
+        </ul>
+
+        @endif
+
+         
 
         @if(Auth::user()->role == 'siswa')
 

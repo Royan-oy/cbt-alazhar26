@@ -156,6 +156,7 @@ Route::middleware(['auth'])->group(function () {
             Route::put('soal/{soal}', [SoalController::class, 'update'])->name('soal.update');
             Route::delete('soal/{soal}', [SoalController::class, 'destroy'])->name('soal.destroy');
             Route::post('soal/import', [SoalController::class, 'import'])->name('soal.import');
+            Route::get('soal/template', [SoalController::class, 'downloadTemplate'])->name('soal.template');
         });
     });
 
