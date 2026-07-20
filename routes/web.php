@@ -195,6 +195,10 @@ Route::middleware(['auth'])->group(function () {
     ->name('dashboard-siswa.')
     ->group(function () {
 
+        Route::get('scan-token', [\App\Http\Controllers\Siswa\ScanTokenController::class, 'index'])->name('scan-token.index');
+        Route::post('scan-token', [\App\Http\Controllers\Siswa\ScanTokenController::class, 'cariUjian'])->name('scan-token.proses');
+        Route::post('scan-token/{ujian}/konfirmasi', [\App\Http\Controllers\Siswa\ScanTokenController::class, 'konfirmasi'])->name('scan-token.konfirmasi');
+
         Route::get('ujian-hari-ini', [UjianHariIniController::class, 'index'])->name('ujian-hari-ini');
 
         /*

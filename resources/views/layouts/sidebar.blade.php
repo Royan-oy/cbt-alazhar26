@@ -447,75 +447,36 @@
 
         @if(Auth::user()->role == 'siswa')
 
-            {{-- ===================== UJIAN ===================== --}}
-            <span class="menu-group-label">Ujian</span>
+            <span class="menu-group-label">Menu Ujian</span>
 
             <ul class="nav flex-column mb-3">
+                <li>
+                    <a href="{{ route('dashboard-siswa.scan-token.index') }}" 
+                       class="nav-link {{ request()->routeIs('dashboard-siswa.scan-token.*') ? 'active' : '' }}">
+                        <i class="fa-solid fa-qrcode me-3"></i>
+                        Scan Token
+                    </a>
+                </li>
 
                 <li>
                     <a href="{{ route('dashboard-siswa.ujian-hari-ini') }}"
                     class="nav-link {{ request()->routeIs('dashboard-siswa.ujian-hari-ini') ? 'active' : '' }}">
                         <i class="fa-solid fa-calendar-day me-3"></i>
-                        Ujian Hari Ini
-                    </a>
-                </li>
-
-                <li>
-                    <a href="#" class="nav-link">
-                        <i class="fa-solid fa-hourglass-half me-3"></i>
-                        Ujian Akan Datang
-                    </a>
-                </li>
-
-                <li>
-                    <a href="#" class="nav-link">
-                        <i class="fa-solid fa-clock-rotate-left me-3"></i>
-                        Riwayat Ujian
-                    </a>
-                </li>
-
-            </ul>
-
-            {{-- ===================== PEMBELAJARAN ===================== --}}
-            <span class="menu-group-label">Pembelajaran</span>
-
-            <ul class="nav flex-column mb-3">
-
-                <li>
-                    <a href="#" class="nav-link">
-                        <i class="fa-solid fa-calendar-days me-3"></i>
                         Jadwal Ujian
                     </a>
                 </li>
-
-                <li>
-                    <a href="#" class="nav-link">
-                        <i class="fa-solid fa-book-open-reader me-3"></i>
-                        Panduan CBT
-                    </a>
-                </li>
-
             </ul>
 
-            {{-- ===================== AKUN ===================== --}}
-            <span class="menu-group-label">Akun</span>
+            <span class="menu-group-label">Pengaturan</span>
 
             <ul class="nav flex-column">
-
                 <li>
-                    <a href="#" class="nav-link">
-                        <i class="fa-solid fa-id-card me-3"></i>
-                        Profil Saya
+                    <a href="{{ route('pengaturan-akun.index') }}" 
+                       class="nav-link {{ request()->routeIs('pengaturan-akun.*') ? 'active' : '' }}">
+                        <i class="fa-solid fa-user me-3"></i>
+                        Profile Saya
                     </a>
                 </li>
-
-                <li>
-                    <a href="{{ route('pengaturan-akun.index') }}" class="nav-link">
-                        <i class="fa-solid fa-gear me-3"></i>
-                        Pengaturan Akun
-                    </a>
-                </li>
-
             </ul>
 
         @endif
