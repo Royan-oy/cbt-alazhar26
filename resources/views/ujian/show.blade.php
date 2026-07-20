@@ -202,10 +202,28 @@
             </div>
 
             <div class="d-flex gap-2">
-                <a href="{{ route('ujian.edit', $ujian->id) }}" class="btn-back d-inline-flex align-items-center">
+                @if(!$ujian->token_aktif)
+
+                <a href="{{ route('ujian.edit',$ujian->id) }}"
+                class="btn-back d-inline-flex align-items-center">
+
                     <i class="fa-solid fa-pen me-2"></i>
                     Edit
+
                 </a>
+
+                @else
+
+                <button class="btn-back"
+                        disabled>
+
+                    <i class="fa-solid fa-lock me-2"></i>
+
+                    Sedang Berlangsung
+
+                </button>
+
+                @endif
                 <a href="{{ route('ujian.index') }}" class="btn-back d-inline-flex align-items-center">
                     <i class="fa-solid fa-arrow-left me-2"></i>
                     Kembali
@@ -235,10 +253,27 @@
 
             <div class="token-display mb-3">
                 <div class="mb-2">
-                    @if($ujian->token_aktif)
-                        <span class="token-status-on"><i class="fa-solid fa-circle-play"></i> Token Aktif</span>
+                    @if(now()->lt($ujian->waktu_mulai))
+
+                        <span class="token-status-off">
+                            <i class="fa-solid fa-clock"></i>
+                            Menunggu Jadwal
+                        </span>
+
+                    @elseif($ujian->token_aktif)
+
+                        <span class="token-status-on">
+                            <i class="fa-solid fa-circle-play"></i>
+                            Token Aktif
+                        </span>
+
                     @else
-                        <span class="token-status-off"><i class="fa-solid fa-lock"></i> Token Nonaktif</span>
+
+                        <span class="token-status-off">
+                            <i class="fa-solid fa-circle-stop"></i>
+                            Ujian Berakhir
+                        </span>
+
                     @endif
                 </div>
 
@@ -263,29 +298,53 @@
             </div>
 
             <div class="content-card mb-3">
-                <form action="{{ route('ujian.toggle-token', $ujian->id) }}" method="POST">
-                    @csrf
-                    @method('PATCH')
 
-                    <button type="submit" 
-                        class="btn {{ $ujian->token_aktif ? 'btn-warning' : 'btn-success' }} text-white btn-toggle-token">
+                <div class="section-title">
+                    <i class="fa-solid fa-circle-info text-primary"></i>
+                    Status Ujian
+                </div>
 
-                        <i class="fa-solid {{ $ujian->token_aktif ? 'fa-lock' : 'fa-unlock' }} me-2"></i>
+                @if(now()->lt($ujian->waktu_mulai))
 
-                        {{ $ujian->token_aktif ? 'Nonaktifkan Token' : 'Aktifkan Token' }}
-                    </button>
-                </form>
+                    <div class="alert alert-warning border-0 rounded-4 mb-3">
+                        <i class="fa-solid fa-clock me-2"></i>
+                        Token akan otomatis aktif saat waktu ujian dimulai.
+                    </div>
 
-                @if(!$ujian->token_aktif)
-                <form action="{{ route('ujian.regenerate-token', $ujian->id) }}" method="POST" class="mt-2">
-                    @csrf
-                    @method('PATCH')
-                    <button type="submit" class="btn btn-light border btn-toggle-token" onclick="return confirm('Buat token baru? Token lama tidak akan berlaku lagi.')">
-                        <i class="fa-solid fa-rotate me-2"></i>
-                        Buat Token Baru
-                    </button>
-                </form>
+                @elseif(now()->between($ujian->waktu_mulai, $ujian->waktu_selesai))
+
+                    <div class="alert alert-success border-0 rounded-4 mb-3">
+                        <i class="fa-solid fa-circle-check me-2"></i>
+                        Token sedang aktif dan dapat digunakan siswa.
+                    </div>
+
+                @else
+
+                    <div class="alert alert-secondary border-0 rounded-4 mb-3">
+                        <i class="fa-solid fa-circle-stop me-2"></i>
+                        Ujian telah selesai. Token otomatis tidak berlaku.
+                    </div>
+
                 @endif
+
+                <form action="{{ route('ujian.regenerate-token', $ujian->id) }}"
+                    method="POST">
+
+                    @csrf
+                    @method('PATCH')
+
+                    <button type="submit"
+                            class="btn btn-light border btn-toggle-token"
+                            onclick="return confirm('Yakin ingin membuat token baru? Token lama langsung tidak berlaku dan siswa harus menggunakan token yang baru.')">
+
+                        <i class="fa-solid fa-rotate me-2"></i>
+
+                        Buat Token Baru
+
+                    </button>
+
+                </form>
+
             </div>
 
             <div class="content-card">

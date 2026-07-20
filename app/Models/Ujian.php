@@ -19,7 +19,6 @@ class Ujian extends Model
         'waktu_selesai',
         'durasi_minimal',
         'token',
-        'token_aktif',
         'acak_soal',
         'acak_jawaban',
         'tampilkan_nilai',
@@ -29,7 +28,6 @@ class Ujian extends Model
     protected $casts = [
         'waktu_mulai'           => 'datetime',
         'waktu_selesai'         => 'datetime',
-        'token_aktif'           => 'boolean',
         'acak_soal'             => 'boolean',
         'acak_jawaban'          => 'boolean',
         'tampilkan_nilai'       => 'boolean',
@@ -90,30 +88,11 @@ class Ujian extends Model
         return $this->belongsTo(MataPelajaran::class, 'mata_pelajaran_id');
     }
 
-    
-    
-    public function autoUpdateTokenStatus()
+    public function getTokenAktifAttribute(): bool
     {
-        $now = now();
-
-        // Belum aktif tapi waktu sudah masuk
-        if (!$this->token_aktif &&
-            $now->greaterThanOrEqualTo($this->waktu_mulai) &&
-            $now->lessThanOrEqualTo($this->waktu_selesai)) {
-
-            $this->update([
-                'token_aktif' => true
-            ]);
-        }
-
-        // Masih aktif tapi waktu sudah habis
-        if ($this->token_aktif &&
-            $now->greaterThan($this->waktu_selesai)) {
-
-            $this->update([
-                'token_aktif' => false
-            ]);
-        }
-        
+        return now()->between(
+            $this->waktu_mulai,
+            $this->waktu_selesai
+        );
     }
 }

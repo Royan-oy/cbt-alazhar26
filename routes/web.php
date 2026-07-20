@@ -128,7 +128,6 @@ Route::middleware(['auth'])->group(function () {
 
     Route::resource('siswa', SiswaController::class);
 
-    Route::patch('ujian/{ujian}/toggle-token', [UjianController::class, 'toggleToken'])->name('ujian.toggle-token');
     Route::patch('ujian/{ujian}/regenerate-token', [UjianController::class, 'regenerateToken'])->name('ujian.regenerate-token');
 
     Route::resource('ujian', UjianController::class);
@@ -222,7 +221,12 @@ Route::middleware(['auth'])->group(function () {
         Route::post('ujian/current-question',
             [RuangUjianController::class, 'saveCurrentQuestion']
         )->name('ujian.current-question');
+
+       Route::post(
+            'ujian/violation',
+            [RuangUjianController::class, 'violation']
+        )->name('ujian.violation');
+        
     });
-
-
+    
 });
