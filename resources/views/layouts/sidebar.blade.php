@@ -388,34 +388,40 @@
                     Jadwal Ujian
                 </a>
             </li>
-            <li><a href="#" class="nav-link">
-                <i class="fa-solid fa-square-poll-vertical me-3"></i>
-                Nilai Siswa
-            </a></li>
+            <li>
+                <a href="{{ route('dashboard-guru.nilai-siswa.index') }}" 
+                   class="nav-link {{ request()->routeIs('dashboard-guru.nilai-siswa.*') ? 'active' : '' }}">
+                    <i class="fa-solid fa-square-poll-vertical me-3"></i>
+                    Nilai Siswa
+                </a>
+            </li>
         </ul>
 
-        @if(Auth::user()->guru && Auth::user()->guru->waliKelas)
+        @if(Auth::user()->guru && Auth::user()->guru->waliKelas->isNotEmpty())
 
         <span class="menu-group-label">Wali Kelas</span>
 
         <ul class="nav flex-column mb-2">
 
             <li>
-                <a href="#" class="nav-link">
-                    <i class="fa-solid fa-users-gear me-3"></i>
+                <a href="{{ route('dashboard-guru.wali-kelas.data-kelas') }}"
+                   class="nav-link {{ request()->routeIs('dashboard-guru.wali-kelas.data-kelas') ? 'active' : '' }}">
+                    <i class="fa-solid fa-users me-3"></i>
                     Data Kelas
                 </a>
             </li>
 
             <li>
-                <a href="#" class="nav-link">
+                <a href="{{ route('dashboard-guru.wali-kelas.monitoring-siswa') }}"
+                   class="nav-link {{ request()->routeIs('dashboard-guru.wali-kelas.monitoring-siswa') ? 'active' : '' }}">
                     <i class="fa-solid fa-chart-line me-3"></i>
                     Monitoring Siswa
                 </a>
             </li>
 
             <li>
-                <a href="#" class="nav-link">
+                <a href="{{ route('dashboard-guru.wali-kelas.rekap-nilai') }}"
+                   class="nav-link {{ request()->routeIs('dashboard-guru.wali-kelas.rekap-nilai') ? 'active' : '' }}">
                     <i class="fa-solid fa-clipboard-check me-3"></i>
                     Rekap Nilai
                 </a>

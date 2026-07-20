@@ -90,9 +90,12 @@ class BankSoalController extends Controller
     {
         $this->authorizeJenjang($bankSoal);
 
-        if (!$bankSoal->is_publish && $bankSoal->soals()->count() == 0) {
-            return redirect()->back()
-                ->with('error', 'Bank soal ini belum punya soal sama sekali, tidak bisa dipublikasikan.');
+        if (!$bankSoal->is_publish) {
+            $totalBobot = $bankSoal->soals()->sum('bobot');
+            if ($totalBobot != 100) {
+                return redirect()->back()
+                    ->with('error', 'Gagal mempublikasikan! Total bobot soal saat ini adalah ' . $totalBobot . ', syarat publish harus tepat 100.');
+            }
         }
 
         $bankSoal->update([

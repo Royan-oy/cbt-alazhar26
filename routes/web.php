@@ -21,6 +21,8 @@ use App\Http\Controllers\UjianController;
 use App\Http\Controllers\GuruBankSoalController;
 use App\Http\Controllers\GuruDashboardController;
 use App\Http\Controllers\GuruJadwalUjianController;
+use App\Http\Controllers\GuruNilaiSiswaController;
+use App\Http\Controllers\GuruWaliKelasController;
 
 
 use App\Http\Controllers\Siswa\UjianHariIniController;
@@ -163,6 +165,24 @@ Route::middleware(['auth'])->group(function () {
             Route::delete('soal/{soal}', [SoalController::class, 'destroy'])->name('soal.destroy');
             Route::post('soal/import', [SoalController::class, 'import'])->name('soal.import');
             Route::get('soal/template', [SoalController::class, 'downloadTemplate'])->name('soal.template');
+        });
+
+        // Wali Kelas sub-menus
+        Route::prefix('wali-kelas')->name('wali-kelas.')->group(function () {
+            Route::get('data-kelas', [GuruWaliKelasController::class, 'dataKelas'])->name('data-kelas');
+            Route::get('data-kelas/{id}', [GuruWaliKelasController::class, 'showSiswa'])->name('data-kelas.show-siswa');
+            Route::get('monitoring-siswa', [GuruWaliKelasController::class, 'monitoringSiswa'])->name('monitoring-siswa');
+            Route::post('monitoring-siswa/{nilai}/force-submit', [GuruWaliKelasController::class, 'forceSubmit'])->name('monitoring-siswa.force-submit');
+            Route::post('monitoring-siswa/{nilai}/reset', [GuruWaliKelasController::class, 'resetUjian'])->name('monitoring-siswa.reset');
+            Route::get('rekap-nilai/export', [GuruWaliKelasController::class, 'exportRekap'])->name('rekap-nilai.export');
+            Route::get('rekap-nilai', [GuruWaliKelasController::class, 'rekapNilai'])->name('rekap-nilai');
+        });
+        // Nilai Siswa & Koreksi Jawaban (Guru Mapel)
+        Route::prefix('nilai-siswa')->name('nilai-siswa.')->group(function () {
+            Route::get('/', [GuruNilaiSiswaController::class, 'index'])->name('index');
+            Route::get('/{ujian}', [GuruNilaiSiswaController::class, 'show'])->name('show');
+            Route::get('/{ujian}/koreksi/{siswa}', [GuruNilaiSiswaController::class, 'koreksi'])->name('koreksi');
+            Route::post('/{ujian}/koreksi/{siswa}', [GuruNilaiSiswaController::class, 'storeKoreksi'])->name('store-koreksi');
         });
     });
 
