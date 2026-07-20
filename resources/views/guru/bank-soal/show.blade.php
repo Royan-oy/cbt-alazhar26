@@ -247,10 +247,26 @@
             </div>
 
             {{-- Ringkasan jumlah soal + tautan ke pengelolaan soal --}}
+            @php $totalBobot = $bank_soal->soals->sum('bobot'); @endphp
             <div class="soal-count-box">
-                <div class="count-text">
-                    <strong>{{ $bank_soal->soals->count() }}</strong>
-                    <span>soal di dalam bank soal ini</span>
+                <div class="d-flex align-items-center gap-4 flex-wrap">
+                    <div class="count-text">
+                        <strong>{{ $bank_soal->soals->count() }}</strong>
+                        <span>soal di dalam bank soal ini</span>
+                    </div>
+                    <div class="count-text" style="border-left: 2px solid #bfdbfe; padding-left: 16px;">
+                        <strong style="color: {{ $totalBobot == 100 ? '#16a34a' : '#dc2626' }}">{{ $totalBobot }}</strong>
+                        <span>
+                            total bobot
+                            @if($totalBobot == 100)
+                                <i class="fa-solid fa-circle-check text-success ms-1" style="font-size: 11px;"></i>
+                            @else
+                                <span class="ms-1" style="color: #dc2626; font-weight: 600; font-size: 11px;">
+                                    (harus 100)
+                                </span>
+                            @endif
+                        </span>
+                    </div>
                 </div>
                 <a href="{{ route('dashboard-guru.bank-soal.soal.index', $bank_soal->id) }}" class="btn-manage">
                     <i class="fa-solid fa-list-check"></i>

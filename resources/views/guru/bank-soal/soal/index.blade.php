@@ -442,6 +442,34 @@
         </div>
     </div>
 
+    {{-- Total Bobot Indicator --}}
+    @php $totalBobot = $soals->sum('bobot'); @endphp
+    <div class="d-flex align-items-center gap-3 flex-wrap mb-4 px-3 py-3 rounded-4 border {{ $totalBobot == 100 ? 'border-success bg-success bg-opacity-10' : 'border-danger bg-danger bg-opacity-10' }}">
+        <div class="d-flex align-items-center gap-2">
+            @if($totalBobot == 100)
+                <i class="fa-solid fa-circle-check text-success fs-5"></i>
+            @else
+                <i class="fa-solid fa-triangle-exclamation text-danger fs-5"></i>
+            @endif
+            <span style="font-size: 14px;">
+                <strong>Total Bobot: {{ $totalBobot }} / 100</strong>
+                @if($totalBobot == 100)
+                    <span class="text-success ms-1" style="font-size: 12px;">— Siap dipublikasikan</span>
+                @elseif($totalBobot < 100)
+                    <span class="text-danger ms-1" style="font-size: 12px;">— Kurang {{ 100 - $totalBobot }} bobot lagi</span>
+                @else
+                    <span class="text-danger ms-1" style="font-size: 12px;">— Kelebihan {{ $totalBobot - 100 }} bobot</span>
+                @endif
+            </span>
+        </div>
+        <div class="flex-grow-1">
+            <div class="progress" style="height: 8px; border-radius: 4px; background: rgba(0,0,0,0.08);">
+                <div class="progress-bar {{ $totalBobot == 100 ? 'bg-success' : ($totalBobot < 100 ? 'bg-warning' : 'bg-danger') }}"
+                     style="width: {{ min($totalBobot, 100) }}%; border-radius: 4px; transition: width 0.4s ease;"></div>
+            </div>
+        </div>
+    </div>
+
     {{-- Flash Messages --}}
     @if(session('success'))
     <div class="alert alert-success rounded-4 border-0 shadow-sm d-flex align-items-center p-3 mb-4">

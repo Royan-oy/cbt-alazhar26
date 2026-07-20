@@ -157,6 +157,14 @@ class GuruBankSoalController extends Controller
         $guru = Auth::user()->guru;
         $this->authorizeOwnership($guru, $bank_soal);
 
+        if (!$bank_soal->is_publish) {
+            $totalBobot = $bank_soal->soals()->sum('bobot');
+            if ($totalBobot != 100) {
+                return redirect()->back()
+                    ->with('error', 'Gagal mempublikasikan! Total bobot soal saat ini adalah ' . $totalBobot . ', syarat publish harus tepat 100.');
+            }
+        }
+
         $bank_soal->update(['is_publish' => ! $bank_soal->is_publish]);
 
         return redirect()
