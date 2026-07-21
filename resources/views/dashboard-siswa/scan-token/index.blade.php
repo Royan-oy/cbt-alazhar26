@@ -230,7 +230,6 @@
         border: 1px solid var(--border-color);
         padding: 7px 16px;
         height: 40px;
-        width:100;
         border-radius: 10px;
         font-weight: 700;
         font-size: 13px;
@@ -402,18 +401,21 @@
             </div>
 
             {{-- Pertanyaan Konfirmasi --}}
+<<<<<<< HEAD
+            <div class="mt-4 p-3 rounded-3 text-center" style="background: #fffbeb; border: 1px solid #fde68a;">
+=======
             <div class="mt-2 p-2 rounded-3 text-center" style="background: #fffbeb; border: 1px solid #fde68a;">
+>>>>>>> 89e90f1916e63ac49ec62a4de8e334edc023af65
                 <i class="fa-solid fa-circle-question text-warning me-1"></i>
                 <span class="fw-semibold" style="color: #92400e; font-size: 14px;">Apakah ini ujian yang kamu cari?</span>
             </div>
 
             {{-- Tombol Aksi --}}
-            <div class=" mt-2 pt-2" style="border-top: 1px solid #f1f5f9;">
+            <div class="mt-2 pt-2" style="border-top: 1px solid #f1f5f9;">
                 <form class="d-flex gap-2 justify-content-center" action="{{ route('dashboard-siswa.scan-token.konfirmasi', $ujian->id) }}" method="POST">
-                <button type="button" class="btn-batal w-50" onclick="tutupModal()">
-                    <i class="fa-solid fa-xmark me-1"></i> Batal
-                </button>
-
+                    <button type="button" class="btn-batal w-50" onclick="tutupModal()">
+                        <i class="fa-solid fa-xmark me-1"></i> Batal
+                    </button>
                     @csrf
                     <button type="submit" class="btn-yakin w-50">
                         <i class="fa-solid fa-right-to-bracket me-1"></i> Ya, Masuk Sekarang!

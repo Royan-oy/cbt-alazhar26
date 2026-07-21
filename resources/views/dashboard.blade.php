@@ -539,7 +539,7 @@
                 <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
                     <div class="section-title">
                         <i class="fa-solid fa-calendar-day text-primary"></i>
-                        Ujian Hari Ini
+                        Jadwal Ujian
                     </div>
                     <a href="{{ route('dashboard-siswa.ujian-hari-ini') }}" class="text-primary text-decoration-none small fw-semibold">
                         Lihat semua <i class="fa-solid fa-arrow-right ms-1"></i>
