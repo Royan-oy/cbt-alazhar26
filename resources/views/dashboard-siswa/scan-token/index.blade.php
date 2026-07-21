@@ -401,11 +401,7 @@
             </div>
 
             {{-- Pertanyaan Konfirmasi --}}
-<<<<<<< HEAD
-            <div class="mt-4 p-3 rounded-3 text-center" style="background: #fffbeb; border: 1px solid #fde68a;">
-=======
             <div class="mt-2 p-2 rounded-3 text-center" style="background: #fffbeb; border: 1px solid #fde68a;">
->>>>>>> 89e90f1916e63ac49ec62a4de8e334edc023af65
                 <i class="fa-solid fa-circle-question text-warning me-1"></i>
                 <span class="fw-semibold" style="color: #92400e; font-size: 14px;">Apakah ini ujian yang kamu cari?</span>
             </div>
