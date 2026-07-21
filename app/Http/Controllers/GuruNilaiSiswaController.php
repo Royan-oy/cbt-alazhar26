@@ -167,7 +167,42 @@ class GuruNilaiSiswaController extends Controller
             ->orderBy('soals.urutan', 'asc')
             ->get();
 
-        return view('guru.nilai-siswa.koreksi', compact('ujian', 'siswa', 'nilai', 'jawabans'));
+        // Ambil soal Pilihan Ganda dan jawaban siswa
+        $jawabans_pg = DB::table('jawaban_siswas')
+            ->join('soals', 'jawaban_siswas.soal_id', '=', 'soals.id')
+            ->where('jawaban_siswas.nilai_id', $nilai->id)
+            ->where('soals.jenis_soal', 'pilihan_ganda')
+            ->select(
+                'jawaban_siswas.id as jawaban_id',
+                'jawaban_siswas.pilihan_jawaban_id',
+                'jawaban_siswas.nilai as nilai_jawaban',
+                'jawaban_siswas.is_benar',
+                'soals.id as soal_id',
+                'soals.teks_soal',
+                'soals.gambar',
+                'soals.bobot',
+                'soals.urutan',
+                'soals.jenis_soal'
+            )
+            ->orderBy('soals.urutan', 'asc')
+            ->get();
+
+        // Ambil opsi pilihan ganda untuk soal-soal PG tersebut
+        $soal_pg_ids = $jawabans_pg->pluck('soal_id');
+        $opsi_pg = DB::table('pilihan_jawabans')
+            ->whereIn('soal_id', $soal_pg_ids)
+            ->orderBy('urutan', 'asc')
+            ->get()
+            ->groupBy('soal_id');
+
+        // Hitung total skor PG dan jumlah benar PG
+        $skor_pg = $jawabans_pg->sum('nilai_jawaban');
+        $benar_pg = $jawabans_pg->where('is_benar', true)->count();
+        $total_soal_pg = $jawabans_pg->count();
+
+        return view('guru.nilai-siswa.koreksi', compact(
+            'ujian', 'siswa', 'nilai', 'jawabans', 'jawabans_pg', 'opsi_pg', 'skor_pg', 'benar_pg', 'total_soal_pg'
+        ));
     }
 
     /**
