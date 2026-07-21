@@ -49,7 +49,6 @@ class RuangUjianController extends Controller
         }
 
 
-
         /*
         |--------------------------------------------------------------------------
         | CEK WAKTU UJIAN
@@ -126,6 +125,24 @@ class RuangUjianController extends Controller
      */
     public function prosesMasuk(Request $request, Ujian $ujian)
     {
+
+        $siswa = Auth::user()->siswa;
+
+        $nilai = Nilai::where('ujian_id',$ujian->id)
+            ->where('siswa_id',$siswa->id)
+            ->first();
+
+        if($nilai && $nilai->status == 'selesai'){
+
+            return redirect()
+            ->route('dashboard-siswa.ujian-hari-ini')
+            ->with(
+                'error',
+                'Ujian sudah pernah dikerjakan.'
+            );
+
+        }
+
         // 1. Cek apakah status ujian saat ini valid (rentang waktu sesuai)
         $now = Carbon::now();
         $mulai = Carbon::parse($ujian->waktu_mulai);
@@ -256,19 +273,32 @@ class RuangUjianController extends Controller
         }
 
 
+        /*
+        |--------------------------------------------------------------------------
+        | Ambil nilai siswa
+        |--------------------------------------------------------------------------
+        */
+
         $nilai = Nilai::where('ujian_id',$ujian->id)
             ->where('siswa_id',$siswa->id)
             ->firstOrFail();
 
 
-        // CEK SUDAH SUBMIT
+
+        /*
+        |--------------------------------------------------------------------------
+        | Cegah submit ulang
+        |--------------------------------------------------------------------------
+        */
+
         if($nilai->status == 'selesai'){
 
             return redirect()
-            ->route('dashboard-siswa.ujian-hari-ini')
-            ->with('error','Ujian sudah dikumpulkan.');
+                ->route('dashboard-siswa.ujian-hari-ini')
+                ->with('error','Ujian sudah dikumpulkan.');
 
         }
+
 
 
         /*
@@ -299,13 +329,11 @@ class RuangUjianController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | Variabel penilaian
+        | Variabel nilai
         |--------------------------------------------------------------------------
         */
 
-        $totalBobotPG = 0;
-        $nilaiBenarPG = 0;
-
+        $nilaiPG = 0;
 
         $adaEssay = false;
 
@@ -313,11 +341,11 @@ class RuangUjianController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | Koreksi pilihan ganda
+        | Koreksi jawaban
         |--------------------------------------------------------------------------
         */
 
-        foreach ($soals as $soal) {
+        foreach($soals as $soal){
 
 
             $jawaban = $jawabanSiswas->get($soal->id);
@@ -330,60 +358,61 @@ class RuangUjianController extends Controller
             |--------------------------------------------------------------------------
             */
 
-            if ($soal->jenis_soal == 'pilihan_ganda') {
+            if($soal->jenis_soal == 'pilihan_ganda'){
 
 
-                $totalBobotPG += $soal->bobot;
-
-
-
-                if (!$jawaban) {
-
-                    continue;
-
-                }
-
-
-
-                $jawabanBenar = $soal->pilihanJawabans
-                    ->where('is_benar', true)
+                $pilihanBenar = $soal->pilihanJawabans
+                    ->where('is_benar',true)
                     ->first();
 
 
 
-                if (
-                    $jawabanBenar &&
-                    $jawaban->pilihan_jawaban_id == $jawabanBenar->id
-                ) {
+                if(
+                    $jawaban &&
+                    $pilihanBenar &&
+                    $jawaban->pilihan_jawaban_id == $pilihanBenar->id
+                ){
+
+                    /*
+                    Jawaban benar
+                    Nilai sesuai bobot soal
+                    */
 
 
                     $jawaban->update([
 
-                        'is_benar' => true,
+                        'is_benar'=>true,
 
-                        'nilai' => $soal->bobot
-
-                    ]);
-
-
-                    $nilaiBenarPG += $soal->bobot;
-
-
-                } else {
-
-
-                    $jawaban->update([
-
-                        'is_benar' => false,
-
-                        'nilai'=>0
+                        'nilai'=>$soal->bobot
 
                     ]);
+
+
+                    $nilaiPG += $soal->bobot;
+
+
+
+                }else{
+
+
+                    if($jawaban){
+
+                        $jawaban->update([
+
+                            'is_benar'=>false,
+
+                            'nilai'=>0
+
+                        ]);
+
+                    }
 
                 }
 
 
             }
+
+
 
 
             /*
@@ -393,23 +422,21 @@ class RuangUjianController extends Controller
             */
 
 
-            if (
+            if(
                 $soal->jenis_soal == 'essay'
                 ||
                 $soal->jenis_soal == 'isian'
-            ) {
-
+            ){
 
                 $adaEssay = true;
 
 
                 /*
-                Essay belum dinilai guru
+                Essay menunggu guru
                 */
 
 
-                if ($jawaban) {
-
+                if($jawaban){
 
                     $jawaban->update([
 
@@ -423,46 +450,31 @@ class RuangUjianController extends Controller
 
             }
 
-        }
-
-
-
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | Hitung nilai PG
-        |--------------------------------------------------------------------------
-        */
-
-
-        $nilaiPG = 0;
-
-
-        if ($totalBobotPG > 0) {
-
-
-            $nilaiPG = ($nilaiBenarPG / $totalBobotPG) * 100;
-
 
         }
 
 
 
 
-
         /*
         |--------------------------------------------------------------------------
-        | Tentukan status penilaian
+        | Simpan nilai
         |--------------------------------------------------------------------------
         */
 
 
         if($adaEssay){
 
+
+            /*
+            Ada essay
+            Tunggu koreksi guru
+            */
+
+
             $nilai->update([
 
-                'nilai_pg'=>round($nilaiPG,2),
+                'nilai_pg'=> $nilaiPG,
 
                 'nilai_akhir'=>0,
 
@@ -476,50 +488,68 @@ class RuangUjianController extends Controller
 
             ]);
 
-        } else {
 
-        $nilai->update([
 
-            'nilai_pg'=>round($nilaiPG,2),
+        }else{
 
-            'nilai_akhir'=>round($nilaiPG,2),
 
-            'status'=>'selesai',
+            /*
+            Semua pilihan ganda
+            Nilai langsung selesai
+            */
 
-            'status_penilaian'=>'selesai',
 
-            'sudah_dinilai'=>true,
+            $nilai->update([
 
-            'waktu_kumpul'=>now(),
+                'nilai_pg'=>$nilaiPG,
+
+                'nilai_akhir'=>$nilaiPG,
+
+                'status'=>'selesai',
+
+                'status_penilaian'=>'selesai',
+
+                'sudah_dinilai'=>true,
+
+                'waktu_kumpul'=>now(),
 
         ]);
+
 
         }
 
 
 
-        /*
-        |--------------------------------------------------------------------------
-        | Hapus session token
-        |--------------------------------------------------------------------------
-        */
+
+    /*
+    |--------------------------------------------------------------------------
+    | Hapus session token
+    |--------------------------------------------------------------------------
+    */
 
         session()->forget(
             'ujian_terverifikasi_'.$ujian->id
         );
 
-
-        if($request->expectsJson()){
-
-            return response()->json([
-                'success' => true
-            ]);
-
-        }
-
         $message = $request->get('auto_submit')
             ? 'Ujian dikumpulkan otomatis karena Anda melakukan pelanggaran sebanyak 2 kali.'
             : 'Ujian berhasil dikumpulkan.';
+
+        // Flash message selalu di-set, baik untuk request JSON maupun biasa,
+        // supaya saat browser di-redirect (baik oleh Laravel maupun JS),
+        // modal sukses tetap bisa tampil.
+        session()->flash('success', $message);
+        session()->flash('auto_submit', $request->get('auto_submit', false));
+
+        if ($request->expectsJson()) {
+
+            return response()->json([
+                'success'     => true,
+                'redirect'    => route('dashboard-siswa.ujian-hari-ini'),
+                'auto_submit' => $request->get('auto_submit', false),
+            ]);
+
+        }
 
         return redirect()
             ->route('dashboard-siswa.ujian-hari-ini')

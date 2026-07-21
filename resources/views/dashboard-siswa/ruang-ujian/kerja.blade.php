@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.ujian')
 
 @section('title', 'Lembar Kerja Ujian')
 
@@ -8,95 +8,392 @@
         --primary-dark: #0f172a;
         --secondary-dark: #1e293b;
         --accent-blue: #0ea5e9;
+        --accent-blue-dark: #0284c7;
         --surface-white: #ffffff;
         --text-muted: #64748b;
         --border-color: #e2e8f0;
-        --card-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.04), 0 8px 16px -6px rgba(15, 23, 42, 0.04);
+        --warning-bg: #fffbeb;
+        --warning-border: #fde68a;
+        --warning-text: #b45309;
+        --card-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.06), 0 8px 16px -6px rgba(15, 23, 42, 0.04);
+        --card-shadow-lg: 0 20px 40px -10px rgba(15, 23, 42, 0.10);
+        --radius-lg: 20px;
+        --radius-md: 14px;
+        --radius-sm: 10px;
     }
 
     body {
-        background-color: #f8fafc;
+        background: #f1f5f9;
+        -webkit-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
     }
 
-    /* Mencegah seleksi teks (Anti-Block) di seluruh halaman kerja ujian */
-    body {
-        -webkit-user-select: none;  /* Safari */
-        -ms-user-select: none;      /* IE 10 and Consumer Preview */
-        user-select: none;          /* Standard syntax */
-    }
-
-    /* Proteksi tambahan untuk elemen visual dan sentuhan di HP */
     img {
-        pointer-events: none;       /* Gambar tidak bisa ditekan lama/diunduh di browser HP */
-        -webkit-touch-callout: none; /* Menghilangkan menu pop-up saat gambar ditahan di iOS/Android */
+        pointer-events: none;
+        -webkit-touch-callout: none;
     }
 
     .soal-card {
-        /* Mencegah fitur salin bawaan browser modern mobile */
         -webkit-user-select: none;
         -moz-user-select: none;
         -ms-user-select: none;
         user-select: none;
     }
 
-    /* Khusus jika ada input/textarea yang tetap harus bisa diketik oleh siswa */
     textarea, input[type="text"] {
         -webkit-user-select: text;
         -ms-user-select: text;
         user-select: text;
     }
 
-    /* Card Wrapper */
+    .exam-wrapper {
+        max-width: 1320px;
+        margin: 0 auto;
+        padding: 20px 24px 40px;
+    }
+
+    /* =========================================================
+       BANNER PERINGATAN FULLSCREEN (selalu tampil di paling atas)
+       ========================================================= */
+    .fullscreen-warning-banner {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        background: linear-gradient(135deg, var(--warning-bg), #fff7ed);
+        border: 1px solid var(--warning-border);
+        color: var(--warning-text);
+        padding: 12px 18px;
+        border-radius: var(--radius-md);
+        font-size: 13px;
+        font-weight: 600;
+        margin-bottom: 18px;
+        box-shadow: 0 4px 12px -4px rgba(180, 83, 9, 0.15);
+    }
+
+    .fullscreen-warning-banner .icon-wrap {
+        width: 32px;
+        height: 32px;
+        min-width: 32px;
+        border-radius: 10px;
+        background: rgba(180, 83, 9, 0.12);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 15px;
+        color: #d97706;
+    }
+
+    .fullscreen-warning-banner .banner-sub {
+        display: block;
+        font-weight: 500;
+        font-size: 11.5px;
+        color: #a16207;
+        margin-top: 1px;
+    }
+
+    /* =========================================================
+       TOP BAR INFO (nama ujian + timer)
+       ========================================================= */
+    .exam-topbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        background: var(--surface-white);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-lg);
+        padding: 18px 24px;
+        margin-bottom: 22px;
+        box-shadow: var(--card-shadow);
+    }
+
+    .exam-topbar .exam-label {
+        font-size: 10.5px;
+        text-transform: uppercase;
+        font-weight: 700;
+        letter-spacing: 0.6px;
+        color: var(--text-muted);
+        display: block;
+        margin-bottom: 3px;
+    }
+
+    .exam-topbar .exam-title {
+        font-size: 18px;
+        font-weight: 800;
+        color: var(--primary-dark);
+        margin: 0;
+        line-height: 1.3;
+    }
+
+    .exam-timer-box {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+        border-radius: var(--radius-md);
+        padding: 10px 18px;
+        min-width: 150px;
+        justify-content: center;
+    }
+
+    .exam-timer-box i { color: #dc2626; font-size: 16px; }
+
+    .exam-timer-box .timer-text {
+        display: flex;
+        flex-direction: column;
+        line-height: 1.2;
+    }
+
+    .exam-timer-box .timer-label {
+        font-size: 9.5px;
+        text-transform: uppercase;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        color: #b91c1c;
+        opacity: 0.8;
+    }
+
+    #countdownTimer {
+        font-size: 19px;
+        font-weight: 800;
+        color: #dc2626;
+        font-variant-numeric: tabular-nums;
+        margin: 0;
+    }
+
+    /* =========================================================
+       LAYOUT UTAMA (grid 2 kolom -> jadi 1 kolom di HP/tablet kecil)
+       ========================================================= */
+    .exam-main-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 320px;
+        gap: 24px;
+        align-items: start;
+    }
+
+    /* =========================================================
+       KARTU SOAL
+       ========================================================= */
     .exam-nav-card {
         background: var(--surface-white);
         border: 1px solid var(--border-color);
-        border-radius: 20px;
-        padding: 24px;
+        border-radius: var(--radius-lg);
+        padding: 22px;
         position: sticky;
-        top: 24px;
+        top: 20px;
         box-shadow: var(--card-shadow);
     }
 
     .soal-card {
         background: var(--surface-white);
         border: 1px solid var(--border-color);
-        border-radius: 20px;
-        padding: 35px;
-        margin-bottom: 24px;
+        border-radius: var(--radius-lg);
+        padding: 30px 32px;
+        margin-bottom: 20px;
         box-shadow: var(--card-shadow);
-        display: none; /* Disembunyikan secara default, diatur lewat JS */
+        display: none;
     }
 
     .soal-card.active {
         display: block;
-        animation: fadeIn 0.4s ease-in-out;
+        animation: fadeIn 0.35s ease-in-out;
     }
 
     @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(8px); }
+        from { opacity: 0; transform: translateY(10px); }
         to { opacity: 1; transform: translateY(0); }
     }
 
-    /* Number Navigation */
+    .soal-meta-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 22px;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .soal-index-badge {
+        background: var(--primary-dark);
+        color: #fff;
+        padding: 7px 16px;
+        border-radius: 10px;
+        text-transform: uppercase;
+        font-weight: 700;
+        font-size: 11px;
+        letter-spacing: 0.4px;
+    }
+
+    .soal-bobot {
+        color: var(--text-muted);
+        font-weight: 600;
+        font-size: 12.5px;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .soal-teks {
+        font-size: 16px;
+        line-height: 1.85;
+        font-weight: 500;
+        color: #1e293b;
+        margin-bottom: 22px;
+        word-break: break-word;
+    }
+
+    .soal-gambar-wrap img {
+        max-height: 340px;
+        width: auto;
+        max-width: 100%;
+        border-radius: var(--radius-md);
+        border: 1px solid var(--border-color);
+    }
+
+    /* =========================================================
+       OPSI JAWABAN PILIHAN GANDA
+       ========================================================= */
+    .option-wrapper { position: relative; margin-bottom: 12px; }
+
+    .option-input { position: absolute; opacity: 0; width: 0; height: 0; }
+
+    .btn-option {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        width: 100%;
+        text-align: left;
+        background: #f8fafc;
+        border: 1.5px solid var(--border-color);
+        padding: 15px 18px;
+        border-radius: var(--radius-md);
+        transition: all 0.18s ease;
+        cursor: pointer;
+        user-select: none;
+    }
+
+    .btn-option:hover {
+        border-color: #bae6fd;
+        background: #f0f9ff;
+    }
+
+    .option-badge {
+        width: 34px;
+        height: 34px;
+        min-width: 34px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1.5px solid var(--border-color);
+        border-radius: 9px;
+        font-weight: 700;
+        font-size: 13.5px;
+        background: #ffffff;
+        color: var(--secondary-dark);
+        transition: all 0.18s ease;
+    }
+
+    .option-input:checked + .btn-option {
+        border-color: var(--accent-blue);
+        background-color: #eff8ff;
+        box-shadow: 0 0 0 1.5px var(--accent-blue), 0 4px 14px -4px rgba(14,165,233,0.25);
+    }
+
+    .option-input:checked + .btn-option .option-badge {
+        background: var(--accent-blue);
+        color: #fff;
+        border-color: var(--accent-blue);
+    }
+
+    .option-text { font-size: 14.5px; color: #334155; font-weight: 500; }
+
+    /* Essay */
+    .essay-label {
+        font-weight: 700;
+        color: var(--text-muted);
+        font-size: 12.5px;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+        margin-bottom: 8px;
+        display: block;
+    }
+
+    textarea.form-control {
+        border: 1.5px solid var(--border-color);
+        border-radius: var(--radius-md);
+        font-size: 14.5px;
+        padding: 14px 16px;
+        transition: all 0.18s ease;
+    }
+
+    textarea.form-control:focus {
+        border-color: var(--accent-blue);
+        box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.12);
+    }
+
+    /* =========================================================
+       NAVIGASI BAWAH
+       ========================================================= */
+    .exam-bottom-nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+        background: var(--surface-white);
+        padding: 14px;
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--border-color);
+        margin-bottom: 24px;
+        box-shadow: var(--card-shadow);
+        flex-wrap: wrap;
+    }
+
+    .exam-bottom-nav .btn {
+        border-radius: var(--radius-sm);
+        font-weight: 600;
+        padding: 10px 20px;
+        font-size: 13.5px;
+        border: none;
+        flex: 1 1 auto;
+        min-width: 120px;
+    }
+
+    #btnPrev { background: #f1f5f9; color: #475569; }
+    #btnPrev:disabled { opacity: 0.45; }
+    #btnRagu { background: #f59e0b; color: #fff; }
+    #btnNext { background: var(--accent-blue); color: #fff; }
+
+    /* =========================================================
+       KARTU NAVIGASI NOMOR SOAL (sidebar kanan)
+       ========================================================= */
+    .exam-nav-card h6 {
+        font-weight: 800;
+        color: var(--primary-dark);
+        font-size: 14px;
+        margin-bottom: 16px;
+    }
+
     .number-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(42px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
         gap: 8px;
     }
 
     .number-box {
-        height: 42px;
+        height: 40px;
         display: flex;
         align-items: center;
         justify-content: center;
-        border: 1px solid var(--border-color);
-        border-radius: 12px;
-        font-weight: 600;
+        border: 1.5px solid var(--border-color);
+        border-radius: 10px;
+        font-weight: 700;
+        font-size: 13px;
         color: var(--secondary-dark);
-        text-decoration: none;
-        transition: all 0.2s ease;
-        background: var(--surface-white);
         cursor: pointer;
+        background: #fff;
+        transition: all 0.18s ease;
     }
 
     .number-box:hover {
@@ -107,8 +404,9 @@
 
     .number-box.active {
         background: var(--primary-dark);
-        color: var(--surface-white) !important;
+        color: #fff !important;
         border-color: var(--primary-dark);
+        transform: scale(1.05);
     }
 
     .number-box.answered {
@@ -125,118 +423,190 @@
 
     .number-box.ragu.active {
         background: #f59e0b !important;
-        color: var(--surface-white) !important;
+        color: #fff !important;
         border-color: #f59e0b !important;
     }
 
-    /* Interactive Options */
-    .option-wrapper {
-        position: relative;
-        margin-bottom: 14px;
+    .nav-legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 14px;
+        font-size: 11px;
+        color: var(--text-muted);
     }
 
-    .option-input {
-        position: absolute;
-        opacity: 0;
-        width: 0;
-        height: 0;
-    }
-
-    .btn-option {
+    .nav-legend span {
         display: flex;
         align-items: center;
-        gap: 16px;
-        width: 100%;
-        text-align: left;
-        background: var(--surface-white);
-        border: 1px solid var(--border-color);
-        padding: 16px 20px;
-        border-radius: 14px;
-        transition: all 0.2s ease;
-        cursor: pointer;
-        user-select: none;
+        gap: 5px;
     }
 
-    .option-badge {
-        width: 32px;
-        height: 32px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border: 1px solid var(--border-color);
-        border-radius: 8px;
+    .nav-legend i.dot {
+        width: 9px; height: 9px; border-radius: 3px; display: inline-block;
+    }
+
+    .dot-answered { background: #38bdf8; }
+    .dot-ragu { background: #f59e0b; }
+    .dot-empty { background: #e2e8f0; }
+
+    .btn-finish-exam {
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+        border: none;
+        color: #fff;
         font-weight: 700;
-        background: #f8fafc;
-        color: var(--secondary-dark);
-        transition: all 0.2s ease;
+        border-radius: var(--radius-md);
+        padding: 14px;
+        width: 100%;
+        letter-spacing: 0.3px;
+        box-shadow: 0 10px 22px -8px rgba(220, 38, 38, 0.45);
+        transition: all 0.18s ease;
     }
 
-    /* Checked State styling */
-    .option-input:checked + .btn-option {
-        border-color: var(--accent-blue);
-        background-color: #f0f9ff;
-        box-shadow: 0 0 0 1px var(--accent-blue);
+    .btn-finish-exam:hover { filter: brightness(1.05); }
+
+    /* =========================================================
+       RESPONSIVE — TABLET (<= 991.98px)
+       ========================================================= */
+    @media (max-width: 991.98px) {
+        .exam-wrapper { padding: 16px 16px 32px; }
+
+        .exam-main-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .exam-nav-card {
+            position: static;
+            order: -1; /* navigasi soal tampil di atas soal di layar sempit */
+        }
+
+        .number-grid {
+            grid-template-columns: repeat(auto-fill, minmax(38px, 1fr));
+        }
+
+        .soal-card { padding: 26px 24px; }
     }
 
-    .option-input:checked + .btn-option .option-badge {
-        background: var(--accent-blue);
-        color: var(--surface-white);
-        border-color: var(--accent-blue);
+    /* =========================================================
+       RESPONSIVE — HP (<= 575.98px)
+       ========================================================= */
+    @media (max-width: 575.98px) {
+        .exam-wrapper { padding: 12px 10px 28px; }
+
+        .exam-topbar {
+            flex-direction: column;
+            align-items: stretch;
+            padding: 14px 16px;
+            gap: 12px;
+        }
+
+        .exam-topbar .exam-title { font-size: 15.5px; }
+
+        .exam-timer-box { min-width: 0; }
+
+        .fullscreen-warning-banner {
+            font-size: 12px;
+            padding: 10px 14px;
+        }
+
+        .fullscreen-warning-banner .banner-sub { font-size: 10.5px; }
+
+        .soal-card { padding: 20px 16px; border-radius: 16px; }
+
+        .soal-teks { font-size: 14.5px; line-height: 1.7; }
+
+        .soal-meta-row { margin-bottom: 16px; }
+
+        .soal-index-badge { font-size: 10px; padding: 6px 12px; }
+
+        .btn-option { padding: 13px 14px; gap: 12px; }
+
+        .option-badge { width: 30px; height: 30px; min-width: 30px; font-size: 12px; }
+
+        .option-text { font-size: 13.5px; }
+
+        .exam-bottom-nav {
+            flex-direction: column;
+            padding: 10px;
+        }
+
+        .exam-bottom-nav .btn {
+            width: 100%;
+            padding: 13px 16px;
+        }
+
+        .exam-nav-card { padding: 16px; }
+
+        .number-grid { grid-template-columns: repeat(auto-fill, minmax(36px, 1fr)); gap: 6px; }
+
+        .number-box { height: 38px; font-size: 12.5px; border-radius: 9px; }
+
+        .btn-finish-exam { padding: 13px; font-size: 13.5px; }
     }
 </style>
 
-<div class="container-fluid px-4 py-4">
-    
-    {{-- TOP BAR INFO --}}
-    <div class="d-flex justify-content-between align-items-center mb-4 p-3 bg-white rounded-4 border shadow-sm">
+<div class="exam-wrapper">
+
+    {{-- BANNER PERINGATAN: JANGAN KELUAR FULLSCREEN --}}
+    <div class="fullscreen-warning-banner">
+        <span class="icon-wrap"><i class="fa-solid fa-triangle-exclamation"></i></span>
         <div>
-            <span class="text-muted d-block text-uppercase fw-semibold" style="font-size: 10px; letter-spacing: 0.5px;">Sedang Mengerjakan</span>
-            <h5 class="fw-bold mb-0" style="color: var(--primary-dark);">{{ $ujian->nama_ujian }}</h5>
+            Tetap berada di mode layar penuh (fullscreen) selama ujian berlangsung.
+            <span class="banner-sub">Menekan tombol Esc atau keluar dari fullscreen akan tercatat sebagai pelanggaran (maks. 2x sebelum ujian dikumpulkan otomatis).</span>
         </div>
-        <div class="text-end">
-            <span class="text-muted d-block text-uppercase fw-semibold" style="font-size: 10px; letter-spacing: 0.5px;">
-                <i class="fa-regular fa-clock me-1 text-danger"></i> Sisa Waktu
-            </span>
-            <h5 class="fw-bold text-danger mb-0" id="countdownTimer">--:--:--</h5>
+    </div>
+
+    {{-- TOP BAR INFO --}}
+    <div class="exam-topbar">
+        <div>
+            <span class="exam-label">Sedang Mengerjakan</span>
+            <h5 class="exam-title">{{ $ujian->nama_ujian }}</h5>
+        </div>
+        <div class="exam-timer-box">
+            <i class="fa-regular fa-clock"></i>
+            <div class="timer-text">
+                <span class="timer-label">Sisa Waktu</span>
+                <p id="countdownTimer">--:--:--</p>
+            </div>
         </div>
     </div>
 
     {{-- CORE AREA --}}
-    <div class="row">
-        
+    <div class="exam-main-grid">
+
         {{-- KOLOM SOAL --}}
-        <div class="col-lg-8">
-            <form 
-                id="formUjian" 
-                action="{{ route('dashboard-siswa.ujian.submit', $ujian->id) }}" 
+        <div>
+            <form
+                id="formUjian"
+                action="{{ route('dashboard-siswa.ujian.submit', $ujian->id) }}"
                 method="POST">
                 @csrf
-                
+
                 @foreach($soals as $index => $soal)
-                    <div 
+                    <div
                         class="soal-card {{ $index==$currentQuestion?'active':'' }}"
                         id="card-soal-{{ $index }}"
                         data-soal-index="{{ $index }}"
                         data-soal-id="{{ $soal->id }}">
-                        
-                        <div class="d-flex justify-content-between mb-4 align-items-center">
-                            <span class="badge bg-dark px-3 py-2 rounded-3 text-uppercase fw-bold" style="font-size: 11px;">
+
+                        <div class="soal-meta-row">
+                            <span class="soal-index-badge">
                                 Soal {{ $index + 1 }} dari {{ $soals->count() }}
                             </span>
-                            <span class="text-muted fw-medium" style="font-size: 12px;">
-                                <i class="fa-regular fa-star me-1 text-warning"></i> Bobot: {{ $soal->bobot }} Poin
+                            <span class="soal-bobot">
+                                <i class="fa-regular fa-star text-warning"></i> Bobot: {{ $soal->bobot }} Poin
                             </span>
                         </div>
 
                         {{-- Teks Soal --}}
-                        <div class="fs-5 mb-4 text-dark" style="line-height: 1.8; font-weight: 500;">
+                        <div class="soal-teks">
                             {!! $soal->teks_soal !!}
                         </div>
 
                         {{-- Gambar Soal (Jika Ada) --}}
                         @if($soal->gambar)
-                            <div class="mb-4">
-                                <img src="{{ asset('storage/' . $soal->gambar) }}" class="img-fluid rounded-4 border" style="max-height: 350px;" alt="Gambar Soal">
+                            <div class="mb-4 soal-gambar-wrap">
+                                <img src="{{ asset('storage/' . $soal->gambar) }}" alt="Gambar Soal">
                             </div>
                         @endif
 
@@ -278,7 +648,7 @@
                                             {{ $pilihan->kode }}
                                         </span>
 
-                                        <span class="text-secondary fw-medium">
+                                        <span class="option-text">
                                             {!! $pilihan->teks_pilihan !!}
                                         </span>
 
@@ -290,14 +660,14 @@
                         @else
                             {{-- Jika Essay / Isian --}}
                             <div class="form-group">
-                                <label class="form-label fw-bold text-muted mb-2">Jawaban Anda:</label>
+                                <label class="essay-label">Jawaban Anda</label>
                                 @php
                                     $jawabanSoal = $jawaban[$soal->id] ?? null;
                                 @endphp
 
                                 <textarea
                                     name="jawaban[{{ $soal->id }}]"
-                                    class="form-control rounded-4 p-3 border-2"
+                                    class="form-control"
                                     rows="5"
                                     placeholder="Ketik jawaban lengkap Anda di sini..."
                                     oninput="
@@ -315,29 +685,29 @@
             </form>
 
             {{-- NAVIGASI BUTTONS --}}
-            <div class="d-flex justify-content-between align-items-center bg-white p-3 rounded-4 border mb-4 shadow-sm">
-                <button type="button" class="btn btn-light px-4 py-2.5 rounded-3 text-secondary fw-semibold" id="btnPrev" onclick="navigateQuestion(-1)">
+            <div class="exam-bottom-nav">
+                <button type="button" class="btn" id="btnPrev" onclick="navigateQuestion(-1)">
                     <i class="fa-solid fa-arrow-left me-2"></i> Sebelumnya
                 </button>
-                
-                <button type="button" class="btn btn-warning px-4 py-2.5 rounded-3 text-white fw-semibold" id="btnRagu" onclick="toggleRagu()">
+
+                <button type="button" class="btn" id="btnRagu" onclick="toggleRagu()">
                     <i class="fa-regular fa-square-minus me-2"></i> Ragu-Ragu
                 </button>
-                
-                <button type="button" class="btn btn-primary px-4 py-2.5 rounded-3 fw-semibold" id="btnNext" style="background: var(--accent-blue); border:none;" onclick="navigateQuestion(1)">
+
+                <button type="button" class="btn" id="btnNext" onclick="navigateQuestion(1)">
                     Selanjutnya <i class="fa-solid fa-arrow-right ms-2"></i>
                 </button>
             </div>
         </div>
 
         {{-- KOLOM NAVIGASI NOMOR SOAL --}}
-        <div class="col-lg-4">
-            <div class="exam-nav-card shadow-sm">
-                <h6 class="fw-bold mb-3" style="color: var(--primary-dark);">
+        <div>
+            <div class="exam-nav-card">
+                <h6>
                     <i class="fa-solid fa-th me-2 text-info"></i> Navigasi Soal
                 </h6>
-                
-                <div class="number-grid mb-4" id="navigationGrid">
+
+                <div class="number-grid" id="navigationGrid">
                     @foreach($soals as $index => $soal)
                         @php
                             $jawabanSoal = $jawaban[$soal->id] ?? null;
@@ -375,10 +745,16 @@
                         </div>
                     @endforeach
                 </div>
-                
-                <hr style="border-color: var(--border-color);">
-                
-                <button type="button" class="btn btn-danger w-100 py-3 rounded-4 fw-bold shadow-sm" style="letter-spacing: 0.5px;" onclick="confirmFinish()">
+
+                <div class="nav-legend">
+                    <span><i class="dot dot-answered"></i> Terjawab</span>
+                    <span><i class="dot dot-ragu"></i> Ragu-ragu</span>
+                    <span><i class="dot dot-empty"></i> Belum diisi</span>
+                </div>
+
+                <hr style="border-color: var(--border-color); margin: 18px 0;">
+
+                <button type="button" class="btn-finish-exam" onclick="confirmFinish()">
                     <i class="fa-solid fa-cloud-arrow-up me-2"></i> Selesaikan Ujian
                 </button>
             </div>
@@ -414,7 +790,7 @@
     document.addEventListener("DOMContentLoaded", function() {
         updateNavigationButtons();
         startTimer();
-        
+
         // Aktifkan fitur proteksi keamanan
         enableAntiCheat();
     });
@@ -573,7 +949,7 @@
         // Jika nomor terakhir, ubah tombol "Selanjutnya" menjadi "Selesai"
         if (currentIdx === totalQuestions - 1) {
             btnNext.innerHTML = 'Selesai <i class="fa-solid fa-circle-check ms-2"></i>';
-            btnNext.style.background = '#10b981'; // Green color for completion
+            btnNext.style.background = '#10b981';
         } else {
             btnNext.innerHTML = 'Selanjutnya <i class="fa-solid fa-arrow-right ms-2"></i>';
             btnNext.style.background = 'var(--accent-blue)';
@@ -581,12 +957,10 @@
 
         // Sinkronisasi status visual Ragu-Ragu pada tombol
         if (raguStates[currentIdx]) {
-            btnRagu.classList.remove('btn-warning');
-            btnRagu.classList.add('btn-danger');
+            btnRagu.style.background = '#dc2626';
             btnRagu.innerHTML = '<i class="fa-solid fa-square-check me-2"></i> Batalkan Ragu';
         } else {
-            btnRagu.classList.remove('btn-danger');
-            btnRagu.classList.add('btn-warning');
+            btnRagu.style.background = '#f59e0b';
             btnRagu.innerHTML = '<i class="fa-regular fa-square-minus me-2"></i> Ragu-Ragu';
         }
     }
@@ -641,7 +1015,7 @@
     // Hitung Mundur Sisa Waktu Ujian (Simulasi menggunakan waktu selesai)
     function startTimer() {
         const targetTime = new Date("{{ $ujian->waktu_selesai }}").getTime();
-        
+
         const interval = setInterval(function() {
             const now = new Date().getTime();
             const distance = targetTime - now;
@@ -649,7 +1023,7 @@
             if (distance < 0) {
                 clearInterval(interval);
                 document.getElementById("countdownTimer").innerHTML = "WAKTU HABIS";
-                document.getElementById("formUjian").submit(); // Kumpulkan otomatis jika habis
+                document.getElementById("formUjian").submit();
                 return;
             }
 
@@ -657,7 +1031,6 @@
             const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
             const seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
-            // Format angka agar selalu dua digit (00:00:00)
             const format = (num) => String(num).padStart(2, '0');
             document.getElementById("countdownTimer").innerHTML = `${format(hours)}:${format(minutes)}:${format(seconds)}`;
         }, 1000);
@@ -686,7 +1059,6 @@
                 ujian_id: ujianId,
                 soal_id: soalId,
                 pilihan_jawaban_id: pilihanJawabanId
-                // tidak kirim jawaban_text & is_ragu_ragu -> tidak akan tertimpa
             })
         })
         .then(r => r.json())
@@ -706,7 +1078,6 @@
                 ujian_id: ujianId,
                 soal_id: soalId,
                 jawaban_text: jawaban
-                // tidak kirim pilihan_jawaban_id & is_ragu_ragu
             })
         });
     }
@@ -727,62 +1098,54 @@
                 ujian_id: {{ $ujian->id }},
                 soal_id: soalId,
                 is_ragu_ragu: status
-                // tidak kirim pilihan_jawaban_id & jawaban_text -> jawaban lama tetap aman
             })
         });
     }
 
+    // ==========================================================
+    // SUBMIT OTOMATIS (dipicu saat pelanggaran ke-2 atau waktu habis)
+    // ==========================================================
     async function submitExamAutomatically() {
 
-        // simpan seluruh textarea terakhir
         const textareas = document.querySelectorAll("textarea");
 
         for (const textarea of textareas) {
+            try {
+                const soalId = textarea.closest(".soal-card").dataset.soalId;
 
-            let soalId = textarea
-                .closest(".soal-card")
-                .dataset.soalId;
-
-            await fetch("{{ route('dashboard-siswa.ujian.autosave') }}", {
-
-                method:"POST",
-
-                headers:{
-                    "Content-Type":"application/json",
-                    "Accept":"application/json",
-                    "X-CSRF-TOKEN":"{{ csrf_token() }}"
-                },
-
-                body:JSON.stringify({
-
-                    ujian_id:{{ $ujian->id }},
-                    soal_id:soalId,
-                    jawaban_text:textarea.value
-
-                })
-
-            });
-
+                await fetch("{{ route('dashboard-siswa.ujian.autosave') }}", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Accept": "application/json",
+                        "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                    },
+                    body: JSON.stringify({
+                        ujian_id: {{ $ujian->id }},
+                        soal_id: soalId,
+                        jawaban_text: textarea.value
+                    })
+                });
+            } catch (err) {
+                console.error("Gagal autosave sebelum submit:", err);
+            }
         }
 
+        const form = document.getElementById("formUjian");
 
-        // submit ujian
-        fetch("{{ route('dashboard-siswa.ujian.submit',$ujian->id) }}",{
+        let flag = document.getElementById("autoSubmitFlag");
+        if (!flag) {
+            flag = document.createElement("input");
+            flag.type = "hidden";
+            flag.name = "auto_submit";
+            flag.id = "autoSubmitFlag";
+            form.appendChild(flag);
+        }
+        flag.value = "1";
 
-            method:"POST",
+        isReloading = true;
 
-            headers:{
-                "X-CSRF-TOKEN":"{{ csrf_token() }}",
-                "Accept":"application/json"
-            }
-
-        })
-        .then(()=>{
-
-            window.location.href="{{ route('dashboard-siswa.ujian-hari-ini') }}";
-
-        });
-
+        form.submit();
     }
 </script>
 @endsection
