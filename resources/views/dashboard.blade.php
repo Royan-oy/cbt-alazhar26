@@ -496,7 +496,7 @@
                 <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
                     <div class="section-title">
                         <i class="fa-solid fa-calendar-day text-primary"></i>
-                        Jadwal Ujian
+                        Ujian Hari Ini
                     </div>
                     <a href="{{ route('dashboard-siswa.ujian-hari-ini') }}" class="text-primary text-decoration-none small fw-semibold">
                         Lihat semua <i class="fa-solid fa-arrow-right ms-1"></i>
@@ -525,7 +525,7 @@
                                             <small class="d-block"><i class="fa-regular fa-clock me-1"></i>{{ $ujian->display_tanggal }}</small>
                                         </td>
                                         <td class="text-center">
-                                            @if($ujian->status_waktu == 'belum_mulai')
+                                            @if($ujian->status_waktu == 'akan_datang')
                                                 <span class="exam-status-badge status-belum"><i class="fa-regular fa-calendar-days"></i> Akan Datang</span>
                                             @elseif($ujian->status_siswa == 'Belum Dikerjakan')
                                                 <span class="exam-status-badge status-berjalan"><i class="fa-solid fa-hourglass-start"></i> Belum Dikerjakan</span>
@@ -535,15 +535,15 @@
                                         </td>
                                         <td class="text-end">
                                             @if($ujian->status_siswa == 'Belum Dikerjakan')
-                                                @if($ujian->status_waktu == 'belum_mulai')
+                                                @if($ujian->status_waktu == 'akan_datang')
                                                     <button class="btn btn-secondary text-white btn-exam-action" disabled>Belum Mulai</button>
-                                                @elseif($ujian->status_waktu == 'berakhir')
+                                                @elseif($ujian->status_waktu == 'selesai')
                                                     <button class="btn btn-danger text-white btn-exam-action" disabled>Berakhir</button>
                                                 @else
                                                     <a href="#" class="btn btn-primary btn-exam-action">Mulai</a>
                                                 @endif
                                             @elseif($ujian->status_siswa == 'Sedang Mengerjakan')
-                                                @if($ujian->status_waktu == 'berakhir')
+                                                @if($ujian->status_waktu == 'selesai')
                                                     <button class="btn btn-danger text-white btn-exam-action" disabled>Waktu Habis</button>
                                                 @else
                                                     <a href="#" class="btn btn-warning text-dark btn-exam-action">Lanjutkan</a>
