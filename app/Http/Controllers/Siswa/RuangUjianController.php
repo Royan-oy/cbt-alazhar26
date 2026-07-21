@@ -386,7 +386,6 @@ class RuangUjianController extends Controller
             }
 
 
-
             /*
             |--------------------------------------------------------------------------
             | ESSAY / ISIAN
@@ -510,15 +509,22 @@ class RuangUjianController extends Controller
         );
 
 
+        if($request->expectsJson()){
+
+            return response()->json([
+                'success' => true
+            ]);
+
+        }
+
+        $message = $request->get('auto_submit')
+            ? 'Ujian dikumpulkan otomatis karena Anda melakukan pelanggaran sebanyak 2 kali.'
+            : 'Ujian berhasil dikumpulkan.';
 
         return redirect()
-
             ->route('dashboard-siswa.ujian-hari-ini')
-
-            ->with(
-                'success',
-                'Ujian berhasil dikumpulkan.'
-            );
+            ->with('success', $message)
+            ->with('auto_submit', $request->get('auto_submit', false));
 
     }
 
@@ -613,11 +619,6 @@ class RuangUjianController extends Controller
         $nilai->refresh();
 
         if($nilai->violation_count >= 2){
-
-            $nilai->update([
-                'status'=>'selesai',
-                'waktu_kumpul'=>now()
-            ]);
 
             return response()->json([
                 'success'=>true,
