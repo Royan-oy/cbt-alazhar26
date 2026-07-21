@@ -103,24 +103,17 @@ class DashboardController extends Controller
             $kelasAktif = optional($siswa->kelasAktif)->kelas;
             
             if ($kelasAktif) {
-                // 1. Ambil data semua ujian untuk kelas siswa ini
+                // 1. Ambil data ujian hari ini / sedang aktif untuk kelas siswa ini
                 $ujians = \App\Models\Ujian::with(['bankSoal.mataPelajaran'])
                     ->whereHas('kelas', function($query) use ($kelasAktif) {
                         $query->where('kelas.id', $kelasAktif->id);
                     })
-                    ->orderBy('waktu_mulai', 'desc')
-                    ->get();
-            } else {
-                $ujians = collect();
-            }
-            $siswa = \App\Models\Siswa::with(['kelasAktif.kelas'])->where('user_id', $user->id)->first();
-            $kelasAktif = optional($siswa->kelasAktif)->kelas;
-            
-            if ($kelasAktif) {
-                // 1. Ambil data semua ujian untuk kelas siswa ini
-                $ujians = \App\Models\Ujian::with(['bankSoal.mataPelajaran'])
-                    ->whereHas('kelas', function($query) use ($kelasAktif) {
-                        $query->where('kelas.id', $kelasAktif->id);
+                    ->where(function($query) use ($sekarang) {
+                        $query->whereDate('waktu_mulai', $sekarang->toDateString())
+                              ->orWhere(function($q) use ($sekarang) {
+                                  $q->where('waktu_mulai', '<=', $sekarang)
+                                    ->where('waktu_selesai', '>=', $sekarang);
+                              });
                     })
                     ->orderBy('waktu_mulai', 'desc')
                     ->get();
@@ -129,7 +122,6 @@ class DashboardController extends Controller
             }
 
             // 2. Map data ujian untuk mengecek status pengerjaan siswa secara real-time
-            $ujian_with_status = $ujians->map(function ($ujian) use ($user, $sekarang) {
             $ujian_with_status = $ujians->map(function ($ujian) use ($user, $sekarang) {
                 // Cek riwayat di tabel nilais berdasarkan ujian_id dan user_id siswa
                 $riwayat = DB::table('nilais')
@@ -142,16 +134,11 @@ class DashboardController extends Controller
                 
                 $isWaktuAktif = $sekarang->between($waktuMulai, $waktuSelesai);
 
-                $waktuMulai = \Carbon\Carbon::parse($ujian->waktu_mulai);
-                $waktuSelesai = \Carbon\Carbon::parse($ujian->waktu_selesai);
-                
-                $isWaktuAktif = $sekarang->between($waktuMulai, $waktuSelesai);
-
                 // Tentukan status berdasarkan data di tabel nilais
                 if (!$riwayat) {
                     $ujian->status_siswa = 'Belum Dikerjakan';
                     $ujian->badge_color  = 'bg-danger';
-                } elseif ($riwayat->status == 'mengerjakan') { // Sesuaikan string 'mengerjakan' dengan DB Anda
+                } elseif ($riwayat->status == 'mengerjakan') {
                     $ujian->status_siswa = 'Sedang Mengerjakan';
                     $ujian->badge_color  = 'bg-warning text-dark';
                 } else {
@@ -177,14 +164,7 @@ class DashboardController extends Controller
                 $endStr = $waktuSelesai->isToday() ? 'Hari ini, ' . $waktuSelesai->format('H:i') : $waktuSelesai->format('d M Y, H:i');
                 $ujian->display_tanggal = $startStr . ' - ' . $endStr;
 
-                // dd($ujian);
                 return $ujian;
-            });
-
-
-            // Filter: Hilangkan jadwal ujian yang sudah selesai atau waktunya sudah berakhir
-            $ujian_with_status = $ujian_with_status->reject(function ($ujian) {
-                return $ujian->status_siswa == 'Sudah Selesai' || $ujian->status_waktu == 'berakhir';
             });
 
             // Sort agar ujian yang sedang aktif berada di paling atas, lalu diikuti yang belum lewat
@@ -193,10 +173,6 @@ class DashboardController extends Controller
             })->values();
 
             // 3. Masukkan ke dalam array data untuk dikirim ke view
-            // Mengambil top 5 atau semua, di sini kita ambil maksimal 5 untuk di dashboard (sebagai preview)
-            // Namun karena user minta "tampilkan semua", kita akan pass semua, tapi di blade bisa kita styling jika perlu
-            // Mengambil top 5 atau semua, di sini kita ambil maksimal 5 untuk di dashboard (sebagai preview)
-            // Namun karena user minta "tampilkan semua", kita akan pass semua, tapi di blade bisa kita styling jika perlu
             $data['ujian_hari_ini'] = $ujian_with_status;
             
             // Riwayat ujian total milik siswa

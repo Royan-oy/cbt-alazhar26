@@ -38,6 +38,9 @@ Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/pengaturan-akun', [PengaturanAkunController::class, 'index'])->name('pengaturan-akun.index');
+    Route::post('/pengaturan-akun/password', [PengaturanAkunController::class, 'updatePassword'])->name('pengaturan-akun.update-password');
+    Route::post('/pengaturan-akun/foto', [PengaturanAkunController::class, 'updateFoto'])->name('pengaturan-akun.update-foto');
+    Route::delete('/pengaturan-akun/foto', [PengaturanAkunController::class, 'destroyFoto'])->name('pengaturan-akun.destroy-foto');
     Route::resource('jenjang', JenjangController::class);
     Route::resource('tahun-ajaran', TahunAjaranController::class);
 

@@ -46,15 +46,6 @@ class UjianHariIniController extends Controller
                 ->whereHas('kelas', function($query) use ($kelasAktif) {
                     $query->where('kelas.id', $kelasAktif->id);
                 })
-                ->where(function($query) use ($now) {
-                    // Skenario 1: Ujian yang mulai hari ini
-                    $query->whereDate('waktu_mulai', $now->toDateString())
-                    // Skenario 2: Atau ujian multi-hari yang saat ini sedang aktif rentang waktunya
-                    ->orWhere(function($q) use ($now) {
-                        $q->where('waktu_mulai', '<=', $now)
-                        ->where('waktu_selesai', '>=', $now);
-                    });
-                })
                 ->orderBy('waktu_mulai', 'asc')
                 ->get();
 
@@ -98,17 +89,21 @@ class UjianHariIniController extends Controller
 
 
                 if ($now->lt($mulai)) {
-
                     $ujian->status = 'belum';
-
                 } elseif ($now->between($mulai,$selesai)) {
-
                     $ujian->status = 'berlangsung';
-
                 } else {
-
                     $ujian->status = 'selesai';
+                }
 
+                $isHariIni = $mulai->isSameDay($now) || $selesai->isSameDay($now) || $now->between($mulai, $selesai);
+                
+                if ($isHariIni) {
+                    $ujian->filter_category = 'hari_ini';
+                } elseif ($mulai->isFuture()) {
+                    $ujian->filter_category = 'akan_datang';
+                } else {
+                    $ujian->filter_category = 'riwayat';
                 }
 
 

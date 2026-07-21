@@ -576,6 +576,8 @@
                                                 <span class="exam-status-badge status-berjalan"><i class="fa-solid fa-hourglass-start"></i> Belum Dikerjakan</span>
                                             @elseif($ujian->status_siswa == 'Sedang Mengerjakan')
                                                 <span class="exam-status-badge status-berjalan pulse-badge"><i class="fa-solid fa-spinner"></i> Sedang Mengerjakan</span>
+                                            @else
+                                                <span class="exam-status-badge status-selesai"><i class="fa-solid fa-circle-check"></i> Selesai</span>
                                             @endif
                                         </td>
                                         <td class="text-end" data-label="Aksi">
