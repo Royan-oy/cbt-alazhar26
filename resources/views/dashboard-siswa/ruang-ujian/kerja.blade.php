@@ -543,6 +543,92 @@
 
         .btn-finish-exam { padding: 13px; font-size: 13.5px; }
     }
+
+    .finish-exam-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.55);
+        backdrop-filter: blur(3px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 99999;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.2s ease;
+    }
+
+    .finish-exam-overlay.show {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .finish-exam-modal {
+        background: var(--surface-white);
+        border-radius: var(--radius-lg);
+        padding: 32px 28px;
+        max-width: 380px;
+        width: 90%;
+        text-align: center;
+        box-shadow: var(--card-shadow-lg);
+        transform: scale(0.92);
+        transition: transform 0.2s ease;
+    }
+
+    .finish-exam-overlay.show .finish-exam-modal {
+        transform: scale(1);
+    }
+
+    .finish-exam-icon {
+        width: 60px;
+        height: 60px;
+        margin: 0 auto 16px;
+        border-radius: 50%;
+        background: #fef2f2;
+        color: #dc2626;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+    }
+
+    .finish-exam-modal h5 {
+        font-weight: 800;
+        color: var(--primary-dark);
+        margin-bottom: 8px;
+    }
+
+    .finish-exam-modal p {
+        font-size: 13.5px;
+        color: var(--text-muted);
+        line-height: 1.6;
+        margin-bottom: 22px;
+    }
+
+    .finish-exam-actions {
+        display: flex;
+        gap: 10px;
+    }
+
+    .finish-exam-actions button {
+        flex: 1;
+        padding: 12px;
+        border-radius: var(--radius-sm);
+        font-weight: 700;
+        font-size: 13.5px;
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn-batal-finish {
+        background: #f1f5f9;
+        color: #475569;
+    }
+
+    .btn-yakin-finish {
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+        color: #fff;
+    }
 </style>
 
 <div class="exam-wrapper">
@@ -763,12 +849,36 @@
     </div>
 </div>
 
+{{-- MODAL KONFIRMASI SELESAI UJIAN (custom, aman untuk fullscreen) --}}
+<div class="finish-exam-overlay" id="finishExamOverlay">
+    <div class="finish-exam-modal">
+        <div class="finish-exam-icon">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+        </div>
+        <h5>Selesaikan Ujian?</h5>
+        <p>Pastikan semua jawaban telah terisi dengan benar. Jawaban yang sudah dikumpulkan tidak dapat diubah kembali.</p>
+        <div class="finish-exam-actions">
+            <button type="button" class="btn-batal-finish" onclick="closeFinishModal()">
+                Batal
+            </button>
+            <button type="button" class="btn-yakin-finish" onclick="submitFinalExam()">
+                <i class="fa-solid fa-cloud-arrow-up me-1"></i> Ya, Selesaikan
+            </button>
+        </div>
+    </div>
+</div>
+
 {{-- INTERACTIVE JAVASCRIPT --}}
 <script>
     let isReloading = false;
 
-    window.addEventListener("beforeunload", function () {
+    window.addEventListener("beforeunload", function (e) {
         isReloading = true;
+        if (isFinishing) {
+            // proses submit yang sah (klik "Selesaikan Ujian"), jangan tampilkan warning
+            delete e.returnValue;
+            return;
+        }
     });
 
     let currentIdx = {{ $currentQuestion ?? 0 }};
@@ -817,8 +927,7 @@
         // 3. Deteksi Perpindahan Tab / Minimize Aplikasi (Page Visibility API)
         document.addEventListener("visibilitychange", function () {
 
-            // sedang reload -> abaikan
-            if (isReloading) return;
+           if (isReloading || isFinishing) return;
 
             if (document.hidden) {
                 forceSubmitExam();
@@ -1023,6 +1132,10 @@
             if (distance < 0) {
                 clearInterval(interval);
                 document.getElementById("countdownTimer").innerHTML = "WAKTU HABIS";
+
+                intentionalExit = true; // <-- tambahkan ini
+                isReloading = true;
+
                 document.getElementById("formUjian").submit();
                 return;
             }
@@ -1036,11 +1149,20 @@
         }, 1000);
     }
 
-    // Alert Konfirmasi Selesai Ujian
     function confirmFinish() {
-        if (confirm("Apakah Anda yakin ingin mengakhiri ujian ini? Pastikan semua jawaban telah terisi.")) {
-            document.getElementById("formUjian").submit();
-        }
+            document.getElementById("finishExamOverlay").classList.add("show");
+    }
+
+    function closeFinishModal() {
+        document.getElementById("finishExamOverlay").classList.remove("show");
+    }
+
+    function submitFinalExam() {
+        // PENTING: set variabel milik layout, bukan variabel lokal
+        intentionalExit = true;
+        isReloading = true;
+
+        document.getElementById("formUjian").submit();
     }
 
     // ===============================
@@ -1106,6 +1228,8 @@
     // SUBMIT OTOMATIS (dipicu saat pelanggaran ke-2 atau waktu habis)
     // ==========================================================
     async function submitExamAutomatically() {
+
+        intentionalExit = true; // <-- tambahkan ini di awal fungsi
 
         const textareas = document.querySelectorAll("textarea");
 
