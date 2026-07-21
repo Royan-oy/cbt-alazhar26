@@ -38,7 +38,10 @@ class UjianHariIniController extends Controller
             $ujians = Ujian::with([
                     'bankSoal.mataPelajaran',
                     'jenisUjian',
-                    'tahunAjaran'
+                    'tahunAjaran',
+                    'nilais' => function($query) use ($siswa){
+                        $query->where('siswa_id',$siswa->id);
+                    }
                 ])
                 ->whereHas('kelas', function($query) use ($kelasAktif) {
                     $query->where('kelas.id', $kelasAktif->id);
@@ -60,19 +63,57 @@ class UjianHariIniController extends Controller
             | MAP STATUS REALTIME SECARA EFISIEN
             |--------------------------------------------------------------------------
             */
-            $ujians->transform(function($ujian) use ($now) {
+            $ujians->transform(function($ujian) use ($now){
+
                 $mulai = Carbon::parse($ujian->waktu_mulai);
                 $selesai = Carbon::parse($ujian->waktu_selesai);
 
-                if ($now->lt($mulai)) {
-                    $ujian->status = 'belum';
-                } elseif ($now->between($mulai, $selesai)) {
-                    $ujian->status = 'berlangsung';
-                } else {
-                    $ujian->status = 'selesai';
+
+                /*
+                |--------------------------------------------------------------------------
+                | CEK STATUS PENGERJAAN SISWA
+                |--------------------------------------------------------------------------
+                */
+
+                $nilai = $ujian->nilais->first();
+
+
+                if($nilai && $nilai->status == 'selesai'){
+
+                    $ujian->status_siswa = 'selesai';
+
+                }else{
+
+                    $ujian->status_siswa = 'belum_mengerjakan';
+
                 }
 
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | STATUS WAKTU UJIAN
+                |--------------------------------------------------------------------------
+                */
+
+
+                if ($now->lt($mulai)) {
+
+                    $ujian->status = 'belum';
+
+                } elseif ($now->between($mulai,$selesai)) {
+
+                    $ujian->status = 'berlangsung';
+
+                } else {
+
+                    $ujian->status = 'selesai';
+
+                }
+
+
                 return $ujian;
+
             });
         }
 

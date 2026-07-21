@@ -60,7 +60,7 @@ class BankSoalSeeder extends Seeder
             [
                 'jenis' => 'pilihan_ganda',
                 'soal'  => 'Berapakah hasil dari 5 + 7 ?',
-                'bobot' => 1,
+                'bobot' => 20,
                 'jawaban' => [
                     ['A','10',false],
                     ['B','11',false],
@@ -73,7 +73,7 @@ class BankSoalSeeder extends Seeder
             [
                 'jenis' => 'pilihan_ganda',
                 'soal'  => 'Berapakah hasil dari 8 x 6 ?',
-                'bobot' => 1,
+                'bobot' => 20,
                 'jawaban' => [
                     ['A','42',false],
                     ['B','46',false],
@@ -86,14 +86,14 @@ class BankSoalSeeder extends Seeder
             [
                 'jenis' => 'essay',
                 'soal'  => 'Jelaskan pengertian bilangan prima.',
-                'bobot' => 5,
+                'bobot' => 40,
                 'jawaban' => 'Bilangan prima adalah bilangan yang hanya memiliki dua faktor yaitu 1 dan dirinya sendiri.'
             ],
 
             [
                 'jenis' => 'isian',
                 'soal'  => '100 : 4 = ....',
-                'bobot' => 2,
+                'bobot' => 20,
                 'jawaban' => '25'
             ],
 
@@ -205,7 +205,7 @@ class BankSoalSeeder extends Seeder
             [
                 'jenis'=>'pilihan_ganda',
                 'soal'=>'Hasil dari x + x + x adalah...',
-                'bobot'=>1,
+                'bobot'=>20,
                 'jawaban'=>[
                     ['A','2x',false],
                     ['B','3x',true],
@@ -218,7 +218,7 @@ class BankSoalSeeder extends Seeder
             [
                 'jenis'=>'pilihan_ganda',
                 'soal'=>'Nilai 5x jika x = 6 adalah...',
-                'bobot'=>1,
+                'bobot'=>20,
                 'jawaban'=>[
                     ['A','25',false],
                     ['B','30',true],
@@ -231,16 +231,17 @@ class BankSoalSeeder extends Seeder
             [
                 'jenis'=>'essay',
                 'soal'=>'Jelaskan pengertian variabel pada bentuk aljabar.',
-                'bobot'=>5,
+                'bobot'=>40,
                 'jawaban'=>'Variabel adalah lambang yang mewakili suatu nilai yang belum diketahui.'
             ],
 
             [
                 'jenis'=>'isian',
                 'soal'=>'2x + 3x = ....',
-                'bobot'=>2,
+                'bobot'=>20,
                 'jawaban'=>'5x'
             ],
+
         ];
 
         $urutan = 1;
@@ -311,7 +312,7 @@ class BankSoalSeeder extends Seeder
             [
                 'jenis'=>'pilihan_ganda',
                 'soal'=>'Bangun datar yang memiliki 4 sisi sama panjang adalah...',
-                'bobot'=>1,
+                'bobot'=>20,
                 'jawaban'=>[
                     ['A','Persegi',true],
                     ['B','Segitiga',false],
@@ -324,7 +325,7 @@ class BankSoalSeeder extends Seeder
             [
                 'jenis'=>'pilihan_ganda',
                 'soal'=>'Jumlah sudut dalam segitiga adalah...',
-                'bobot'=>1,
+                'bobot'=>20,
                 'jawaban'=>[
                     ['A','90°',false],
                     ['B','180°',true],
@@ -337,16 +338,17 @@ class BankSoalSeeder extends Seeder
             [
                 'jenis'=>'essay',
                 'soal'=>'Jelaskan perbedaan persegi dan persegi panjang.',
-                'bobot'=>5,
+                'bobot'=>40,
                 'jawaban'=>'Persegi memiliki empat sisi sama panjang, sedangkan persegi panjang hanya sisi yang berhadapan saja yang sama panjang.'
             ],
 
             [
                 'jenis'=>'isian',
                 'soal'=>'Rumus luas persegi adalah ....',
-                'bobot'=>2,
+                'bobot'=>20,
                 'jawaban'=>'s × s'
             ],
+
         ];
 
         $urutan = 1;

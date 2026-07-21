@@ -135,10 +135,10 @@
 
     .confirm-modal-box {
         background: #fff;
-        border-radius: 24px;
-        max-width: 460px;
+        border-radius: 20px;
+        max-width: 380px;
         width: 100%;
-        box-shadow: 0 30px 60px rgba(15, 23, 42, 0.2);
+        box-shadow: 0 20px 50px rgba(15, 23, 42, 0.2);
         overflow: hidden;
         animation: slideUpModal 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
@@ -150,57 +150,57 @@
 
     .modal-top-bar {
         background: linear-gradient(135deg, #0f172a, #1e293b);
-        padding: 24px;
+        padding: 16px 20px;
         text-align: center;
         position: relative;
     }
 
     .modal-check-icon {
-        width: 56px;
-        height: 56px;
+        width: 40px;
+        height: 40px;
         background: rgba(14, 165, 233, 0.2);
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
-        margin: 0 auto 12px;
+        margin: 0 auto 8px;
         border: 2px solid rgba(14, 165, 233, 0.4);
     }
 
-    .modal-body-content { padding: 28px; }
+    .modal-body-content { padding: 16px 20px; }
 
     .info-row {
         display: flex;
         align-items: flex-start;
-        gap: 14px;
-        padding: 14px 0;
+        gap: 10px;
+        padding: 8px 0;
         border-bottom: 1px solid #f1f5f9;
     }
 
     .info-row:last-of-type { border-bottom: none; }
 
     .info-icon {
-        width: 36px;
-        height: 36px;
-        border-radius: 10px;
+        width: 28px;
+        height: 28px;
+        border-radius: 8px;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 14px;
+        font-size: 12px;
         flex-shrink: 0;
     }
 
     .info-label {
-        font-size: 11px;
+        font-size: 10px;
         color: var(--text-muted);
         font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 0.5px;
-        margin-bottom: 2px;
+        margin-bottom: 1px;
     }
 
     .info-value {
-        font-size: 15px;
+        font-size: 13px;
         font-weight: 700;
         color: var(--primary-dark);
     }
@@ -209,10 +209,11 @@
         background: linear-gradient(135deg, #0ea5e9, #0284c7);
         color: white;
         border: none;
-        padding: 10px 22px;
-        border-radius: 12px;
+        height: 40px;
+        padding: 7px 16px;
+        border-radius: 10px;
         font-weight: 700;
-        font-size: 14px;
+        font-size: 13px;
         transition: all 0.2s;
         box-shadow: 0 4px 12px rgba(14, 165, 233, 0.25);
         white-space: nowrap;
@@ -227,10 +228,11 @@
         background: #f1f5f9;
         color: var(--text-muted);
         border: 1px solid var(--border-color);
-        padding: 10px 22px;
-        border-radius: 12px;
+        padding: 7px 16px;
+        height: 40px;
+        border-radius: 10px;
         font-weight: 700;
-        font-size: 14px;
+        font-size: 13px;
         transition: all 0.2s;
         white-space: nowrap;
     }
@@ -399,20 +401,23 @@
             </div>
 
             {{-- Pertanyaan Konfirmasi --}}
+<<<<<<< HEAD
             <div class="mt-4 p-3 rounded-3 text-center" style="background: #fffbeb; border: 1px solid #fde68a;">
+=======
+            <div class="mt-2 p-2 rounded-3 text-center" style="background: #fffbeb; border: 1px solid #fde68a;">
+>>>>>>> 89e90f1916e63ac49ec62a4de8e334edc023af65
                 <i class="fa-solid fa-circle-question text-warning me-1"></i>
                 <span class="fw-semibold" style="color: #92400e; font-size: 14px;">Apakah ini ujian yang kamu cari?</span>
             </div>
 
             {{-- Tombol Aksi --}}
-            <div class="d-flex gap-2 justify-content-end mt-4 pt-3" style="border-top: 1px solid #f1f5f9;">
-                <button type="button" class="btn-batal" onclick="tutupModal()">
-                    <i class="fa-solid fa-xmark me-1"></i> Batal
-                </button>
-
-                <form action="{{ route('dashboard-siswa.scan-token.konfirmasi', $ujian->id) }}" method="POST">
+            <div class="mt-2 pt-2" style="border-top: 1px solid #f1f5f9;">
+                <form class="d-flex gap-2 justify-content-center" action="{{ route('dashboard-siswa.scan-token.konfirmasi', $ujian->id) }}" method="POST">
+                    <button type="button" class="btn-batal w-50" onclick="tutupModal()">
+                        <i class="fa-solid fa-xmark me-1"></i> Batal
+                    </button>
                     @csrf
-                    <button type="submit" class="btn-yakin">
+                    <button type="submit" class="btn-yakin w-50">
                         <i class="fa-solid fa-right-to-bracket me-1"></i> Ya, Masuk Sekarang!
                     </button>
                 </form>

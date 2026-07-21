@@ -492,7 +492,7 @@
                     "/2.\n\nUjian akan dikumpulkan otomatis."
                 );
 
-                document.getElementById("formUjian").submit();
+                submitExamAutomatically();
 
             } else {
 
@@ -730,6 +730,59 @@
                 // tidak kirim pilihan_jawaban_id & jawaban_text -> jawaban lama tetap aman
             })
         });
+    }
+
+    async function submitExamAutomatically() {
+
+        // simpan seluruh textarea terakhir
+        const textareas = document.querySelectorAll("textarea");
+
+        for (const textarea of textareas) {
+
+            let soalId = textarea
+                .closest(".soal-card")
+                .dataset.soalId;
+
+            await fetch("{{ route('dashboard-siswa.ujian.autosave') }}", {
+
+                method:"POST",
+
+                headers:{
+                    "Content-Type":"application/json",
+                    "Accept":"application/json",
+                    "X-CSRF-TOKEN":"{{ csrf_token() }}"
+                },
+
+                body:JSON.stringify({
+
+                    ujian_id:{{ $ujian->id }},
+                    soal_id:soalId,
+                    jawaban_text:textarea.value
+
+                })
+
+            });
+
+        }
+
+
+        // submit ujian
+        fetch("{{ route('dashboard-siswa.ujian.submit',$ujian->id) }}",{
+
+            method:"POST",
+
+            headers:{
+                "X-CSRF-TOKEN":"{{ csrf_token() }}",
+                "Accept":"application/json"
+            }
+
+        })
+        .then(()=>{
+
+            window.location.href="{{ route('dashboard-siswa.ujian-hari-ini') }}";
+
+        });
+
     }
 </script>
 @endsection

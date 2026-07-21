@@ -166,6 +166,59 @@
         border-radius: 24px;
         background: #fafafa;
     }
+
+    /* SUCCESS MODAL */
+
+    .success-icon{
+
+        width:90px;
+        height:90px;
+
+        margin:auto;
+
+        border-radius:50%;
+
+        display:flex;
+        align-items:center;
+        justify-content:center;
+
+        background:#dcfce7;
+
+        color:#16a34a;
+
+        font-size:45px;
+
+        animation:pop .4s ease;
+
+    }
+
+
+    @keyframes pop{
+
+        from{
+
+            transform:scale(.5);
+
+            opacity:0;
+
+        }
+
+        to{
+
+            transform:scale(1);
+
+            opacity:1;
+
+        }
+
+    }
+
+
+    .modal-content{
+
+        border-radius:24px!important;
+
+    }
 </style>
 
 <div class="container-fluid px-4 py-2">
@@ -300,18 +353,61 @@
                             </div>
 
                             <div class="mt-auto">
-                                @if($ujian->status == 'berlangsung')
-                                    <a href="{{ route('dashboard-siswa.ujian.mulai', $ujian->id) }}" class="btn-masuk d-block text-center text-decoration-none">
-                                        <i class="fa-solid fa-right-to-bracket me-2"></i> Kerjakan Ujian
-                                    </a>
+                                @if($ujian->status_siswa == 'selesai')
+
+
+                                <button class="btn-disabled d-flex align-items-center justify-content-center gap-2"
+                                        style="background:#dcfce7;color:#15803d;">
+
+                                    <i class="fa-solid fa-circle-check"></i>
+
+                                    Sudah Dikerjakan
+
+                                </button>
+
+
+
+                                @elseif($ujian->status == 'berlangsung')
+
+
+                                <a href="{{ route('dashboard-siswa.ujian.mulai',$ujian->id) }}"
+                                class="btn-masuk d-block text-center text-decoration-none">
+
+                                    <i class="fa-solid fa-play me-2"></i>
+
+                                    Kerjakan Ujian
+
+                                </a>
+
+
+
                                 @elseif($ujian->status == 'belum')
-                                    <button class="btn-disabled d-flex align-items-center justify-content-center gap-2" disabled>
-                                        <i class="fa-solid fa-lock me-1"></i> Belum Dibuka
-                                    </button>
+
+
+                                <button class="btn-disabled d-flex align-items-center justify-content-center gap-2"
+                                        disabled>
+
+                                    <i class="fa-solid fa-lock"></i>
+
+                                    Belum Dibuka
+
+                                </button>
+
+
+
                                 @else
-                                    <button class="btn-disabled d-flex align-items-center justify-content-center gap-2" disabled>
-                                        <i class="fa-solid fa-lock-open me-1"></i> Sesi Ditutup
-                                    </button>
+
+
+                                <button class="btn-disabled d-flex align-items-center justify-content-center gap-2"
+                                        disabled>
+
+                                    <i class="fa-solid fa-clock"></i>
+
+                                    Waktu Berakhir
+
+                                </button>
+
+
                                 @endif
                             </div>
                         </div>
@@ -331,4 +427,85 @@
     @endif
 
 </div>
+
+{{-- MODAL SUCCESS --}}
+@if(session('success'))
+
+<div class="modal fade" id="successModal" tabindex="-1" aria-hidden="true">
+
+    <div class="modal-dialog modal-dialog-centered">
+
+        <div class="modal-content border-0 rounded-4 shadow-lg overflow-hidden">
+
+
+            <div class="modal-body text-center p-5">
+
+
+                <div class="success-icon mb-4">
+
+                    <i class="fa-solid fa-circle-check"></i>
+
+                </div>
+
+
+                <h4 class="fw-bold mb-2"
+                    style="color:var(--primary-dark);">
+
+                    Ujian Berhasil Dikumpulkan
+
+                </h4>
+
+
+                <p class="text-muted mb-4">
+
+                    {{ session('success') }}
+
+                    <br>
+
+                    Jawaban Anda sudah tersimpan dan tidak dapat dikerjakan kembali.
+
+                </p>
+
+
+
+                <button type="button"
+                        class="btn-masuk px-5"
+                        data-bs-dismiss="modal">
+
+                    <i class="fa-solid fa-check me-2"></i>
+
+                    Mengerti
+
+                </button>
+
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+</div>
+
+
+@endif
+
+@if(session('success'))
+
+<script>
+
+document.addEventListener("DOMContentLoaded",function(){
+
+    let modal = new bootstrap.Modal(
+        document.getElementById('successModal')
+    );
+
+    modal.show();
+
+});
+
+</script>
+
+@endif
 @endsection

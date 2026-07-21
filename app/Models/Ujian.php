@@ -95,4 +95,9 @@ class Ujian extends Model
             $this->waktu_selesai
         );
     }
+
+    public function nilais()
+    {
+        return $this->hasMany(Nilai::class);
+    }
 }

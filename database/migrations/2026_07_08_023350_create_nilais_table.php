@@ -40,6 +40,12 @@ class CreateNilaisTable extends Migration
 
             ])->default('belum');
 
+            $table->enum('status_penilaian', [
+                'belum',
+                'menunggu',
+                'selesai'
+            ])->default('belum');
+
             $table->timestamps();
 
             // soal terakhir yang sedang dibuka

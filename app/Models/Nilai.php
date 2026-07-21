@@ -18,6 +18,7 @@ class Nilai extends Model
         'nilai_essay',
         'nilai_akhir',
         'status',
+        'status_penilaian',
         'current_question',
         'last_autosave',
         'violation_count'

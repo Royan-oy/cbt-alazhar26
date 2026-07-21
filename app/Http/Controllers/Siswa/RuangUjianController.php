@@ -14,24 +14,111 @@ class RuangUjianController extends Controller
 {
     public function mulai(Ujian $ujian)
     {
-        // Memuat relasi dan menghitung jumlah soal di dalam bank soal terkait
-        $ujian->load([
-            'bankSoal.mataPelajaran',
-            'jenisUjian',
-        ])->loadCount(['bankSoal as total_soal' => function($query) {
-            $query->withCount('soals');
-        }]);
+        /*
+        |--------------------------------------------------------------------------
+        | CEK SISWA LOGIN
+        |--------------------------------------------------------------------------
+        */
 
-        // Namun, cara paling bersih dan aman di Laravel untuk relasi nested count adalah:
+        $siswa = Auth::user()->siswa;
+
+        if (!$siswa) {
+            abort(403, 'Data siswa tidak ditemukan.');
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | CEK APAKAH SUDAH PERNAH MENGERJAKAN
+        |--------------------------------------------------------------------------
+        */
+
+        $nilai = Nilai::where('ujian_id', $ujian->id)
+            ->where('siswa_id', $siswa->id)
+            ->first();
+
+
+        if ($nilai && $nilai->status == 'selesai') {
+
+            return redirect()
+                ->route('dashboard-siswa.ujian-hari-ini')
+                ->with(
+                    'error',
+                    'Anda sudah mengerjakan ujian ini.'
+                );
+        }
+
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | CEK WAKTU UJIAN
+        |--------------------------------------------------------------------------
+        */
+
+        $now = Carbon::now();
+
+        if (
+            $now->lt(Carbon::parse($ujian->waktu_mulai)) ||
+            $now->gt(Carbon::parse($ujian->waktu_selesai))
+        ) {
+
+            return redirect()
+                ->route('dashboard-siswa.ujian-hari-ini')
+                ->with(
+                    'error',
+                    'Ujian belum dibuka atau waktu ujian sudah berakhir.'
+                );
+
+        }
+
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | LOAD DATA UJIAN
+        |--------------------------------------------------------------------------
+        */
+
         $ujian->load([
             'bankSoal.mataPelajaran',
             'jenisUjian',
         ]);
-        
-        // Hitung jumlah soal secara spesifik lewat relation instance
-        $totalSoal = $ujian->bankSoal ? $ujian->bankSoal->soals()->count() : 0;
 
-        return view('dashboard-siswa.ruang-ujian.index', compact('ujian', 'totalSoal'));
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | HITUNG JUMLAH SOAL
+        |--------------------------------------------------------------------------
+        */
+
+        $totalSoal = 0;
+
+
+        if ($ujian->bankSoal) {
+
+            $totalSoal = $ujian->bankSoal
+                ->soals()
+                ->count();
+
+        }
+
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | TAMPILKAN HALAMAN TOKEN / KONFIRMASI
+        |--------------------------------------------------------------------------
+        */
+
+        return view(
+            'dashboard-siswa.ruang-ujian.index',
+            compact(
+                'ujian',
+                'totalSoal'
+            )
+        );
     }
 
     /**
@@ -111,6 +198,13 @@ class RuangUjianController extends Controller
                 ->with('error', 'Ujian sudah selesai.');
         }
 
+        if ($nilai->status == 'selesai') {
+
+            return redirect()
+                ->route('dashboard-siswa.ujian-hari-ini')
+                ->with('error', 'Ujian sudah selesai.');
+        }
+
         // Load soal
         $ujian->load([
             'bankSoal.soals' => function ($query) use ($ujian) {
@@ -147,6 +241,8 @@ class RuangUjianController extends Controller
 
         $violationCount = $nilai->violation_count;
 
+        $violationCount = $nilai->violation_count;
+
         return view(
             'dashboard-siswa.ruang-ujian.kerja',
             compact(
@@ -156,13 +252,291 @@ class RuangUjianController extends Controller
                 'jawaban',
                 'currentQuestion',
                 'violationCount'
+                'currentQuestion',
+                'violationCount'
             )
         );
     }
 
     public function submit(Request $request, Ujian $ujian)
     {
-        dd($request->all());
+        $siswa = Auth::user()->siswa;
+
+        if(!$siswa){
+            abort(403);
+        }
+
+
+        $nilai = Nilai::where('ujian_id',$ujian->id)
+            ->where('siswa_id',$siswa->id)
+            ->firstOrFail();
+
+
+        // CEK SUDAH SUBMIT
+        if($nilai->status == 'selesai'){
+
+            return redirect()
+            ->route('dashboard-siswa.ujian-hari-ini')
+            ->with('error','Ujian sudah dikumpulkan.');
+
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Ambil semua soal
+        |--------------------------------------------------------------------------
+        */
+
+        $soals = $ujian->bankSoal
+            ->soals()
+            ->with('pilihanJawabans')
+            ->orderBy('urutan')
+            ->get();
+
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Jawaban siswa
+        |--------------------------------------------------------------------------
+        */
+
+        $jawabanSiswas = $nilai->jawabanSiswas()
+            ->get()
+            ->keyBy('soal_id');
+
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Variabel penilaian
+        |--------------------------------------------------------------------------
+        */
+
+        $totalBobotPG = 0;
+        $nilaiBenarPG = 0;
+
+
+        $adaEssay = false;
+
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Koreksi pilihan ganda
+        |--------------------------------------------------------------------------
+        */
+
+        foreach ($soals as $soal) {
+
+
+            $jawaban = $jawabanSiswas->get($soal->id);
+
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | PILIHAN GANDA
+            |--------------------------------------------------------------------------
+            */
+
+            if ($soal->jenis_soal == 'pilihan_ganda') {
+
+
+                $totalBobotPG += $soal->bobot;
+
+
+
+                if (!$jawaban) {
+
+                    continue;
+
+                }
+
+
+
+                $jawabanBenar = $soal->pilihanJawabans
+                    ->where('is_benar', true)
+                    ->first();
+
+
+
+                if (
+                    $jawabanBenar &&
+                    $jawaban->pilihan_jawaban_id == $jawabanBenar->id
+                ) {
+
+
+                    $jawaban->update([
+
+                        'is_benar' => true,
+
+                        'nilai' => $soal->bobot
+
+                    ]);
+
+
+                    $nilaiBenarPG += $soal->bobot;
+
+
+                } else {
+
+
+                    $jawaban->update([
+
+                        'is_benar' => false,
+
+                        'nilai'=>0
+
+                    ]);
+
+                }
+
+
+            }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | ESSAY / ISIAN
+            |--------------------------------------------------------------------------
+            */
+
+
+            if (
+                $soal->jenis_soal == 'essay'
+                ||
+                $soal->jenis_soal == 'isian'
+            ) {
+
+
+                $adaEssay = true;
+
+
+                /*
+                Essay belum dinilai guru
+                */
+
+
+                if ($jawaban) {
+
+
+                    $jawaban->update([
+
+                        'is_benar'=>null,
+
+                        'nilai'=>0
+
+                    ]);
+
+                }
+
+            }
+
+        }
+
+
+
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Hitung nilai PG
+        |--------------------------------------------------------------------------
+        */
+
+
+        $nilaiPG = 0;
+
+
+        if ($totalBobotPG > 0) {
+
+
+            $nilaiPG = ($nilaiBenarPG / $totalBobotPG) * 100;
+
+
+        }
+
+
+
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Tentukan status penilaian
+        |--------------------------------------------------------------------------
+        */
+
+
+        if($adaEssay){
+
+            $nilai->update([
+
+                'nilai_pg'=>round($nilaiPG,2),
+
+                'nilai_akhir'=>0,
+
+                'status'=>'selesai',
+
+                'status_penilaian'=>'menunggu',
+
+                'sudah_dinilai'=>false,
+
+                'waktu_kumpul'=>now(),
+
+            ]);
+
+        } else {
+
+        $nilai->update([
+
+            'nilai_pg'=>round($nilaiPG,2),
+
+            'nilai_akhir'=>round($nilaiPG,2),
+
+            'status'=>'selesai',
+
+            'status_penilaian'=>'selesai',
+
+            'sudah_dinilai'=>true,
+
+            'waktu_kumpul'=>now(),
+
+        ]);
+
+        }
+
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Hapus session token
+        |--------------------------------------------------------------------------
+        */
+
+        session()->forget(
+            'ujian_terverifikasi_'.$ujian->id
+        );
+
+
+        if($request->expectsJson()){
+
+            return response()->json([
+                'success' => true
+            ]);
+
+        }
+
+        $message = $request->get('auto_submit')
+            ? 'Ujian dikumpulkan otomatis karena Anda melakukan pelanggaran sebanyak 2 kali.'
+            : 'Ujian berhasil dikumpulkan.';
+
+        return redirect()
+            ->route('dashboard-siswa.ujian-hari-ini')
+            ->with('success', $message)
+            ->with('auto_submit', $request->get('auto_submit', false));
+
     }
 
     public function autoSave(Request $request)
@@ -261,6 +635,50 @@ class RuangUjianController extends Controller
                 'status'=>'selesai',
                 'waktu_kumpul'=>now()
             ]);
+
+            return response()->json([
+                'success'=>true,
+                'submit'=>true,
+                'count'=>$nilai->violation_count
+            ]);
+        }
+
+        return response()->json([
+            'success'=>true,
+            'submit'=>false,
+            'count'=>$nilai->violation_count
+        ]);
+    }
+
+    public function violation(Request $request)
+    {
+        $request->validate([
+            'ujian_id' => 'required|exists:ujians,id'
+        ]);
+
+        $siswa = Auth::user()->siswa;
+
+        if (!$siswa) {
+            return response()->json([
+                'success' => false
+            ],403);
+        }
+
+        $nilai = Nilai::where('ujian_id',$request->ujian_id)
+            ->where('siswa_id',$siswa->id)
+            ->first();
+
+        if(!$nilai){
+            return response()->json([
+                'success'=>false
+            ],404);
+        }
+
+        $nilai->increment('violation_count');
+
+        $nilai->refresh();
+
+        if($nilai->violation_count >= 2){
 
             return response()->json([
                 'success'=>true,

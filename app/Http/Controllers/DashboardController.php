@@ -113,14 +113,34 @@ class DashboardController extends Controller
             } else {
                 $ujians = collect();
             }
+            $siswa = \App\Models\Siswa::with(['kelasAktif.kelas'])->where('user_id', $user->id)->first();
+            $kelasAktif = optional($siswa->kelasAktif)->kelas;
+            
+            if ($kelasAktif) {
+                // 1. Ambil data semua ujian untuk kelas siswa ini
+                $ujians = \App\Models\Ujian::with(['bankSoal.mataPelajaran'])
+                    ->whereHas('kelas', function($query) use ($kelasAktif) {
+                        $query->where('kelas.id', $kelasAktif->id);
+                    })
+                    ->orderBy('waktu_mulai', 'desc')
+                    ->get();
+            } else {
+                $ujians = collect();
+            }
 
             // 2. Map data ujian untuk mengecek status pengerjaan siswa secara real-time
+            $ujian_with_status = $ujians->map(function ($ujian) use ($user, $sekarang) {
             $ujian_with_status = $ujians->map(function ($ujian) use ($user, $sekarang) {
                 // Cek riwayat di tabel nilais berdasarkan ujian_id dan user_id siswa
                 $riwayat = DB::table('nilais')
                     ->where('ujian_id', $ujian->id)
                     ->where('siswa_id', $user->siswa->id)
                     ->first();      
+
+                $waktuMulai = \Carbon\Carbon::parse($ujian->waktu_mulai);
+                $waktuSelesai = \Carbon\Carbon::parse($ujian->waktu_selesai);
+                
+                $isWaktuAktif = $sekarang->between($waktuMulai, $waktuSelesai);
 
                 $waktuMulai = \Carbon\Carbon::parse($ujian->waktu_mulai);
                 $waktuSelesai = \Carbon\Carbon::parse($ujian->waktu_selesai);
@@ -175,6 +195,8 @@ class DashboardController extends Controller
             // 3. Masukkan ke dalam array data untuk dikirim ke view
             // Mengambil top 5 atau semua, di sini kita ambil maksimal 5 untuk di dashboard (sebagai preview)
             // Namun karena user minta "tampilkan semua", kita akan pass semua, tapi di blade bisa kita styling jika perlu
+            // Mengambil top 5 atau semua, di sini kita ambil maksimal 5 untuk di dashboard (sebagai preview)
+            // Namun karena user minta "tampilkan semua", kita akan pass semua, tapi di blade bisa kita styling jika perlu
             $data['ujian_hari_ini'] = $ujian_with_status;
             
             // Riwayat ujian total milik siswa
@@ -184,5 +206,6 @@ class DashboardController extends Controller
         }
 
         return view('dashboard', $data);
+        
     }
 }
