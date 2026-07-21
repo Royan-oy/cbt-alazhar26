@@ -468,7 +468,7 @@ class RuangUjianController extends Controller
 
                 'status'=>'selesai',
 
-                'status_penilaian'=>'menunggu_koreksi',
+                'status_penilaian'=>'menunggu',
 
                 'sudah_dinilai'=>false,
 
