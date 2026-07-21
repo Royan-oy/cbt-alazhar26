@@ -464,18 +464,24 @@
 
                 <div class="success-icon mb-4">
 
-                    <i class="fa-solid fa-circle-check"></i>
+                    @if(session('auto_submit'))
+                        <i class="fa-solid fa-triangle-exclamation text-danger"></i>
+                    @else
+                        <i class="fa-solid fa-circle-check text-success"></i>
+                    @endif
 
                 </div>
 
 
-                <h4 class="fw-bold mb-2"
-                    style="color:var(--primary-dark);">
+                <h4 class="fw-bold mb-2">
 
-                    Ujian Berhasil Dikumpulkan
+                    @if(session('auto_submit'))
+                        Ujian Dikumpulkan Otomatis
+                    @else
+                        Ujian Berhasil Dikumpulkan
+                    @endif
 
                 </h4>
-
 
                 <p class="text-muted mb-4">
 
@@ -483,12 +489,14 @@
 
                     <br>
 
-                    Jawaban Anda sudah tersimpan dan tidak dapat dikerjakan kembali.
+                    @if(session('auto_submit'))
+                        Jawaban yang belum diisi dianggap salah.
+                    @else
+                        Jawaban Anda sudah tersimpan dan tidak dapat dikerjakan kembali.
+                    @endif
 
                 </p>
-
-
-
+                
                 <button type="button"
                         class="btn-masuk px-5"
                         data-bs-dismiss="modal">
