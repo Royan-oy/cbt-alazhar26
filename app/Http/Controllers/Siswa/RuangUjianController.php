@@ -215,6 +215,13 @@ class RuangUjianController extends Controller
                 ->with('error', 'Ujian sudah selesai.');
         }
 
+        if ($nilai->status == 'selesai') {
+
+            return redirect()
+                ->route('dashboard-siswa.ujian-hari-ini')
+                ->with('error', 'Ujian sudah selesai.');
+        }
+
         // Load soal
         $ujian->load([
             'bankSoal.soals' => function ($query) use ($ujian) {
@@ -248,7 +255,6 @@ class RuangUjianController extends Controller
 
         // Nomor soal terakhir
         $currentQuestion = $nilai->current_question;
-
         $violationCount = $nilai->violation_count;
 
         return view(
@@ -649,6 +655,11 @@ class RuangUjianController extends Controller
         $nilai->refresh();
 
         if($nilai->violation_count >= 2){
+
+            $nilai->update([
+                'status'=>'selesai',
+                'waktu_kumpul'=>now()
+            ]);
 
             return response()->json([
                 'success'=>true,

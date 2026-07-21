@@ -103,10 +103,17 @@ class DashboardController extends Controller
             $kelasAktif = optional($siswa->kelasAktif)->kelas;
             
             if ($kelasAktif) {
-                // 1. Ambil data semua ujian untuk kelas siswa ini
+                // 1. Ambil data ujian hari ini / sedang aktif untuk kelas siswa ini
                 $ujians = \App\Models\Ujian::with(['bankSoal.mataPelajaran'])
                     ->whereHas('kelas', function($query) use ($kelasAktif) {
                         $query->where('kelas.id', $kelasAktif->id);
+                    })
+                    ->where(function($query) use ($sekarang) {
+                        $query->whereDate('waktu_mulai', $sekarang->toDateString())
+                              ->orWhere(function($q) use ($sekarang) {
+                                  $q->where('waktu_mulai', '<=', $sekarang)
+                                    ->where('waktu_selesai', '>=', $sekarang);
+                              });
                     })
                     ->orderBy('waktu_mulai', 'desc')
                     ->get();
@@ -131,7 +138,7 @@ class DashboardController extends Controller
                 if (!$riwayat) {
                     $ujian->status_siswa = 'Belum Dikerjakan';
                     $ujian->badge_color  = 'bg-danger';
-                } elseif ($riwayat->status == 'mengerjakan') { // Sesuaikan string 'mengerjakan' dengan DB Anda
+                } elseif ($riwayat->status == 'mengerjakan') {
                     $ujian->status_siswa = 'Sedang Mengerjakan';
                     $ujian->badge_color  = 'bg-warning text-dark';
                 } else {
@@ -141,6 +148,14 @@ class DashboardController extends Controller
 
                 $ujian->is_aktif = $isWaktuAktif;
 
+                if ($sekarang->lt($waktuMulai)) {
+                    $ujian->status_waktu = 'belum_mulai';
+                } elseif ($sekarang->gt($waktuSelesai)) {
+                    $ujian->status_waktu = 'berakhir';
+                } else {
+                    $ujian->status_waktu = 'aktif';
+                }
+
                 // Kalkulasi durasi aktual
                 $ujian->durasi_menit = $waktuMulai->diffInMinutes($waktuSelesai);
 
@@ -149,15 +164,7 @@ class DashboardController extends Controller
                 $endStr = $waktuSelesai->isToday() ? 'Hari ini, ' . $waktuSelesai->format('H:i') : $waktuSelesai->format('d M Y, H:i');
                 $ujian->display_tanggal = $startStr . ' - ' . $endStr;
 
-                // dd($ujian);
                 return $ujian;
-            });
-
-
-            // Filter: Hilangkan jadwal ujian yang sudah selesai, waktunya sudah berakhir, atau jadwalnya bukan hari ini
-            $ujian_with_status = $ujian_with_status->reject(function ($ujian) {
-                $isHariIni = \Carbon\Carbon::parse($ujian->waktu_mulai)->isToday();
-                return $ujian->status_siswa == 'Sudah Selesai' || $ujian->status_waktu == 'selesai' || !$isHariIni;
             });
 
             // Sort agar ujian yang sedang aktif berada di paling atas, lalu diikuti yang belum lewat
@@ -166,8 +173,6 @@ class DashboardController extends Controller
             })->values();
 
             // 3. Masukkan ke dalam array data untuk dikirim ke view
-            // Mengambil top 5 atau semua, di sini kita ambil maksimal 5 untuk di dashboard (sebagai preview)
-            // Namun karena user minta "tampilkan semua", kita akan pass semua, tapi di blade bisa kita styling jika perlu
             $data['ujian_hari_ini'] = $ujian_with_status;
             
             // Riwayat ujian total milik siswa
@@ -177,5 +182,6 @@ class DashboardController extends Controller
         }
 
         return view('dashboard', $data);
+        
     }
 }

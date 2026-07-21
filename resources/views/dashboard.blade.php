@@ -278,6 +278,49 @@
         .stat-card { padding: 16px; }
         .stat-icon { width: 42px; height: 42px; font-size: 16px; }
         .content-card { padding: 16px; border-radius: 18px; }
+
+        /* Mobile Table Optimization */
+        .table-responsive { overflow: visible; max-height: none !important; }
+        .table-responsive table,
+        .table-responsive thead,
+        .table-responsive tbody,
+        .table-responsive tr,
+        .table-responsive th,
+        .table-responsive td {
+            display: block;
+        }
+        .table-responsive thead {
+            display: none;
+        }
+        .table-responsive tr {
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            margin-bottom: 16px;
+            padding: 4px 16px;
+            background: #fff;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.03);
+        }
+        .table-responsive td {
+            border: none !important;
+            padding: 14px 0 !important;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            text-align: right !important;
+        }
+        .table-responsive td:not(:last-child) {
+            border-bottom: 1px dashed #e2e8f0 !important;
+        }
+        .table-responsive td::before {
+            content: attr(data-label);
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-align: left;
+            margin-right: 15px;
+        }
     }
 </style>
 
@@ -496,7 +539,7 @@
                 <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
                     <div class="section-title">
                         <i class="fa-solid fa-calendar-day text-primary"></i>
-                        Ujian Hari Ini
+                        Jadwal Ujian
                     </div>
                     <a href="{{ route('dashboard-siswa.ujian-hari-ini') }}" class="text-primary text-decoration-none small fw-semibold">
                         Lihat semua <i class="fa-solid fa-arrow-right ms-1"></i>
@@ -517,23 +560,27 @@
                             <tbody>
                                 @foreach($ujian_hari_ini as $ujian)
                                     <tr>
-                                        <td>
-                                            <div class="fw-bold text-dark">{{ $ujian->nama_ujian }}</div>
-                                            <small class="text-muted">Durasi: {{ $ujian->durasi_menit }} Menit</small>
+                                        <td data-label="Nama Ujian">
+                                            <div class="text-end">
+                                                <div class="fw-bold text-dark">{{ $ujian->nama_ujian }}</div>
+                                                <small class="text-muted">Durasi: {{ $ujian->durasi_menit }} Menit</small>
+                                            </div>
                                         </td>
-                                        <td class="text-muted" style="white-space: nowrap;">
+                                        <td class="text-muted text-end" data-label="Batas Waktu">
                                             <small class="d-block"><i class="fa-regular fa-clock me-1"></i>{{ $ujian->display_tanggal }}</small>
                                         </td>
-                                        <td class="text-center">
+                                        <td class="text-center" data-label="Status">
                                             @if($ujian->status_waktu == 'akan_datang')
                                                 <span class="exam-status-badge status-belum"><i class="fa-regular fa-calendar-days"></i> Akan Datang</span>
                                             @elseif($ujian->status_siswa == 'Belum Dikerjakan')
                                                 <span class="exam-status-badge status-berjalan"><i class="fa-solid fa-hourglass-start"></i> Belum Dikerjakan</span>
                                             @elseif($ujian->status_siswa == 'Sedang Mengerjakan')
                                                 <span class="exam-status-badge status-berjalan pulse-badge"><i class="fa-solid fa-spinner"></i> Sedang Mengerjakan</span>
+                                            @else
+                                                <span class="exam-status-badge status-selesai"><i class="fa-solid fa-circle-check"></i> Selesai</span>
                                             @endif
                                         </td>
-                                        <td class="text-end">
+                                        <td class="text-end" data-label="Aksi">
                                             @if($ujian->status_siswa == 'Belum Dikerjakan')
                                                 @if($ujian->status_waktu == 'akan_datang')
                                                     <button class="btn btn-secondary text-white btn-exam-action" disabled>Belum Mulai</button>

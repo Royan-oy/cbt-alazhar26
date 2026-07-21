@@ -282,16 +282,37 @@
     </div>
 
     {{-- DAFTAR UJIAN --}}
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h5 class="fw-bold mb-0" style="color: var(--primary-dark);">
-            <i class="fa-solid fa-calendar-week me-2" style="color: var(--accent-blue);"></i> Jadwal Ujian Aktif
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+        <h5 class="fw-bold mb-0" id="section-title" style="color: var(--primary-dark);">
+            <i class="fa-solid fa-calendar-week me-2" style="color: var(--accent-blue);"></i> <span>Jadwal Ujian Aktif</span>
         </h5>
+        
+        <div class="nav nav-pills custom-filter-pills gap-2" role="tablist">
+            <button class="nav-link active rounded-pill px-3 py-2 btn-filter-tab" data-filter="hari_ini" style="font-size: 13px; font-weight: 600;">
+                <i class="fa-solid fa-calendar-day me-1"></i> Hari Ini
+            </button>
+            <button class="nav-link rounded-pill px-3 py-2 btn-filter-tab" data-filter="akan_datang" style="font-size: 13px; font-weight: 600;">
+                <i class="fa-solid fa-clock me-1"></i> Akan Datang
+            </button>
+            <button class="nav-link rounded-pill px-3 py-2 btn-filter-tab" data-filter="riwayat" style="font-size: 13px; font-weight: 600;">
+                <i class="fa-solid fa-clock-rotate-left me-1"></i> Riwayat Ujian
+            </button>
+        </div>
     </div>
 
     @if($ujians->count() > 0)
-        <div class="row g-4">
+        <div class="row g-4" id="exam-list-container">
+            <!-- Empty state (hidden by default) -->
+            <div class="col-12" id="empty-state" style="display: none;">
+                <div class="text-center py-5">
+                    <i class="fa-regular fa-folder-open mb-3" style="font-size: 48px; color: var(--border-color);"></i>
+                    <h5 class="fw-bold" style="color: var(--text-muted);">Tidak ada data ujian</h5>
+                    <p class="text-muted small">Belum ada jadwal ujian untuk kategori ini.</p>
+                </div>
+            </div>
+
             @foreach($ujians as $ujian)
-                <div class="col-md-6 col-xl-4">
+                <div class="col-md-6 col-xl-4 exam-card-wrapper" data-category="{{ $ujian->filter_category }}">
                     <div class="exam-card">
                         
                         <div class="exam-header">
@@ -516,4 +537,76 @@ document.addEventListener("DOMContentLoaded",function(){
 </script>
 
 @endif
+
+<style>
+.custom-filter-pills .nav-link {
+    color: var(--text-muted);
+    background: #f8fafc;
+    border: 1px solid var(--border-color);
+    transition: all 0.2s ease;
+}
+.custom-filter-pills .nav-link:hover {
+    background: #e2e8f0;
+}
+.custom-filter-pills .nav-link.active {
+    background: var(--accent-blue) !important;
+    color: white !important;
+    border-color: var(--accent-blue);
+    box-shadow: 0 4px 12px rgba(14, 165, 233, 0.25);
+}
+</style>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const filterBtns = document.querySelectorAll('.btn-filter-tab');
+    const examCards = document.querySelectorAll('.exam-card-wrapper');
+    const emptyState = document.getElementById('empty-state');
+    const sectionTitleText = document.querySelector('#section-title span');
+    const sectionTitleIcon = document.querySelector('#section-title i');
+
+    const titleMap = {
+        'hari_ini': { text: 'Jadwal Ujian Aktif', icon: 'fa-calendar-week' },
+        'akan_datang': { text: 'Jadwal Ujian Mendatang', icon: 'fa-clock' },
+        'riwayat': { text: 'Riwayat Ujian', icon: 'fa-clock-rotate-left' }
+    };
+
+    function applyFilter(filterValue) {
+        let visibleCount = 0;
+
+        examCards.forEach(card => {
+            if (card.dataset.category === filterValue) {
+                card.style.display = 'block';
+                visibleCount++;
+            } else {
+                card.style.display = 'none';
+            }
+        });
+
+        if (emptyState) {
+            emptyState.style.display = visibleCount === 0 ? 'block' : 'none';
+        }
+
+        // Update title
+        if (titleMap[filterValue] && sectionTitleText && sectionTitleIcon) {
+            sectionTitleText.textContent = titleMap[filterValue].text;
+            sectionTitleIcon.className = `fa-solid ${titleMap[filterValue].icon} me-2`;
+        }
+    }
+
+    // Initialize with default active tab (hari_ini)
+    applyFilter('hari_ini');
+
+    filterBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            // Update active state on buttons
+            filterBtns.forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            
+            const filterValue = this.dataset.filter;
+            applyFilter(filterValue);
+        });
+    });
+});
+</script>
+
 @endsection
