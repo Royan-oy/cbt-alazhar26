@@ -141,14 +141,6 @@ class DashboardController extends Controller
 
                 $ujian->is_aktif = $isWaktuAktif;
 
-                if ($sekarang->lt($waktuMulai)) {
-                    $ujian->status_waktu = 'belum_mulai';
-                } elseif ($sekarang->gt($waktuSelesai)) {
-                    $ujian->status_waktu = 'berakhir';
-                } else {
-                    $ujian->status_waktu = 'aktif';
-                }
-
                 // Kalkulasi durasi aktual
                 $ujian->durasi_menit = $waktuMulai->diffInMinutes($waktuSelesai);
 
@@ -165,7 +157,7 @@ class DashboardController extends Controller
             // Filter: Hilangkan jadwal ujian yang sudah selesai, waktunya sudah berakhir, atau jadwalnya bukan hari ini
             $ujian_with_status = $ujian_with_status->reject(function ($ujian) {
                 $isHariIni = \Carbon\Carbon::parse($ujian->waktu_mulai)->isToday();
-                return $ujian->status_siswa == 'Sudah Selesai' || $ujian->status_waktu == 'berakhir' || !$isHariIni;
+                return $ujian->status_siswa == 'Sudah Selesai' || $ujian->status_waktu == 'selesai' || !$isHariIni;
             });
 
             // Sort agar ujian yang sedang aktif berada di paling atas, lalu diikuti yang belum lewat
