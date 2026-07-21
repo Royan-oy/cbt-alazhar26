@@ -221,6 +221,32 @@
         z-index: 10;
     }
 
+    /* Styles for PG Accordion matching the general theme */
+    .pg-option-item {
+        padding: 10px 14px;
+        border-radius: 10px;
+        font-size: 13px;
+        margin-bottom: 6px;
+        border: 1px solid #e2e8f0;
+        background-color: #fff;
+    }
+    .pg-option-item.correct-key {
+        background-color: #ecfdf5;
+        border-color: #6ee7b7;
+        color: #065f46;
+        font-weight: 600;
+    }
+    .pg-option-item.student-wrong {
+        background-color: #fef2f2;
+        border-color: #fca5a5;
+        color: #991b1b;
+        font-weight: 600;
+    }
+    .accordion-button:not(.collapsed) {
+        color: #0f172a;
+        background-color: #f8fafc;
+        box-shadow: inset 0 -1px 0 rgba(0,0,0,.125);
+    }
 </style>
 
 <div class="container-fluid px-0 py-2">
@@ -259,22 +285,128 @@
         </div>
     @endif
 
+    {{-- HASIL RINGKAS --}}
+    <div class="row g-3 mb-4">
+        <div class="col-12 col-md-6 col-lg-5">
+            <div class="bg-white border rounded-3 p-3 text-center d-flex flex-column justify-content-center h-100" style="border-color: #e2e8f0 !important;">
+                <div class="text-muted mb-1" style="font-size: 12px;">Skor Pilihan Ganda (Otomatis)</div>
+                <div class="fw-bold text-success fs-3">{{ $skor_pg }} <span class="fs-6 fw-normal text-muted">/ ({{ $benar_pg }}/{{ $total_soal_pg }} Benar)</span></div>
+            </div>
+        </div>
+        <div class="col-12 col-md-6 col-lg-7">
+            <div class="bg-white border rounded-3 p-3 text-center d-flex flex-column justify-content-center h-100" style="border-color: #e2e8f0 !important;">
+                <div class="text-muted mb-1" style="font-size: 12px;">Nilai Akhir Keseluruhan (Sementara)</div>
+                <div class="fw-bold text-primary fs-2">{{ number_format($nilai->nilai_akhir, 2) }} <span class="fs-6 text-muted fw-normal">/ 100</span></div>
+            </div>
+        </div>
+    </div>
+
+    {{-- ACCORDION PILIHAN GANDA --}}
+    @if($jawabans_pg->isNotEmpty())
+    <div class="row mb-4">
+        <div class="col-12 col-lg-10 mx-auto">
+            <div class="accordion" id="accordionPG">
+                <div class="accordion-item border rounded-3 overflow-hidden shadow-sm" style="border-color: #e2e8f0 !important;">
+                    <h2 class="accordion-header" id="headingPG">
+                        <button class="accordion-button bg-light fw-bold text-dark py-3" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePG" aria-expanded="true" aria-controls="collapsePG">
+                            <i class="fa-solid fa-list-check text-primary me-2"></i> Rincian Pilihan Ganda (Auto-Scored) &mdash; {{ $total_soal_pg }} Soal
+                            <span class="badge bg-success ms-3 fw-normal" style="font-size: 11px;">Skor PG: {{ $skor_pg }} Poin</span>
+                        </button>
+                    </h2>
+                    <div id="collapsePG" class="accordion-collapse collapse show" aria-labelledby="headingPG" data-bs-parent="#accordionPG">
+                        <div class="accordion-body bg-white p-4">
+                            
+                            @foreach($jawabans_pg as $pg)
+                            <div class="p-3 mb-3 border rounded-3 bg-light bg-opacity-50" style="border-color: #e2e8f0 !important;">
+                                <div class="d-flex align-items-center justify-content-between mb-2">
+                                    <span class="badge bg-primary">Soal No. {{ $pg->urutan }} (Pilihan Ganda)</span>
+                                    @if($pg->is_benar === 1)
+                                        <span class="badge bg-success-subtle text-success border border-success border-opacity-25 fw-bold">
+                                            <i class="fa-solid fa-check me-1"></i> Benar (+{{ $pg->nilai_jawaban }} Poin)
+                                        </span>
+                                    @else
+                                        <span class="badge bg-danger-subtle text-danger border border-danger border-opacity-25 fw-bold">
+                                            <i class="fa-solid fa-xmark me-1"></i> Salah (0 Poin)
+                                        </span>
+                                    @endif
+                                </div>
+                                <div class="fw-medium text-dark mb-2">
+                                    {!! $pg->teks_soal !!}
+                                    @if($pg->gambar)
+                                        <div class="mt-2"><img src="{{ asset('storage/'.$pg->gambar) }}" class="soal-img" alt="Gambar Soal"></div>
+                                    @endif
+                                </div>
+                                
+                                <div class="row g-2 mt-1">
+                                    @if(isset($opsi_pg[$pg->soal_id]))
+                                        @foreach($opsi_pg[$pg->soal_id] as $opsi)
+                                            @php
+                                                $isSiswaJawaban = ($pg->pilihan_jawaban_id == $opsi->id);
+                                                $isKunciBenar = ($opsi->is_benar == 1);
+                                                
+                                                $class = 'pg-option-item';
+                                                $icon = '';
+                                                $badge = '';
+                                                
+                                                if ($isKunciBenar && $isSiswaJawaban) {
+                                                    $class .= ' correct-key';
+                                                    $icon = '<i class="fa-solid fa-circle-check me-1"></i>';
+                                                    $badge = '<span class="badge bg-success text-white ms-2">Jawaban Siswa & Kunci Benar</span>';
+                                                } elseif ($isKunciBenar && !$isSiswaJawaban) {
+                                                    $class .= ' correct-key';
+                                                    $icon = '<i class="fa-solid fa-circle-check me-1"></i>';
+                                                    $badge = '<span class="badge bg-success text-white ms-2">Kunci Jawaban Benar</span>';
+                                                } elseif (!$isKunciBenar && $isSiswaJawaban) {
+                                                    $class .= ' student-wrong';
+                                                    $icon = '<i class="fa-solid fa-circle-xmark me-1"></i>';
+                                                    $badge = '<span class="badge bg-danger text-white ms-2">Jawaban Siswa (Salah)</span>';
+                                                }
+                                            @endphp
+                                            <div class="col-md-6">
+                                                <div class="{!! $class !!}">
+                                                    {!! $icon !!} {!! $opsi->teks_pilihan !!} {!! $badge !!}
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    @endif
+                                </div>
+                            </div>
+                            @endforeach
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
+
+    {{-- KOREKSI MANUAL ESSAY --}}
     @if($jawabans->isEmpty())
+        @if($jawabans_pg->isEmpty())
         <div class="card border-0 shadow-sm rounded-4 text-center py-5">
             <div class="card-body">
                 <i class="fa-solid fa-clipboard-check fa-3x text-muted opacity-25 mb-3 d-block"></i>
-                <h5 class="fw-bold text-dark mb-1">Tidak Ada Soal Essay</h5>
+                <h5 class="fw-bold text-dark mb-1">Data Kosong</h5>
                 <p class="text-muted mb-0" style="font-size: 0.875rem;">
-                    Ujian ini tidak memiliki soal berjenis Essay atau Isian yang memerlukan koreksi manual.
+                    Tidak ada jawaban yang direkam untuk siswa ini.
                 </p>
             </div>
         </div>
+        @else
+        <div class="alert alert-info border-0 rounded-3 text-center py-4 col-lg-10 mx-auto">
+            <i class="fa-solid fa-info-circle fa-2x mb-2"></i>
+            <h6 class="fw-bold">Hanya Soal Pilihan Ganda</h6>
+            <p class="mb-0 small">Ujian ini tidak memiliki soal essay. Semua nilai sudah dikalkulasi secara otomatis oleh sistem.</p>
+        </div>
+        @endif
     @else
         <form method="POST" action="{{ route('dashboard-guru.nilai-siswa.store-koreksi', ['ujian' => $ujian->id, 'siswa' => $siswa->id]) }}">
             @csrf
             
             <div class="row">
                 <div class="col-12 col-lg-10 mx-auto">
+                    <h5 class="fw-bold text-dark mb-3"><i class="fa-solid fa-pen-ruler text-warning me-2"></i>Koreksi Manual Soal Uraian</h5>
                     @foreach($jawabans as $j)
                     <div class="question-card">
                         <div class="question-header">
@@ -316,7 +448,7 @@
                                 </div>
                                 
                                 <div class="ms-md-auto">
-                                    <label class="grading-title">Status Jawaban</label>
+                                    <label class="grading-title">Status Keabsahan</label>
                                     <div class="status-radio-group">
                                         <label>
                                             <input type="radio" name="koreksi[{{ $j->jawaban_id }}][is_benar]" value="1" class="custom-radio" {{ $j->is_benar === 1 ? 'checked' : '' }} required>

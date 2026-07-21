@@ -242,15 +242,15 @@
                 <hr class="text-muted opacity-25 mt-0 mb-3">
                 
                 <div class="d-flex flex-wrap gap-2 gap-md-3">
-                    <a href="{{ route('dashboard-guru.bank-soal.create') ?? '#' }}" class="action-btn">
+                    <a href="{{ route('dashboard-guru.bank-soal.create') }}" class="action-btn">
                         <i class="fa-solid fa-circle-plus me-2"></i> Buat Bank Soal
                     </a>
-                    <a href="#" class="action-btn">
-                        <i class="fa-solid fa-calendar-plus me-2"></i> Jadwalkan Ujian
+                    <a href="{{ route('dashboard-guru.jadwal-ujian.index') }}" class="action-btn">
+                        <i class="fa-solid fa-calendar-plus me-2"></i> Jadwal Ujian
                     </a>
                     
                     @if($isWaliKelas)
-                    <a href="#" class="action-btn">
+                    <a href="{{ route('dashboard-guru.wali-kelas.rekap-nilai') }}" class="action-btn">
                         <i class="fa-solid fa-chart-line me-2"></i> Rekap Kelas
                     </a>
                     @endif

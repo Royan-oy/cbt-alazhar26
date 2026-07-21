@@ -3,1175 +3,589 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CBT Pro - Dashboard Guru</title>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <title>Visualisasi Alur & UI Menu Nilai Siswa (Koreksi Jawaban Guru)</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+        :root {
+            --primary-bg: #0f172a;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --accent-blue: #0284c7;
+            --accent-green: #10b981;
+            --accent-amber: #f59e0b;
+            --accent-rose: #f43f5e;
+            --text-dark: #1e293b;
+            --text-muted: #64748b;
+        }
+
         body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+            color: var(--text-dark);
+            padding-bottom: 80px;
         }
-        /* Custom scrollbar */
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
+
+        /* Top Bar Header Visualizer */
+        .visualizer-header {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: white;
+            padding: 2.5rem 0;
+            border-bottom: 3px solid var(--accent-blue);
+            margin-bottom: 2rem;
         }
-        ::-webkit-scrollbar-track {
+
+        /* Custom Nav Pills for Prototype Tabs */
+        .nav-pills-custom .nav-link {
+            color: #64748b;
+            font-weight: 600;
+            padding: 12px 24px;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            background: white;
+            transition: all 0.25s ease;
+        }
+
+        .nav-pills-custom .nav-link:hover {
+            color: var(--accent-blue);
+            border-color: var(--accent-blue);
+            background: #f0f9ff;
+        }
+
+        .nav-pills-custom .nav-link.active {
+            background: linear-gradient(135deg, #0284c7, #0369a1);
+            color: white;
+            border-color: #0284c7;
+            box-shadow: 0 10px 20px -5px rgba(2, 132, 199, 0.3);
+        }
+
+        /* Diagram Box Flow */
+        .flow-step-card {
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1.5rem;
+            position: relative;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+            height: 100%;
+        }
+
+        .flow-step-badge {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--accent-blue);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 14px;
+            margin-bottom: 1rem;
+        }
+
+        /* Mockup Containers */
+        .mockup-window {
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 15px 35px -5px rgba(15, 23, 42, 0.08);
+        }
+
+        .mockup-header {
             background: #f1f5f9;
+            padding: 12px 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
-        ::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 4px;
+
+        .window-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
         }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
+
+        .mockup-body {
+            padding: 24px;
+            background-color: #ffffff;
+        }
+
+        /* UI Element Badges */
+        .status-badge {
+            font-size: 11px;
+            font-weight: 700;
+            padding: 5px 12px;
+            border-radius: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .status-pending {
+            background-color: #fffbebf7;
+            color: #d97706;
+            border: 1px solid #fef3c7;
+        }
+        .status-complete {
+            background-color: #ecfdf5;
+            color: #059669;
+            border: 1px solid #a7f3d0;
+        }
+
+        /* Interactive Correction Box */
+        .correction-card {
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 20px;
+            background: #ffffff;
+            transition: all 0.2s ease;
+        }
+
+        .correction-card:hover {
+            border-color: #93c5fd;
+            box-shadow: 0 8px 16px -4px rgba(59, 130, 246, 0.08);
+        }
+
+        .student-answer-box {
+            background-color: #f8fafc;
+            border-left: 4px solid var(--accent-blue);
+            padding: 14px 18px;
+            border-radius: 0 12px 12px 0;
+            font-size: 14px;
+            color: #334155;
+        }
+
+        .pg-option-item {
+            padding: 10px 14px;
+            border-radius: 10px;
+            font-size: 13px;
+            margin-bottom: 6px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .pg-option-item.correct-key {
+            background-color: #ecfdf5;
+            border-color: #6ee7b7;
+            color: #065f46;
+            font-weight: 600;
+        }
+
+        .pg-option-item.student-wrong {
+            background-color: #fef2f2;
+            border-color: #fca5a5;
+            color: #991b1b;
+            font-weight: 600;
+        }
+
+        .score-input-group {
+            max-width: 140px;
         }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 flex h-screen overflow-hidden">
+<body>
 
-    <!-- SIDEBAR -->
-    <aside class="w-64 bg-slate-900 text-slate-300 flex flex-col flex-shrink-0 transition-all duration-300">
-        <!-- Logo Brand -->
-        <div class="p-5 border-b border-slate-800 flex items-center gap-3">
-            <div class="bg-indigo-600 p-2 rounded-xl text-white">
-                <i data-lucide="graduation-cap" class="w-6 h-6"></i>
-            </div>
-            <div>
-                <h1 class="text-white font-bold leading-none">CBT Portal</h1>
-                <span class="text-xs text-indigo-400">Panel Guru v2.5</span>
-            </div>
+    <!-- TOP HEADER -->
+    <header class="visualizer-header text-center">
+        <div class="container">
+            <span class="badge bg-info bg-opacity-25 text-info px-3 py-2 rounded-pill fw-bold text-uppercase mb-2" style="letter-spacing: 1px; font-size: 11px;">
+                <i class="fa-solid fa-compass me-1"></i> Interactive UI Blueprint & Workflow (Updated with PG & Accordion)
+            </span>
+            <h2 class="fw-bold mb-2">Sistem Nilai Siswa & Lembar Peninjauan Lengkap (PG + Essay)</h2>
+            <p class="text-white-50 mb-0 max-w-600 mx-auto" style="font-size: 14px;">
+                Penambahan fitur peninjauan Pilihan Ganda (Otomatik Benar/Salah) &amp; Koreksi Manual Essay dalam satu halaman terpadu.
+            </p>
         </div>
+    </header>
 
-        <!-- Profil Singkat Guru -->
-        <div class="p-4 border-b border-slate-800 bg-slate-950/40 flex items-center gap-3">
-            <div class="w-10 h-10 rounded-full bg-indigo-500 text-white flex items-center justify-center font-bold text-lg border border-indigo-400">
-                BR
+    <div class="container">
+
+        <!-- ALUR PROSES DIAGRAM (WORKFLOW ALUR CORE) -->
+        <div class="mb-5">
+            <div class="d-flex align-items-center justify-content-between mb-4">
+                <h5 class="fw-bold m-0"><i class="fa-solid fa-diagram-project text-primary me-2"></i>1. Diagram Alur Kerja Terbaru</h5>
+                <span class="text-muted small">Integrasi Otomatis (PG) &amp; Manual (Essay)</span>
             </div>
-            <div class="overflow-hidden">
-                <p class="text-sm font-semibold text-white truncate">Budi Raharjo, S.Pd.</p>
-                <p class="text-xs text-slate-400 truncate">NIP. 198503112010011002</p>
-            </div>
-        </div>
 
-        <!-- Menu Navigasi -->
-        <nav class="flex-1 p-3 space-y-1 overflow-y-auto">
-            <button onclick="switchTab('dashboard')" id="btn-dashboard" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-150 hover:bg-slate-800 hover:text-white bg-slate-800 text-white">
-                <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
-                <span>Beranda / Dashboard</span>
-            </button>
-            <button onclick="switchTab('bank-soal')" id="btn-bank-soal" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-150 hover:bg-slate-800 hover:text-white text-slate-400">
-                <i data-lucide="database" class="w-5 h-5"></i>
-                <span>Bank Soal</span>
-            </button>
-            <button onclick="switchTab('jadwal-ujian')" id="btn-jadwal-ujian" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-150 hover:bg-slate-800 hover:text-white text-slate-400">
-                <i data-lucide="calendar" class="w-5 h-5"></i>
-                <span>Jadwal Ujian</span>
-            </button>
-            <button onclick="switchTab('monitoring')" id="btn-monitoring" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-150 hover:bg-slate-800 hover:text-white text-slate-400">
-                <i data-lucide="activity" class="w-5 h-5"></i>
-                <span>Monitoring Sesi</span>
-                <span class="ml-auto bg-emerald-500/20 text-emerald-400 text-xs px-2 py-0.5 rounded-full font-bold">Aktif</span>
-            </button>
-            <button onclick="switchTab('koreksi-esai')" id="btn-koreksi-esai" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-150 hover:bg-slate-800 hover:text-white text-slate-400">
-                <i data-lucide="pen-tool" class="w-5 h-5"></i>
-                <span>Koreksi Esai</span>
-                <span class="ml-auto bg-amber-500/20 text-amber-400 text-xs px-2 py-0.5 rounded-full font-bold">12</span>
-            </button>
-            <button onclick="switchTab('laporan')" id="btn-laporan" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-150 hover:bg-slate-800 hover:text-white text-slate-400">
-                <i data-lucide="file-bar-chart" class="w-5 h-5"></i>
-                <span>Laporan & Hasil</span>
-            </button>
-            <button onclick="switchTab('pengaturan')" id="btn-pengaturan" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-150 hover:bg-slate-800 hover:text-white text-slate-400">
-                <i data-lucide="settings" class="w-5 h-5"></i>
-                <span>Pengaturan Akun</span>
-            </button>
-        </nav>
-
-        <!-- Footer Sidebar -->
-        <div class="p-4 border-t border-slate-800 flex items-center gap-3">
-            <button onclick="alertNotification('Logout Berhasil', 'Anda telah aman keluar dari sistem.', 'success')" class="w-full flex items-center justify-center gap-2 py-2 px-4 rounded-lg bg-rose-500/10 hover:bg-rose-500 text-rose-400 hover:text-white text-sm font-medium transition-all duration-200">
-                <i data-lucide="log-out" class="w-4 h-4"></i>
-                <span>Keluar Aplikasi</span>
-            </button>
-        </div>
-    </aside>
-
-    <!-- MAIN CONTENT WRAPPER -->
-    <main class="flex-1 flex flex-col overflow-hidden">
-        <!-- HEADER -->
-        <header class="h-16 bg-white border-b border-slate-200 px-6 flex items-center justify-between flex-shrink-0">
-            <div class="flex items-center gap-2 text-slate-500 text-sm">
-                <i data-lucide="home" class="w-4 h-4"></i>
-                <span>/</span>
-                <span class="font-medium text-slate-800" id="breadcrumb-active">Beranda</span>
-            </div>
-            
-            <div class="flex items-center gap-4">
-                <!-- Dropdown Pilih Mapel -->
-                <div class="relative">
-                    <select class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold py-2 px-3 rounded-lg border-none focus:ring-2 focus:ring-indigo-500 cursor-pointer">
-                        <option>Matematika Peminatan (XI MIPA)</option>
-                        <option>Matematika Wajib (XI IPS)</option>
-                    </select>
-                </div>
-
-                <!-- Notifikasi Sederhana -->
-                <button onclick="alertNotification('Notifikasi', 'Tidak ada pesan atau laporan baru saat ini.', 'info')" class="relative p-2 rounded-full hover:bg-slate-100 text-slate-500 transition-colors">
-                    <i data-lucide="bell" class="w-5 h-5"></i>
-                    <span class="absolute top-1 right-1 w-2.5 h-2.5 bg-rose-500 rounded-full ring-2 ring-white"></span>
-                </button>
-            </div>
-        </header>
-
-        <!-- TOAST NOTIFICATION CONTAINER -->
-        <div id="toast-container" class="fixed top-4 right-4 z-50 pointer-events-none space-y-2"></div>
-
-        <!-- CONTENT VIEWPORT -->
-        <div class="flex-1 overflow-y-auto p-6" id="content-viewport">
-
-            <!-- TAB 1: DASHBOARD -->
-            <div id="tab-dashboard" class="tab-content space-y-6">
-                <!-- Welcome Banner -->
-                <div class="bg-gradient-to-r from-indigo-600 via-indigo-700 to-purple-800 rounded-2xl p-6 text-white shadow-lg shadow-indigo-100 relative overflow-hidden">
-                    <div class="relative z-10 max-w-xl">
-                        <h2 class="text-2xl font-bold mb-1">Selamat Datang Kembali, Pak Budi!</h2>
-                        <p class="text-indigo-100 text-sm leading-relaxed">
-                            Semua instrumen ujian berjalan dengan lancar. Hari ini terdapat <span class="font-bold underline">1 ujian aktif</span> yang sedang diselenggarakan. Pantau jalannya ujian melalui menu Monitoring Sesi.
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <div class="flow-step-card">
+                        <div class="flow-step-badge">1</div>
+                        <h6 class="fw-bold mb-2">Halaman Index Ujian</h6>
+                        <span class="badge bg-secondary mb-2" style="font-size: 10px;">Route: /dashboard-guru/nilai-siswa</span>
+                        <p class="text-muted small mb-0">
+                            Guru melihat daftar paket ujian yang dibuatnya. Menampilkan total siswa yang sudah mengumpulkan pekerjaan.
                         </p>
                     </div>
-                    <!-- Hiasan Dekoratif Bulatan -->
-                    <div class="absolute -right-10 -bottom-10 w-44 h-44 bg-white/10 rounded-full blur-2xl"></div>
-                    <div class="absolute right-1/4 -top-12 w-32 h-32 bg-indigo-500/20 rounded-full blur-xl"></div>
                 </div>
 
-                <!-- Statistik Widget -->
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-                    <!-- Widget 1 -->
-                    <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between">
-                        <div>
-                            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Bank Soal</span>
-                            <h3 class="text-2xl font-bold text-slate-800 mt-1" id="stat-total-soal">142</h3>
-                            <span class="text-xs text-indigo-600 font-medium flex items-center gap-1 mt-1">
-                                <i data-lucide="plus" class="w-3 h-3"></i> Tambah 12 pekan ini
-                            </span>
-                        </div>
-                        <div class="bg-indigo-50 text-indigo-600 p-3.5 rounded-2xl">
-                            <i data-lucide="database" class="w-6 h-6"></i>
-                        </div>
-                    </div>
-                    <!-- Widget 2 -->
-                    <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between">
-                        <div>
-                            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Kelas Diampu</span>
-                            <h3 class="text-2xl font-bold text-slate-800 mt-1">6 Kelas</h3>
-                            <span class="text-xs text-emerald-600 font-medium flex items-center gap-1 mt-1">
-                                <i data-lucide="users" class="w-3 h-3"></i> 216 Siswa Terdaftar
-                            </span>
-                        </div>
-                        <div class="bg-emerald-50 text-emerald-600 p-3.5 rounded-2xl">
-                            <i data-lucide="users" class="w-6 h-6"></i>
-                        </div>
-                    </div>
-                    <!-- Widget 3 -->
-                    <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between">
-                        <div>
-                            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Ujian Aktif Hari Ini</span>
-                            <h3 class="text-2xl font-bold text-slate-800 mt-1" id="stat-ujian-aktif">1</h3>
-                            <span class="text-xs text-amber-600 font-medium flex items-center gap-1 mt-1">
-                                <i data-lucide="clock" class="w-3 h-3"></i> Sisa waktu 45 menit lagi
-                            </span>
-                        </div>
-                        <div class="bg-amber-50 text-amber-600 p-3.5 rounded-2xl">
-                            <i data-lucide="play-circle" class="w-6 h-6"></i>
-                        </div>
-                    </div>
-                    <!-- Widget 4 -->
-                    <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between">
-                        <div>
-                            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Rata-rata Nilai</span>
-                            <h3 class="text-2xl font-bold text-slate-800 mt-1">78.4</h3>
-                            <span class="text-xs text-emerald-600 font-medium flex items-center gap-1 mt-1">
-                                <i data-lucide="trending-up" class="w-3 h-3"></i> Di atas KKM (75)
-                            </span>
-                        </div>
-                        <div class="bg-indigo-50 text-indigo-600 p-3.5 rounded-2xl">
-                            <i data-lucide="award" class="w-6 h-6"></i>
-                        </div>
+                <div class="col-md-4">
+                    <div class="flow-step-card">
+                        <div class="flow-step-badge">2</div>
+                        <h6 class="fw-bold mb-2">Halaman Daftar Peserta</h6>
+                        <span class="badge bg-secondary mb-2" style="font-size: 10px;">Route: /dashboard-guru/nilai-siswa/{ujian}</span>
+                        <p class="text-muted small mb-0">
+                            Menampilkan tabel siswa, status pengerjaan, skor awal PG, serta indikator <strong>"Belum Dikoreksi"</strong> untuk soal Essay.
+                        </p>
                     </div>
                 </div>
 
-                <!-- Grafik Sederhana & Aktivitas Terbaru -->
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <!-- Kolom Grafik / Ringkasan -->
-                    <div class="lg:col-span-2 bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col">
-                        <div class="flex items-center justify-between mb-4">
-                            <h4 class="font-bold text-slate-800 text-base">Perkembangan Hasil Ujian Terakhir</h4>
-                            <span class="text-xs text-slate-400">Semester Ganjil 2026/2027</span>
-                        </div>
-                        <!-- Mini Bar Chart (Pure CSS & Tailwind) -->
-                        <div class="flex-1 flex items-end justify-between h-48 gap-3 pt-4 px-2">
-                            <div class="flex flex-col items-center flex-1">
-                                <div class="w-full bg-indigo-100 hover:bg-indigo-200 rounded-t-lg transition-all" style="height: 65%;"></div>
-                                <span class="text-[10px] text-slate-500 mt-2 text-center">UH-1 Aljabar</span>
-                                <span class="text-xs font-bold text-indigo-600">65</span>
-                            </div>
-                            <div class="flex flex-col items-center flex-1">
-                                <div class="w-full bg-indigo-100 hover:bg-indigo-200 rounded-t-lg transition-all" style="height: 72%;"></div>
-                                <span class="text-[10px] text-slate-500 mt-2 text-center">UH-2 Trigonometri</span>
-                                <span class="text-xs font-bold text-indigo-600">72</span>
-                            </div>
-                            <div class="flex flex-col items-center flex-1">
-                                <div class="w-full bg-indigo-100 hover:bg-indigo-200 rounded-t-lg transition-all" style="height: 80%;"></div>
-                                <span class="text-[10px] text-slate-500 mt-2 text-center">UTS Matematika</span>
-                                <span class="text-xs font-bold text-indigo-600">80</span>
-                            </div>
-                            <div class="flex flex-col items-center flex-1">
-                                <div class="w-full bg-indigo-600 hover:bg-indigo-700 rounded-t-lg transition-all" style="height: 85%;"></div>
-                                <span class="text-[10px] text-slate-500 mt-2 text-center">UAS Ganjil</span>
-                                <span class="text-xs font-bold text-indigo-700">85</span>
-                            </div>
-                        </div>
+                <div class="col-md-4">
+                    <div class="flow-step-card">
+                        <div class="flow-step-badge bg-success">3</div>
+                        <h6 class="fw-bold mb-2">Lembar Peninjauan Lengkap</h6>
+                        <span class="badge bg-secondary mb-2" style="font-size: 10px;">Route: /.../koreksi/{siswa}</span>
+                        <p class="text-muted small mb-0">
+                            Menampilkan <strong>Section PG (Otomatis)</strong> sebagai referensi transparansi, serta <strong>Section Essay (Manual Input)</strong> yang bisa di-koreksi oleh Guru.
+                        </p>
                     </div>
+                </div>
+            </div>
+        </div>
 
-                    <!-- Log Aktivitas Guru -->
-                    <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
-                        <h4 class="font-bold text-slate-800 text-base mb-4">Aktivitas Terakhir</h4>
-                        <div class="space-y-4">
-                            <div class="flex gap-3">
-                                <div class="w-2 h-2 rounded-full bg-indigo-500 mt-2 flex-shrink-0"></div>
-                                <div>
-                                    <p class="text-xs text-slate-400">10 Menit Lalu</p>
-                                    <p class="text-sm font-semibold text-slate-700">Ujian PAS Matematika dimulai</p>
-                                    <span class="text-xs bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded-full font-medium">Sesi Aktif</span>
-                                </div>
+        <hr class="my-5 opacity-25">
+
+        <!-- INTERACTIVE TABBED PROTOTYPE PREVIEW -->
+        <div class="d-flex align-items-center justify-content-between mb-4">
+            <div>
+                <h5 class="fw-bold m-0"><i class="fa-solid fa-desktop text-primary me-2"></i>2. Prototype Visual Tampilan (Live Preview)</h5>
+                <p class="text-muted small mb-0">Klik tab di bawah untuk melihat simulasi tampilan di setiap tahapnya:</p>
+            </div>
+        </div>
+
+        <!-- NAV TABS -->
+        <ul class="nav nav-pills nav-pills-custom gap-2 mb-4" id="pills-tab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="tab-1-btn" data-bs-toggle="pill" data-bs-target="#tab-1" type="button" role="tab">
+                    <i class="fa-solid fa-list-check me-2"></i> Tahap 1: Daftar Ujian (Index)
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="tab-2-btn" data-bs-toggle="pill" data-bs-target="#tab-2" type="button" role="tab">
+                    <i class="fa-solid fa-users me-2"></i> Tahap 2: Detail Peserta & Status
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="tab-3-btn" data-bs-toggle="pill" data-bs-target="#tab-3" type="button" role="tab">
+                    <i class="fa-solid fa-pen-to-square me-2"></i> Tahap 3: Peninjauan PG + Koreksi Essay
+                </button>
+            </li>
+        </ul>
+
+        <!-- TAB CONTENT CONTAINER -->
+        <div class="tab-content" id="pills-tabContent">
+
+            <!-- TAHAP 1: INDEX UJIAN -->
+            <div class="tab-pane fade" id="tab-1" role="tabpanel">
+                <div class="mockup-window">
+                    <div class="mockup-header">
+                        <span class="window-dot bg-danger"></span>
+                        <span class="window-dot bg-warning"></span>
+                        <span class="window-dot bg-success"></span>
+                        <span class="text-muted ms-2 small fw-semibold">View: <code>resources/views/guru/nilai-siswa/index.blade.php</code></span>
+                    </div>
+                    <div class="mockup-body">
+                        <div class="d-flex align-items-center justify-content-between mb-4">
+                            <div>
+                                <h5 class="fw-bold mb-1">Daftar Nilai Ujian Siswa</h5>
+                                <p class="text-muted small mb-0">Pilih paket ujian untuk melihat dan melakukan koreksi jawaban siswa.</p>
                             </div>
-                            <div class="flex gap-3">
-                                <div class="w-2 h-2 rounded-full bg-emerald-500 mt-2 flex-shrink-0"></div>
-                                <div>
-                                    <p class="text-xs text-slate-400">1 Jam Lalu</p>
-                                    <p class="text-sm font-semibold text-slate-700">Menambahkan 5 soal esai</p>
-                                    <span class="text-xs text-slate-500">Mata Pelajaran: Matematika Peminatan</span>
-                                </div>
-                            </div>
-                            <div class="flex gap-3">
-                                <div class="w-2 h-2 rounded-full bg-amber-500 mt-2 flex-shrink-0"></div>
-                                <div>
-                                    <p class="text-xs text-slate-400">Kemarin, 14:20</p>
-                                    <p class="text-sm font-semibold text-slate-700">Mengekspor Rekap Nilai UTS Kelas XI</p>
-                                    <span class="text-xs text-slate-500">Format: Excel (.xlsx)</span>
-                                </div>
-                            </div>
+                            <input type="text" class="form-control form-control-sm w-auto" placeholder="Cari Ujian...">
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table align-middle table-hover border">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Nama Ujian</th>
+                                        <th>Mata Pelajaran</th>
+                                        <th>Jenis Ujian</th>
+                                        <th class="text-center">Peserta Selesai</th>
+                                        <th class="text-end">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <strong class="d-block text-dark">Penilaian Tengah Semester (PTS) Genap</strong>
+                                            <small class="text-muted">Tahun Ajaran 2025/2026</small>
+                                        </td>
+                                        <td><span class="badge bg-primary bg-opacity-10 text-primary fw-semibold">Matematika</span></td>
+                                        <td>PTS</td>
+                                        <td class="text-center"><span class="badge bg-secondary">32 Siswa</span></td>
+                                        <td class="text-end">
+                                            <button class="btn btn-sm btn-primary rounded-3">
+                                                <i class="fa-solid fa-eye me-1"></i> Lihat Peserta &amp; Nilai
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- TAB 2: BANK SOAL -->
-            <div id="tab-bank-soal" class="tab-content hidden space-y-6">
-                <!-- Header Toolbar -->
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
-                    <div class="flex flex-wrap items-center gap-2">
-                        <select class="bg-slate-100 text-slate-600 text-xs font-semibold py-2 px-3 rounded-lg border-none focus:ring-2 focus:ring-indigo-500 cursor-pointer">
-                            <option>Semua Kelas</option>
-                            <option>Kelas XI MIPA</option>
-                            <option>Kelas XI IPS</option>
-                        </select>
-                        <select class="bg-slate-100 text-slate-600 text-xs font-semibold py-2 px-3 rounded-lg border-none focus:ring-2 focus:ring-indigo-500 cursor-pointer">
-                            <option>Semua Kategori</option>
-                            <option>Aljabar</option>
-                            <option>Trigonometri</option>
-                            <option>Matriks</option>
-                        </select>
+            <!-- TAHAP 2: DETAIL PESERTA -->
+            <div class="tab-pane fade" id="tab-2" role="tabpanel">
+                <div class="mockup-window">
+                    <div class="mockup-header">
+                        <span class="window-dot bg-danger"></span>
+                        <span class="window-dot bg-warning"></span>
+                        <span class="window-dot bg-success"></span>
+                        <span class="text-muted ms-2 small fw-semibold">View: <code>resources/views/guru/nilai-siswa/show.blade.php</code></span>
                     </div>
-                    <div class="flex gap-2 w-full sm:w-auto">
-                        <button onclick="openImportModal()" class="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2 px-4 rounded-xl text-xs transition-all">
-                            <i data-lucide="file-spreadsheet" class="w-4 h-4 text-emerald-600"></i>
-                            <span>Impor Excel</span>
-                        </button>
-                        <button onclick="toggleFormSoal()" class="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-xl text-xs transition-all shadow-md shadow-indigo-100">
-                            <i data-lucide="plus-circle" class="w-4 h-4"></i>
-                            <span>Tambah Soal</span>
-                        </button>
+                    <div class="mockup-body">
+                        <div class="mb-4">
+                            <a href="#" class="text-decoration-none small text-muted"><i class="fa-solid fa-arrow-left me-1"></i> Kembali ke Daftar Ujian</a>
+                            <h5 class="fw-bold mt-2 mb-1">PTS Genap - Matematika</h5>
+                            <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25">Total 32 Siswa Terdaftar</span>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table align-middle border">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>NIS</th>
+                                        <th>Nama Siswa</th>
+                                        <th>Status Ujian</th>
+                                        <th>Status Koreksi Essay</th>
+                                        <th class="text-center">Nilai Akhir</th>
+                                        <th class="text-end">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><code>102938</code></td>
+                                        <td><strong>Ahmad Fauzi</strong></td>
+                                        <td><span class="badge bg-success">Selesai</span></td>
+                                        <td>
+                                            <span class="status-badge status-pending">
+                                                <i class="fa-solid fa-clock me-1"></i> 2 Soal Belum Dikoreksi
+                                            </span>
+                                        </td>
+                                        <td class="text-center fw-bold text-muted">70.00</td>
+                                        <td class="text-end">
+                                            <button class="btn btn-sm btn-warning text-dark font-semibold rounded-3">
+                                                <i class="fa-solid fa-pen-to-square me-1"></i> Koreksi / Tinjau
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
+            </div>
 
-                <!-- Formulir Tambah Soal (Collapsible) -->
-                <div id="form-tambah-soal" class="hidden bg-white p-6 rounded-2xl border border-indigo-100 shadow-lg shadow-indigo-50/50 space-y-4">
-                    <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-                        <h4 class="font-bold text-slate-800 flex items-center gap-2">
-                            <i data-lucide="plus-circle" class="w-5 h-5 text-indigo-600"></i>
-                            Buat Pertanyaan Baru
-                        </h4>
-                        <button onclick="toggleFormSoal()" class="text-slate-400 hover:text-slate-600">
-                            <i data-lucide="x" class="w-5 h-5"></i>
-                        </button>
+            <!-- TAHAP 3: LEMBAR KOREKSI ESSAY & RINCIAN PG -->
+            <div class="tab-pane fade show active" id="tab-3" role="tabpanel">
+                <div class="mockup-window">
+                    <div class="mockup-header">
+                        <span class="window-dot bg-danger"></span>
+                        <span class="window-dot bg-warning"></span>
+                        <span class="window-dot bg-success"></span>
+                        <span class="text-muted ms-2 small fw-semibold">View: <code>resources/views/guru/nilai-siswa/koreksi.blade.php</code></span>
                     </div>
-
-                    <form id="soal-form" onsubmit="saveSoal(event)" class="space-y-4">
-                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                            <div>
-                                <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Mata Pelajaran</label>
-                                <input type="text" id="form-mapel" value="Matematika" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none" required>
-                            </div>
-                            <div>
-                                <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Topik/Materi</label>
-                                <input type="text" id="form-topik" placeholder="Contoh: Logaritma" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none" required>
-                            </div>
-                            <div>
-                                <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Tingkat Kesulitan</label>
-                                <select id="form-kesulitan" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none cursor-pointer">
-                                    <option value="Mudah">Mudah</option>
-                                    <option value="Sedang" selected>Sedang</option>
-                                    <option value="Sukar">Sukar</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Tipe Soal</label>
-                                <select id="form-tipe" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none cursor-pointer">
-                                    <option value="Pilihan Ganda">Pilihan Ganda</option>
-                                    <option value="Esai">Esai</option>
-                                </select>
+                    <div class="mockup-body">
+                        
+                        <!-- HEADER SISWA INFO + STATS RINGKAS -->
+                        <div class="card bg-light border-0 p-3 mb-4 rounded-3">
+                            <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                                <div>
+                                    <span class="text-muted small d-block">Siswa yang Dikoreksi:</span>
+                                    <h5 class="fw-bold text-dark mb-0">Ahmad Fauzi (NIS: 102938)</h5>
+                                    <small class="text-muted">Ujian: PTS Genap - Matematika Kelas VIII</small>
+                                </div>
+                                <div class="d-flex align-items-center gap-4 text-end">
+                                    <div class="border-end pe-3">
+                                        <span class="text-muted small d-block">Skor Pilihan Ganda (Auto):</span>
+                                        <h5 class="fw-bold text-success mb-0">50 <span class="fs-6 text-muted fw-normal">/ 70 Poin (5/7 Benar)</span></h5>
+                                    </div>
+                                    <div>
+                                        <span class="text-muted small d-block">Nilai Akhir Total:</span>
+                                        <h3 class="fw-bold text-primary mb-0">70.00 <span class="fs-6 text-muted fw-normal">/ 100</span></h3>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
-                        <!-- Editor Soal -->
-                        <div>
-                            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Butir Pertanyaan</label>
-                            <textarea id="form-pertanyaan" rows="3" placeholder="Tuliskan pertanyaan di sini..." class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-500 outline-none" required></textarea>
+                        <!-- ACCORDION SECTION: RINCIAN PILIHAN GANDA -->
+                        <div class="accordion mb-4" id="accordionPG">
+                            <div class="accordion-item border rounded-3 overflow-hidden">
+                                <h2 class="accordion-header" id="headingPG">
+                                    <button class="accordion-button bg-light fw-bold text-dark py-3" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePG" aria-expanded="true" aria-controls="collapsePG">
+                                        <i class="fa-solid fa-list-check text-primary me-2"></i> Rincian Pilihan Ganda (Auto-Scored) &mdash; 7 Soal
+                                        <span class="badge bg-success ms-3 font-normal" style="font-size: 11px;">Skor PG: 50 Poin</span>
+                                    </button>
+                                </h2>
+                                <div id="collapsePG" class="accordion-collapse collapse show" aria-labelledby="headingPG" data-bs-parent="#accordionPG">
+                                    <div class="accordion-body bg-white p-4">
+                                        
+                                        <!-- PG ITEM 1 (SISWA BENAR) -->
+                                        <div class="p-3 mb-3 border rounded-3 bg-light bg-opacity-50">
+                                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                                <span class="badge bg-primary">Soal No. 1 (Pilihan Ganda)</span>
+                                                <span class="badge bg-success-subtle text-success border border-success border-opacity-25 fw-bold">
+                                                    <i class="fa-solid fa-check me-1"></i> Benar (+10 Poin)
+                                                </span>
+                                            </div>
+                                            <p class="fw-medium text-dark mb-2">Berapakah hasil dari $2^3 + 3^2$?</p>
+                                            
+                                            <div class="row g-2 mt-1">
+                                                <div class="col-md-6">
+                                                    <div class="pg-option-item">A. 15</div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="pg-option-item correct-key">
+                                                        <i class="fa-solid fa-circle-check me-1"></i> B. 17 &nbsp;<span class="badge bg-success text-white">Jawaban Siswa &amp; Kunci Benar</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- PG ITEM 2 (SISWA SALAH) -->
+                                        <div class="p-3 border rounded-3 bg-light bg-opacity-50">
+                                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                                <span class="badge bg-primary">Soal No. 2 (Pilihan Ganda)</span>
+                                                <span class="badge bg-danger-subtle text-danger border border-danger border-opacity-25 fw-bold">
+                                                    <i class="fa-solid fa-xmark me-1"></i> Salah (0 Poin)
+                                                </span>
+                                            </div>
+                                            <p class="fw-medium text-dark mb-2">Bentuk sederhana dari $\sqrt{50}$ adalah...</p>
+                                            
+                                            <div class="row g-2 mt-1">
+                                                <div class="col-md-6">
+                                                    <div class="pg-option-item student-wrong">
+                                                        <i class="fa-solid fa-circle-xmark me-1"></i> A. $2\sqrt{5}$ &nbsp;<span class="badge bg-danger text-white">Jawaban Siswa (Salah)</span>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="pg-option-item correct-key">
+                                                        <i class="fa-solid fa-circle-check me-1"></i> C. $5\sqrt{2}$ &nbsp;<span class="badge bg-success text-white">Kunci Jawaban Benar</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
-                        <!-- Opsi Jawaban (Hanya muncul jika tipe soal Pilihan Ganda) -->
-                        <div id="opsi-jawaban-wrapper" class="space-y-3">
-                            <label class="block text-xs font-bold text-slate-500 uppercase">Opsi Pilihan Ganda & Kunci Jawaban</label>
+                        <!-- SECTION SOAL ESSAY & FORM INPUT KOREKSI GURU -->
+                        <div class="d-flex align-items-center justify-content-between mb-3">
+                            <h6 class="fw-bold text-dark m-0"><i class="fa-solid fa-pen-ruler text-warning me-2"></i>Koreksi Manual Soal Uraian / Essay</h6>
+                            <span class="text-muted small">Guru menginput penilaian &amp; menentukan keabsahan</span>
+                        </div>
+
+                        <!-- FORM KOREKSI -->
+                        <form onsubmit="event.preventDefault(); alert('Koreksi berhasil disimpan!');">
                             
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                <div class="flex items-center gap-2 bg-slate-50 p-2 rounded-xl border border-slate-200">
-                                    <input type="radio" name="kunci" value="A" checked class="w-4 h-4 text-indigo-600 focus:ring-indigo-500">
-                                    <span class="font-bold text-slate-400 text-sm">A.</span>
-                                    <input type="text" id="opsi-A" placeholder="Ketik pilihan A" class="w-full bg-transparent border-none text-sm outline-none focus:ring-0" required>
+                            <!-- ITEM SOAL ESSAY 1 -->
+                            <div class="correction-card mb-4">
+                                <div class="d-flex align-items-center justify-content-between mb-2">
+                                    <span class="badge bg-dark">Soal No. 8 (Essay)</span>
+                                    <span class="text-muted small fw-semibold">Bobot Maksimal: <strong>20 Poin</strong></span>
                                 </div>
-                                <div class="flex items-center gap-2 bg-slate-50 p-2 rounded-xl border border-slate-200">
-                                    <input type="radio" name="kunci" value="B" class="w-4 h-4 text-indigo-600 focus:ring-indigo-500">
-                                    <span class="font-bold text-slate-400 text-sm">B.</span>
-                                    <input type="text" id="opsi-B" placeholder="Ketik pilihan B" class="w-full bg-transparent border-none text-sm outline-none focus:ring-0" required>
+                                
+                                <p class="fw-medium text-dark mb-3">
+                                    Jelaskan langkah-langkah dalam menyelesaiakan persamaan kuadrat $x^2 + 5x + 6 = 0$ menggunakan metode pemfaktoran!
+                                </p>
+
+                                <div class="mb-3">
+                                    <label class="form-label small text-muted fw-bold">Jawaban Siswa:</label>
+                                    <div class="student-answer-box">
+                                        "Cari dua angka jika dikali menghasilkan 6 dan dijumlahkan 5, yaitu 2 dan 3. Sehingga $(x + 2)(x + 3) = 0$. Maka akar-akarnya adalah $x = -2$ dan $x = -3$."
+                                    </div>
                                 </div>
-                                <div class="flex items-center gap-2 bg-slate-50 p-2 rounded-xl border border-slate-200">
-                                    <input type="radio" name="kunci" value="C" class="w-4 h-4 text-indigo-600 focus:ring-indigo-500">
-                                    <span class="font-bold text-slate-400 text-sm">C.</span>
-                                    <input type="text" id="opsi-C" placeholder="Ketik pilihan C" class="w-full bg-transparent border-none text-sm outline-none focus:ring-0" required>
-                                </div>
-                                <div class="flex items-center gap-2 bg-slate-50 p-2 rounded-xl border border-slate-200">
-                                    <input type="radio" name="kunci" value="D" class="w-4 h-4 text-indigo-600 focus:ring-indigo-500">
-                                    <span class="font-bold text-slate-400 text-sm">D.</span>
-                                    <input type="text" id="opsi-D" placeholder="Ketik pilihan D" class="w-full bg-transparent border-none text-sm outline-none focus:ring-0" required>
-                                </div>
-                            </div>
-                        </div>
 
-                        <!-- Tombol Submit -->
-                        <div class="flex justify-end gap-2 pt-2">
-                            <button type="button" onclick="toggleFormSoal()" class="bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold py-2 px-4 rounded-xl text-xs transition-all">Batal</button>
-                            <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-xl text-xs transition-all">Simpan ke Bank Soal</button>
-                        </div>
-                    </form>
-                </div>
-
-                <!-- Daftar Soal Terdaftar -->
-                <div class="space-y-4" id="daftar-soal-list">
-                    <!-- Soal 1 -->
-                    <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-3">
-                        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-2.5">
-                            <div class="flex items-center gap-2">
-                                <span class="bg-slate-100 text-slate-600 text-xs px-2.5 py-1 rounded-full font-bold">Matematika</span>
-                                <span class="bg-indigo-50 text-indigo-600 text-xs px-2.5 py-1 rounded-full font-bold">Trigonometri</span>
-                                <span class="bg-rose-50 text-rose-600 text-xs px-2.5 py-1 rounded-full font-bold">Sukar</span>
-                            </div>
-                            <div class="flex gap-2">
-                                <button onclick="alertNotification('Edit Soal', 'Fitur edit soal dibuka', 'info')" class="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all"><i data-lucide="edit" class="w-4 h-4"></i></button>
-                                <button onclick="deleteSoalCard(this)" class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-                            </div>
-                        </div>
-                        <div>
-                            <p class="text-sm text-slate-700 font-medium">Jika $\sin x = \frac{3}{5}$ untuk $90^\circ < x < 180^\circ$, berapakah nilai dari $\cos x$? (Tingkat kesukaran tinggi)</p>
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-3 text-xs text-slate-500">
-                                <div class="p-2 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-100 font-semibold">A. $-4/5$ (Kunci Jawaban)</div>
-                                <div class="p-2 rounded-lg bg-slate-50 border border-slate-100">B. $4/5$</div>
-                                <div class="p-2 rounded-lg bg-slate-50 border border-slate-100">C. $-3/4$</div>
-                                <div class="p-2 rounded-lg bg-slate-50 border border-slate-100">D. $3/4$</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Soal 2 -->
-                    <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-3">
-                        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-2.5">
-                            <div class="flex items-center gap-2">
-                                <span class="bg-slate-100 text-slate-600 text-xs px-2.5 py-1 rounded-full font-bold">Matematika</span>
-                                <span class="bg-indigo-50 text-indigo-600 text-xs px-2.5 py-1 rounded-full font-bold">Aljabar</span>
-                                <span class="bg-emerald-50 text-emerald-600 text-xs px-2.5 py-1 rounded-full font-bold">Mudah</span>
-                            </div>
-                            <div class="flex gap-2">
-                                <button onclick="alertNotification('Edit Soal', 'Fitur edit soal dibuka', 'info')" class="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all"><i data-lucide="edit" class="w-4 h-4"></i></button>
-                                <button onclick="deleteSoalCard(this)" class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-                            </div>
-                        </div>
-                        <div>
-                            <p class="text-sm text-slate-700 font-medium">Berapakah nilai $x$ yang memenuhi persamaan linier berikut: $3x - 7 = 8$?</p>
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-3 text-xs text-slate-500">
-                                <div class="p-2 rounded-lg bg-slate-50 border border-slate-100">A. 3</div>
-                                <div class="p-2 rounded-lg bg-slate-50 border border-slate-100">B. 4</div>
-                                <div class="p-2 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-100 font-semibold">C. 5 (Kunci Jawaban)</div>
-                                <div class="p-2 rounded-lg bg-slate-50 border border-slate-100">D. 6</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- TAB 3: JADWAL UJIAN -->
-            <div id="tab-jadwal-ujian" class="tab-content hidden space-y-6">
-                <!-- Rilis Ujian Form -->
-                <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-4">
-                    <h4 class="font-bold text-slate-800 text-base border-b border-slate-100 pb-2">Rilis / Jadwalkan Ujian Baru</h4>
-                    <form onsubmit="rilisUjian(event)" class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
-                            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Nama Paket Ujian</label>
-                            <input type="text" id="ujian-nama" placeholder="Contoh: PAS Semester Ganjil" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none" required>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Pilih Paket Bank Soal</label>
-                            <select id="ujian-paket" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none cursor-pointer">
-                                <option>Ujian Trigonometri Dasar (20 Soal)</option>
-                                <option>Ujian Aljabar Komprehensif (40 Soal)</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Kelas Target</label>
-                            <select id="ujian-kelas" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none cursor-pointer">
-                                <option>XI MIPA-1, XI MIPA-2</option>
-                                <option>XI IPS-1, XI IPS-2</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Tanggal & Waktu Mulai</label>
-                            <input type="datetime-local" id="ujian-waktu" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none" required>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Durasi Ujian (Menit)</label>
-                            <input type="number" id="ujian-durasi" placeholder="90" min="10" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none" required>
-                        </div>
-                        <div class="flex items-end">
-                            <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 px-4 rounded-xl text-sm transition-all shadow-md shadow-indigo-100 flex items-center justify-center gap-2">
-                                <i data-lucide="rocket" class="w-4 h-4"></i>
-                                <span>Rilis Sekarang</span>
-                            </button>
-                        </div>
-                    </form>
-                </div>
-
-                <!-- Daftar Jadwal Ujian Aktif/Mendatang -->
-                <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-4">
-                    <h4 class="font-bold text-slate-800 text-base">Jadwal Ujian Terdaftar</h4>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse">
-                            <thead>
-                                <tr class="border-b border-slate-100 text-slate-400 text-xs font-bold uppercase">
-                                    <th class="pb-3 pl-2">Nama Ujian</th>
-                                    <th class="pb-3">Mata Pelajaran</th>
-                                    <th class="pb-3">Kelas</th>
-                                    <th class="pb-3">Jadwal Pelaksanaan</th>
-                                    <th class="pb-3">Durasi</th>
-                                    <th class="pb-3">Token</th>
-                                    <th class="pb-3 text-center">Status</th>
-                                </tr>
-                            </thead>
-                            <tbody class="text-sm divide-y divide-slate-50" id="ujian-table-body">
-                                <tr>
-                                    <td class="py-3.5 pl-2 font-semibold text-slate-800">PAS Ganjil Matematika</td>
-                                    <td class="py-3.5 text-slate-500">Matematika Peminatan</td>
-                                    <td class="py-3.5 text-slate-500">XI MIPA-1, XI MIPA-2</td>
-                                    <td class="py-3.5 text-slate-500">Hari ini, 07:30 WIB</td>
-                                    <td class="py-3.5 text-slate-500">90 Menit</td>
-                                    <td class="py-3.5 font-mono text-indigo-600 font-bold">X7B9KD</td>
-                                    <td class="py-3.5 text-center">
-                                        <span class="bg-emerald-50 text-emerald-600 text-xs font-bold px-2.5 py-1 rounded-full">Berjalan</span>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="py-3.5 pl-2 font-semibold text-slate-800">Ulangan Harian Bab Matriks</td>
-                                    <td class="py-3.5 text-slate-500">Matematika Wajib</td>
-                                    <td class="py-3.5 text-slate-500">XI IPS-1</td>
-                                    <td class="py-3.5 text-slate-500">Besok, 08:00 WIB</td>
-                                    <td class="py-3.5 text-slate-500">45 Menit</td>
-                                    <td class="py-3.5 font-mono text-slate-400 font-bold">A5W2P0</td>
-                                    <td class="py-3.5 text-center">
-                                        <span class="bg-amber-50 text-amber-600 text-xs font-bold px-2.5 py-1 rounded-full">Mendatang</span>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <!-- TAB 4: MONITORING SESI -->
-            <div id="tab-monitoring" class="tab-content hidden space-y-6">
-                <!-- Banner Live Monitoring -->
-                <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
-                    <div class="flex items-center gap-3">
-                        <div class="w-3 h-3 bg-emerald-500 rounded-full animate-ping"></div>
-                        <div>
-                            <h4 class="font-bold text-slate-800">Live Real-time Monitoring</h4>
-                            <p class="text-xs text-slate-400">Memantau aktivitas siswa yang sedang mengerjakan ujian saat ini.</p>
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <span class="text-xs text-slate-500">Ujian Aktif: <strong>PAS Ganjil Matematika</strong></span>
-                    </div>
-                </div>
-
-                <!-- Live Siswa List -->
-                <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-4">
-                    <div class="flex items-center justify-between">
-                        <h5 class="font-bold text-slate-800 text-sm">Siswa Mengerjakan (12 Terdeteksi)</h5>
-                        <button onclick="alertNotification('Segarkan Data', 'Status siswa berhasil diperbarui', 'success')" class="text-xs text-indigo-600 font-bold hover:underline flex items-center gap-1">
-                            <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Segarkan Sesi
-                        </button>
-                    </div>
-
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse">
-                            <thead>
-                                <tr class="border-b border-slate-100 text-slate-400 text-xs font-bold uppercase">
-                                    <th class="pb-3 pl-2">Nama Siswa</th>
-                                    <th class="pb-3">Kelas</th>
-                                    <th class="pb-3">Progess Soal</th>
-                                    <th class="pb-3">Sisa Waktu</th>
-                                    <th class="pb-3">Alamat IP</th>
-                                    <th class="pb-3">Status</th>
-                                    <th class="pb-3 text-center">Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody class="text-sm divide-y divide-slate-50" id="monitoring-table-body">
-                                <tr>
-                                    <td class="py-3.5 pl-2 font-semibold text-slate-800">Aditya Pratama</td>
-                                    <td class="py-3.5 text-slate-500">XI MIPA-1</td>
-                                    <td class="py-3.5">
-                                        <div class="flex items-center gap-2">
-                                            <div class="w-24 bg-slate-100 h-2 rounded-full overflow-hidden">
-                                                <div class="bg-indigo-600 h-full" style="width: 75%;"></div>
+                                <div class="row align-items-center g-3 bg-light p-3 rounded-3 mt-2">
+                                    <div class="col-md-6">
+                                        <label class="form-label small fw-bold mb-1">Status Keabsahan:</label>
+                                        <div class="d-flex gap-3">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="status_1" id="b1" checked>
+                                                <label class="form-check-label text-success fw-bold" for="b1"><i class="fa-solid fa-check-circle me-1"></i> Benar</label>
                                             </div>
-                                            <span class="text-xs font-semibold text-slate-600">30/40 Soal</span>
-                                        </div>
-                                    </td>
-                                    <td class="py-3.5 text-slate-500">34 menit</td>
-                                    <td class="py-3.5 font-mono text-xs text-slate-400">192.168.1.115</td>
-                                    <td class="py-3.5">
-                                        <span class="bg-emerald-50 text-emerald-600 text-xs font-bold px-2 py-0.5 rounded-full">Sedang Mengerjakan</span>
-                                    </td>
-                                    <td class="py-3.5 text-center">
-                                        <button onclick="resetSesiSiswa('Aditya Pratama')" class="bg-amber-500/10 hover:bg-amber-500 text-amber-600 hover:text-white px-2.5 py-1 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1 mx-auto">
-                                            <i data-lucide="key-round" class="w-3.5 h-3.5"></i> Reset Sesi
-                                        </button>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="py-3.5 pl-2 font-semibold text-slate-800">Amalia Putri</td>
-                                    <td class="py-3.5 text-slate-500">XI MIPA-1</td>
-                                    <td class="py-3.5">
-                                        <div class="flex items-center gap-2">
-                                            <div class="w-24 bg-slate-100 h-2 rounded-full overflow-hidden">
-                                                <div class="bg-indigo-600 h-full" style="width: 100%;"></div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="status_1" id="s1">
+                                                <label class="form-check-label text-danger fw-bold" for="s1"><i class="fa-solid fa-times-circle me-1"></i> Salah</label>
                                             </div>
-                                            <span class="text-xs font-semibold text-slate-600">40/40 Soal</span>
                                         </div>
-                                    </td>
-                                    <td class="py-3.5 text-slate-500">Selesai</td>
-                                    <td class="py-3.5 font-mono text-xs text-slate-400">192.168.1.102</td>
-                                    <td class="py-3.5">
-                                        <span class="bg-indigo-50 text-indigo-600 text-xs font-bold px-2 py-0.5 rounded-full">Selesai Ujian</span>
-                                    </td>
-                                    <td class="py-3.5 text-center">
-                                        <button disabled class="opacity-50 cursor-not-allowed bg-slate-100 text-slate-400 px-2.5 py-1 rounded-lg text-xs font-bold mx-auto">
-                                            Selesai
-                                        </button>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="py-3.5 pl-2 font-semibold text-slate-800">Farhan Alamsyah</td>
-                                    <td class="py-3.5 text-slate-500">XI MIPA-2</td>
-                                    <td class="py-3.5">
-                                        <div class="flex items-center gap-2">
-                                            <div class="w-24 bg-slate-100 h-2 rounded-full overflow-hidden">
-                                                <div class="bg-red-500 h-full" style="width: 45%;"></div>
-                                            </div>
-                                            <span class="text-xs font-semibold text-slate-600">18/40 Soal</span>
-                                        </div>
-                                    </td>
-                                    <td class="py-3.5 text-slate-500">Sesi Terputus</td>
-                                    <td class="py-3.5 font-mono text-xs text-slate-400">192.168.1.134</td>
-                                    <td class="py-3.5">
-                                        <span class="bg-rose-50 text-rose-600 text-xs font-bold px-2 py-0.5 rounded-full">Koneksi Hilang</span>
-                                    </td>
-                                    <td class="py-3.5 text-center">
-                                        <button onclick="resetSesiSiswa('Farhan Alamsyah')" class="bg-rose-500/10 hover:bg-rose-500 text-rose-600 hover:text-white px-2.5 py-1 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1 mx-auto">
-                                            <i data-lucide="key-round" class="w-3.5 h-3.5"></i> Hubungkan Kembali
-                                        </button>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <!-- TAB 5: KOREKSI ESAI -->
-            <div id="tab-koreksi-esai" class="tab-content hidden space-y-6">
-                <!-- Info Status -->
-                <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
-                    <div>
-                        <h4 class="font-bold text-slate-800">Penilaian Uraian / Esai Mandiri</h4>
-                        <p class="text-xs text-slate-400">Total tersisa <span class="text-amber-600 font-bold">12 butir jawaban</span> esai yang perlu divalidasi skornya.</p>
-                    </div>
-                    <select class="bg-slate-100 text-slate-600 text-xs font-semibold py-2 px-3 rounded-lg border-none focus:ring-2 focus:ring-indigo-500 cursor-pointer">
-                        <option>PAS Ganjil Matematika</option>
-                    </select>
-                </div>
-
-                <!-- Lembar Koreksi Card -->
-                <div class="space-y-4" id="koreksi-list">
-                    <!-- Lembar 1 -->
-                    <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-4">
-                        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-                            <div>
-                                <span class="text-xs text-slate-400">Siswa:</span>
-                                <h5 class="font-bold text-slate-800 text-sm">Aditya Pratama (XI MIPA-1)</h5>
+                                    </div>
+                                    <div class="col-md-6 d-flex align-items-center justify-content-md-end gap-2">
+                                        <label class="form-label small fw-bold mb-0">Input Poin Skor:</label>
+                                        <input type="number" class="form-control score-input-group font-bold text-center border-primary" value="20" max="20" min="0">
+                                        <span class="text-muted small">/ 20</span>
+                                    </div>
+                                </div>
                             </div>
-                            <span class="bg-amber-100 text-amber-800 text-[10px] font-bold px-2 py-0.5 rounded-full">Belum Dinilai</span>
-                        </div>
-                        <div class="space-y-2">
-                            <span class="text-xs text-slate-400 font-bold block">Butir Soal No. 41:</span>
-                            <p class="text-sm font-semibold text-slate-700">Jelaskan cara mencari nilai maksimum fungsi kuadrat $f(x) = -x^2 + 4x + 5$!</p>
-                        </div>
-                        <div class="p-4 bg-slate-50 rounded-xl border border-slate-100 text-sm text-slate-600 space-y-2">
-                            <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Jawaban Siswa:</span>
-                            <p>Pertama kita cari titik puncak sumbu $x$ dengan rumus $x = -b / (2a)$. Dari persamaan diperoleh $a = -1$, $b = 4$. Maka $x_p = -4 / (2 \cdot -1) = 2$. Kemudian nilai maksimum kita substitusi $x = 2$ ke dalam fungsi: $f(2) = -(2)^2 + 4(2) + 5 = -4 + 8 + 5 = 9$. Jadi nilai maksimumnya adalah 9.</p>
-                        </div>
-                        <!-- Form Input Nilai -->
-                        <div class="flex flex-col sm:flex-row items-end sm:items-center justify-between gap-3 pt-2">
-                            <span class="text-xs text-indigo-600 font-medium italic">Kunci Jawaban Guru: Hasil Nilai Maksimum = 9</span>
-                            <div class="flex items-center gap-2 w-full sm:w-auto">
-                                <label class="text-xs text-slate-500 font-semibold whitespace-nowrap">Beri Skor (Maks 10):</label>
-                                <input type="number" max="10" min="0" placeholder="10" class="w-16 bg-slate-100 border border-slate-200 rounded-lg px-2.5 py-1 text-sm outline-none focus:ring-2 focus:ring-indigo-500">
-                                <button onclick="simpanSkorEsai(this, 'Aditya Pratama')" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-1.5 px-3 rounded-lg text-xs transition-all flex items-center gap-1">
-                                    <i data-lucide="check" class="w-3.5 h-3.5"></i> Simpan
+
+                            <!-- ITEM SOAL ESSAY 2 -->
+                            <div class="correction-card mb-4">
+                                <div class="d-flex align-items-center justify-content-between mb-2">
+                                    <span class="badge bg-dark">Soal No. 9 (Isian/Essay)</span>
+                                    <span class="text-muted small fw-semibold">Bobot Maksimal: <strong>10 Poin</strong></span>
+                                </div>
+                                
+                                <p class="fw-medium text-dark mb-3">
+                                    Sebutkan rumus umum untuk menghitung Luas Permukaan Tabung!
+                                </p>
+
+                                <div class="mb-3">
+                                    <label class="form-label small text-muted fw-bold">Jawaban Siswa:</label>
+                                    <div class="student-answer-box border-warning" style="border-left-color: #f59e0b;">
+                                        "Rumusnya $2 \times \pi \times r \times t$"
+                                    </div>
+                                </div>
+
+                                <div class="row align-items-center g-3 bg-light p-3 rounded-3 mt-2">
+                                    <div class="col-md-6">
+                                        <label class="form-label small fw-bold mb-1">Status Keabsahan:</label>
+                                        <div class="d-flex gap-3">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="status_2" id="b2">
+                                                <label class="form-check-label text-success fw-bold" for="b2"><i class="fa-solid fa-check-circle me-1"></i> Benar</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="status_2" id="s2" checked>
+                                                <label class="form-check-label text-danger fw-bold" for="s2"><i class="fa-solid fa-times-circle me-1"></i> Salah / Kurang Tepat</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 d-flex align-items-center justify-content-md-end gap-2">
+                                        <label class="form-label small fw-bold mb-0">Input Poin Skor:</label>
+                                        <input type="number" class="form-control score-input-group font-bold text-center border-amber" value="5" max="10" min="0">
+                                        <span class="text-muted small">/ 10</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- BOTTOM BUTTON ACTIONS -->
+                            <div class="d-flex align-items-center justify-content-between mt-4 pt-3 border-top">
+                                <a href="#" class="btn btn-outline-secondary rounded-3 px-4">Batal</a>
+                                <button type="submit" class="btn btn-success rounded-3 px-4 fw-bold">
+                                    <i class="fa-solid fa-floppy-disk me-2"></i> Simpan Hasil Koreksi &amp; Hitung Nilai Akhir
                                 </button>
                             </div>
-                        </div>
-                    </div>
 
-                    <!-- Lembar 2 -->
-                    <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-4">
-                        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-                            <div>
-                                <span class="text-xs text-slate-400">Siswa:</span>
-                                <h5 class="font-bold text-slate-800 text-sm">Amalia Putri (XI MIPA-1)</h5>
-                            </div>
-                            <span class="bg-amber-100 text-amber-800 text-[10px] font-bold px-2 py-0.5 rounded-full">Belum Dinilai</span>
-                        </div>
-                        <div class="space-y-2">
-                            <span class="text-xs text-slate-400 font-bold block">Butir Soal No. 41:</span>
-                            <p class="text-sm font-semibold text-slate-700">Jelaskan cara mencari nilai maksimum fungsi kuadrat $f(x) = -x^2 + 4x + 5$!</p>
-                        </div>
-                        <div class="p-4 bg-slate-50 rounded-xl border border-slate-100 text-sm text-slate-600 space-y-2">
-                            <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Jawaban Siswa:</span>
-                            <p>Gunakan rumus turunan pertama $f'(x) = 0$. Turunan fungsi yaitu $-2x + 4 = 0$ didapat $x = 2$. Masukkan ke dalam persamaan kuadrat hasilnya 9.</p>
-                        </div>
-                        <!-- Form Input Nilai -->
-                        <div class="flex flex-col sm:flex-row items-end sm:items-center justify-between gap-3 pt-2">
-                            <span class="text-xs text-indigo-600 font-medium italic">Kunci Jawaban Guru: Hasil Nilai Maksimum = 9</span>
-                            <div class="flex items-center gap-2 w-full sm:w-auto">
-                                <label class="text-xs text-slate-500 font-semibold whitespace-nowrap">Beri Skor (Maks 10):</label>
-                                <input type="number" max="10" min="0" placeholder="10" class="w-16 bg-slate-100 border border-slate-200 rounded-lg px-2.5 py-1 text-sm outline-none focus:ring-2 focus:ring-indigo-500">
-                                <button onclick="simpanSkorEsai(this, 'Amalia Putri')" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-1.5 px-3 rounded-lg text-xs transition-all flex items-center gap-1">
-                                    <i data-lucide="check" class="w-3.5 h-3.5"></i> Simpan
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- TAB 6: LAPORAN & HASIL -->
-            <div id="tab-laporan" class="tab-content hidden space-y-6">
-                <!-- Toolbar Seleksi & Ekspor -->
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
-                    <div class="flex flex-wrap items-center gap-2">
-                        <select class="bg-slate-100 text-slate-600 text-xs font-semibold py-2 px-3 rounded-lg border-none focus:ring-2 focus:ring-indigo-500 cursor-pointer">
-                            <option>PAS Ganjil Matematika</option>
-                            <option>Ulangan Harian Matriks</option>
-                        </select>
-                        <select class="bg-slate-100 text-slate-600 text-xs font-semibold py-2 px-3 rounded-lg border-none focus:ring-2 focus:ring-indigo-500 cursor-pointer">
-                            <option>Semua Kelas</option>
-                            <option>XI MIPA-1</option>
-                            <option>XI MIPA-2</option>
-                        </select>
-                    </div>
-                    <button onclick="eksporLaporan()" class="flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-xl text-xs transition-all shadow-md shadow-indigo-100">
-                        <i data-lucide="download" class="w-4 h-4"></i>
-                        <span>Ekspor Nilai (Excel)</span>
-                    </button>
-                </div>
-
-                <!-- Statistik Kelulusan / Grafik Singkat -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-                    <div class="bg-emerald-50 border border-emerald-100 p-5 rounded-2xl flex items-center gap-4">
-                        <div class="bg-emerald-500 text-white p-3 rounded-xl"><i data-lucide="check-circle" class="w-6 h-6"></i></div>
-                        <div>
-                            <h5 class="text-emerald-800 font-bold text-lg">94.5%</h5>
-                            <p class="text-xs text-emerald-600 font-medium">Tingkat Ketuntasan Siswa</p>
-                        </div>
-                    </div>
-                    <div class="bg-rose-50 border border-rose-100 p-5 rounded-2xl flex items-center gap-4">
-                        <div class="bg-rose-500 text-white p-3 rounded-xl"><i data-lucide="alert-triangle" class="w-6 h-6"></i></div>
-                        <div>
-                            <h5 class="text-rose-800 font-bold text-lg">12 Siswa</h5>
-                            <p class="text-xs text-rose-600 font-medium">Butuh Remedial</p>
-                        </div>
-                    </div>
-                    <div class="bg-indigo-50 border border-indigo-100 p-5 rounded-2xl flex items-center gap-4">
-                        <div class="bg-indigo-500 text-white p-3 rounded-xl"><i data-lucide="award" class="w-6 h-6"></i></div>
-                        <div>
-                            <h5 class="text-indigo-800 font-bold text-lg">98</h5>
-                            <p class="text-xs text-indigo-600 font-medium">Nilai Tertinggi Dicapai</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Tabel Nilai Rekap -->
-                <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-4">
-                    <h4 class="font-bold text-slate-800 text-base">Rekapitulasi Nilai Siswa</h4>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse">
-                            <thead>
-                                <tr class="border-b border-slate-100 text-slate-400 text-xs font-bold uppercase">
-                                    <th class="pb-3 pl-2">Nama Lengkap</th>
-                                    <th class="pb-3">Kelas</th>
-                                    <th class="pb-3 text-center">Nilai PG (80%)</th>
-                                    <th class="pb-3 text-center">Nilai Esai (20%)</th>
-                                    <th class="pb-3 text-center">Nilai Akhir</th>
-                                    <th class="pb-3 text-center">Status Kelulusan</th>
-                                </tr>
-                            </thead>
-                            <tbody class="text-sm divide-y divide-slate-50">
-                                <tr>
-                                    <td class="py-3.5 pl-2 font-semibold text-slate-800">Aditya Pratama</td>
-                                    <td class="py-3.5 text-slate-500">XI MIPA-1</td>
-                                    <td class="py-3.5 text-center font-medium">75</td>
-                                    <td class="py-3.5 text-center font-medium">90</td>
-                                    <td class="py-3.5 text-center font-bold text-indigo-600">78</td>
-                                    <td class="py-3.5 text-center">
-                                        <span class="bg-emerald-50 text-emerald-600 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">Tuntas</span>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="py-3.5 pl-2 font-semibold text-slate-800">Amalia Putri</td>
-                                    <td class="py-3.5 text-slate-500">XI MIPA-1</td>
-                                    <td class="py-3.5 text-center font-medium">92</td>
-                                    <td class="py-3.5 text-center font-medium">95</td>
-                                    <td class="py-3.5 text-center font-bold text-indigo-600">93</td>
-                                    <td class="py-3.5 text-center">
-                                        <span class="bg-emerald-50 text-emerald-600 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">Tuntas</span>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="py-3.5 pl-2 font-semibold text-slate-800">Eko Prasetyo</td>
-                                    <td class="py-3.5 text-slate-500">XI MIPA-2</td>
-                                    <td class="py-3.5 text-center font-medium">60</td>
-                                    <td class="py-3.5 text-center font-medium">50</td>
-                                    <td class="py-3.5 text-center font-bold text-rose-500">58</td>
-                                    <td class="py-3.5 text-center">
-                                        <span class="bg-rose-50 text-rose-600 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">Remedial</span>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <!-- TAB 7: PENGATURAN -->
-            <div id="tab-pengaturan" class="tab-content hidden space-y-6">
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <!-- Sisi Kiri (Info Profil) -->
-                    <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm text-center space-y-4">
-                        <div class="relative w-28 h-28 mx-auto">
-                            <div class="w-full h-full rounded-full bg-indigo-500 text-white flex items-center justify-center font-bold text-4xl border-4 border-indigo-50 shadow-md">
-                                BR
-                            </div>
-                            <button onclick="alertNotification('Ganti Foto', 'Fitur ganti foto profil belum aktif', 'info')" class="absolute bottom-0 right-0 bg-white hover:bg-slate-100 p-2 rounded-full border border-slate-200 shadow-sm text-indigo-600 transition-colors">
-                                <i data-lucide="camera" class="w-4 h-4"></i>
-                            </button>
-                        </div>
-                        <div>
-                            <h4 class="font-bold text-slate-800 text-base">Budi Raharjo, S.Pd.</h4>
-                            <p class="text-xs text-slate-400">NIP. 198503112010011002</p>
-                        </div>
-                        <div class="pt-4 border-t border-slate-100 grid grid-cols-2 gap-2 text-left">
-                            <div>
-                                <span class="text-[10px] text-slate-400 font-bold block">SITUS LOGIN</span>
-                                <span class="text-xs font-semibold text-slate-700">CBT Utama Sekolah</span>
-                            </div>
-                            <div>
-                                <span class="text-[10px] text-slate-400 font-bold block">TANGGAL BERGABUNG</span>
-                                <span class="text-xs font-semibold text-slate-700">12 Sep 2021</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Sisi Kanan (Formulir Setting) -->
-                    <div class="lg:col-span-2 bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-4">
-                        <h4 class="font-bold text-slate-800 text-base border-b border-slate-100 pb-2">Informasi & Keamanan Akun</h4>
-                        <form onsubmit="savePengaturan(event)" class="space-y-4">
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Nama Lengkap (Gelar)</label>
-                                    <input type="text" value="Budi Raharjo, S.Pd." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Alamat Email</label>
-                                    <input type="email" value="budiraharjo@sekolah.sch.id" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Kata Sandi Baru</label>
-                                    <input type="password" placeholder="••••••••" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Konfirmasi Kata Sandi Baru</label>
-                                    <input type="password" placeholder="••••••••" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
-                                </div>
-                            </div>
-                            <div class="flex justify-end pt-2">
-                                <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-6 rounded-xl text-xs transition-all shadow-md shadow-indigo-100">
-                                    Simpan Perubahan
-                                </button>
-                            </div>
                         </form>
                     </div>
                 </div>
             </div>
 
         </div>
-    </main>
 
-    <!-- MODAL IMPOR EXCEL -->
-    <div id="import-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden">
-        <div class="bg-white rounded-2xl w-full max-w-md p-6 m-4 shadow-xl space-y-4">
-            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-                <h4 class="font-bold text-slate-800 flex items-center gap-2">
-                    <i data-lucide="file-spreadsheet" class="w-5 h-5 text-emerald-600"></i>
-                    Impor Soal Excel
-                </h4>
-                <button onclick="closeImportModal()" class="text-slate-400 hover:text-slate-600">
-                    <i data-lucide="x" class="w-5 h-5"></i>
-                </button>
-            </div>
-            <div class="text-sm text-slate-500 space-y-3">
-                <p>Silakan unduh templat excel format resmi CBT terlebih dahulu sebelum mengunggah berkas Anda.</p>
-                <a href="#" onclick="alertNotification('Mengunduh', 'Berkas template berhasil diunduh.', 'success'); return false;" class="inline-flex items-center gap-1.5 text-indigo-600 font-bold hover:underline">
-                    <i data-lucide="download" class="w-4 h-4"></i> Unduh Templat Excel (.xlsx)
-                </a>
-            </div>
-            <div class="border-2 border-dashed border-slate-200 hover:border-indigo-400 rounded-2xl p-6 text-center cursor-pointer transition-colors" onclick="alertNotification('Pilih Berkas', 'Silakan pilih file Excel dari komputer Anda.', 'info')">
-                <i data-lucide="upload-cloud" class="w-10 h-10 text-slate-400 mx-auto mb-2"></i>
-                <span class="text-xs font-semibold text-slate-600 block">Klik atau Seret Berkas ke Sini</span>
-                <span class="text-[10px] text-slate-400">Mendukung berkas format .xls, .xlsx atau .csv</span>
-            </div>
-            <div class="flex justify-end gap-2 pt-2">
-                <button onclick="closeImportModal()" class="bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold py-2 px-4 rounded-xl text-xs transition-all">Tutup</button>
-                <button onclick="alertNotification('Proses Impor', 'Berhasil mengimpor 40 Soal baru!', 'success'); closeImportModal();" class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2 px-4 rounded-xl text-xs transition-all">Impor Sekarang</button>
-            </div>
-        </div>
     </div>
 
-    <!-- SCRIPT LOGIKA DASHBOARD -->
-    <script>
-        // Inisialisasi ikon Lucide
-        lucide.createIcons();
-
-        // 1. Logika Pindah Tab
-        function switchTab(tabId) {
-            // Sembunyikan semua konten tab
-            const tabContents = document.querySelectorAll('.tab-content');
-            tabContents.forEach(content => content.classList.add('hidden'));
-
-            // Hapus kelas aktif di tombol navigasi
-            const navItems = document.querySelectorAll('.nav-item');
-            navItems.forEach(item => {
-                item.classList.remove('bg-slate-800', 'text-white');
-                item.classList.add('text-slate-400');
-            });
-
-            // Tampilkan tab terpilih
-            const targetTab = document.getElementById(`tab-${tabId}`);
-            if (targetTab) {
-                targetTab.classList.remove('hidden');
-            }
-
-            // Tambah kelas aktif ke tombol terpilih
-            const targetBtn = document.getElementById(`btn-${tabId}`);
-            if (targetBtn) {
-                targetBtn.classList.remove('text-slate-400');
-                targetBtn.classList.add('bg-slate-800', 'text-white');
-            }
-
-            // Perbarui Breadcrumb
-            const breadcrumbMap = {
-                'dashboard': 'Beranda / Dashboard',
-                'bank-soal': 'Bank Soal',
-                'jadwal-ujian': 'Jadwal Ujian',
-                'monitoring': 'Monitoring Sesi',
-                'koreksi-esai': 'Koreksi Esai',
-                'laporan': 'Laporan & Hasil',
-                'pengaturan': 'Pengaturan Akun'
-            };
-            document.getElementById('breadcrumb-active').textContent = breadcrumbMap[tabId] || 'Beranda';
-        }
-
-        // 2. Custom Toast Notification
-        function alertNotification(title, message, type = 'info') {
-            const container = document.getElementById('toast-container');
-            
-            let bgClass = 'bg-slate-800 text-white border-slate-700';
-            let icon = 'info';
-
-            if (type === 'success') {
-                bgClass = 'bg-white text-slate-800 border-emerald-500 shadow-emerald-50/50';
-                icon = 'check-circle';
-            } else if (type === 'error') {
-                bgClass = 'bg-rose-500 text-white border-rose-600';
-                icon = 'alert-octagon';
-            }
-
-            const toast = document.createElement('div');
-            toast.className = `flex items-start gap-3 p-4 rounded-xl border-l-4 shadow-lg transition-all duration-300 transform translate-x-12 opacity-0 pointer-events-auto max-w-sm ${bgClass}`;
-            toast.innerHTML = `
-                <div class="${type === 'success' ? 'text-emerald-500' : 'text-inherit'} flex-shrink-0 mt-0.5">
-                    <i data-lucide="${icon}" class="w-5 h-5"></i>
-                </div>
-                <div class="flex-1">
-                    <h5 class="text-xs font-bold ${type === 'success' ? 'text-slate-800' : 'text-inherit'}">${title}</h5>
-                    <p class="text-[11px] mt-0.5 leading-relaxed opacity-90">${message}</p>
-                </div>
-                <button class="text-inherit opacity-60 hover:opacity-100" onclick="this.parentElement.remove()">
-                    <i data-lucide="x" class="w-3.5 h-3.5"></i>
-                </button>
-            `;
-
-            container.appendChild(toast);
-            lucide.createIcons();
-
-            // Animasi masuk
-            setTimeout(() => {
-                toast.classList.remove('translate-x-12', 'opacity-0');
-            }, 10);
-
-            // Hilang otomatis dalam 4 detik
-            setTimeout(() => {
-                toast.classList.add('translate-x-12', 'opacity-0');
-                setTimeout(() => toast.remove(), 300);
-            }, 4000);
-        }
-
-        // 3. Fungsionalitas Bank Soal
-        function toggleFormSoal() {
-            const form = document.getElementById('form-tambah-soal');
-            form.classList.toggle('hidden');
-        }
-
-        function saveSoal(event) {
-            event.preventDefault();
-            
-            const mapel = document.getElementById('form-mapel').value;
-            const topik = document.getElementById('form-topik').value;
-            const kesulitan = document.getElementById('form-kesulitan').value;
-            const tipe = document.getElementById('form-tipe').value;
-            const pertanyaan = document.getElementById('form-pertanyaan').value;
-
-            // Mendapatkan data pilihan ganda jika tipe soal PG
-            let pgContent = '';
-            if (tipe === 'Pilihan Ganda') {
-                const opsiA = document.getElementById('opsi-A').value;
-                const opsiB = document.getElementById('opsi-B').value;
-                const opsiC = document.getElementById('opsi-C').value;
-                const opsiD = document.getElementById('opsi-D').value;
-                const kunciInput = document.querySelector('input[name="kunci"]:checked');
-                const kunci = kunciInput ? kunciInput.value : 'A';
-
-                pgContent = `
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-3 text-xs text-slate-500">
-                        <div class="p-2 rounded-lg ${kunci === 'A' ? 'bg-emerald-50 text-emerald-700 border border-emerald-100 font-semibold' : 'bg-slate-50 border border-slate-100'}">A. ${opsiA} ${kunci === 'A' ? '(Kunci)' : ''}</div>
-                        <div class="p-2 rounded-lg ${kunci === 'B' ? 'bg-emerald-50 text-emerald-700 border border-emerald-100 font-semibold' : 'bg-slate-50 border border-slate-100'}">B. ${opsiB} ${kunci === 'B' ? '(Kunci)' : ''}</div>
-                        <div class="p-2 rounded-lg ${kunci === 'C' ? 'bg-emerald-50 text-emerald-700 border border-emerald-100 font-semibold' : 'bg-slate-50 border border-slate-100'}">C. ${opsiC} ${kunci === 'C' ? '(Kunci)' : ''}</div>
-                        <div class="p-2 rounded-lg ${kunci === 'D' ? 'bg-emerald-50 text-emerald-700 border border-emerald-100 font-semibold' : 'bg-slate-50 border border-slate-100'}">D. ${opsiD} ${kunci === 'D' ? '(Kunci)' : ''}</div>
-                    </div>
-                `;
-            } else {
-                pgContent = `
-                    <div class="p-3 bg-indigo-50/50 rounded-xl text-xs text-indigo-700 mt-2 font-medium border border-indigo-100">
-                        Butir Soal Esai: Tidak memerlukan pilihan jawaban manual ganda.
-                    </div>
-                `;
-            }
-
-            // Buat elemen card soal baru
-            const listContainer = document.getElementById('daftar-soal-list');
-            const newCard = document.createElement('div');
-            newCard.className = "bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-3";
-            
-            // Atur warna label kesulitan
-            let labelKesulitan = 'bg-emerald-50 text-emerald-600';
-            if (kesulitan === 'Sedang') labelKesulitan = 'bg-amber-50 text-amber-600';
-            else if (kesulitan === 'Sukar') labelKesulitan = 'bg-rose-50 text-rose-600';
-
-            newCard.innerHTML = `
-                <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-2.5">
-                    <div class="flex items-center gap-2">
-                        <span class="bg-slate-100 text-slate-600 text-xs px-2.5 py-1 rounded-full font-bold">${mapel}</span>
-                        <span class="bg-indigo-50 text-indigo-600 text-xs px-2.5 py-1 rounded-full font-bold">${topik}</span>
-                        <span class="${labelKesulitan} text-xs px-2.5 py-1 rounded-full font-bold">${kesulitan}</span>
-                    </div>
-                    <div class="flex gap-2">
-                        <button onclick="alertNotification('Edit Soal', 'Fitur edit soal dibuka', 'info')" class="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all"><i data-lucide="edit" class="w-4 h-4"></i></button>
-                        <button onclick="deleteSoalCard(this)" class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-                    </div>
-                </div>
-                <div>
-                    <p class="text-sm text-slate-700 font-medium">${pertanyaan}</p>
-                    ${pgContent}
-                </div>
-            `;
-
-            // Masukkan ke bagian atas daftar soal
-            listContainer.insertBefore(newCard, listContainer.firstChild);
-            
-            // Perbarui jumlah total bank soal di dashboard
-            const totalSoalEl = document.getElementById('stat-total-soal');
-            totalSoalEl.textContent = parseInt(totalSoalEl.textContent) + 1;
-
-            lucide.createIcons();
-            toggleFormSoal();
-            document.getElementById('soal-form').reset();
-            alertNotification('Soal Berhasil Disimpan', `Butir soal bertopik ${topik} berhasil masuk ke database Bank Soal.`, 'success');
-        }
-
-        function deleteSoalCard(btn) {
-            if (confirm("Apakah Anda yakin ingin menghapus butir soal ini dari Bank Soal?")) {
-                btn.closest('.bg-white').remove();
-                
-                const totalSoalEl = document.getElementById('stat-total-soal');
-                totalSoalEl.textContent = parseInt(totalSoalEl.textContent) - 1;
-
-                alertNotification('Terhapus', 'Soal berhasil dihapus dari sistem.', 'success');
-            }
-        }
-
-        // Listener untuk tipe soal di Form Tambah Soal
-        document.getElementById('form-tipe').addEventListener('change', function() {
-            const wrapper = document.getElementById('opsi-jawaban-wrapper');
-            if (this.value === 'Esai') {
-                wrapper.classList.add('hidden');
-            } else {
-                wrapper.classList.remove('hidden');
-            }
-        });
-
-        // 4. Modal Impor
-        function openImportModal() {
-            document.getElementById('import-modal').classList.remove('hidden');
-        }
-        function closeImportModal() {
-            document.getElementById('import-modal').classList.add('hidden');
-        }
-
-        // 5. Rilis Ujian Baru
-        function rilisUjian(event) {
-            event.preventDefault();
-            const namaUjian = document.getElementById('ujian-nama').value;
-            const kelas = document.getElementById('ujian-kelas').value;
-            const durasi = document.getElementById('ujian-durasi').value;
-
-            const tableBody = document.getElementById('ujian-table-body');
-            const newRow = document.createElement('tr');
-            newRow.innerHTML = `
-                <td class="py-3.5 pl-2 font-semibold text-slate-800">${namaUjian}</td>
-                <td class="py-3.5 text-slate-500">Matematika Peminatan</td>
-                <td class="py-3.5 text-slate-500">${kelas}</td>
-                <td class="py-3.5 text-slate-500">Baru Saja Dirilis</td>
-                <td class="py-3.5 text-slate-500">${durasi} Menit</td>
-                <td class="py-3.5 font-mono text-indigo-600 font-bold">R9X${Math.floor(Math.random() * 900 + 100)}</td>
-                <td class="py-3.5 text-center">
-                    <span class="bg-emerald-50 text-emerald-600 text-xs font-bold px-2.5 py-1 rounded-full">Berjalan</span>
-                </td>
-            `;
-            
-            tableBody.insertBefore(newRow, tableBody.firstChild);
-            
-            // Update widget statistika ujian aktif
-            const activeTestEl = document.getElementById('stat-ujian-aktif');
-            activeTestEl.textContent = parseInt(activeTestEl.textContent) + 1;
-
-            alertNotification('Ujian Berhasil Dirilis', `Sesi ujian ${namaUjian} telah aktif untuk ${kelas}. Token rilis secara otomatis!`, 'success');
-            document.getElementById('ujian-nama').value = '';
-        }
-
-        // 6. Monitoring & Reset Sesi
-        function resetSesiSiswa(namaSiswa) {
-            if (confirm(`Apakah Anda yakin ingin melakukan RESET SESI untuk siswa "${namaSiswa}"? Tindakan ini mengizinkan siswa login kembali tanpa kehilangan data jawaban.`)) {
-                alertNotification('Reset Berhasil', `Sesi login ${namaSiswa} telah dibersihkan. Siswa kini dapat melanjutkan ujian kembali.`, 'success');
-            }
-        }
-
-        // 7. Koreksi Esai
-        function simpanSkorEsai(btn, namaSiswa) {
-            const input = btn.previousElementSibling;
-            const skor = input.value;
-
-            if (!skor || skor < 0 || skor > 10) {
-                alertNotification('Skor Salah', 'Harap isi skor bernilai 0 sampai 10', 'error');
-                return;
-            }
-
-            const card = btn.closest('.bg-white');
-            card.style.opacity = '0.5';
-            btn.disabled = true;
-            input.disabled = true;
-
-            const badge = card.querySelector('.bg-amber-100');
-            if (badge) {
-                badge.className = "bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded-full";
-                badge.textContent = "Selesai Dinilai";
-            }
-
-            alertNotification('Nilai Disimpan', `Skor ${skor}/10 berhasil tersimpan untuk esai ${namaSiswa}.`, 'success');
-        }
-
-        // 8. Laporan & Hasil
-        function eksporLaporan() {
-            alertNotification('Mempersiapkan Data', 'Sistem sedang memproses database nilai seluruh siswa...', 'info');
-            setTimeout(() => {
-                alertNotification('Ekspor Sukses', 'Berkas "PAS_Ganjil_Matematika_XI_MIPA.xlsx" telah berhasil diunduh ke komputer Anda.', 'success');
-            }, 1500);
-        }
-
-        // 9. Pengaturan Profil
-        function savePengaturan(event) {
-            event.preventDefault();
-            alertNotification('Profil Diperbarui', 'Data profil dan keamanan kata sandi Anda berhasil diperbarui di server.', 'success');
-        }
-    </script>
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

@@ -304,6 +304,28 @@ class RuangUjianController extends Controller
 
         /*
         |--------------------------------------------------------------------------
+        | Sinkronisasi Jawaban dari Request Form (Mengatasi Race Condition AutoSave)
+        |--------------------------------------------------------------------------
+        */
+        $inputJawabans = $request->input('jawaban', []);
+        foreach ($inputJawabans as $soal_id => $isi_jawaban) {
+            $jawaban = \App\Models\JawabanSiswa::firstOrNew([
+                'nilai_id' => $nilai->id,
+                'soal_id'  => $soal_id,
+            ]);
+
+            // Jika $isi_jawaban is numeric, asumsi itu Pilihan Ganda (berisi ID pilihan_jawaban)
+            if (is_numeric($isi_jawaban)) {
+                $jawaban->pilihan_jawaban_id = $isi_jawaban;
+            } else {
+                // Jika tidak, asumsi essay/isian
+                $jawaban->jawaban_text = $isi_jawaban;
+            }
+            $jawaban->save();
+        }
+
+        /*
+        |--------------------------------------------------------------------------
         | Ambil semua soal
         |--------------------------------------------------------------------------
         */
