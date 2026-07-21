@@ -162,9 +162,10 @@ class DashboardController extends Controller
             });
 
 
-            // Filter: Hilangkan jadwal ujian yang sudah selesai atau waktunya sudah berakhir
+            // Filter: Hilangkan jadwal ujian yang sudah selesai, waktunya sudah berakhir, atau jadwalnya bukan hari ini
             $ujian_with_status = $ujian_with_status->reject(function ($ujian) {
-                return $ujian->status_siswa == 'Sudah Selesai' || $ujian->status_waktu == 'berakhir';
+                $isHariIni = \Carbon\Carbon::parse($ujian->waktu_mulai)->isToday();
+                return $ujian->status_siswa == 'Sudah Selesai' || $ujian->status_waktu == 'berakhir' || !$isHariIni;
             });
 
             // Sort agar ujian yang sedang aktif berada di paling atas, lalu diikuti yang belum lewat
