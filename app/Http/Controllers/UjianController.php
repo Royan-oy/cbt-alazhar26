@@ -144,7 +144,6 @@ class UjianController extends Controller
             'waktu_selesai'        => $request->waktu_selesai,
             'durasi_minimal'       => $request->durasi_minimal,
             'token'                => Ujian::generateToken(),
-            'token_aktif'          => false,
             'acak_soal'            => $request->boolean('acak_soal'),
             'acak_jawaban'         => $request->boolean('acak_jawaban'),
             'tampilkan_nilai'      => $request->boolean('tampilkan_nilai'),
@@ -161,12 +160,6 @@ class UjianController extends Controller
     {
         $this->authorizeJenjang($ujian);
 
-        // Sinkronkan status token berdasarkan waktu
-        $this->updateStatusToken($ujian);
-
-        // Ambil data terbaru setelah update
-        $ujian->refresh();
-
         $ujian->load([
             'bankSoal.mataPelajaran',
             'bankSoal.jenjang',
@@ -176,32 +169,6 @@ class UjianController extends Controller
         ]);
 
         return view('ujian.show', compact('ujian'));
-    }
-
-    private function updateStatusToken(Ujian $ujian)
-    {
-        $now = now();
-
-        // Jika sudah masuk waktu ujian dan token masih nonaktif
-        if (
-            !$ujian->token_aktif &&
-            $now->greaterThanOrEqualTo($ujian->waktu_mulai) &&
-            $now->lessThanOrEqualTo($ujian->waktu_selesai)
-        ) {
-            $ujian->update([
-                'token_aktif' => true,
-            ]);
-        }
-
-        // Jika waktu ujian sudah habis tetapi token masih aktif
-        if (
-            $ujian->token_aktif &&
-            $now->greaterThan($ujian->waktu_selesai)
-        ) {
-            $ujian->update([
-                'token_aktif' => false,
-            ]);
-        }
     }
 
     public function edit(Ujian $ujian)
@@ -295,28 +262,9 @@ class UjianController extends Controller
             ->with('success', 'Jadwal ujian berhasil dihapus.');
     }
 
-    public function toggleToken(Ujian $ujian)
-    {
-        $this->authorizeJenjang($ujian);
-
-        $ujian->update([
-            'token_aktif' => !$ujian->token_aktif
-        ]);
-
-        $pesan = $ujian->token_aktif
-            ? 'Token berhasil diaktifkan. Siswa dapat masuk menggunakan token.'
-            : 'Token berhasil dinonaktifkan. Siswa tidak dapat masuk meskipun mengetahui token.';
-
-        return back()->with('success', $pesan);
-    }
-
     public function regenerateToken(Ujian $ujian)
     {
         $this->authorizeJenjang($ujian);
-
-        if ($ujian->token_aktif) {
-            return back()->with('error', 'Nonaktifkan token dulu sebelum membuat token baru.');
-        }
 
         $ujian->update(['token' => Ujian::generateToken()]);
 

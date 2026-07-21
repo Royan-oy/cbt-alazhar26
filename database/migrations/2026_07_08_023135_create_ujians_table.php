@@ -34,8 +34,6 @@ class CreateUjiansTable extends Migration
 
             $table->string('token', 6)->nullable()->unique();
 
-            $table->boolean('token_aktif')->default(false);
-
             $table->boolean('acak_soal')->default(true);
 
             $table->boolean('acak_jawaban')->default(true);

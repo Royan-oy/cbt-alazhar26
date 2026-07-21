@@ -389,6 +389,12 @@
 
 {{-- INTERACTIVE JAVASCRIPT --}}
 <script>
+    let isReloading = false;
+
+    window.addEventListener("beforeunload", function () {
+        isReloading = true;
+    });
+
     let currentIdx = {{ $currentQuestion ?? 0 }};
     const totalQuestions = {{ $soals->count() }};
     const raguStates = [
@@ -404,10 +410,6 @@
     @endforeach
 
     ];
-
-    // Batas toleransi keluar dari tab ujian (misal: maksimal 3 kali melanggar)
-    let violationCount = 0;
-    const maxViolations = 3; 
 
     document.addEventListener("DOMContentLoaded", function() {
         updateNavigationButtons();
@@ -437,32 +439,80 @@
         });
 
         // 3. Deteksi Perpindahan Tab / Minimize Aplikasi (Page Visibility API)
-        document.addEventListener('visibilitychange', function() {
+        document.addEventListener("visibilitychange", function () {
+
+            // sedang reload -> abaikan
+            if (isReloading) return;
+
             if (document.hidden) {
                 forceSubmitExam();
             }
-        });
 
-        // 4. PROTEKSI UTAMA HP: Deteksi Kehilangan Fokus/Keluar Window (Alt+Tab, Buka Google Lens, Split Screen, Buka Notifikasi)
-        // Di HP, membuka panel Google Lens atau asisten suara akan memicu event 'blur' pada window secara instan.
-        window.addEventListener('blur', function() {
-            // Berikan sedikit delay 200ms untuk memastikan ini bukan kesalahan render browser biasa
-            setTimeout(function() {
-                forceSubmitExam();
-            }, 200);
         });
     }
 
-    // Fungsi satu pintu untuk mematikan ujian dan langsung mengirimkan data ke database
-    function forceSubmitExam() {
-        // Nonaktifkan alert bawaan agar siswa tidak bisa menahan proses submit dengan menekan tombol 'OK' pada alert biasa
-        console.warn('Pelanggaran terdeteksi. Mengumpulkan ujian secara otomatis...');
-        
-        // Langsung submit form tanpa konfirmasi lagi
-        const form = document.getElementById("formUjian");
-        if (form) {
-            form.submit();
-        }
+    let sendingViolation = false;
+    function forceSubmitExam()
+    {
+        if (sendingViolation) return;
+
+        sendingViolation = true;
+
+        fetch("{{ route('dashboard-siswa.ujian.violation') }}", {
+
+            method: "POST",
+
+            headers: {
+
+                "Content-Type": "application/json",
+                "Accept": "application/json",
+                "X-CSRF-TOKEN": "{{ csrf_token() }}"
+
+            },
+
+            body: JSON.stringify({
+
+                ujian_id: {{ $ujian->id }}
+
+            })
+
+        })
+        .then(response => response.json())
+        .then(data => {
+
+            sendingViolation = false;
+
+            if (!data.success) return;
+
+            if (data.submit) {
+
+                alert(
+                    "Anda telah melakukan pelanggaran sebanyak "
+                    + data.count +
+                    "/2.\n\nUjian akan dikumpulkan otomatis."
+                );
+
+                document.getElementById("formUjian").submit();
+
+            } else {
+
+                alert(
+                    "PERINGATAN!\n\n" +
+                    "Anda telah keluar dari halaman ujian.\n\n" +
+                    "Pelanggaran : "
+                    + data.count +
+                    "/2\n\n" +
+                    "Jika mengulangi sekali lagi maka ujian akan langsung dikumpulkan."
+                );
+
+            }
+
+        })
+        .catch(() => {
+
+            sendingViolation = false;
+
+        });
     }
 
     // Pindah Soal (Selanjutnya/Sebelumnya)

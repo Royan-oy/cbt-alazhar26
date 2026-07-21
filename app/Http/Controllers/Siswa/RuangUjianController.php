@@ -104,6 +104,13 @@ class RuangUjianController extends Controller
             ]
         );
 
+        if ($nilai->status == 'selesai') {
+
+            return redirect()
+                ->route('dashboard-siswa.ujian-hari-ini')
+                ->with('error', 'Ujian sudah selesai.');
+        }
+
         // Load soal
         $ujian->load([
             'bankSoal.soals' => function ($query) use ($ujian) {
@@ -138,6 +145,8 @@ class RuangUjianController extends Controller
         // Nomor soal terakhir
         $currentQuestion = $nilai->current_question;
 
+        $violationCount = $nilai->violation_count;
+
         return view(
             'dashboard-siswa.ruang-ujian.kerja',
             compact(
@@ -145,7 +154,8 @@ class RuangUjianController extends Controller
                 'soals',
                 'nilai',
                 'jawaban',
-                'currentQuestion'
+                'currentQuestion',
+                'violationCount'
             )
         );
     }
@@ -214,6 +224,55 @@ class RuangUjianController extends Controller
             'message'    => 'Jawaban berhasil disimpan.',
             'jawaban_id' => $jawaban->id,
             'saved_at'   => now()->format('H:i:s'),
+        ]);
+    }
+
+    public function violation(Request $request)
+    {
+        $request->validate([
+            'ujian_id' => 'required|exists:ujians,id'
+        ]);
+
+        $siswa = Auth::user()->siswa;
+
+        if (!$siswa) {
+            return response()->json([
+                'success' => false
+            ],403);
+        }
+
+        $nilai = Nilai::where('ujian_id',$request->ujian_id)
+            ->where('siswa_id',$siswa->id)
+            ->first();
+
+        if(!$nilai){
+            return response()->json([
+                'success'=>false
+            ],404);
+        }
+
+        $nilai->increment('violation_count');
+
+        $nilai->refresh();
+
+        if($nilai->violation_count >= 2){
+
+            $nilai->update([
+                'status'=>'selesai',
+                'waktu_kumpul'=>now()
+            ]);
+
+            return response()->json([
+                'success'=>true,
+                'submit'=>true,
+                'count'=>$nilai->violation_count
+            ]);
+        }
+
+        return response()->json([
+            'success'=>true,
+            'submit'=>false,
+            'count'=>$nilai->violation_count
         ]);
     }
 }
