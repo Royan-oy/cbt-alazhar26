@@ -373,10 +373,20 @@ class RuangUjianController extends Controller
 
         foreach($soals as $soal){
 
-
             $jawaban = $jawabanSiswas->get($soal->id);
 
-
+            // Jika siswa sama sekali tidak menjawab (tidak ada di request maupun autosave)
+            // Buat record kosong agar soal tetap muncul di halaman koreksi guru
+            if (!$jawaban) {
+                $jawaban = \App\Models\JawabanSiswa::create([
+                    'nilai_id' => $nilai->id,
+                    'soal_id'  => $soal->id,
+                    'pilihan_jawaban_id' => null,
+                    'jawaban_text' => null,
+                    'is_benar' => false,
+                    'nilai' => 0,
+                ]);
+            }
 
             /*
             |--------------------------------------------------------------------------
@@ -386,12 +396,9 @@ class RuangUjianController extends Controller
 
             if($soal->jenis_soal == 'pilihan_ganda'){
 
-
                 $pilihanBenar = $soal->pilihanJawabans
                     ->where('is_benar',true)
                     ->first();
-
-
 
                 if(
                     $jawaban &&
@@ -403,42 +410,25 @@ class RuangUjianController extends Controller
                     Jawaban benar
                     Nilai sesuai bobot soal
                     */
-
-
                     $jawaban->update([
-
                         'is_benar'=>true,
-
                         'nilai'=>$soal->bobot
-
                     ]);
-
 
                     $nilaiPG += $soal->bobot;
 
-
-
                 }else{
 
-
                     if($jawaban){
-
                         $jawaban->update([
-
                             'is_benar'=>false,
-
                             'nilai'=>0
-
                         ]);
-
                     }
 
                 }
 
-
             }
-
-
 
 
             /*
@@ -446,7 +436,6 @@ class RuangUjianController extends Controller
             | ESSAY / ISIAN
             |--------------------------------------------------------------------------
             */
-
 
             if(
                 $soal->jenis_soal == 'essay'
@@ -456,26 +445,17 @@ class RuangUjianController extends Controller
 
                 $adaEssay = true;
 
-
                 /*
                 Essay menunggu guru
                 */
-
-
                 if($jawaban){
-
                     $jawaban->update([
-
                         'is_benar'=>null,
-
                         'nilai'=>0
-
                     ]);
-
                 }
 
             }
-
 
         }
 

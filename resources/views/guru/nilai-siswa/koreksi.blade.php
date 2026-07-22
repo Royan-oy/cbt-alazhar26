@@ -429,9 +429,7 @@
                     </div>
                 </div>
             @else
-                <form method="POST" action="{{ route('dashboard-guru.nilai-siswa.store-koreksi', ['ujian' => $ujian->id, 'siswa' => $siswa->id]) }}">
-                    @csrf
-                    <div class="row">
+                <div id="koreksi-container">
                         <div class="col-12 col-lg-10 mx-auto">
                             <div class="d-flex justify-content-between align-items-center mb-3">
                                 <h5 class="fw-bold text-dark mb-0"><i class="fa-solid fa-pen-ruler text-warning me-2"></i>Koreksi Manual Soal Uraian</h5>
@@ -456,7 +454,7 @@
                                                 <span class="badge-no me-3">{{ $loop->iteration }}</span>
                                                 <span>Soal {{ ucfirst($j->jenis_soal) }}</span>
                                                 <div class="ms-auto d-flex align-items-center gap-3">
-                                                    @if(isset($j->nilai_jawaban))
+                                                    @if(isset($j->is_benar))
                                                         <span class="badge bg-success-subtle text-success border border-success border-opacity-25" style="font-size: 11px;"><i class="fa-solid fa-check me-1"></i>Sudah Dinilai</span>
                                                     @else
                                                         <span class="badge bg-danger-subtle text-danger border border-danger border-opacity-25" style="font-size: 11px;"><i class="fa-solid fa-exclamation-circle me-1"></i>Belum Dinilai</span>
@@ -483,6 +481,7 @@
                                             </div>
                                             
                                             {{-- Form Penilaian --}}
+                                            <form class="form-koreksi" onsubmit="simpanKoreksi(event, {{ $j->jawaban_id }})">
                                             <div class="grading-box">
                                                 <div>
                                                     <label class="grading-title">Berikan Nilai (0 - {{ $j->bobot }})</label>
@@ -509,6 +508,15 @@
                                                     </div>
                                                 </div>
                                             </div>
+                                            <div class="mt-3 d-flex justify-content-end align-items-center">
+                                                <span class="text-success me-3 fw-medium d-none save-indicator" id="save-indicator-{{ $j->jawaban_id }}">
+                                                    <i class="fa-solid fa-check-circle me-1"></i> Tersimpan
+                                                </span>
+                                                <button type="submit" class="btn btn-primary btn-sm px-4 rounded-3 shadow-sm btn-simpan" id="btn-simpan-{{ $j->jawaban_id }}">
+                                                    <i class="fa-solid fa-save me-1"></i> Simpan Penilaian Ini
+                                                </button>
+                                            </div>
+                                            </form>
                                         </div>
                                     </div>
                                 </div>
@@ -520,13 +528,13 @@
                     <div class="sticky-action-bar col-12 col-lg-10 mx-auto mt-4">
                         <div class="d-flex flex-column">
                             <span class="fw-bold text-dark mb-1">Selesai Mengoreksi?</span>
-                            <span class="text-muted" style="font-size: 12px;">Pastikan semua nilai dan status jawaban sudah diisi.</span>
+                            <span class="text-muted" style="font-size: 12px;">Nilai akan tersimpan otomatis setiap Anda mengklik tombol Simpan pada masing-masing soal.</span>
                         </div>
-                        <button type="submit" class="btn-save">
-                            <i class="fa-solid fa-floppy-disk me-2"></i> Simpan Nilai Akhir
-                        </button>
+                        <a href="{{ route('dashboard-guru.nilai-siswa.show', $ujian->id) }}" class="btn-save text-decoration-none text-center">
+                            <i class="fa-solid fa-arrow-left me-2"></i> Kembali ke Daftar Siswa
+                        </a>
                     </div>
-                </form>
+                </div>
             @endif
         </div>
 
@@ -634,6 +642,63 @@
     </div>
 
 <script>
+function simpanKoreksi(event, jawabanId) {
+    event.preventDefault();
+    
+    const form = event.target;
+    const btn = document.getElementById('btn-simpan-' + jawabanId);
+    const indicator = document.getElementById('save-indicator-' + jawabanId);
+    const badgeContainer = document.querySelector('#headingEssay' + jawabanId + ' .d-flex.align-items-center.gap-3');
+    
+    // Ganti state button ke loading
+    const originalBtnText = btn.innerHTML;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i> Menyimpan...';
+    btn.disabled = true;
+    indicator.classList.add('d-none');
+    
+    const formData = new FormData(form);
+    
+    fetch("{{ route('dashboard-guru.nilai-siswa.store-koreksi', ['ujian' => $ujian->id, 'siswa' => $siswa->id]) }}", {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+            'Accept': 'application/json'
+        },
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        btn.innerHTML = originalBtnText;
+        btn.disabled = false;
+        
+        if (data.success) {
+            // Tampilkan indikator sukses
+            indicator.classList.remove('d-none');
+            
+            // Update badge di header accordion
+            if (badgeContainer) {
+                const badgeStatus = badgeContainer.querySelector('.badge:first-child'); // Target badge status
+                if (badgeStatus) {
+                    badgeStatus.className = 'badge bg-success-subtle text-success border border-success border-opacity-25';
+                    badgeStatus.innerHTML = '<i class="fa-solid fa-check me-1"></i>Sudah Dinilai';
+                }
+            }
+            
+            setTimeout(() => {
+                indicator.classList.add('d-none');
+            }, 3000);
+        } else {
+            alert('Gagal menyimpan: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Terjadi kesalahan koneksi saat menyimpan penilaian.');
+        btn.innerHTML = originalBtnText;
+        btn.disabled = false;
+    });
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     function setupSearch(inputId, accordionId, noResultId) {
         const input = document.getElementById(inputId);

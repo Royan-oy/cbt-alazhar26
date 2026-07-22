@@ -528,6 +528,7 @@ class DatabaseSeeder extends Seeder
 
         $this->call([
             BankSoalSeeder::class,
+            DummyExamSeeder::class,
         ]);
     }
 }

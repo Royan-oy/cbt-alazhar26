@@ -283,11 +283,25 @@ class GuruNilaiSiswaController extends Controller
 
             DB::commit();
 
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Koreksi jawaban berhasil disimpan.',
+                    'nilai_akhir' => round($nilaiAkhir, 2)
+                ]);
+            }
+
             return redirect()->route('dashboard-guru.nilai-siswa.show', $ujian_id)
                 ->with('success', 'Koreksi jawaban berhasil disimpan dan nilai akhir telah diperbarui.');
 
         } catch (\Exception $e) {
             DB::rollBack();
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+                ], 500);
+            }
             return back()->with('error', 'Terjadi kesalahan saat menyimpan koreksi: ' . $e->getMessage());
         }
     }
