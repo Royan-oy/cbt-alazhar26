@@ -4,77 +4,137 @@
 
 @section('content')
 <style>
-    .page-header-card {
-        background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-        border: none;
-        border-radius: 1.25rem;
-        overflow: hidden;
-        position: relative;
+    .page-header {
+        background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+        border: 1px solid #bae6fd;
+        padding: 2rem 1.5rem;
+        margin-bottom: 2rem;
+        border-radius: 0.75rem;
+        box-shadow: 0 4px 6px -1px rgba(14, 165, 233, 0.1), 0 2px 4px -1px rgba(14, 165, 233, 0.06);
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
     }
-    .page-header-card::before {
-        content: '';
-        position: absolute;
-        top: -60px; right: -60px;
-        width: 280px; height: 280px;
-        background: radial-gradient(circle, rgba(99,102,241,0.15) 0%, transparent 70%);
-        border-radius: 50%;
-        pointer-events: none;
+    .header-icon {
+        background: #fff;
+        color: #0ea5e9;
+        width: 60px;
+        height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 1rem;
+        font-size: 1.75rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        flex-shrink: 0;
     }
-
+    
     .btn-back {
         display: inline-flex;
         align-items: center;
         gap: 0.5rem;
-        background: rgba(255, 255, 255, 0.1);
-        color: #fff;
-        padding: 0.5rem 1rem;
+        background: #fff;
+        color: #0369a1;
+        padding: 0.375rem 0.75rem;
         border-radius: 0.5rem;
         text-decoration: none;
-        font-size: 0.875rem;
-        transition: background 0.2s;
+        font-size: 0.8125rem;
+        font-weight: 600;
+        border: 1px solid #bae6fd;
+        transition: all 0.2s;
     }
     .btn-back:hover {
-        background: rgba(255, 255, 255, 0.2);
+        background: #0284c7;
         color: #fff;
+        border-color: #0284c7;
     }
 
-    .data-card {
+    .page-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #0f172a;
+        margin-bottom: 0.25rem;
+    }
+    .page-description {
+        color: #475569;
+        font-size: 0.875rem;
+        margin-bottom: 0;
+    }
+
+    /* Info Cards */
+    .info-card {
+        background: #fff;
+        border: 1px solid #bae6fd;
+        border-radius: 0.5rem;
+        padding: 1.25rem;
+        text-align: center;
+        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    }
+    
+    .info-card .number {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 0.25rem;
+    }
+    
+    .info-card .label {
+        color: #64748b;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    /* Table Minimalist */
+    .table-card {
         background: #fff;
         border: 1px solid #e2e8f0;
-        border-radius: 1rem;
+        border-radius: 0.5rem;
+        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
         overflow: hidden;
     }
     
-    .data-table th {
+    .table-minimalist {
+        margin-bottom: 0;
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    .table-minimalist thead th {
         background-color: #f8fafc;
         color: #475569;
-        font-size: 11px;
-        font-weight: 700;
+        font-size: 0.75rem;
+        font-weight: 600;
         text-transform: uppercase;
-        letter-spacing: 0.5px;
-        padding: 0.875rem 1rem;
+        letter-spacing: 0.05em;
+        padding: 1rem 1.5rem;
         border-bottom: 1px solid #e2e8f0;
         white-space: nowrap;
     }
     
-    .data-table td {
-        padding: 0.875rem 1rem;
+    .table-minimalist tbody td {
+        padding: 1rem 1.5rem;
         font-size: 0.875rem;
         color: #334155;
         border-bottom: 1px solid #f1f5f9;
         vertical-align: middle;
     }
     
-    .data-table tbody tr:hover {
+    .table-minimalist tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .table-minimalist tbody tr:hover {
         background-color: #f8fafc;
     }
 
+    /* Badges & Actions */
     .status-badge {
         display: inline-flex;
         align-items: center;
         gap: 5px;
         padding: 4px 10px;
-        border-radius: 20px;
+        border-radius: 4px;
         font-size: 11px;
         font-weight: 600;
         white-space: nowrap;
@@ -86,15 +146,15 @@
     .score-badge {
         display: inline-block;
         padding: 4px 12px;
-        border-radius: 20px;
+        border-radius: 4px;
         font-size: 12px;
         font-weight: 600;
         text-align: center;
         min-width: 50px;
     }
-    .score-high   { background: #dcfce7; color: #15803d; }
-    .score-mid    { background: #fef9c3; color: #a16207; }
-    .score-low    { background: #fee2e2; color: #b91c1c; }
+    .score-high   { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+    .score-mid    { background: #fef9c3; color: #a16207; border: 1px solid #fef08a; }
+    .score-low    { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
     
     .alert-badge {
         display: inline-flex;
@@ -103,7 +163,7 @@
         background: #fee2e2;
         color: #b91c1c;
         padding: 0.25rem 0.5rem;
-        border-radius: 0.375rem;
+        border-radius: 4px;
         font-size: 0.75rem;
         font-weight: 600;
     }
@@ -112,20 +172,21 @@
         display: inline-flex;
         align-items: center;
         gap: 0.35rem;
-        padding: 0.35rem 0.75rem;
-        border-radius: 0.5rem;
-        font-size: 0.8125rem;
+        padding: 0.375rem 0.75rem;
+        border-radius: 0.375rem;
+        font-size: 0.75rem;
         font-weight: 500;
         text-decoration: none;
         transition: all 0.2s;
     }
     .btn-koreksi {
-        background: #eff6ff;
-        color: #2563eb;
-        border: 1px solid #bfdbfe;
+        background: #f0f9ff;
+        color: #0284c7;
+        border: 1px solid #bae6fd;
     }
     .btn-koreksi:hover {
-        background: #2563eb;
+        background: #0284c7;
+        border-color: #0284c7;
         color: #fff;
     }
     .btn-koreksi-warning {
@@ -149,44 +210,40 @@
     .avatar-student {
         width: 32px; height: 32px;
         border-radius: 50%;
-        background: linear-gradient(135deg, #6366f1, #4338ca);
-        color: #fff;
+        background: #e0f2fe;
+        color: #0284c7;
         font-size: 11px;
         font-weight: 700;
         display: inline-flex;
         align-items: center;
         justify-content: center;
         flex-shrink: 0;
+        border: 1px solid #bae6fd;
     }
 </style>
 
 <div class="container-fluid px-0 py-2">
 
+    {{-- BACK BUTTON --}}
+    <div class="mb-3">
+        <a href="{{ route('dashboard-guru.nilai-siswa.index') }}" class="btn-back">
+            <i class="fa-solid fa-arrow-left"></i> Kembali
+        </a>
+    </div>
+
     {{-- PAGE HEADER --}}
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="page-header-card p-4 p-md-5">
-                <div class="mb-4">
-                    <a href="{{ route('dashboard-guru.nilai-siswa.index') }}" class="btn-back">
-                        <i class="fa-solid fa-arrow-left"></i> Kembali
-                    </a>
-                </div>
-                <div class="d-flex flex-column flex-md-row align-items-md-center gap-3">
-                    <div class="flex-grow-1">
-                        <span class="badge bg-white bg-opacity-10 text-white border border-white border-opacity-25 px-3 py-2 rounded-pill mb-3 d-inline-flex align-items-center gap-1"
-                              style="font-size: 11px; font-weight: 600;">
-                            <i class="fa-solid fa-users me-1"></i>
-                            Daftar Peserta & Nilai
-                        </span>
-                        <h1 class="fw-bold text-white mb-1" style="font-size: 1.75rem; letter-spacing: -0.5px;">
-                            {{ $ujian->nama_ujian }}
-                        </h1>
-                        <p class="text-white text-opacity-60 mb-0" style="font-size: 13px;">
-                            Mata Pelajaran: {{ $ujian->nama_mapel }} &bull; Pelaksanaan: {{ \Carbon\Carbon::parse($ujian->waktu_mulai)->format('d M Y') }}
-                        </p>
-                    </div>
-                </div>
-            </div>
+    <div class="page-header">
+        <div class="header-icon">
+            <i class="fa-solid fa-users"></i>
+        </div>
+        <div>
+            <h1 class="page-title">
+                {{ $ujian->nama_ujian }}
+            </h1>
+            <p class="page-description">
+                <i class="fa-solid fa-book-open text-muted me-1"></i> {{ $ujian->nama_mapel }} &bull; 
+                <i class="fa-regular fa-calendar text-muted me-1"></i> {{ \Carbon\Carbon::parse($ujian->waktu_mulai)->format('d M Y') }}
+            </p>
         </div>
     </div>
     
@@ -204,29 +261,29 @@
     @endphp
     <div class="row g-3 mb-4">
         <div class="col-12 col-md-4">
-            <div class="bg-white border rounded-3 p-3 text-center" style="border-color: #e2e8f0 !important;">
-                <div class="fw-bold text-dark fs-4">{{ $pesertas->count() }}</div>
-                <div class="text-muted" style="font-size: 12px;">Total Peserta</div>
+            <div class="info-card">
+                <div class="number text-dark">{{ $pesertas->count() }}</div>
+                <div class="label">Total Peserta</div>
             </div>
         </div>
         <div class="col-12 col-md-4">
-            <div class="bg-white border rounded-3 p-3 text-center" style="border-color: #e2e8f0 !important;">
-                <div class="fw-bold text-success fs-4">{{ $totalSelesai }}</div>
-                <div class="text-muted" style="font-size: 12px;">Selesai Mengerjakan</div>
+            <div class="info-card" style="border-color: #bbf7d0; background: #f0fdf4;">
+                <div class="number text-success">{{ $totalSelesai }}</div>
+                <div class="label text-success">Selesai Mengerjakan</div>
             </div>
         </div>
         <div class="col-12 col-md-4">
-            <div class="bg-white border rounded-3 p-3 text-center" style="border-color: #e2e8f0 !important;">
-                <div class="fw-bold {{ $totalBelumDikoreksi > 0 ? 'text-danger' : 'text-primary' }} fs-4">{{ $totalBelumDikoreksi }}</div>
-                <div class="text-muted" style="font-size: 12px;">Butuh Koreksi Manual</div>
+            <div class="info-card" style="border-color: {{ $totalBelumDikoreksi > 0 ? '#fecaca' : '#bae6fd' }}; background: {{ $totalBelumDikoreksi > 0 ? '#fef2f2' : '#f0f9ff' }};">
+                <div class="number {{ $totalBelumDikoreksi > 0 ? 'text-danger' : 'text-primary' }}">{{ $totalBelumDikoreksi }}</div>
+                <div class="label {{ $totalBelumDikoreksi > 0 ? 'text-danger' : 'text-primary' }}">Butuh Koreksi Manual</div>
             </div>
         </div>
     </div>
 
     {{-- TABLE --}}
-    <div class="data-card">
+    <div class="table-card">
         <div class="table-responsive">
-            <table class="table mb-0 data-table">
+            <table class="table-minimalist">
                 <thead>
                     <tr>
                         <th style="width: 48px;">No</th>
@@ -248,7 +305,7 @@
                                 </div>
                                 <div>
                                     <div class="fw-semibold text-dark" style="font-size: 13.5px;">{{ $p->nama_siswa }}</div>
-                                    <div class="text-muted" style="font-size: 11px;">NIS: {{ $p->nis ?? '-' }}</div>
+                                    <div class="text-muted" style="font-size: 11px;"><i class="fa-regular fa-id-badge me-1"></i> NIS: {{ $p->nis ?? '-' }}</div>
                                 </div>
                             </div>
                         </td>
