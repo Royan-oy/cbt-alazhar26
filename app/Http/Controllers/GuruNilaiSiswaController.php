@@ -217,6 +217,7 @@ class GuruNilaiSiswaController extends Controller
             ->join('bank_soals', 'ujians.bank_soal_id', '=', 'bank_soals.id')
             ->where('ujians.id', $ujian_id)
             ->whereIn('bank_soals.guru_mapel_id', $guruMapelIds)
+            ->select('ujians.*', 'bank_soals.id as bank_soal_id')
             ->first();
 
         if (!$ujian) abort(403);
@@ -228,13 +229,25 @@ class GuruNilaiSiswaController extends Controller
         DB::beginTransaction();
         try {
             foreach ($koreksiData as $jawaban_id => $data) {
-                // Update nilai dan is_benar di table jawaban_siswas
-                JawabanSiswa::where('id', $jawaban_id)
+                // Ambil info soal terkait untuk memvalidasi bobot nilai
+                $jawabanSiswa = JawabanSiswa::where('id', $jawaban_id)
                     ->where('nilai_id', $nilai->id)
-                    ->update([
-                        'nilai' => $data['nilai'] ?? 0,
+                    ->first();
+                
+                if ($jawabanSiswa) {
+                    $soal = DB::table('soals')->where('id', $jawabanSiswa->soal_id)->first();
+                    $inputNilai = (float) ($data['nilai'] ?? 0);
+                    
+                    // Validasi backend: nilai tidak boleh kurang dari 0 atau lebih dari bobot soal
+                    if ($soal && ($inputNilai < 0 || $inputNilai > $soal->bobot)) {
+                        throw new \Exception("Nilai untuk soal nomor {$soal->urutan} melebihi bobot maksimal ({$soal->bobot}).");
+                    }
+                    
+                    $jawabanSiswa->update([
+                        'nilai' => $inputNilai,
                         'is_benar' => isset($data['is_benar']) ? (bool) $data['is_benar'] : null
                     ]);
+                }
             }
 
             // --- KALKULASI ULANG NILAI AKHIR ---
@@ -244,22 +257,29 @@ class GuruNilaiSiswaController extends Controller
                 ->where('bank_soal_id', $ujian->bank_soal_id)
                 ->sum('bobot');
 
-            // 2. Dapatkan total nilai yang dicapai siswa (dari jawaban PG maupun Essay yang benar)
-            // Untuk PG: jika is_benar = true, maka nilainya adalah bobot soal.
-            // Untuk Essay: nilainya adalah nilai yang diinput guru (jawaban_siswas.nilai).
-            // Saat RuangUjianController submit nanti, PG harus set jawaban_siswas.nilai = bobot_soal jika benar.
-            // Di sini kita asumsikan jawaban_siswas.nilai sudah merepresentasikan poin yang didapat.
-            
+            // 2. Dapatkan total nilai keseluruhan yang dicapai siswa (PG + Essay)
             $totalSkorSiswa = DB::table('jawaban_siswas')
                 ->where('nilai_id', $nilai->id)
                 ->sum('nilai');
+
+            // 3. Hitung akumulasi nilai essay saja untuk mengisi kolom 'nilai_essay'
+            $totalSkorEssay = DB::table('jawaban_siswas')
+                ->join('soals', 'jawaban_siswas.soal_id', '=', 'soals.id')
+                ->where('jawaban_siswas.nilai_id', $nilai->id)
+                ->whereIn('soals.jenis_soal', ['essay', 'isian'])
+                ->sum('jawaban_siswas.nilai');
 
             $nilaiAkhir = 0;
             if ($totalBobot > 0) {
                 $nilaiAkhir = ($totalSkorSiswa / $totalBobot) * 100;
             }
 
-            $nilai->update(['nilai_akhir' => round($nilaiAkhir, 2)]);
+            // Update nilai akhir, nilai essay, dan status penilaian menjadi selesai
+            $nilai->update([
+                'nilai_essay'      => round($totalSkorEssay, 2),
+                'nilai_akhir'      => round($nilaiAkhir, 2),
+                'status_penilaian' => 'selesai'
+            ]);
 
             DB::commit();
 
