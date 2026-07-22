@@ -1229,47 +1229,82 @@
     // ==========================================================
     async function submitExamAutomatically() {
 
-        intentionalExit = true; // <-- tambahkan ini di awal fungsi
+        intentionalExit = true;
+        isReloading = true;
 
-        const textareas = document.querySelectorAll("textarea");
+        const soalCards = document.querySelectorAll(".soal-card");
 
-        for (const textarea of textareas) {
+        for (const card of soalCards) {
+
+            const soalId = card.dataset.soalId;
+
+            let payload = {
+                ujian_id: {{ $ujian->id }},
+                soal_id: soalId
+            };
+
+            // ==========================
+            // PILIHAN GANDA
+            // ==========================
+
+            const checked = card.querySelector("input[type=radio]:checked");
+
+            if (checked) {
+                payload.pilihan_jawaban_id = checked.value;
+            }
+
+            // ==========================
+            // ESSAY
+            // ==========================
+
+            const textarea = card.querySelector("textarea");
+
+            if (textarea) {
+                payload.jawaban_text = textarea.value;
+            }
+
             try {
-                const soalId = textarea.closest(".soal-card").dataset.soalId;
 
                 await fetch("{{ route('dashboard-siswa.ujian.autosave') }}", {
+
                     method: "POST",
+
                     headers: {
-                        "Content-Type": "application/json",
-                        "Accept": "application/json",
-                        "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                        "Content-Type":"application/json",
+                        "Accept":"application/json",
+                        "X-CSRF-TOKEN":"{{ csrf_token() }}"
                     },
-                    body: JSON.stringify({
-                        ujian_id: {{ $ujian->id }},
-                        soal_id: soalId,
-                        jawaban_text: textarea.value
-                    })
+
+                    body: JSON.stringify(payload)
+
                 });
-            } catch (err) {
-                console.error("Gagal autosave sebelum submit:", err);
+
+            } catch(e){
+
+                console.log(e);
+
             }
+
         }
 
         const form = document.getElementById("formUjian");
 
         let flag = document.getElementById("autoSubmitFlag");
-        if (!flag) {
-            flag = document.createElement("input");
-            flag.type = "hidden";
-            flag.name = "auto_submit";
-            flag.id = "autoSubmitFlag";
-            form.appendChild(flag);
-        }
-        flag.value = "1";
 
-        isReloading = true;
+        if(!flag){
+
+            flag=document.createElement("input");
+
+            flag.type="hidden";
+            flag.name="auto_submit";
+            flag.value="1";
+
+            form.appendChild(flag);
+
+        }
 
         form.submit();
+
     }
 </script>
 @endsection

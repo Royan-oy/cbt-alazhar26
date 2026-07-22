@@ -38,14 +38,13 @@ class RuangUjianController extends Controller
             ->first();
 
 
+            
         if ($nilai && $nilai->status == 'selesai') {
 
             return redirect()
                 ->route('dashboard-siswa.ujian-hari-ini')
-                ->with(
-                    'error',
-                    'Anda sudah mengerjakan ujian ini.'
-                );
+                ->with('error', 'Ujian sudah dikumpulkan.');
+
         }
 
 
@@ -71,8 +70,6 @@ class RuangUjianController extends Controller
 
         }
 
-
-
         /*
         |--------------------------------------------------------------------------
         | LOAD DATA UJIAN
@@ -83,8 +80,6 @@ class RuangUjianController extends Controller
             'bankSoal.mataPelajaran',
             'jenisUjian',
         ]);
-
-
 
         /*
         |--------------------------------------------------------------------------
@@ -102,8 +97,6 @@ class RuangUjianController extends Controller
                 ->count();
 
         }
-
-
 
         /*
         |--------------------------------------------------------------------------
@@ -215,13 +208,6 @@ class RuangUjianController extends Controller
                 ->with('error', 'Ujian sudah selesai.');
         }
 
-        if ($nilai->status == 'selesai') {
-
-            return redirect()
-                ->route('dashboard-siswa.ujian-hari-ini')
-                ->with('error', 'Ujian sudah selesai.');
-        }
-
         // Load soal
         $ujian->load([
             'bankSoal.soals' => function ($query) use ($ujian) {
@@ -294,11 +280,13 @@ class RuangUjianController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        if($nilai->status == 'selesai'){
+        $isAutoSubmit = $request->boolean('auto_submit');
+
+        if ($nilai->status == 'selesai' && !$isAutoSubmit) {
 
             return redirect()
                 ->route('dashboard-siswa.ujian-hari-ini')
-                ->with('error','Ujian sudah dikumpulkan.');
+                ->with('error', 'Ujian sudah dikumpulkan.');
 
         }
 
@@ -636,15 +624,10 @@ class RuangUjianController extends Controller
 
         if($nilai->violation_count >= 2){
 
-            $nilai->update([
-                'status'=>'selesai',
-                'waktu_kumpul'=>now()
-            ]);
-
             return response()->json([
-                'success'=>true,
-                'submit'=>true,
-                'count'=>$nilai->violation_count
+                'success' => true,
+                'submit'  => true,
+                'count'   => $nilai->violation_count
             ]);
         }
 
