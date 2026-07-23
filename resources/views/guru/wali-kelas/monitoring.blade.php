@@ -91,35 +91,6 @@
         text-transform: uppercase;
         letter-spacing: 0.5px;
     }
-
-
-    .auto-refresh-indicator {
-        position: fixed;
-        bottom: 1.5rem;
-        right: 1.5rem;
-        background: rgba(15, 23, 42, 0.85);
-        color: #fff;
-        padding: 0.5rem 1rem;
-        border-radius: 2rem;
-        font-size: 0.75rem;
-        font-weight: 500;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        backdrop-filter: blur(4px);
-        z-index: 1000;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        transition: opacity 0.3s;
-    }
-    .refresh-spinner {
-        width: 12px; height: 12px;
-        border: 2px solid rgba(255,255,255,0.3);
-        border-top-color: #fff;
-        border-radius: 50%;
-        animation: spin 1s linear infinite;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
 </style>
 
 <div class="container-fluid px-0 py-2">
@@ -237,14 +208,7 @@
         </div>
 
         {{-- TOOLBAR (SEARCH & FILTER) --}}
-        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-3">
-            <div class="input-group" style="max-width: 350px;">
-                <span class="input-group-text bg-white border-end-0" style="border-radius: 0.75rem 0 0 0.75rem; border-color: #e2e8f0;">
-                    <i class="fa-solid fa-search text-muted"></i>
-                </span>
-                <input type="text" id="search-input" class="form-control border-start-0 ps-0" placeholder="Cari nama siswa..." style="border-radius: 0 0.75rem 0.75rem 0; border-color: #e2e8f0; box-shadow: none;">
-            </div>
-            
+        <div class="d-flex flex-column flex-md-row justify-content-start align-items-md-center gap-3 my-3">
             <div class="d-flex align-items-center gap-2">
                 <label for="status-filter" class="text-muted fw-semibold mb-0" style="font-size: 0.85rem; white-space: nowrap;">Filter:</label>
                 <select id="status-filter" class="form-select" style="min-width: 160px; border-radius: 0.75rem; border-color: #e2e8f0; font-size: 0.875rem;">
@@ -254,6 +218,13 @@
                     <option value="selesai">Selesai</option>
                 </select>
             </div>
+            <div class="input-group" style="max-width: 350px;">
+                <span class="input-group-text bg-white border-end-0" style="border-radius: 0.75rem 0 0 0.75rem; border-color: #e2e8f0;">
+                    <i class="fa-solid fa-search text-muted"></i>
+                </span>
+                <input type="text" id="search-input" class="form-control border-start-0 ps-0" placeholder="Cari nama siswa..." style="border-radius: 0 0.75rem 0.75rem 0; border-color: #e2e8f0; box-shadow: none;">
+            </div>
+            
         </div>
 
         {{-- MONITORING TABLE --}}
@@ -276,12 +247,6 @@
             </table>
         </div>
 
-        {{-- AUTO REFRESH INDICATOR --}}
-        <div class="auto-refresh-indicator" id="sync-indicator">
-            <div class="refresh-spinner" id="sync-spinner"></div>
-            <span id="sync-text">Live Sync: Menghubungkan...</span>
-        </div>
-
     @endif
 
 </div>
@@ -290,24 +255,13 @@
 <script>
     const monitoringUrl = "{{ route('dashboard-guru.wali-kelas.monitoring-siswa', ['ujian_id' => $selectedUjianId]) }}";
     const container = document.getElementById('monitoring-container');
-    const syncIndicator = document.getElementById('sync-indicator');
-    const syncSpinner = document.getElementById('sync-spinner');
-    const syncText = document.getElementById('sync-text');
     
     const searchInput = document.getElementById('search-input');
     const statusFilter = document.getElementById('status-filter');
     
-    // Polling every 5 seconds for real-time feel
-    const pollInterval = 5000; 
     let initialLoad = true;
-    let fetchTimer;
     
     function fetchMonitoringData() {
-        if(!initialLoad) {
-            syncSpinner.style.display = 'block';
-            syncText.textContent = 'Syncing...';
-        }
-        
         let queryParams = new URLSearchParams({
             search: searchInput.value,
             status: statusFilter.value
@@ -345,15 +299,9 @@
                     </td>
                 </tr>`;
             }
-            
-            syncSpinner.style.display = 'none';
-            syncText.textContent = 'Live Sync: Active';
-            initialLoad = false;
         })
         .catch(error => {
             console.error("Error fetching monitoring data:", error);
-            syncSpinner.style.display = 'none';
-            syncText.textContent = 'Sync Failed. Retrying...';
         });
     }
     
@@ -415,26 +363,17 @@
             </tr>
         `;
     }
-    function startPolling() {
-        clearInterval(fetchTimer);
-        fetchTimer = setInterval(fetchMonitoringData, pollInterval);
-    }
-
     // Event Listeners for Search and Filter
     searchInput.addEventListener('keyup', function() {
         fetchMonitoringData();
-        startPolling(); // Reset timer so it doesn't double fetch
     });
     
     statusFilter.addEventListener('change', function() {
         fetchMonitoringData();
-        startPolling();
     });
 
     // Initial fetch
     fetchMonitoringData();
-    // Start Polling
-    startPolling();
 </script>
 @endif
 
