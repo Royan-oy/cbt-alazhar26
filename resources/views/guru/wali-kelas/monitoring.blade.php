@@ -236,11 +236,23 @@
             </div>
         </div>
 
-        {{-- SEARCH BAR --}}
-        <div class="d-flex justify-content-end mb-3">
-            <div class="input-group" style="max-width: 300px;">
-                <span class="input-group-text bg-white border-end-0 text-muted"><i class="fa-solid fa-search"></i></span>
-                <input type="text" id="search-student" class="form-control border-start-0 ps-0 form-control-modern" placeholder="Cari nama atau NIS...">
+        {{-- TOOLBAR (SEARCH & FILTER) --}}
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-3">
+            <div class="input-group" style="max-width: 350px;">
+                <span class="input-group-text bg-white border-end-0" style="border-radius: 0.75rem 0 0 0.75rem; border-color: #e2e8f0;">
+                    <i class="fa-solid fa-search text-muted"></i>
+                </span>
+                <input type="text" id="search-input" class="form-control border-start-0 ps-0" placeholder="Cari nama siswa..." style="border-radius: 0 0.75rem 0.75rem 0; border-color: #e2e8f0; box-shadow: none;">
+            </div>
+            
+            <div class="d-flex align-items-center gap-2">
+                <label for="status-filter" class="text-muted fw-semibold mb-0" style="font-size: 0.85rem; white-space: nowrap;">Filter:</label>
+                <select id="status-filter" class="form-select" style="min-width: 160px; border-radius: 0.75rem; border-color: #e2e8f0; font-size: 0.875rem;">
+                    <option value="semua">Semua Status</option>
+                    <option value="belum">Belum Mulai</option>
+                    <option value="mengerjakan">Mengerjakan</option>
+                    <option value="selesai">Selesai</option>
+                </select>
             </div>
         </div>
 
@@ -281,45 +293,14 @@
     const syncIndicator = document.getElementById('sync-indicator');
     const syncSpinner = document.getElementById('sync-spinner');
     const syncText = document.getElementById('sync-text');
-    const searchInput = document.getElementById('search-student');
+    
+    const searchInput = document.getElementById('search-input');
+    const statusFilter = document.getElementById('status-filter');
     
     // Polling every 5 seconds for real-time feel
     const pollInterval = 5000; 
     let initialLoad = true;
-    let allStudents = [];
-    
-    searchInput.addEventListener('input', () => {
-        renderTable();
-    });
-    
-    function renderTable() {
-        const query = searchInput.value.toLowerCase();
-        let filteredStudents = allStudents;
-        
-        if (query) {
-            filteredStudents = allStudents.filter(row => {
-                const nama = row.nama ? row.nama.toLowerCase() : '';
-                const nis = row.nis ? row.nis.toLowerCase() : '';
-                return nama.includes(query) || nis.includes(query);
-            });
-        }
-        
-        if(filteredStudents.length > 0) {
-            let html = '';
-            filteredStudents.forEach((row, index) => {
-                html += buildRowHtml(row, index + 1);
-            });
-            container.innerHTML = html;
-        } else {
-            container.innerHTML = `
-            <tr>
-                <td colspan="7" class="text-center py-4 text-muted">
-                    <i class="fa-solid fa-users-slash fa-2x mb-3 d-block opacity-25"></i>
-                    Tidak ada data siswa yang cocok dengan pencarian.
-                </td>
-            </tr>`;
-        }
-    }
+    let fetchTimer;
     
     function fetchMonitoringData() {
         if(!initialLoad) {
@@ -327,7 +308,12 @@
             syncText.textContent = 'Syncing...';
         }
         
-        fetch(monitoringUrl, {
+        let queryParams = new URLSearchParams({
+            search: searchInput.value,
+            status: statusFilter.value
+        }).toString();
+
+        fetch(monitoringUrl + '&' + queryParams, {
             headers: {
                 'X-Requested-With': 'XMLHttpRequest'
             }
@@ -340,9 +326,25 @@
             document.getElementById('stat-mengerjakan').textContent = data.cntMengerjakan;
             document.getElementById('stat-selesai').textContent = data.cntSelesai;
             
-            // Update Table
-            allStudents = data.monitoring || [];
-            renderTable();
+            // Update Cards
+            const students = data.monitoring;
+            const totalSoal = data.totalSoal;
+            
+            if(students.length > 0) {
+                let html = '';
+                students.forEach((row, index) => {
+                    html += buildRowHtml(row, index + 1);
+                });
+                container.innerHTML = html;
+            } else {
+                container.innerHTML = `
+                <tr>
+                    <td colspan="7" class="text-center py-4 text-muted">
+                        <i class="fa-solid fa-users-slash fa-2x mb-3 d-block opacity-25"></i>
+                        Tidak ada data siswa untuk ujian ini.
+                    </td>
+                </tr>`;
+            }
             
             syncSpinner.style.display = 'none';
             syncText.textContent = 'Live Sync: Active';
@@ -413,11 +415,26 @@
             </tr>
         `;
     }
+    function startPolling() {
+        clearInterval(fetchTimer);
+        fetchTimer = setInterval(fetchMonitoringData, pollInterval);
+    }
+
+    // Event Listeners for Search and Filter
+    searchInput.addEventListener('keyup', function() {
+        fetchMonitoringData();
+        startPolling(); // Reset timer so it doesn't double fetch
+    });
     
+    statusFilter.addEventListener('change', function() {
+        fetchMonitoringData();
+        startPolling();
+    });
+
     // Initial fetch
     fetchMonitoringData();
     // Start Polling
-    setInterval(fetchMonitoringData, pollInterval);
+    startPolling();
 </script>
 @endif
 

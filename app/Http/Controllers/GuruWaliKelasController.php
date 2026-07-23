@@ -243,16 +243,38 @@ class GuruWaliKelasController extends Controller
                         : 0;
                     return $row;
                 });
+                
+            // Simpan statistik keseluruhan sebelum di-filter
+            $overallStats = [
+                'totalSiswa' => $monitoring->count(),
+                'cntBelum' => $monitoring->where('status', 'belum')->count(),
+                'cntMengerjakan' => $monitoring->where('status', 'mengerjakan')->count(),
+                'cntSelesai' => $monitoring->where('status', 'selesai')->count(),
+            ];
+
+            // Filter Pencarian (Search by Nama)
+            $search = $request->input('search');
+            if ($search) {
+                $monitoring = $monitoring->filter(function ($row) use ($search) {
+                    return stripos($row->nama, $search) !== false;
+                })->values();
+            }
+
+            // Filter Status
+            $statusFilter = $request->input('status');
+            if ($statusFilter && $statusFilter !== 'semua') {
+                $monitoring = $monitoring->where('status', $statusFilter)->values();
+            }
         }
 
         if ($request->ajax()) {
             return response()->json([
                 'monitoring' => $monitoring,
                 'totalSoal' => $totalSoal,
-                'totalSiswa' => $monitoring->count(),
-                'cntBelum' => $monitoring->where('status', 'belum')->count(),
-                'cntMengerjakan' => $monitoring->where('status', 'mengerjakan')->count(),
-                'cntSelesai' => $monitoring->where('status', 'selesai')->count(),
+                'totalSiswa' => $overallStats['totalSiswa'] ?? 0,
+                'cntBelum' => $overallStats['cntBelum'] ?? 0,
+                'cntMengerjakan' => $overallStats['cntMengerjakan'] ?? 0,
+                'cntSelesai' => $overallStats['cntSelesai'] ?? 0,
             ]);
         }
 
