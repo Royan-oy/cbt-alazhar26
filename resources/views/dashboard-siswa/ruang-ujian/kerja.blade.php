@@ -840,9 +840,10 @@
 
                 <hr style="border-color: var(--border-color); margin: 18px 0;">
 
-                <button type="button" class="btn-finish-exam" onclick="confirmFinish()">
+                <button type="button" class="btn-finish-exam" id="btnFinishExam" onclick="confirmFinish()" disabled>
                     <i class="fa-solid fa-cloud-arrow-up me-2"></i> Selesaikan Ujian
                 </button>
+                <p id="finishExamNotice" style="font-size:11px;color:#94a3b8;text-align:center;margin-top:8px;margin-bottom:0;"></p>
             </div>
         </div>
 
@@ -871,11 +872,11 @@
 {{-- INTERACTIVE JAVASCRIPT --}}
 <script>
     let isReloading = false;
+    let isFinishing = false;
 
     window.addEventListener("beforeunload", function (e) {
         isReloading = true;
         if (isFinishing) {
-            // proses submit yang sah (klik "Selesaikan Ujian"), jangan tampilkan warning
             delete e.returnValue;
             return;
         }
@@ -884,35 +885,70 @@
     let currentIdx = {{ $currentQuestion ?? 0 }};
     const totalQuestions = {{ $soals->count() }};
     const raguStates = [
-
     @foreach($soals as $index=>$soal)
-
-    @if(isset($jawaban[$soal->id]) && $jawaban[$soal->id]->is_ragu_ragu)
-    true,
-    @else
-    false,
-    @endif
-
+        @if(isset($jawaban[$soal->id]) && $jawaban[$soal->id]->is_ragu_ragu)
+            true,
+        @else
+            false,
+        @endif
     @endforeach
-
     ];
+
+    // Batas waktu paling cepat boleh menyelesaikan ujian
+    const minSelesaiTime = new Date("{{ $minSelesai->toIso8601String() }}").getTime();
+
+    function checkAllAnswered() {
+        const boxes = document.querySelectorAll('.number-box');
+        for (const box of boxes) {
+            if (!box.classList.contains('answered')) return false;
+        }
+        return true;
+    }
+
+    function formatJam(timestamp) {
+        const d = new Date(timestamp);
+        const jam = String(d.getHours()).padStart(2, '0');
+        const menit = String(d.getMinutes()).padStart(2, '0');
+        return `${jam}:${menit}`;
+    }
+
+    function updateFinishButtonState() {
+        const btn = document.getElementById('btnFinishExam');
+        const notice = document.getElementById('finishExamNotice');
+        if (!btn) return;
+
+        const allAnswered = checkAllAnswered();
+        const now = new Date().getTime();
+        const timeRequirementMet = now >= minSelesaiTime;
+
+        if (allAnswered && timeRequirementMet) {
+            btn.disabled = false;
+            notice.textContent = '';
+        } else {
+            btn.disabled = true;
+            let pesan = [];
+            if (!allAnswered) pesan.push('semua soal belum terisi');
+            if (!timeRequirementMet) pesan.push(`baru bisa diselesaikan pukul ${formatJam(minSelesaiTime)}`);
+            notice.textContent = 'Belum bisa diselesaikan: ' + pesan.join(' & ');
+        }
+    }
 
     document.addEventListener("DOMContentLoaded", function() {
         updateNavigationButtons();
+        updateFinishButtonState();
         startTimer();
-
-        // Aktifkan fitur proteksi keamanan
         enableAntiCheat();
+        setInterval(updateFinishButtonState, 1000);
     });
 
     function enableAntiCheat() {
-        // 1. Mencegah Klik Kanan & Long Press di HP (Anti-contexmenu)
+        // 1. Mencegah Klik Kanan & Long Press
         document.addEventListener('contextmenu', function(e) {
             e.preventDefault();
             return false;
         });
 
-        // 2. Mencegah Shortcut Keyboard & Aksi Seleksi
+        // 2. Mencegah Shortcut Keyboard
         document.addEventListener('keydown', function(e) {
             if (e.ctrlKey && (e.key === 'c' || e.key === 'v' || e.key === 'u' || e.key === 's' || e.key === 'a')) {
                 e.preventDefault();
@@ -924,79 +960,14 @@
             }
         });
 
-        // 3. Deteksi Perpindahan Tab / Minimize Aplikasi (Page Visibility API)
+        // 3. Deteksi Perpindahan Tab / Minimize (Alt+Tab dsb)
+        // Panggil fungsi TERPUSAT dari layout — bukan fungsi lokal lagi.
         document.addEventListener("visibilitychange", function () {
-
-           if (isReloading || isFinishing) return;
+            if (isReloading || isFinishing) return;
 
             if (document.hidden) {
-                forceSubmitExam();
+                reportViolation();
             }
-
-        });
-    }
-
-    let sendingViolation = false;
-    function forceSubmitExam()
-    {
-        if (sendingViolation) return;
-
-        sendingViolation = true;
-
-        fetch("{{ route('dashboard-siswa.ujian.violation') }}", {
-
-            method: "POST",
-
-            headers: {
-
-                "Content-Type": "application/json",
-                "Accept": "application/json",
-                "X-CSRF-TOKEN": "{{ csrf_token() }}"
-
-            },
-
-            body: JSON.stringify({
-
-                ujian_id: {{ $ujian->id }}
-
-            })
-
-        })
-        .then(response => response.json())
-        .then(data => {
-
-            sendingViolation = false;
-
-            if (!data.success) return;
-
-            if (data.submit) {
-
-                alert(
-                    "Anda telah melakukan pelanggaran sebanyak "
-                    + data.count +
-                    "/2.\n\nUjian akan dikumpulkan otomatis."
-                );
-
-                submitExamAutomatically();
-
-            } else {
-
-                alert(
-                    "PERINGATAN!\n\n" +
-                    "Anda telah keluar dari halaman ujian.\n\n" +
-                    "Pelanggaran : "
-                    + data.count +
-                    "/2\n\n" +
-                    "Jika mengulangi sekali lagi maka ujian akan langsung dikumpulkan."
-                );
-
-            }
-
-        })
-        .catch(() => {
-
-            sendingViolation = false;
-
         });
     }
 
@@ -1008,36 +979,24 @@
         }
     }
 
-    function saveCurrentQuestion(index)
-    {
-        fetch("{{ route('dashboard-siswa.ujian.current-question') }}",{
-
-            method:"POST",
-
-            headers:{
-                "Content-Type":"application/json",
-                "X-CSRF-TOKEN":"{{ csrf_token() }}"
+    function saveCurrentQuestion(index) {
+        fetch("{{ route('dashboard-siswa.ujian.current-question') }}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRF-TOKEN": "{{ csrf_token() }}"
             },
-
-            body:JSON.stringify({
-
-                ujian_id:{{ $ujian->id }},
-
-                current_question:index
-
+            body: JSON.stringify({
+                ujian_id: {{ $ujian->id }},
+                current_question: index
             })
-
         });
-
     }
 
-    // Lompat Langsung ke No Soal Tertentu
     function jumpToQuestion(index) {
-        // Deaktifkan soal saat ini
         document.getElementById(`card-soal-${currentIdx}`).classList.remove('active');
         document.getElementById(`nav-box-${currentIdx}`).classList.remove('active');
 
-        // Aktifkan soal tujuan
         currentIdx = index;
         saveCurrentQuestion(index);
         document.getElementById(`card-soal-${currentIdx}`).classList.add('active');
@@ -1046,16 +1005,13 @@
         updateNavigationButtons();
     }
 
-    // Perbarui Teks & Keaktifan Tombol Bawah
     function updateNavigationButtons() {
         const btnPrev = document.getElementById('btnPrev');
         const btnNext = document.getElementById('btnNext');
         const btnRagu = document.getElementById('btnRagu');
 
-        // Disable "Sebelumnya" jika di nomor 1
         btnPrev.disabled = (currentIdx === 0);
 
-        // Jika nomor terakhir, ubah tombol "Selanjutnya" menjadi "Selesai"
         if (currentIdx === totalQuestions - 1) {
             btnNext.innerHTML = 'Selesai <i class="fa-solid fa-circle-check ms-2"></i>';
             btnNext.style.background = '#10b981';
@@ -1064,7 +1020,6 @@
             btnNext.style.background = 'var(--accent-blue)';
         }
 
-        // Sinkronisasi status visual Ragu-Ragu pada tombol
         if (raguStates[currentIdx]) {
             btnRagu.style.background = '#dc2626';
             btnRagu.innerHTML = '<i class="fa-solid fa-square-check me-2"></i> Batalkan Ragu';
@@ -1074,44 +1029,27 @@
         }
     }
 
-    // Aksi tombol Ragu-Ragu
     function toggleRagu() {
-
         raguStates[currentIdx] = !raguStates[currentIdx];
-
-
         const navBox = document.getElementById(`nav-box-${currentIdx}`);
 
-
         if (raguStates[currentIdx]) {
-
             navBox.classList.add('ragu');
-
         } else {
-
             navBox.classList.remove('ragu');
-
         }
 
-
         saveRaguStatus(currentIdx, raguStates[currentIdx]);
-
-
         updateNavigationButtons();
-
     }
 
-    // Tandai nomor soal hijau/biru jika sudah dijawab (Pilihan Ganda)
-    function markAsAnswered(index)
-    {
+    function markAsAnswered(index) {
         const nav = document.getElementById(`nav-box-${index}`);
-
         nav.classList.add("answered");
-
         nav.classList.remove("ragu");
+        updateFinishButtonState();
     }
 
-    // Tandai nomor soal jika sudah dijawab (Essay/Isian)
     function checkEssayAnswer(textarea, index) {
         const navBox = document.getElementById(`nav-box-${index}`);
         if (textarea.value.trim().length > 0) {
@@ -1119,9 +1057,9 @@
         } else {
             navBox.classList.remove('answered');
         }
+        updateFinishButtonState();
     }
 
-    // Hitung Mundur Sisa Waktu Ujian (Simulasi menggunakan waktu selesai)
     function startTimer() {
         const targetTime = new Date("{{ $ujian->waktu_selesai }}").getTime();
 
@@ -1133,7 +1071,8 @@
                 clearInterval(interval);
                 document.getElementById("countdownTimer").innerHTML = "WAKTU HABIS";
 
-                intentionalExit = true; // <-- tambahkan ini
+                intentionalExit = true;
+                isFinishing = true;
                 isReloading = true;
 
                 document.getElementById("formUjian").submit();
@@ -1150,7 +1089,10 @@
     }
 
     function confirmFinish() {
-            document.getElementById("finishExamOverlay").classList.add("show");
+        const btn = document.getElementById('btnFinishExam');
+        if (btn && btn.disabled) return;
+
+        document.getElementById("finishExamOverlay").classList.add("show");
     }
 
     function closeFinishModal() {
@@ -1158,15 +1100,15 @@
     }
 
     function submitFinalExam() {
-        // PENTING: set variabel milik layout, bukan variabel lokal
         intentionalExit = true;
+        isFinishing = true;
         isReloading = true;
 
         document.getElementById("formUjian").submit();
     }
 
     // ===============================
-    // AUTO SAVE PILIHAN GANDA
+    // AUTO SAVE
     // ===============================
 
     function saveAnswer(ujianId, soalId, pilihanJawabanId, jenisSoal) {
@@ -1225,17 +1167,16 @@
     }
 
     // ==========================================================
-    // SUBMIT OTOMATIS (dipicu saat pelanggaran ke-2 atau waktu habis)
+    // SUBMIT OTOMATIS
     // ==========================================================
     async function submitExamAutomatically() {
-
         intentionalExit = true;
+        isFinishing = true;
         isReloading = true;
 
         const soalCards = document.querySelectorAll(".soal-card");
 
         for (const card of soalCards) {
-
             const soalId = card.dataset.soalId;
 
             let payload = {
@@ -1243,68 +1184,39 @@
                 soal_id: soalId
             };
 
-            // ==========================
-            // PILIHAN GANDA
-            // ==========================
-
             const checked = card.querySelector("input[type=radio]:checked");
-
-            if (checked) {
-                payload.pilihan_jawaban_id = checked.value;
-            }
-
-            // ==========================
-            // ESSAY
-            // ==========================
+            if (checked) payload.pilihan_jawaban_id = checked.value;
 
             const textarea = card.querySelector("textarea");
-
-            if (textarea) {
-                payload.jawaban_text = textarea.value;
-            }
+            if (textarea) payload.jawaban_text = textarea.value;
 
             try {
-
                 await fetch("{{ route('dashboard-siswa.ujian.autosave') }}", {
-
                     method: "POST",
-
                     headers: {
-                        "Content-Type":"application/json",
-                        "Accept":"application/json",
-                        "X-CSRF-TOKEN":"{{ csrf_token() }}"
+                        "Content-Type": "application/json",
+                        "Accept": "application/json",
+                        "X-CSRF-TOKEN": "{{ csrf_token() }}"
                     },
-
                     body: JSON.stringify(payload)
-
                 });
-
-            } catch(e){
-
+            } catch(e) {
                 console.log(e);
-
             }
-
         }
 
         const form = document.getElementById("formUjian");
-
         let flag = document.getElementById("autoSubmitFlag");
 
-        if(!flag){
-
-            flag=document.createElement("input");
-
-            flag.type="hidden";
-            flag.name="auto_submit";
-            flag.value="1";
-
+        if (!flag) {
+            flag = document.createElement("input");
+            flag.type = "hidden";
+            flag.name = "auto_submit";
+            flag.value = "1";
             form.appendChild(flag);
-
         }
 
         form.submit();
-
     }
 </script>
 @endsection

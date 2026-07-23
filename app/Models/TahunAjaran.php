@@ -12,4 +12,13 @@ class TahunAjaran extends Model
         'semester',
         'is_aktif'
     ];
+
+    protected $casts = [
+        'is_aktif' => 'boolean',
+    ];
+
+    public function getSemesterLabelAttribute()
+    {
+        return ucfirst($this->semester); // 'ganjil' -> 'Ganjil', 'genap' -> 'Genap'
+    }
 }

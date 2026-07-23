@@ -211,19 +211,16 @@ class RuangUjianController extends Controller
         // Load soal
         $ujian->load([
             'bankSoal.soals' => function ($query) use ($ujian) {
-
                 if ($ujian->acak_soal) {
                     $query->orderBy('urutan');
                 } else {
                     $query->orderBy('urutan');
                 }
-
             },
-
             'bankSoal.soals.pilihanJawabans',
-
-            'bankSoal.mataPelajaran'
-
+            'bankSoal.mataPelajaran',
+            'jenisUjian',      // <-- tambahkan
+            'tahunAjaran',     // <-- tambahkan
         ]);
 
         // Pastikan bank soal ada
@@ -243,6 +240,12 @@ class RuangUjianController extends Controller
         $currentQuestion = $nilai->current_question;
         $violationCount = $nilai->violation_count;
 
+        // Waktu paling cepat siswa boleh menekan tombol "Selesaikan Ujian"
+        // = waktu_mulai ujian + durasi_minimal (asumsi dalam MENIT, sesuaikan jika satuan beda)
+        $minSelesai = Carbon::parse($ujian->waktu_mulai)
+            ->addMinutes((int) $ujian->durasi_minimal);
+        
+
         return view(
             'dashboard-siswa.ruang-ujian.kerja',
             compact(
@@ -251,7 +254,8 @@ class RuangUjianController extends Controller
                 'nilai',
                 'jawaban',
                 'currentQuestion',
-                'violationCount'
+                'violationCount',
+                'minSelesai'
             )
         );
     }

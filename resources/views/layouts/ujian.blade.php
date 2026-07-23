@@ -15,7 +15,7 @@
         }
 
         /* =========================================================
-           HEADER DARURAT (minimalis, hanya nama + tombol keluar)
+           HEADER DARURAT — FIXED, selalu terlihat saat discroll
            ========================================================= */
         .exam-emergency-header {
             background-color: #ffffff;
@@ -24,18 +24,95 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            position: sticky;
+            gap: 14px;
+            position: fixed;   /* <-- diganti dari sticky */
             top: 0;
+            left: 0;
+            right: 0;
+            width: 100%;
             z-index: 1030;
+            box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
         }
 
-        .exam-emergency-header .exam-user-name {
-            font-size: 13px;
+        /* Kompensasi tinggi header supaya konten tidak ketutupan */
+        .exam-content-wrapper main {
+            padding-top: 64px; /* sesuaikan dengan tinggi header desktop */
+        }
+
+        @media (max-width: 767.98px) {
+            .exam-content-wrapper main {
+                padding-top: 56px; /* header sedikit lebih pendek di tablet/hp */
+            }
+        }
+
+        @media (max-width: 480px) {
+            .exam-content-wrapper main {
+                padding-top: 52px; /* header paling pendek di hp kecil */
+            }
+        }
+
+        .exam-header-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 0; /* supaya teks bisa ellipsis di flex container */
+        }
+
+        .exam-header-logos {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        .exam-logo {
+            height: 38px;
+            width: 38px;
+            object-fit: contain;
+            border-radius: 8px;
+        }
+
+        .exam-header-info {
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+            line-height: 1.35;
+        }
+
+        .exam-header-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            width: fit-content;
+            background: #eff6ff;
+            color: #1d4ed8;
+            border: 1px solid #bfdbfe;
+            padding: 2px 10px;
+            border-radius: 999px;
+            font-size: 10.5px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            margin-bottom: 3px;
+        }
+
+        .exam-header-badge i { font-size: 10px; }
+
+        .exam-header-dot {
+            opacity: 0.55;
+            font-size: 8px;
+        }
+
+        .exam-user-name {
+            font-size: 13.5px;
             font-weight: 700;
             color: #1e293b;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
-        .exam-emergency-header .exam-user-role {
+        .exam-user-role {
             font-size: 9px;
             font-weight: 700;
             text-transform: uppercase;
@@ -47,13 +124,14 @@
             background-color: transparent;
             color: #64748b;
             border: 1px solid #e2e8f0;
-            padding: 6px 12px;
+            padding: 8px 14px;
             border-radius: 10px;
             font-size: 12px;
             font-weight: 600;
             display: flex;
             align-items: center;
             gap: 6px;
+            flex-shrink: 0;
             transition: all 0.2s ease;
         }
 
@@ -61,6 +139,70 @@
             background-color: #fff1f2;
             color: #f43f5e;
             border-color: #ffe4e6;
+        }
+
+        /* =========================================================
+           RESPONSIVE HEADER — TABLET
+           ========================================================= */
+        @media (max-width: 767.98px) {
+            .exam-emergency-header {
+                padding: 8px 14px;
+            }
+
+            .exam-logo {
+                height: 32px;
+                width: 32px;
+            }
+
+            .exam-header-badge {
+                font-size: 9.5px;
+                padding: 2px 8px;
+            }
+
+            .exam-user-name {
+                font-size: 12.5px;
+            }
+
+            .exam-user-role {
+                font-size: 8.5px;
+            }
+        }
+
+        /* =========================================================
+           RESPONSIVE HEADER — HP KECIL
+           ========================================================= */
+        @media (max-width: 480px) {
+            .exam-header-logos {
+                gap: 5px;
+            }
+
+            .exam-logo {
+                height: 28px;
+                width: 28px;
+                border-radius: 6px;
+            }
+
+            .exam-header-badge .exam-header-dot,
+            .exam-header-badge {
+                font-size: 8.5px;
+            }
+
+            .exam-header-info {
+                max-width: 150px;
+            }
+
+            .exam-user-name {
+                font-size: 11.5px;
+            }
+
+            /* Sembunyikan teks "Keluar Darurat", sisakan ikon saja supaya muat */
+            .btn-logout-text {
+                display: none;
+            }
+
+            .btn-logout-emergency {
+                padding: 8px 10px;
+            }
         }
 
         /* =========================================================
@@ -121,6 +263,17 @@
         .exam-content-wrapper {
             display: none; /* baru ditampilkan setelah fullscreen aktif */
         }
+
+        .exam-header-active-tag {
+            background: #dcfce7;
+            color: #16a34a;
+            font-size: 8.5px;
+            font-weight: 800;
+            padding: 1px 6px;
+            border-radius: 999px;
+            margin-left: 2px;
+            text-transform: uppercase;
+        }
     </style>
 </head>
 <body>
@@ -143,20 +296,37 @@
     </div>
 
     {{-- ================================================= --}}
-    {{-- HEADER DARURAT: hanya nama siswa + tombol keluar   --}}
+    {{-- HEADER DARURAT: logo sekolah + info ujian + keluar --}}
     {{-- ================================================= --}}
     <div class="exam-content-wrapper" id="examContentWrapper">
         <header class="exam-emergency-header">
-            <div>
-                <span class="exam-user-name d-block">{{ Auth::user()->nama }}</span>
-                <span class="exam-user-role">{{ str_replace('_', ' ', Auth::user()->role) }} &mdash; Sedang Ujian</span>
+            <div class="exam-header-brand">
+                <div class="exam-header-logos">
+                    <img src="{{ asset('img/alazhar.png') }}" alt="Logo Sekolah" class="exam-logo">
+                    <img src="{{ asset('img/sigma.png') }}" alt="Logo Sigma" class="exam-logo">
+                </div>
+
+                <div class="exam-header-info">
+                    <span class="exam-header-badge">
+                        <i class="fa-solid fa-file-signature"></i>
+                        {{ $ujian->jenisUjian->nama ?? 'Ujian' }}
+                        <span class="exam-header-dot">&bull;</span>
+                        TA {{ $ujian->tahunAjaran->nama_tahun ?? '-' }}
+                        {{ optional($ujian->tahunAjaran)->semester }}
+                        @if(optional($ujian->tahunAjaran)->is_aktif)
+                            <span class="exam-header-active-tag">Aktif</span>
+                        @endif
+                    </span>
+                    <span class="exam-user-name">{{ Auth::user()->nama }}</span>
+                    <span class="exam-user-role">{{ str_replace('_', ' ', Auth::user()->role) }} &mdash; Sedang Ujian</span>
+                </div>
             </div>
 
             <form action="{{ route('logout') }}" method="POST" class="m-0" id="formLogoutDarurat">
                 @csrf
                 <button type="submit" class="btn-logout-emergency" onclick="return confirmEmergencyLogout(event)">
                     <i class="fa-solid fa-right-from-bracket"></i>
-                    <span>Keluar Darurat</span>
+                    <span class="btn-logout-text">Keluar Darurat</span>
                 </button>
             </form>
         </header>
@@ -177,9 +347,8 @@
         let intentionalExit = false; // true saat logout darurat / submit selesai
 
         /* =========================================================
-           MASUK FULLSCREEN SAAT TOMBOL "MULAI UJIAN" DIKLIK
-           (harus dari user gesture, tidak bisa otomatis saat load)
-           ========================================================= */
+        MASUK FULLSCREEN SAAT TOMBOL "MULAI UJIAN" DIKLIK
+        ========================================================= */
         btnStart.addEventListener('click', function () {
             const el = document.documentElement;
             const request = el.requestFullscreen
@@ -207,11 +376,6 @@
             contentWrapper.style.display = 'block';
         }
 
-        /* =========================================================
-           DETEKSI KELUAR DARI FULLSCREEN (tekan Esc, dsb)
-           -> pelanggaran 1/2: notif + otomatis coba masuk fullscreen lagi
-           -> pelanggaran 2/2: langsung submit ujian otomatis
-           ========================================================= */
         function isFullscreenActive() {
             return !!(document.fullscreenElement
                 || document.webkitFullscreenElement
@@ -225,17 +389,29 @@
         document.addEventListener('MSFullscreenChange', handleFullscreenExit);
 
         function handleFullscreenExit() {
-            if (!examStarted || intentionalExit) return;
             if (isFullscreenActive()) return; // masih fullscreen, abaikan
-
-            reportFullscreenViolation();
+            reportViolation();
         }
 
-        let fsViolationSending = false;
+        /* =========================================================
+        SATU-SATUNYA PINTU PELAPORAN PELANGGARAN
+        Dipanggil oleh: fullscreenchange (file ini) DAN
+        visibilitychange (kerja.blade.php) — supaya Alt+Tab yang
+        memicu keduanya sekaligus tetap hanya dihitung 1x.
+        ========================================================= */
+        let violationInFlight = false;
+        let violationCooldownUntil = 0;
 
-        function reportFullscreenViolation() {
-            if (fsViolationSending) return;
-            fsViolationSending = true;
+        window.reportViolation = function () {
+            if (!examStarted || intentionalExit) return;
+            if (typeof isReloading !== 'undefined' && isReloading) return;
+            if (typeof isFinishing !== 'undefined' && isFinishing) return;
+
+            const now = Date.now();
+            if (violationInFlight || now < violationCooldownUntil) return; // cegah double-count
+
+            violationInFlight = true;
+            violationCooldownUntil = now + 2000; // jeda 2 detik
 
             fetch("{{ route('dashboard-siswa.ujian.violation') }}", {
                 method: "POST",
@@ -244,14 +420,11 @@
                     "Accept": "application/json",
                     "X-CSRF-TOKEN": "{{ csrf_token() }}"
                 },
-                body: JSON.stringify({
-                    ujian_id: {{ $ujian->id }},
-                    reason: 'keluar_fullscreen'
-                })
+                body: JSON.stringify({ ujian_id: {{ $ujian->id }} })
             })
             .then(function (r) { return r.json(); })
             .then(function (data) {
-                fsViolationSending = false;
+                violationInFlight = false;
                 if (!data.success) return;
 
                 if (data.submit) {
@@ -261,7 +434,7 @@
                     Swal.fire({
                         icon: 'error',
                         title: 'Pelanggaran ' + data.count + '/2',
-                        text: 'Anda keluar dari mode layar penuh untuk kedua kalinya. Ujian akan dikumpulkan otomatis.',
+                        text: 'Anda keluar dari ujian untuk kedua kalinya. Ujian akan dikumpulkan otomatis.',
                         confirmButtonText: 'Mengerti',
                         confirmButtonColor: '#ef4444',
                         allowOutsideClick: false,
@@ -277,26 +450,23 @@
                     Swal.fire({
                         icon: 'warning',
                         title: 'Pelanggaran ' + data.count + '/2',
-                        html: 'Anda keluar dari mode layar penuh.<br>' +
-                              'Jika terjadi sekali lagi, ujian akan otomatis dikumpulkan.',
-                        confirmButtonText: 'Kembali ke Layar Penuh',
+                        html: 'Anda keluar dari halaman atau mode layar penuh ujian.<br>' +
+                            'Jika terjadi sekali lagi, ujian akan otomatis dikumpulkan.',
+                        confirmButtonText: 'Kembali ke Ujian',
                         confirmButtonColor: '#0ea5e9',
                         allowOutsideClick: false,
                         allowEscapeKey: false
                     }).then(function (result) {
-                        if (result.isConfirmed) {
-                            // Diklik dalam jeda singkat setelah klik ini,
-                            // browser masih menganggap ini "user gesture"
-                            // sehingga fullscreen bisa diminta ulang.
+                        if (result.isConfirmed && !isFullscreenActive()) {
                             reEnterFullscreen();
                         }
                     });
                 }
             })
             .catch(function () {
-                fsViolationSending = false;
+                violationInFlight = false;
             });
-        }
+        };
 
         function reEnterFullscreen() {
             const el = document.documentElement;
@@ -308,8 +478,6 @@
             if (!request) return;
 
             request.call(el).catch(function () {
-                // Jika browser tetap menolak (mis. Safari iOS),
-                // tampilkan gerbang awal lagi sebagai fallback manual
                 Swal.fire({
                     icon: 'info',
                     title: 'Klik untuk Kembali ke Layar Penuh',
@@ -325,10 +493,12 @@
         }
 
         /* =========================================================
-           TOMBOL LOGOUT DARURAT
-           ========================================================= */
+        TOMBOL LOGOUT DARURAT
+        ========================================================= */
         function confirmEmergencyLogout(e) {
             e.preventDefault();
+            intentionalExit = true;
+
             Swal.fire({
                 icon: 'warning',
                 title: 'Keluar dari Ujian?',
@@ -342,14 +512,17 @@
                 if (result.isConfirmed) {
                     intentionalExit = true;
                     document.getElementById('formLogoutDarurat').submit();
+                } else {
+                    intentionalExit = false;
                 }
             });
+
             return false;
         }
 
         /* =========================================================
-           CEGAH SISWA KEMBALI (TOMBOL BACK)
-           ========================================================= */
+        CEGAH SISWA KEMBALI (TOMBOL BACK)
+        ========================================================= */
         (function () {
             history.pushState(null, "", location.href);
 
@@ -367,8 +540,8 @@
         })();
 
         /* =========================================================
-           KONFIRMASI SEBELUM MENUTUP / RELOAD TAB
-           ========================================================= */
+        KONFIRMASI SEBELUM MENUTUP / RELOAD TAB
+        ========================================================= */
         window.addEventListener("beforeunload", function (e) {
             if (intentionalExit) return;
             e.preventDefault();
