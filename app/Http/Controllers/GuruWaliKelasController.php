@@ -245,6 +245,17 @@ class GuruWaliKelasController extends Controller
                 });
         }
 
+        if ($request->ajax()) {
+            return response()->json([
+                'monitoring' => $monitoring,
+                'totalSoal' => $totalSoal,
+                'totalSiswa' => $monitoring->count(),
+                'cntBelum' => $monitoring->where('status', 'belum')->count(),
+                'cntMengerjakan' => $monitoring->where('status', 'mengerjakan')->count(),
+                'cntSelesai' => $monitoring->where('status', 'selesai')->count(),
+            ]);
+        }
+
         return view('guru.wali-kelas.monitoring', compact(
             'waliKelas',
             'ujians',
