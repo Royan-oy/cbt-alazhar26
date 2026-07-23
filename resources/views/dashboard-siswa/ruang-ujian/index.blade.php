@@ -149,7 +149,8 @@
                                        maxlength="6" 
                                        value="{{ old('token') }}"
                                        required 
-                                       autocomplete="off">
+                                       autocomplete="off"
+                                       autofocus>
                                 
                                 @error('token')
                                     <div class="invalid-feedback fw-semibold mt-2 fs-6">

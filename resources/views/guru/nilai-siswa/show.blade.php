@@ -160,8 +160,9 @@
         display: inline-flex;
         align-items: center;
         gap: 0.25rem;
-        background: #fee2e2;
-        color: #b91c1c;
+        background: #fffbeb;
+        color: #d97706;
+        border: 1px solid #fde68a;
         padding: 0.25rem 0.5rem;
         border-radius: 4px;
         font-size: 0.75rem;
@@ -190,21 +191,21 @@
         color: #fff;
     }
     .btn-koreksi-warning {
-        background: #fef2f2;
-        color: #dc2626;
-        border: 1px solid #fecaca;
-        animation: pulse-red 2s infinite;
+        background: #fffbeb;
+        color: #d97706;
+        border: 1px solid #fde68a;
+        animation: pulse-warning 2s infinite;
     }
     .btn-koreksi-warning:hover {
-        background: #dc2626;
+        background: #d97706;
         color: #fff;
         animation: none;
     }
 
-    @keyframes pulse-red {
-        0% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.4); }
-        70% { box-shadow: 0 0 0 6px rgba(220, 38, 38, 0); }
-        100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); }
+    @keyframes pulse-warning {
+        0% { box-shadow: 0 0 0 0 rgba(217, 119, 6, 0.4); }
+        70% { box-shadow: 0 0 0 6px rgba(217, 119, 6, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(217, 119, 6, 0); }
     }
     
     .avatar-student {
@@ -290,6 +291,7 @@
                         <th>Nama Siswa</th>
                         {{-- <th>Status</th> --}}
                         <th>Waktu Selesai</th>
+                        <th>Pelanggaran</th>
                         <th class="text-center">Nilai Akhir</th>
                         <th class="text-end">Aksi</th>
                     </tr>
@@ -326,6 +328,22 @@
                         </td> --}}
                         <td class="text-muted" style="font-size: 12px;">
                             {{ $p->waktu_kumpul ? \Carbon\Carbon::parse($p->waktu_kumpul)->format('d M Y, H:i') : '-' }}
+                        </td>
+                        <td>
+                            @if($p->violation_count == 2)
+                                <span class="badge bg-danger-subtle text-danger border border-danger border-opacity-25" style="font-size: 11px;">
+                                    <i class="fa-solid fa-triangle-exclamation me-1"></i> {{ $p->violation_count }}x
+                                </span>
+                            @elseif ($p->violation_count == 1)
+                                <span class="badge bg-warning-subtle text-warning border border-warning border-opacity-25" style="font-size: 11px;">
+                                    <i class="fa-solid fa-triangle-exclamation me-1"></i> {{ $p->violation_count }}x
+                                </span>
+                            @else
+
+                                <span class="badge bg-light text-muted border" style="font-size: 11px;">
+                                    0x
+                                </span>
+                            @endif
                         </td>
                         <td class="text-center">
                             @if($p->status === 'selesai')

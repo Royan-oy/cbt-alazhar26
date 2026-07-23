@@ -97,6 +97,7 @@ class GuruNilaiSiswaController extends Controller
                 'nilais.status',
                 'nilais.waktu_mulai_kerja',
                 'nilais.waktu_kumpul',
+                'nilais.violation_count',
                 'nilais.nilai_akhir'
             )
             ->orderBy('siswas.nama', 'asc')
