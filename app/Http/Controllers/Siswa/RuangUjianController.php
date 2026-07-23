@@ -448,18 +448,22 @@ class RuangUjianController extends Controller
 
         if($adaEssay){
 
-
             /*
             Ada essay
-            Tunggu koreksi guru
+            Hitung nilai sementara dari Pilihan Ganda (PG) agar nilai_akhir tidak 0
+            Tunggu koreksi essay lengkap dari guru
             */
-
+            $totalBobot = $soals->sum('bobot');
+            $nilaiSementara = 0;
+            if ($totalBobot > 0) {
+                $nilaiSementara = ($nilaiPG / $totalBobot) * 100;
+            }
 
             $nilai->update([
 
                 'nilai_pg'=> $nilaiPG,
 
-                'nilai_akhir'=>0,
+                'nilai_akhir'=> round($nilaiSementara, 2),
 
                 'status'=>'selesai',
 
@@ -469,9 +473,8 @@ class RuangUjianController extends Controller
 
             ]);
 
-
-
         }else{
+
 
 
             /*

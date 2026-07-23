@@ -460,10 +460,11 @@
                 <table class="table align-middle mb-0">
                     <thead>
                         <tr>
-                            <th class="text-center" style="width: 50px;">No</th>
+                            <th class="text-center">No</th>
                             <th class="text-center">Nama Bank Soal</th>
                             <th class="text-center">Mapel</th>
                             <th class="text-center">Jenjang</th>
+                            <th class="text-center">KKM</th>
                             <th class="text-center">Deskripsi</th>
                             <th class="text-center">Dibuat</th>
                             <th class="text-center">Status</th>
@@ -497,6 +498,13 @@
                                 </span>
                             </td>
 
+                            {{-- KKM --}}
+                            <td class="text-center">
+                                <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2.5 py-1.5 rounded-pill fw-bold" style="font-size: 12px;">
+                                    {{ $bs->kkm ?? 75 }}
+                                </span>
+                            </td>
+
                             {{-- Deskripsi --}}
                             <td class="text-center">
                                 @if($bs->deskripsi)
@@ -507,6 +515,7 @@
                                     <span class="text-muted fst-italic" style="font-size: 12px;">—</span>
                                 @endif
                             </td>
+
 
                             {{-- Dibuat --}}
                             <td class="text-center">

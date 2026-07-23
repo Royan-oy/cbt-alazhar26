@@ -329,11 +329,12 @@
                         </td>
                         <td class="text-center">
                             @if($p->status === 'selesai')
-                                @php $nilai = (float) $p->nilai_akhir; @endphp
-                                @if($nilai >= 80)
+                                @php 
+                                    $nilai = (float) $p->nilai_akhir;
+                                    $kkm = (float) ($ujian->kkm ?? 75);
+                                @endphp
+                                @if($nilai >= $kkm)
                                     <span class="score-badge score-high">{{ number_format($nilai, 0) }}</span>
-                                @elseif($nilai >= 60)
-                                    <span class="score-badge score-mid">{{ number_format($nilai, 0) }}</span>
                                 @else
                                     <span class="score-badge score-low">{{ number_format($nilai, 0) }}</span>
                                 @endif

@@ -233,9 +233,19 @@
                 </div>
 
                 <div class="info-item">
+                    <div class="info-label">Nilai KKM</div>
+                    <div class="info-value">
+                        <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2.5 py-1.5 rounded-pill fw-bold" style="font-size: 13px;">
+                            {{ $bankSoal->kkm ?? 75 }}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="info-item">
                     <div class="info-label">Deskripsi</div>
                     <div class="info-value fw-normal">{{ $bankSoal->deskripsi ?? '-' }}</div>
                 </div>
+
 
                 <div class="info-item">
                     <div class="info-label">Total Soal</div>

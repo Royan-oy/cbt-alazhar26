@@ -15,12 +15,15 @@ class BankSoal extends Model
         'jenjang_id',
         'nama_bank_soal',
         'deskripsi',
+        'kkm',
         'is_publish',
     ];
 
     protected $casts = [
         'is_publish' => 'boolean',
+        'kkm'        => 'integer',
     ];
+
 
     public function guruMapel()
     {

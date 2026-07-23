@@ -55,27 +55,28 @@ class GuruBankSoalController extends Controller
     {
         $request->validate([
             'nama_bank_soal' => 'required|string|max:255',
-            'guru_mapel_id' => 'required|exists:guru_mapels,id',
-            'deskripsi' => 'nullable|string',
+            'guru_mapel_id'  => 'required|exists:guru_mapels,id',
+            'kkm'            => 'required|integer|min:0|max:100',
+            'deskripsi'      => 'nullable|string',
         ]);
 
         $guru = Auth::user()->guru;
 
         // Pastikan guru_mapel yang dipilih benar-benar milik guru yang login
-        // (mencegah guru A mengirim guru_mapel_id milik guru B lewat DevTools).
         $guruMapel = $guru->guruMapels()->findOrFail($request->guru_mapel_id);
 
         BankSoal::create([
-            'guru_mapel_id' => $guruMapel->id,
-            'mata_pelajaran_id' => $guruMapel->mata_pelajaran_id, // diturunkan, bukan dari input form
-            'jenjang_id' => $guru->jenjang_id, // diturunkan dari data guru, bukan dari input "SD" hardcoded
-            'nama_bank_soal' => $request->nama_bank_soal,
-            'deskripsi' => $request->deskripsi,
-            'is_publish' => false, // Default false
+            'guru_mapel_id'     => $guruMapel->id,
+            'mata_pelajaran_id' => $guruMapel->mata_pelajaran_id,
+            'jenjang_id'        => $guru->jenjang_id,
+            'nama_bank_soal'    => $request->nama_bank_soal,
+            'kkm'               => $request->kkm ?? 75,
+            'deskripsi'         => $request->deskripsi,
+            'is_publish'        => false,
         ]);
 
         return redirect()
-            ->route('dashboard-guru.bank-soal.index') // diperbaiki: sebelumnya 'guru.bank-soal.index' (route ini tidak ada di web.php, akan error)
+            ->route('dashboard-guru.bank-soal.index')
             ->with('success', 'Bank Soal berhasil dibuat');
     }
 
@@ -97,9 +98,9 @@ class GuruBankSoalController extends Controller
         $guruMapels = $guru->guruMapels()->with('mataPelajaran')->get();
 
         return view('guru.bank-soal.edit', [
-            'bankSoal' => $bank_soal,
+            'bankSoal'   => $bank_soal,
             'guruMapels' => $guruMapels,
-            'jenjang' => $guru->jenjang,
+            'jenjang'    => $guru->jenjang,
         ]);
     }
 
@@ -110,21 +111,19 @@ class GuruBankSoalController extends Controller
 
         $request->validate([
             'nama_bank_soal' => 'required|string|max:255',
-            'guru_mapel_id' => 'required|exists:guru_mapels,id',
-            'deskripsi' => 'nullable|string',
+            'guru_mapel_id'  => 'required|exists:guru_mapels,id',
+            'kkm'            => 'required|integer|min:0|max:100',
+            'deskripsi'      => 'nullable|string',
         ]);
 
-        // Sama seperti store(): guru_mapel yang dikirim harus benar-benar
-        // milik guru ini, lalu mata_pelajaran_id diturunkan darinya (bukan dari input bebas).
         $guruMapel = $guru->guruMapels()->findOrFail($request->guru_mapel_id);
 
         $bank_soal->update([
-            'guru_mapel_id' => $guruMapel->id,
+            'guru_mapel_id'     => $guruMapel->id,
             'mata_pelajaran_id' => $guruMapel->mata_pelajaran_id,
-            'jenjang_id' => $guru->jenjang_id,
-            'nama_bank_soal' => $request->nama_bank_soal,
-            'deskripsi' => $request->deskripsi,
-            // is_publish sengaja TIDAK diubah lewat form ini — dikontrol lewat togglePublish() terpisah
+            'nama_bank_soal'    => $request->nama_bank_soal,
+            'kkm'               => $request->kkm ?? 75,
+            'deskripsi'         => $request->deskripsi,
         ]);
 
         return redirect()
@@ -133,6 +132,7 @@ class GuruBankSoalController extends Controller
     }
 
     public function destroy(BankSoal $bank_soal)
+
     {
         $guru = Auth::user()->guru;
         $this->authorizeOwnership($guru, $bank_soal);

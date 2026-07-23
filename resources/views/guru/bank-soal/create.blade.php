@@ -409,6 +409,28 @@
                     </div>
                 </div>
 
+                {{-- Nilai KKM --}}
+                <div class="form-group mt-3">
+                    <label class="form-label-custom">
+                        <span class="required-dot"></span>
+                        Nilai KKM (Kriteria Ketuntasan Minimal)
+                        <span class="label-hint">Dapat diubah (Skala 0 - 100)</span>
+                    </label>
+                    <input type="number"
+                           name="kkm"
+                           class="form-control-modern @error('kkm') is-invalid @enderror"
+                           placeholder="75"
+                           value="{{ old('kkm', 75) }}"
+                           min="0"
+                           max="100"
+                           required>
+                    @error('kkm')
+                        <div class="field-error">
+                            <i class="fa-solid fa-circle-exclamation"></i> {{ $message }}
+                        </div>
+                    @enderror
+                </div>
+
                 {{-- Deskripsi --}}
                 <div class="form-group mt-3">
                     <label class="form-label-custom">
@@ -425,6 +447,7 @@
                         </div>
                     @enderror
                 </div>
+
 
             </div>
 
