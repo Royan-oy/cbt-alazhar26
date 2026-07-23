@@ -384,19 +384,24 @@
 
     {{-- HASIL RINGKAS --}}
     <div class="row g-3 mb-4">
-        <div class="col-12 col-md-6 col-lg-5">
+        <div class="col-12 col-md-4">
             <div class="info-card">
                 <div class="label">Skor Pilihan Ganda (Otomatis)</div>
                 <div class="number text-success">{{ $skor_pg }} <span style="font-size: 0.875rem; font-weight: normal; color: #64748b;">/ ({{ $benar_pg }}/{{ $total_soal_pg }} Benar)</span></div>
             </div>
         </div>
-        <div class="col-12 col-md-6 col-lg-7">
+        <div class="col-12 col-md-5">
             <div class="info-card" style="border-color: #bae6fd; background: #f0f9ff;">
                 <div class="label text-primary">Nilai Akhir Keseluruhan (Sementara)</div>
                 <div class="number text-primary" id="nilai-akhir-display">{{ number_format($nilai_sementara ?? $nilai->nilai_akhir, 2) }} <span style="font-size: 0.875rem; font-weight: normal; color: #0284c7;">/ 100</span></div>
             </div>
         </div>
-
+        <div class="col-12 col-md-3">
+            <div class="info-card" style="border-color: {{ $nilai->violation_count > 0 ? '#fecaca' : '#e2e8f0' }}; background: {{ $nilai->violation_count > 0 ? '#fef2f2' : '#f8fafc' }};">
+                <div class="label {{ $nilai->violation_count > 0 ? 'text-danger' : 'text-muted' }}">Pelanggaran Ujian</div>
+                <div class="number {{ $nilai->violation_count > 0 ? 'text-danger' : 'text-muted' }}">{{ $nilai->violation_count }} <span style="font-size: 0.875rem; font-weight: normal;">kali</span></div>
+            </div>
+        </div>
     </div>
 
     {{-- TAB NAVIGATION --}}
