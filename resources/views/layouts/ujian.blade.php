@@ -388,6 +388,24 @@
         document.addEventListener('mozfullscreenchange', handleFullscreenExit);
         document.addEventListener('MSFullscreenChange', handleFullscreenExit);
 
+        /* =========================================================
+        LAPISAN CADANGAN: deteksi window kehilangan fokus
+        (recent-apps / app-switcher / alih aplikasi lain)
+        Sengaja pakai fungsi reportViolation() yang SAMA supaya
+        tetap dijaga cooldown-nya — tidak dobel hitung dengan
+        visibilitychange yang mungkin terpicu bersamaan.
+        ========================================================= */
+        window.addEventListener('blur', function () {
+            // Beri jeda sepersekian detik sebelum lapor, supaya tidak
+            // salah tangkap saat dialog SweetAlert sendiri sempat
+            // memindahkan fokus browser secara internal.
+            setTimeout(function () {
+                if (document.hidden || !document.hasFocus()) {
+                    reportViolation();
+                }
+            }, 150);
+        });
+
         function handleFullscreenExit() {
             if (isFullscreenActive()) return; // masih fullscreen, abaikan
             reportViolation();

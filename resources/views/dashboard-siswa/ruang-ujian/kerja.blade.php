@@ -138,6 +138,43 @@
         justify-content: center;
     }
 
+    .exam-clock-box {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background: #f0f9ff;
+        border: 1px solid #bae6fd;
+        border-radius: var(--radius-md);
+        padding: 10px 18px;
+        min-width: 150px;
+        justify-content: center;
+    }
+
+    .exam-clock-box i { color: var(--accent-blue-dark); font-size: 16px; }
+
+    .exam-clock-box .clock-text {
+        display: flex;
+        flex-direction: column;
+        line-height: 1.2;
+    }
+
+    .exam-clock-box .clock-label {
+        font-size: 9.5px;
+        text-transform: uppercase;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        color: var(--accent-blue-dark);
+        opacity: 0.8;
+    }
+
+    #currentClock {
+        font-size: 19px;
+        font-weight: 800;
+        color: var(--accent-blue-dark);
+        font-variant-numeric: tabular-nums;
+        margin: 0;
+    }
+
     .exam-timer-box i { color: #dc2626; font-size: 16px; }
 
     .exam-timer-box .timer-text {
@@ -502,7 +539,12 @@
 
         .exam-topbar .exam-title { font-size: 15.5px; }
 
-        .exam-timer-box { min-width: 0; }
+        .exam-timer-box, .exam-clock-box { min-width: 0; }
+
+        .exam-topbar > div:last-child {
+            display: flex;
+            gap: 8px;
+        }
 
         .fullscreen-warning-banner {
             font-size: 12px;
@@ -648,11 +690,21 @@
             <span class="exam-label">Sedang Mengerjakan</span>
             <h5 class="exam-title">{{ $ujian->nama_ujian }}</h5>
         </div>
-        <div class="exam-timer-box">
-            <i class="fa-regular fa-clock"></i>
-            <div class="timer-text">
-                <span class="timer-label">Sisa Waktu</span>
-                <p id="countdownTimer">--:--:--</p>
+        <div style="display:flex; gap:12px; flex-wrap:wrap;">
+            <div class="exam-clock-box">
+                <i class="fa-regular fa-clock"></i>
+                <div class="clock-text">
+                    <span class="clock-label">Jam Sekarang</span>
+                    <p id="currentClock">--:--:--</p>
+                </div>
+            </div>
+
+            <div class="exam-timer-box">
+                <i class="fa-solid fa-hourglass-half"></i>
+                <div class="timer-text">
+                    <span class="timer-label">Sisa Waktu</span>
+                    <p id="countdownTimer">--:--:--</p>
+                </div>
             </div>
         </div>
     </div>
@@ -937,6 +989,7 @@
         updateNavigationButtons();
         updateFinishButtonState();
         startTimer();
+        startClock();
         enableAntiCheat();
         setInterval(updateFinishButtonState, 1000);
     });
@@ -1086,6 +1139,19 @@
             const format = (num) => String(num).padStart(2, '0');
             document.getElementById("countdownTimer").innerHTML = `${format(hours)}:${format(minutes)}:${format(seconds)}`;
         }, 1000);
+    }
+
+    function startClock() {
+        function updateClock() {
+            const now = new Date();
+            const format = (num) => String(num).padStart(2, '0');
+            const jam = format(now.getHours());
+            const menit = format(now.getMinutes());
+            const detik = format(now.getSeconds());
+            document.getElementById("currentClock").innerHTML = `${jam}:${menit}:${detik}`;
+        }
+        updateClock();
+        setInterval(updateClock, 1000);
     }
 
     function confirmFinish() {
