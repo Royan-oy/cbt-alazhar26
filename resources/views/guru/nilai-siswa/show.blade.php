@@ -288,7 +288,7 @@
                     <tr>
                         <th style="width: 48px;">No</th>
                         <th>Nama Siswa</th>
-                        <th>Status</th>
+                        {{-- <th>Status</th> --}}
                         <th>Waktu Selesai</th>
                         <th class="text-center">Nilai Akhir</th>
                         <th class="text-end">Aksi</th>
@@ -309,7 +309,7 @@
                                 </div>
                             </div>
                         </td>
-                        <td>
+                        {{-- <td>
                             @if($p->status === 'mengerjakan')
                                 <span class="status-badge status-mengerjakan">
                                     <i class="fa-solid fa-circle-dot fa-beat" style="font-size: 8px;"></i> Mengerjakan
@@ -323,7 +323,7 @@
                                     <i class="fa-regular fa-clock"></i> Belum
                                 </span>
                             @endif
-                        </td>
+                        </td> --}}
                         <td class="text-muted" style="font-size: 12px;">
                             {{ $p->waktu_kumpul ? \Carbon\Carbon::parse($p->waktu_kumpul)->format('d M Y, H:i') : '-' }}
                         </td>
