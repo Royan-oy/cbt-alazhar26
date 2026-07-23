@@ -92,199 +92,7 @@
         letter-spacing: 0.5px;
     }
 
-    /* Grid Layout */
-    .monitoring-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-        gap: 1.25rem;
-    }
 
-    /* Student Card */
-    .student-card {
-        background: #fff;
-        border: 1px solid #e2e8f0;
-        border-radius: 1rem;
-        padding: 1.25rem;
-        position: relative;
-        transition: all 0.2s ease;
-        display: flex;
-        flex-direction: column;
-        gap: 1rem;
-    }
-    .student-card:hover {
-        box-shadow: 0 10px 25px rgba(0,0,0,0.05);
-        border-color: #cbd5e1;
-    }
-    .student-card.status-mengerjakan {
-        border-top: 4px solid #f59e0b;
-    }
-    .student-card.status-selesai {
-        border-top: 4px solid #10b981;
-    }
-    .student-card.status-belum {
-        border-top: 4px solid #94a3b8;
-        opacity: 0.9;
-    }
-    .student-card.violation-alert {
-        border-color: #ef4444;
-        box-shadow: 0 0 0 1px #ef4444, 0 4px 6px rgba(239, 68, 68, 0.1);
-    }
-
-    .card-header-flex {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-    }
-
-    .avatar-student {
-        width: 40px; height: 40px;
-        border-radius: 10px;
-        background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-        color: #fff;
-        font-size: 14px;
-        font-weight: 700;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-shrink: 0;
-    }
-
-    .student-info {
-        flex-grow: 1;
-        margin-left: 0.75rem;
-        overflow: hidden;
-    }
-    .student-name {
-        font-weight: 600;
-        color: #1e293b;
-        font-size: 0.95rem;
-        line-height: 1.2;
-        margin-bottom: 0.2rem;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-    .student-nis {
-        font-size: 0.75rem;
-        color: #64748b;
-    }
-
-    /* Pulse animation for 'mengerjakan' */
-    @keyframes pulse-ring {
-        0% { transform: scale(0.8); box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7); }
-        70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(245, 158, 11, 0); }
-        100% { transform: scale(0.8); box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
-    }
-    .status-dot {
-        width: 12px; height: 12px;
-        border-radius: 50%;
-        display: inline-block;
-        flex-shrink: 0;
-    }
-    .dot-mengerjakan {
-        background: #f59e0b;
-        animation: pulse-ring 2s infinite;
-    }
-    .dot-selesai { background: #10b981; }
-    .dot-belum { background: #94a3b8; }
-
-    /* Progress Section */
-    .progress-section {
-        background: #f8fafc;
-        border-radius: 0.75rem;
-        padding: 0.75rem 1rem;
-    }
-    .progress-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 0.5rem;
-        font-size: 0.75rem;
-        font-weight: 600;
-        color: #475569;
-    }
-    .progress-bar-container {
-        height: 6px;
-        border-radius: 3px;
-        background: #e2e8f0;
-        overflow: hidden;
-    }
-    .progress-bar-fill {
-        height: 100%;
-        border-radius: 3px;
-        transition: width 0.5s ease-in-out;
-    }
-    .fill-mengerjakan { background: #3b82f6; }
-    .fill-selesai { background: #10b981; }
-
-    /* Meta Info (Time & Violations) */
-    .meta-info {
-        display: flex;
-        justify-content: space-between;
-        font-size: 0.75rem;
-        color: #64748b;
-        padding-top: 0.5rem;
-        border-top: 1px dashed #e2e8f0;
-    }
-    .meta-item {
-        display: flex;
-        align-items: center;
-        gap: 0.35rem;
-    }
-    
-    .violation-badge {
-        padding: 3px 8px;
-        border-radius: 6px;
-        font-weight: 600;
-        font-size: 0.7rem;
-        display: inline-flex;
-        align-items: center;
-        gap: 4px;
-    }
-    .v-0 { background: #f1f5f9; color: #94a3b8; }
-    .v-low { background: #fef3c7; color: #d97706; }
-    .v-high { background: #fee2e2; color: #dc2626; }
-
-    /* Actions */
-    .card-actions {
-        display: flex;
-        gap: 0.5rem;
-        opacity: 0;
-        transition: opacity 0.2s;
-        position: absolute;
-        top: 1.25rem;
-        right: 1.25rem;
-        background: rgba(255,255,255,0.9);
-        padding-left: 0.5rem;
-        border-radius: 0.5rem;
-    }
-    .student-card:hover .card-actions {
-        opacity: 1;
-    }
-    @media (max-width: 768px) {
-        .card-actions { opacity: 1; position: static; justify-content: flex-end; padding-top: 0.5rem; background: transparent; }
-        .stats-bar { flex-wrap: wrap; gap: 1rem; justify-content: center; position: static; margin-bottom: 1rem; }
-        .stat-item:not(:last-child) { border-right: none; }
-        .stat-item { width: 45%; flex: auto; }
-        .student-info { max-width: 150px; }
-    }
-
-    .btn-action {
-        width: 30px; height: 30px;
-        border-radius: 8px;
-        border: 1px solid #e2e8f0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: #64748b;
-        background: #fff;
-        transition: all 0.2s;
-        cursor: pointer;
-    }
-    .btn-action.force-submit:hover { border-color: #3b82f6; color: #3b82f6; background: #eff6ff; }
-    .btn-action.reset:hover { border-color: #ef4444; color: #ef4444; background: #fef2f2; }
-
-    /* Loading Overlay */
     .auto-refresh-indicator {
         position: fixed;
         bottom: 1.5rem;
@@ -428,9 +236,24 @@
             </div>
         </div>
 
-        {{-- MONITORING GRID --}}
-        <div class="monitoring-grid" id="monitoring-container">
-            <!-- Isi akan di render melalui JavaScript via AJAX -->
+        {{-- MONITORING TABLE --}}
+        <div class="table-responsive bg-white rounded-4 shadow-sm border border-slate-200" style="overflow: hidden;">
+            <table class="table table-hover align-middle mb-0" style="font-size: 0.875rem;">
+                <thead style="background-color: #f8fafc; color: #475569; border-bottom: 2px solid #e2e8f0; font-weight: 600;">
+                    <tr>
+                        <th class="py-3 px-4" width="5%">No</th>
+                        <th class="py-3 px-4" width="30%">Nama Siswa</th>
+                        <th class="py-3 px-4 text-center" width="15%">Status</th>
+                        <th class="py-3 px-4 text-center" width="15%">Pelanggaran</th>
+                        <th class="py-3 px-4 text-center" width="15%">Mulai</th>
+                        <th class="py-3 px-4 text-center" width="15%">Selesai</th>
+                        <th class="py-3 px-4 text-center" width="5%">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="monitoring-container" style="border-top: none;">
+                    <!-- Isi akan di render melalui JavaScript via AJAX -->
+                </tbody>
+            </table>
         </div>
 
         {{-- AUTO REFRESH INDICATOR --}}
@@ -480,16 +303,18 @@
             
             if(students.length > 0) {
                 let html = '';
-                students.forEach(row => {
-                    html += buildCardHtml(row, totalSoal);
+                students.forEach((row, index) => {
+                    html += buildRowHtml(row, index + 1);
                 });
                 container.innerHTML = html;
             } else {
                 container.innerHTML = `
-                <div class="col-12 text-center py-5 text-muted" style="grid-column: 1 / -1;">
-                    <i class="fa-solid fa-users-slash fa-2x mb-3 d-block opacity-25"></i>
-                    Tidak ada data siswa untuk ujian ini.
-                </div>`;
+                <tr>
+                    <td colspan="7" class="text-center py-4 text-muted">
+                        <i class="fa-solid fa-users-slash fa-2x mb-3 d-block opacity-25"></i>
+                        Tidak ada data siswa untuk ujian ini.
+                    </td>
+                </tr>`;
             }
             
             syncSpinner.style.display = 'none';
@@ -503,28 +328,20 @@
         });
     }
     
-    function buildCardHtml(row, totalSoal) {
-        let statusClass = 'status-belum';
-        let dotClass = 'dot-belum';
+    function buildRowHtml(row, index) {
+        let badgeClass = 'bg-secondary';
         let statusText = 'Belum Mulai';
-        if (row.status === 'mengerjakan') { statusClass = 'status-mengerjakan'; dotClass = 'dot-mengerjakan'; statusText = 'Mengerjakan'; }
-        else if (row.status === 'selesai') { statusClass = 'status-selesai'; dotClass = 'dot-selesai'; statusText = 'Selesai'; }
+        if (row.status === 'mengerjakan') { badgeClass = 'bg-warning text-dark'; statusText = 'Mengerjakan'; }
+        else if (row.status === 'selesai') { badgeClass = 'bg-success'; statusText = 'Selesai'; }
         
         let vc = parseInt(row.violation_count || 0);
-        let vClass = 'v-0';
+        let vClass = 'text-muted';
         let vIcon = 'fa-shield-check';
-        let alertClass = '';
-        if (vc > 0 && vc <= 2) { vClass = 'v-low'; vIcon = 'fa-triangle-exclamation'; }
-        else if (vc > 2) { vClass = 'v-high'; vIcon = 'fa-skull-crossbones'; alertClass = 'violation-alert'; }
-        
-        let progressPercent = row.progress;
-        let progressFillClass = row.status === 'selesai' ? 'fill-selesai' : 'fill-mengerjakan';
+        if (vc > 0 && vc <= 2) { vClass = 'text-warning'; vIcon = 'fa-triangle-exclamation'; }
+        else if (vc > 2) { vClass = 'text-danger'; vIcon = 'fa-skull-crossbones'; }
         
         let waktuMulai = row.waktu_mulai_kerja ? row.waktu_mulai_kerja.substring(11, 16) : '—';
-        let lastAuto = row.last_autosave ? row.last_autosave.substring(11, 16) : '—';
-        
-        // Initial Avatar letters
-        let initials = row.nama.substring(0, 2).toUpperCase();
+        let waktuKumpul = row.waktu_kumpul ? row.waktu_kumpul.substring(11, 16) : '—';
         
         // CSRF Token
         let csrf = "{{ csrf_token() }}";
@@ -535,71 +352,38 @@
                 <form method="POST" action="/dashboard-guru/wali-kelas/monitoring/${row.nilai_id}/force-submit" class="d-inline" onsubmit="return confirm('Yakin ingin force submit ujian ${row.nama}?')">
                     <input type="hidden" name="_token" value="${csrf}">
                     <input type="hidden" name="ujian_id" value="{{ $selectedUjianId }}">
-                    <button type="submit" class="btn-action force-submit" title="Force Submit">
+                    <button type="submit" class="btn btn-sm btn-outline-primary rounded-circle" title="Force Submit">
                         <i class="fa-solid fa-paper-plane"></i>
                     </button>
                 </form>
             `;
         }
-        
-        let formReset = '';
-        if (row.nilai_id) {
-            formReset = `
-                <form method="POST" action="/dashboard-guru/wali-kelas/monitoring/${row.nilai_id}/reset" class="d-inline" onsubmit="return confirm('PERHATIAN: Semua jawaban ${row.nama} akan dihapus. Lanjutkan?')">
-                    <input type="hidden" name="_token" value="${csrf}">
-                    <input type="hidden" name="ujian_id" value="{{ $selectedUjianId }}">
-                    <button type="submit" class="btn-action reset" title="Reset Ujian">
-                        <i class="fa-solid fa-rotate-left"></i>
-                    </button>
-                </form>
-            `;
-        }
-        
-        let actionsHtml = '';
-        if (row.nilai_id) {
-            actionsHtml = `
-                <div class="card-actions">
-                    ${formForceSubmit}
-                    ${formReset}
-                </div>
-            `;
-        }
 
         return `
-            <div class="student-card ${statusClass} ${alertClass}">
-                <div class="card-header-flex">
-                    <div class="avatar-student">${initials}</div>
-                    <div class="student-info">
-                        <div class="student-name" title="${row.nama}">${row.nama}</div>
-                        <div class="student-nis">${row.nis}</div>
-                    </div>
-                    <div class="status-dot ${dotClass}" title="${statusText}"></div>
-                </div>
-                
-                <div class="progress-section">
-                    <div class="progress-header">
-                        <span>Progres</span>
-                        <span>${row.current_question || 0} / ${totalSoal} Soal</span>
-                    </div>
-                    <div class="progress-bar-container">
-                        <div class="progress-bar-fill ${progressFillClass}" style="width: ${progressPercent}%"></div>
-                    </div>
-                </div>
-                
-                <div class="meta-info">
-                    <div class="meta-item" title="Mulai Kerja">
-                        <i class="fa-regular fa-clock"></i> ${waktuMulai}
-                    </div>
-                    <div class="meta-item" title="Autosave Terakhir">
-                        <i class="fa-solid fa-floppy-disk"></i> ${lastAuto}
-                    </div>
-                    <div class="meta-item violation-badge ${vClass}" title="Pelanggaran: ${vc}">
-                        <i class="fa-solid ${vIcon}"></i> ${vc}
-                    </div>
-                </div>
-                
-                ${actionsHtml}
-            </div>
+            <tr>
+                <td class="text-center font-weight-bold">${index}</td>
+                <td>
+                    <div class="fw-bold" style="color: #1e293b;">${row.nama}</div>
+                    <div style="font-size: 0.75rem; color: #64748b;">${row.nis}</div>
+                </td>
+                <td class="text-center">
+                    <span class="badge rounded-pill ${badgeClass} px-3 py-2">${statusText}</span>
+                </td>
+                <td class="text-center">
+                    <span class="${vClass} fw-bold" style="font-size: 0.9rem;">
+                        <i class="fa-solid ${vIcon} me-1"></i> ${vc}
+                    </span>
+                </td>
+                <td class="text-center" style="font-size: 0.85rem; color: #475569;">
+                    ${waktuMulai !== '—' ? `<i class="fa-regular fa-clock me-1 text-muted"></i> ${waktuMulai}` : '—'}
+                </td>
+                <td class="text-center" style="font-size: 0.85rem; color: #475569;">
+                    ${waktuKumpul !== '—' ? `<i class="fa-solid fa-flag-checkered me-1 text-muted"></i> ${waktuKumpul}` : '—'}
+                </td>
+                <td class="text-center">
+                    ${formForceSubmit}
+                </td>
+            </tr>
         `;
     }
     
