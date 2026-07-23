@@ -391,6 +391,7 @@
                             <th>Bank Soal</th>
                             <th>Guru</th>
                             <th width="100" class="text-center">Jml Soal</th>
+                            <th width="80" class="text-center">KKM</th>
                             <th width="130">Status</th>
                             <th width="150" class="text-end">Aksi</th>
                         </tr>
@@ -418,6 +419,11 @@
                                     {{ $item->soals_count }}
                                 </span>
                             </td>
+                            <td class="text-center">
+                                <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2.5 py-1.5 rounded-pill fw-bold" style="font-size: 12px;">
+                                    {{ $item->kkm ?? 75 }}
+                                </span>
+                            </td>
                             <td>
                                 @if($item->is_publish)
                                     <span class="status-publish"><i class="fa-solid fa-circle-check"></i> Publish</span>
@@ -425,6 +431,7 @@
                                     <span class="status-draft"><i class="fa-solid fa-pen-to-square"></i> Draft</span>
                                 @endif
                             </td>
+
                             <td class="text-end">
                                 <div class="d-inline-flex">
 

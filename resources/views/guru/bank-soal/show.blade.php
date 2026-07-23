@@ -224,9 +224,18 @@
                 <span class="info-value">{{ $bank_soal->jenjang->nama_jenjang ?? '-' }}</span>
             </div>
             <div class="info-row">
+                <span class="info-label">KKM (Ketuntasan)</span>
+                <span class="info-value">
+                    <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2.5 py-1.5 rounded-pill fw-bold" style="font-size: 13px;">
+                        {{ $bank_soal->kkm ?? 75 }}
+                    </span>
+                </span>
+            </div>
+            <div class="info-row">
                 <span class="info-label">Deskripsi</span>
                 <span class="info-value">{{ $bank_soal->deskripsi ?: '—' }}</span>
             </div>
+
             <div class="info-row">
                 <span class="info-label">Status</span>
                 <span class="info-value">

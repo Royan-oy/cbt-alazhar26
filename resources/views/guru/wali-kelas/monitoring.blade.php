@@ -21,156 +21,75 @@
         pointer-events: none;
     }
 
-    .ujian-tab {
-        display: flex;
-        gap: 0.5rem;
-        flex-wrap: wrap;
-        margin-bottom: 1.25rem;
-    }
-    .ujian-tab-btn {
-        padding: 0.5rem 1rem;
-        border-radius: 0.625rem;
+    /* FILTER PILLS STYLING */
+    .custom-filter-pills .btn-view-mode {
+        color: #64748b;
+        background-color: #ffffff;
         border: 1px solid #e2e8f0;
-        background: #fff;
-        color: #475569;
-        font-size: 0.8125rem;
-        font-weight: 500;
         text-decoration: none;
-        transition: all 0.2s;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        font-size: 13px;
+        font-weight: 600;
     }
-    .ujian-tab-btn:hover {
-        border-color: #3b82f6;
-        color: #3b82f6;
-        background: #eff6ff;
+    .custom-filter-pills .btn-view-mode:hover {
+        background-color: #f1f5f9;
+        color: #0284c7;
     }
-    .ujian-tab-btn.active {
-        background: #3b82f6;
-        color: #fff;
-        border-color: #3b82f6;
-        box-shadow: 0 4px 12px rgba(59,130,246,0.25);
+    .custom-filter-pills .btn-view-mode.active {
+        background: linear-gradient(135deg, #38bdf8, #0284c7) !important;
+        color: #ffffff !important;
+        border-color: #0284c7;
+        box-shadow: 0 4px 12px rgba(2, 132, 199, 0.25);
     }
 
-    .monitor-card {
-        background: #ffffff;
-        border: 1px solid #e2e8f0;
-        border-radius: 1rem;
-        overflow: hidden;
+    /* Floating Stats Bar & Dropdown Animation */
+    .dropdown-menu {
+        animation: slideFadeIn 0.25s ease-out forwards;
+        margin-top: 0;
     }
-    .monitor-card table thead th {
-        background-color: #f8fafc;
-        color: #475569;
-        font-size: 11px;
+    @keyframes slideFadeIn {
+        from { opacity: 0; margin-top: -10px; }
+        to { opacity: 1; margin-top: 0.25rem; }
+    }
+
+    .stats-bar {
+        position: sticky;
+        top: 1rem;
+        z-index: 100;
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(226, 232, 240, 0.8);
+        border-radius: 1rem;
+        padding: 0.75rem 1.5rem;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+    }
+    
+    .stat-item {
+        text-align: center;
+        padding: 0 1rem;
+        flex: 1;
+    }
+    .stat-item:not(:last-child) {
+        border-right: 1px solid #e2e8f0;
+    }
+    .stat-value {
+        font-size: 1.5rem;
         font-weight: 700;
+        line-height: 1;
+        margin-bottom: 0.25rem;
+    }
+    .stat-label {
+        font-size: 0.75rem;
+        color: #64748b;
+        font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.5px;
-        padding: 0.875rem 1rem;
-        border-bottom: 1px solid #e2e8f0;
-        white-space: nowrap;
-    }
-    .monitor-card table tbody tr {
-        transition: background-color 0.15s;
-    }
-    .monitor-card table tbody tr:hover {
-        background-color: #f8fafc;
-    }
-    .monitor-card table tbody td {
-        padding: 0.9rem 1rem;
-        font-size: 0.875rem;
-        color: #334155;
-        border-bottom: 1px solid #f1f5f9;
-        vertical-align: middle;
-    }
-
-    .avatar-student {
-        width: 36px; height: 36px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-        color: #fff;
-        font-size: 12px;
-        font-weight: 700;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        flex-shrink: 0;
-    }
-
-    /* Progress Bar */
-    .progress-thin {
-        height: 6px;
-        border-radius: 3px;
-        background: #f1f5f9;
-        overflow: hidden;
-        min-width: 80px;
-    }
-    .progress-thin .progress-bar {
-        border-radius: 3px;
-        transition: width 0.4s ease;
-    }
-
-    /* Status Badges */
-    .status-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 5px;
-        padding: 4px 10px;
-        border-radius: 20px;
-        font-size: 11px;
-        font-weight: 600;
-        white-space: nowrap;
-    }
-    .status-belum   { background: #f1f5f9; color: #64748b; }
-    .status-mengerjakan { background: #fef9c3; color: #854d0e; }
-    .status-selesai { background: #dcfce7; color: #166534; }
-
-    /* Violation Badge */
-    .violation-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 4px;
-        padding: 3px 9px;
-        border-radius: 20px;
-        font-size: 11px;
-        font-weight: 700;
-    }
-    .violation-0 { background: #f0fdf4; color: #16a34a; }
-    .violation-low { background: #fef9c3; color: #ca8a04; }
-    .violation-high { background: #fee2e2; color: #dc2626; }
-
-    /* Action Buttons */
-    .action-mini-btn {
-        display: inline-flex;
-        align-items: center;
-        gap: 5px;
-        padding: 5px 10px;
-        border-radius: 7px;
-        border: 1px solid;
-        font-size: 11.5px;
-        font-weight: 500;
-        cursor: pointer;
-        transition: all 0.2s;
-        text-decoration: none;
-        background: transparent;
-    }
-    .btn-force { border-color: #ef4444; color: #ef4444; }
-    .btn-force:hover { background: #ef4444; color: #fff; }
-    .btn-reset { border-color: #f59e0b; color: #b45309; }
-    .btn-reset:hover { background: #f59e0b; color: #fff; }
-
-    .auto-refresh-bar {
-        background: #eff6ff;
-        border: 1px solid #bfdbfe;
-        border-radius: 0.75rem;
-        padding: 0.6rem 1rem;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        font-size: 12.5px;
-        color: #1d4ed8;
-    }
-
-    @media (max-width: 767.98px) {
-        .page-header-card { padding: 1.5rem !important; }
-        .ujian-tab-btn { font-size: 0.75rem; padding: 0.4rem 0.75rem; }
     }
 </style>
 
@@ -189,39 +108,27 @@
                     Pemantauan Ujian Real-time
                 </h1>
                 <p class="text-white text-opacity-60 mb-0" style="font-size: 13px;">
-                    Pantau progres, pelanggaran, dan status pengerjaan siswa kelas Anda secara langsung.
+                    Pantau progres, pelanggaran, dan status pengerjaan siswa kelas Anda secara live tanpa perlu me-refresh halaman.
                 </p>
             </div>
         </div>
     </div>
 
-    {{-- AUTO REFRESH INFO --}}
-    <div class="auto-refresh-bar mb-3" id="refreshStatus">
-        <i class="fa-solid fa-rotate fa-spin" id="refreshIcon"></i>
-        <span id="refreshText">Halaman akan diperbarui otomatis setiap <strong>30 detik</strong>.</span>
-        <span class="ms-auto text-muted" id="refreshCountdown" style="font-size: 11px;"></span>
-    </div>
-
     {{-- SESSION MESSAGES --}}
     @if(session('success'))
-        <div class="alert alert-success border-0 rounded-3 mb-3 d-flex align-items-center gap-2" style="font-size: 14px;">
+        <div class="alert alert-success border-0 rounded-3 mb-3 d-flex align-items-center gap-2">
             <i class="fa-solid fa-circle-check text-success"></i> {{ session('success') }}
         </div>
     @endif
     @if(session('error'))
-        <div class="alert alert-danger border-0 rounded-3 mb-3 d-flex align-items-center gap-2" style="font-size: 14px;">
+        <div class="alert alert-danger border-0 rounded-3 mb-3 d-flex align-items-center gap-2">
             <i class="fa-solid fa-circle-exclamation text-danger"></i> {{ session('error') }}
-        </div>
-    @endif
-    @if(session('warning'))
-        <div class="alert alert-warning border-0 rounded-3 mb-3 d-flex align-items-center gap-2" style="font-size: 14px;">
-            <i class="fa-solid fa-triangle-exclamation text-warning"></i> {{ session('warning') }}
         </div>
     @endif
 
     {{-- TIDAK ADA UJIAN AKTIF --}}
     @if($ujians->isEmpty())
-        <div class="monitor-card p-5 text-center">
+        <div class="card border-0 rounded-4 shadow-sm p-5 text-center">
             <i class="fa-regular fa-calendar-xmark fa-3x text-muted mb-3 d-block" style="opacity: 0.3;"></i>
             <h6 class="text-muted fw-semibold">Tidak Ada Ujian Aktif</h6>
             <p class="text-muted mb-0" style="font-size: 13px;">
@@ -230,205 +137,244 @@
         </div>
     @else
 
-        {{-- UJIAN SELECTOR TABS --}}
-        <div class="ujian-tab">
-            @foreach($ujians as $ujian)
-                <a href="{{ route('dashboard-guru.wali-kelas.monitoring-siswa', ['ujian_id' => $ujian->id]) }}"
-                   class="ujian-tab-btn {{ $selectedUjianId == $ujian->id ? 'active' : '' }}">
-                    <i class="fa-solid fa-file-pen me-1"></i>
-                    {{ $ujian->nama_ujian }}
-                    <span class="ms-1 opacity-75">({{ $ujian->nama_mapel }})</span>
-                </a>
-            @endforeach
-        </div>
-
-        {{-- STATS ROW --}}
+        {{-- FLOATING STATS BAR --}}
         @php
             $cntBelum       = $monitoring->where('status', 'belum')->count();
             $cntMengerjakan = $monitoring->where('status', 'mengerjakan')->count();
             $cntSelesai     = $monitoring->where('status', 'selesai')->count();
             $totalSiswa     = $monitoring->count();
         @endphp
-        <div class="row g-3 mb-3">
-            <div class="col-6 col-md-3">
-                <div class="bg-white border rounded-3 p-3 text-center" style="border-color: #e2e8f0 !important;">
-                    <div class="fw-bold text-dark fs-4">{{ $totalSiswa }}</div>
-                    <div class="text-muted" style="font-size: 12px;">Total Siswa</div>
-                </div>
+        <div class="stats-bar">
+            <div class="stat-item">
+                <div class="stat-value text-dark" id="stat-total">{{ $totalSiswa }}</div>
+                <div class="stat-label">Total Siswa</div>
             </div>
-            <div class="col-6 col-md-3">
-                <div class="bg-white border rounded-3 p-3 text-center" style="border-color: #e2e8f0 !important;">
-                    <div class="fw-bold text-secondary fs-4">{{ $cntBelum }}</div>
-                    <div class="text-muted" style="font-size: 12px;">Belum Mulai</div>
-                </div>
+            <div class="stat-item">
+                <div class="stat-value text-secondary" id="stat-belum">{{ $cntBelum }}</div>
+                <div class="stat-label">Belum Mulai</div>
             </div>
-            <div class="col-6 col-md-3">
-                <div class="bg-white border rounded-3 p-3 text-center" style="border-color: #e2e8f0 !important;">
-                    <div class="fw-bold text-warning fs-4">{{ $cntMengerjakan }}</div>
-                    <div class="text-muted" style="font-size: 12px;">Mengerjakan</div>
-                </div>
+            <div class="stat-item">
+                <div class="stat-value text-warning" id="stat-mengerjakan">{{ $cntMengerjakan }}</div>
+                <div class="stat-label">Mengerjakan</div>
             </div>
-            <div class="col-6 col-md-3">
-                <div class="bg-white border rounded-3 p-3 text-center" style="border-color: #e2e8f0 !important;">
-                    <div class="fw-bold text-success fs-4">{{ $cntSelesai }}</div>
-                    <div class="text-muted" style="font-size: 12px;">Selesai</div>
-                </div>
+            <div class="stat-item">
+                <div class="stat-value text-success" id="stat-selesai">{{ $cntSelesai }}</div>
+                <div class="stat-label">Selesai</div>
             </div>
         </div>
 
-        {{-- MONITORING TABLE --}}
-        <div class="monitor-card">
-            <div class="table-responsive">
-                <table class="table mb-0">
-                    <thead>
-                        <tr>
-                            <th style="width: 48px;">No</th>
-                            <th>Nama Siswa</th>
-                            <th>Status</th>
-                            <th>Progres Soal</th>
-                            <th>Pelanggaran</th>
-                            <th>Mulai Kerja</th>
-                            <th>Autosave Terakhir</th>
-                            <th style="min-width: 160px;">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse($monitoring as $i => $row)
-                        <tr>
-                            <td>
-                                <span class="text-muted" style="font-size: 13px;">{{ $i + 1 }}</span>
-                            </td>
-                            <td>
-                                <div class="d-flex align-items-center gap-2">
-                                    <div class="avatar-student">
-                                        {{ strtoupper(substr($row->nama, 0, 2)) }}
-                                    </div>
-                                    <div>
-                                        <div class="fw-semibold text-dark" style="font-size: 13.5px;">{{ $row->nama }}</div>
-                                        <div class="text-muted" style="font-size: 11px;">{{ $row->nis }}</div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>
-                                @if($row->status === 'mengerjakan')
-                                    <span class="status-badge status-mengerjakan">
-                                        <i class="fa-solid fa-circle-dot fa-beat" style="font-size: 8px;"></i> Mengerjakan
-                                    </span>
-                                @elseif($row->status === 'selesai')
-                                    <span class="status-badge status-selesai">
-                                        <i class="fa-solid fa-check"></i> Selesai
-                                    </span>
-                                @else
-                                    <span class="status-badge status-belum">
-                                        <i class="fa-regular fa-clock"></i> Belum Mulai
-                                    </span>
-                                @endif
-                            </td>
-                            <td>
-                                @if($row->status !== 'belum' && $totalSoal > 0)
-                                    <div class="d-flex align-items-center gap-2">
-                                        <div class="progress-thin flex-grow-1">
-                                            <div class="progress-bar {{ $row->status === 'selesai' ? 'bg-success' : 'bg-warning' }}"
-                                                 style="width: {{ $row->progress }}%"></div>
-                                        </div>
-                                        <small class="text-muted fw-medium" style="font-size: 11px; white-space: nowrap;">
-                                            {{ $row->current_question }}/{{ $totalSoal }}
-                                        </small>
-                                    </div>
-                                @else
-                                    <span class="text-muted" style="font-size: 12px;">—</span>
-                                @endif
-                            </td>
-                            <td>
-                                @php $vc = (int) ($row->violation_count ?? 0); @endphp
-                                @if($vc === 0)
-                                    <span class="violation-badge violation-0"><i class="fa-solid fa-shield-check"></i> {{ $vc }}</span>
-                                @elseif($vc <= 2)
-                                    <span class="violation-badge violation-low"><i class="fa-solid fa-triangle-exclamation"></i> {{ $vc }}</span>
-                                @else
-                                    <span class="violation-badge violation-high"><i class="fa-solid fa-skull-crossbones"></i> {{ $vc }}</span>
-                                @endif
-                            </td>
-                            <td class="text-muted" style="font-size: 12px;">
-                                {{ $row->waktu_mulai_kerja ? \Carbon\Carbon::parse($row->waktu_mulai_kerja)->format('H:i:s') : '—' }}
-                            </td>
-                            <td class="text-muted" style="font-size: 12px;">
-                                {{ $row->last_autosave ? \Carbon\Carbon::parse($row->last_autosave)->format('H:i:s') : '—' }}
-                            </td>
-                            <td>
-                                @if($row->nilai_id)
-                                    @if($row->status !== 'selesai')
-                                        {{-- FORCE SUBMIT --}}
-                                        <form method="POST"
-                                              action="{{ route('dashboard-guru.wali-kelas.monitoring-siswa.force-submit', $row->nilai_id) }}"
-                                              class="d-inline-block"
-                                              onsubmit="return confirm('Yakin ingin force submit ujian {{ addslashes($row->nama) }}?')">
-                                            @csrf
-                                            @if($selectedUjianId)
-                                            <input type="hidden" name="ujian_id" value="{{ $selectedUjianId }}">
-                                            @endif
-                                            <button type="submit" class="action-mini-btn btn-force">
-                                                <i class="fa-solid fa-paper-plane"></i> Force Submit
-                                            </button>
-                                        </form>
-                                    @endif
+        {{-- UJIAN SELECTOR TABS --}}
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+            <h5 class="fw-bold mb-0" style="color: #0f172a;">
+                <i class="fa-solid fa-list-check me-2" style="color: #0284c7;"></i> <span style="font-size: 1.1rem;">Pilih Ujian Aktif</span>
+            </h5>
+            
+            <div class="nav nav-pills custom-filter-pills gap-2 flex-wrap justify-content-md-end">
+                @php
+                    // Pastikan ujian yang sedang aktif/dipilih selalu menjadi pill yang terlihat
+                    $selectedUjian = $ujians->firstWhere('id', $selectedUjianId) ?? $ujians->first();
+                    $hiddenUjians = $ujians->where('id', '!=', $selectedUjian->id);
+                @endphp
 
-                                    {{-- RESET --}}
-                                    <form method="POST"
-                                          action="{{ route('dashboard-guru.wali-kelas.monitoring-siswa.reset', $row->nilai_id) }}"
-                                          class="d-inline-block ms-1"
-                                          onsubmit="return confirm('PERHATIAN: Semua jawaban {{ addslashes($row->nama) }} akan dihapus dan sesi direset. Lanjutkan?')">
-                                        @csrf
-                                        @if($selectedUjianId)
-                                        <input type="hidden" name="ujian_id" value="{{ $selectedUjianId }}">
-                                        @endif
-                                        <button type="submit" class="action-mini-btn btn-reset">
-                                            <i class="fa-solid fa-rotate-left"></i> Reset
-                                        </button>
-                                    </form>
-                                @else
-                                    <span class="text-muted" style="font-size: 12px;">—</span>
-                                @endif
-                            </td>
-                        </tr>
-                        @empty
-                        <tr>
-                            <td colspan="8">
-                                <div class="text-center py-5 text-muted">
-                                    <i class="fa-solid fa-users-slash fa-2x mb-3 d-block opacity-25"></i>
-                                    Tidak ada data siswa untuk ujian ini.
-                                </div>
-                            </td>
-                        </tr>
-                        @endforelse
-                    </tbody>
-                </table>
+                <!-- Ujian yang sedang dipilih -->
+                <a href="{{ route('dashboard-guru.wali-kelas.monitoring-siswa', ['ujian_id' => $selectedUjian->id]) }}"
+                   class="nav-link rounded-pill px-3 py-2 btn-view-mode active">
+                    <i class="fa-solid fa-file-pen me-1"></i>
+                    {{ $selectedUjian->nama_ujian }}
+                    <span class="ms-1 opacity-75">({{ $selectedUjian->nama_mapel }})</span>
+                </a>
+
+                <!-- Opsi ujian lainnya di dalam dropdown -->
+                @if($hiddenUjians->isNotEmpty())
+                    <div class="dropdown">
+                        <button class="nav-link rounded-pill px-3 py-2 btn-view-mode dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="background-color: #fff; border: 1px solid #e2e8f0; color: #64748b;">
+                             Ujian Lainnya
+                        </button>
+                        <ul class="dropdown-menu border-0 shadow-sm dropdown-menu-end" style="border-radius: 0.75rem;">
+                            @foreach($hiddenUjians as $ujian)
+                                <li>
+                                    <a class="dropdown-item py-2" 
+                                       href="{{ route('dashboard-guru.wali-kelas.monitoring-siswa', ['ujian_id' => $ujian->id]) }}"
+                                       style="font-size: 13.5px;">
+                                        <i class="fa-solid fa-file-pen me-1 text-muted"></i> {{ $ujian->nama_ujian }}
+                                        <span class="ms-1 text-muted">({{ $ujian->nama_mapel }})</span>
+                                    </a>
+                                </li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
             </div>
+        </div>
+
+        {{-- TOOLBAR (SEARCH & FILTER) --}}
+        <div class="d-flex flex-column flex-md-row justify-content-start align-items-md-center gap-3 my-3">
+            <div class="d-flex align-items-center gap-2">
+                <label for="status-filter" class="text-muted fw-semibold mb-0" style="font-size: 0.85rem; white-space: nowrap;">Filter:</label>
+                <select id="status-filter" class="form-select" style="min-width: 160px; border-radius: 0.75rem; border-color: #e2e8f0; font-size: 0.875rem;">
+                    <option value="semua">Semua Status</option>
+                    <option value="belum">Belum Mulai</option>
+                    <option value="mengerjakan">Mengerjakan</option>
+                    <option value="selesai">Selesai</option>
+                </select>
+            </div>
+            <div class="input-group" style="max-width: 350px;">
+                <span class="input-group-text bg-white border-end-0" style="border-radius: 0.75rem 0 0 0.75rem; border-color: #e2e8f0;">
+                    <i class="fa-solid fa-search text-muted"></i>
+                </span>
+                <input type="text" id="search-input" class="form-control border-start-0 ps-0" placeholder="Cari nama siswa..." style="border-radius: 0 0.75rem 0.75rem 0; border-color: #e2e8f0; box-shadow: none;">
+            </div>
+            
+        </div>
+
+        {{-- MONITORING TABLE --}}
+        <div class="table-responsive bg-white rounded-4 shadow-sm border border-slate-200" style="overflow: hidden;">
+            <table class="table table-hover align-middle mb-0" style="font-size: 0.875rem;">
+                <thead style="background-color: #f8fafc; color: #475569; border-bottom: 2px solid #e2e8f0; font-weight: 600;">
+                    <tr>
+                        <th class="py-3 px-4" width="5%">No</th>
+                        <th class="py-3 px-4" width="30%">Nama Siswa</th>
+                        <th class="py-3 px-4 text-center" width="15%">Status</th>
+                        <th class="py-3 px-4 text-center" width="15%">Pelanggaran</th>
+                        <th class="py-3 px-4 text-center" width="15%">Mulai</th>
+                        <th class="py-3 px-4 text-center" width="15%">Selesai</th>
+                        <th class="py-3 px-4 text-center" width="5%">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="monitoring-container" style="border-top: none;">
+                    <!-- Isi akan di render melalui JavaScript via AJAX -->
+                </tbody>
+            </table>
         </div>
 
     @endif
 
 </div>
 
+@if($ujians->isNotEmpty())
 <script>
-    // Auto-refresh setiap 30 detik
-    let countdown = 30;
-    const countdownEl = document.getElementById('refreshCountdown');
-    const iconEl = document.getElementById('refreshIcon');
+    const monitoringUrl = "{{ route('dashboard-guru.wali-kelas.monitoring-siswa', ['ujian_id' => $selectedUjianId]) }}";
+    const container = document.getElementById('monitoring-container');
+    
+    const searchInput = document.getElementById('search-input');
+    const statusFilter = document.getElementById('status-filter');
+    
+    let initialLoad = true;
+    
+    function fetchMonitoringData() {
+        let queryParams = new URLSearchParams({
+            search: searchInput.value,
+            status: statusFilter.value
+        }).toString();
 
-    const timer = setInterval(function () {
-        countdown--;
-        if (countdownEl) countdownEl.textContent = 'Refresh dalam ' + countdown + 's';
-
-        if (countdown <= 0) {
-            clearInterval(timer);
-            if (iconEl) iconEl.classList.add('fa-spin');
-            window.location.reload();
+        fetch(monitoringUrl + '&' + queryParams, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Update Stats
+            document.getElementById('stat-total').textContent = data.totalSiswa;
+            document.getElementById('stat-belum').textContent = data.cntBelum;
+            document.getElementById('stat-mengerjakan').textContent = data.cntMengerjakan;
+            document.getElementById('stat-selesai').textContent = data.cntSelesai;
+            
+            // Update Cards
+            const students = data.monitoring;
+            const totalSoal = data.totalSoal;
+            
+            if(students.length > 0) {
+                let html = '';
+                students.forEach((row, index) => {
+                    html += buildRowHtml(row, index + 1);
+                });
+                container.innerHTML = html;
+            } else {
+                container.innerHTML = `
+                <tr>
+                    <td colspan="7" class="text-center py-4 text-muted">
+                        <i class="fa-solid fa-users-slash fa-2x mb-3 d-block opacity-25"></i>
+                        Tidak ada data siswa untuk ujian ini.
+                    </td>
+                </tr>`;
+            }
+        })
+        .catch(error => {
+            console.error("Error fetching monitoring data:", error);
+        });
+    }
+    
+    function buildRowHtml(row, index) {
+        let badgeClass = 'bg-secondary';
+        let statusText = 'Belum Mulai';
+        if (row.status === 'mengerjakan') { badgeClass = 'bg-warning text-dark'; statusText = 'Mengerjakan'; }
+        else if (row.status === 'selesai') { badgeClass = 'bg-success'; statusText = 'Selesai'; }
+        
+        let vc = parseInt(row.violation_count || 0);
+        let vClass = 'text-muted';
+        let vIcon = 'fa-shield-check';
+        if (vc > 0 && vc <= 2) { vClass = 'text-warning'; vIcon = 'fa-triangle-exclamation'; }
+        else if (vc > 2) { vClass = 'text-danger'; vIcon = 'fa-skull-crossbones'; }
+        
+        let waktuMulai = row.waktu_mulai_kerja ? row.waktu_mulai_kerja.substring(11, 16) : '—';
+        let waktuKumpul = row.waktu_kumpul ? row.waktu_kumpul.substring(11, 16) : '—';
+        
+        // CSRF Token
+        let csrf = "{{ csrf_token() }}";
+        
+        let formForceSubmit = '';
+        if (row.nilai_id && row.status !== 'selesai') {
+            formForceSubmit = `
+                <form method="POST" action="/dashboard-guru/wali-kelas/monitoring/${row.nilai_id}/force-submit" class="d-inline" onsubmit="return confirm('Yakin ingin force submit ujian ${row.nama}?')">
+                    <input type="hidden" name="_token" value="${csrf}">
+                    <input type="hidden" name="ujian_id" value="{{ $selectedUjianId }}">
+                    <button type="submit" class="btn btn-sm btn-outline-primary rounded-circle" title="Force Submit">
+                        <i class="fa-solid fa-paper-plane"></i>
+                    </button>
+                </form>
+            `;
         }
-    }, 1000);
 
-    // Stop spinning icon once page is loaded
-    if (iconEl) iconEl.classList.remove('fa-spin');
+        return `
+            <tr>
+                <td class="text-center font-weight-bold">${index}</td>
+                <td>
+                    <div class="fw-bold" style="color: #1e293b;">${row.nama}</div>
+                    <div style="font-size: 0.75rem; color: #64748b;">${row.nis}</div>
+                </td>
+                <td class="text-center">
+                    <span class="badge rounded-pill ${badgeClass} px-3 py-2">${statusText}</span>
+                </td>
+                <td class="text-center">
+                    <span class="${vClass} fw-bold" style="font-size: 0.9rem;">
+                        <i class="fa-solid ${vIcon} me-1"></i> ${vc}
+                    </span>
+                </td>
+                <td class="text-center" style="font-size: 0.85rem; color: #475569;">
+                    ${waktuMulai !== '—' ? `<i class="fa-regular fa-clock me-1 text-muted"></i> ${waktuMulai}` : '—'}
+                </td>
+                <td class="text-center" style="font-size: 0.85rem; color: #475569;">
+                    ${waktuKumpul !== '—' ? `<i class="fa-solid fa-flag-checkered me-1 text-muted"></i> ${waktuKumpul}` : '—'}
+                </td>
+                <td class="text-center">
+                    ${formForceSubmit}
+                </td>
+            </tr>
+        `;
+    }
+    // Event Listeners for Search and Filter
+    searchInput.addEventListener('keyup', function() {
+        fetchMonitoringData();
+    });
+    
+    statusFilter.addEventListener('change', function() {
+        fetchMonitoringData();
+    });
+
+    // Initial fetch
+    fetchMonitoringData();
 </script>
+@endif
 
 @endsection

@@ -393,9 +393,10 @@
         <div class="col-12 col-md-6 col-lg-7">
             <div class="info-card" style="border-color: #bae6fd; background: #f0f9ff;">
                 <div class="label text-primary">Nilai Akhir Keseluruhan (Sementara)</div>
-                <div class="number text-primary">{{ number_format($nilai->nilai_akhir, 2) }} <span style="font-size: 0.875rem; font-weight: normal; color: #0284c7;">/ 100</span></div>
+                <div class="number text-primary" id="nilai-akhir-display">{{ number_format($nilai_sementara ?? $nilai->nilai_akhir, 2) }} <span style="font-size: 0.875rem; font-weight: normal; color: #0284c7;">/ 100</span></div>
             </div>
         </div>
+
     </div>
 
     {{-- TAB NAVIGATION --}}
@@ -675,6 +676,14 @@ function simpanKoreksi(event, jawabanId) {
             // Tampilkan indikator sukses
             indicator.classList.remove('d-none');
             
+            // Update angka Nilai Akhir Keseluruhan (Sementara) secara real-time
+            if (data.nilai_akhir !== undefined) {
+                const scoreDisplay = document.getElementById('nilai-akhir-display');
+                if (scoreDisplay) {
+                    scoreDisplay.innerHTML = parseFloat(data.nilai_akhir).toFixed(2) + ' <span style="font-size: 0.875rem; font-weight: normal; color: #0284c7;">/ 100</span>';
+                }
+            }
+
             // Update badge di header accordion
             if (badgeContainer) {
                 const badgeStatus = badgeContainer.querySelector('.badge:first-child'); // Target badge status
@@ -688,6 +697,7 @@ function simpanKoreksi(event, jawabanId) {
                 indicator.classList.add('d-none');
             }, 3000);
         } else {
+
             alert('Gagal menyimpan: ' + data.message);
         }
     })

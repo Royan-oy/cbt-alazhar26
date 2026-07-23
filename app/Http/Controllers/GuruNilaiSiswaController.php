@@ -79,7 +79,7 @@ class GuruNilaiSiswaController extends Controller
             ->join('mata_pelajarans', 'bank_soals.mata_pelajaran_id', '=', 'mata_pelajarans.id')
             ->where('ujians.id', $id)
             ->whereIn('bank_soals.guru_mapel_id', $guruMapelIds)
-            ->select('ujians.*', 'mata_pelajarans.nama_mapel', 'bank_soals.id as bank_soal_id')
+            ->select('ujians.*', 'mata_pelajarans.nama_mapel', 'bank_soals.id as bank_soal_id', 'bank_soals.kkm')
             ->first();
 
         if (!$ujian) {
@@ -200,8 +200,29 @@ class GuruNilaiSiswaController extends Controller
         $benar_pg = $jawabans_pg->where('is_benar', true)->count();
         $total_soal_pg = $jawabans_pg->count();
 
+        // Hitung akumulasi bobot dan total skor siswa saat ini (PG + Essay yang sudah dinilai)
+        $totalBobot = DB::table('soals')
+            ->where('bank_soal_id', $ujian->bank_soal_id)
+            ->sum('bobot');
+
+        $totalSkorSiswa = DB::table('jawaban_siswas')
+            ->where('nilai_id', $nilai->id)
+            ->sum('nilai');
+
+        $nilai_sementara = 0;
+        if ($totalBobot > 0) {
+            $nilai_sementara = round(($totalSkorSiswa / $totalBobot) * 100, 2);
+        }
+
+        // Jika di DB nilai_akhir masih 0 tetapi siswa sudah memiliki nilai sementara, update nilai_akhir
+        if ($nilai->nilai_akhir == 0 && $nilai_sementara > 0) {
+            DB::table('nilais')->where('id', $nilai->id)->update(['nilai_akhir' => $nilai_sementara]);
+            $nilai->nilai_akhir = $nilai_sementara;
+        }
+
+
         return view('guru.nilai-siswa.koreksi', compact(
-            'ujian', 'siswa', 'nilai', 'jawabans', 'jawabans_pg', 'opsi_pg', 'skor_pg', 'benar_pg', 'total_soal_pg'
+            'ujian', 'siswa', 'nilai', 'jawabans', 'jawabans_pg', 'opsi_pg', 'skor_pg', 'benar_pg', 'total_soal_pg', 'nilai_sementara'
         ));
     }
 
@@ -274,12 +295,23 @@ class GuruNilaiSiswaController extends Controller
                 $nilaiAkhir = ($totalSkorSiswa / $totalBobot) * 100;
             }
 
-            // Update nilai akhir, nilai essay, dan status penilaian menjadi selesai
+            // Cek apakah masih ada jawaban essay/isian yang belum dinilai (is_benar null)
+            $masihAdaUnscored = DB::table('jawaban_siswas')
+                ->join('soals', 'jawaban_siswas.soal_id', '=', 'soals.id')
+                ->where('jawaban_siswas.nilai_id', $nilai->id)
+                ->whereIn('soals.jenis_soal', ['essay', 'isian'])
+                ->whereNull('jawaban_siswas.is_benar')
+                ->exists();
+
+            $statusPenilaian = $masihAdaUnscored ? 'menunggu' : 'selesai';
+
+            // Update nilai akhir, nilai essay, dan status penilaian
             $nilai->update([
                 'nilai_essay'      => round($totalSkorEssay, 2),
                 'nilai_akhir'      => round($nilaiAkhir, 2),
-                'status_penilaian' => 'selesai'
+                'status_penilaian' => $statusPenilaian
             ]);
+
 
             DB::commit();
 

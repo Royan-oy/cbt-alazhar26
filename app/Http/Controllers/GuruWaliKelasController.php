@@ -243,6 +243,39 @@ class GuruWaliKelasController extends Controller
                         : 0;
                     return $row;
                 });
+                
+            // Simpan statistik keseluruhan sebelum di-filter
+            $overallStats = [
+                'totalSiswa' => $monitoring->count(),
+                'cntBelum' => $monitoring->where('status', 'belum')->count(),
+                'cntMengerjakan' => $monitoring->where('status', 'mengerjakan')->count(),
+                'cntSelesai' => $monitoring->where('status', 'selesai')->count(),
+            ];
+
+            // Filter Pencarian (Search by Nama)
+            $search = $request->input('search');
+            if ($search) {
+                $monitoring = $monitoring->filter(function ($row) use ($search) {
+                    return stripos($row->nama, $search) !== false;
+                })->values();
+            }
+
+            // Filter Status
+            $statusFilter = $request->input('status');
+            if ($statusFilter && $statusFilter !== 'semua') {
+                $monitoring = $monitoring->where('status', $statusFilter)->values();
+            }
+        }
+
+        if ($request->ajax()) {
+            return response()->json([
+                'monitoring' => $monitoring,
+                'totalSoal' => $totalSoal,
+                'totalSiswa' => $overallStats['totalSiswa'] ?? 0,
+                'cntBelum' => $overallStats['cntBelum'] ?? 0,
+                'cntMengerjakan' => $overallStats['cntMengerjakan'] ?? 0,
+                'cntSelesai' => $overallStats['cntSelesai'] ?? 0,
+            ]);
         }
 
         return view('guru.wali-kelas.monitoring', compact(
@@ -365,6 +398,12 @@ class GuruWaliKelasController extends Controller
             ->orderBy('ujians.waktu_mulai', 'asc')
             ->get();
 
+        // Filter jenis ujian
+        $jenisFilter = $request->input('jenis_ujian', '');
+        if ($jenisFilter) {
+            $ujians = $ujians->where('nama_jenis_ujian', $jenisFilter)->values();
+        }
+
         // Ambil semua data nilai sekaligus (efisien, tidak N+1)
         $nilaiData = DB::table('nilais')
             ->whereIn('ujian_id', $ujians->pluck('id'))
@@ -373,12 +412,6 @@ class GuruWaliKelasController extends Controller
             ->select('ujian_id', 'siswa_id', 'nilai_akhir')
             ->get()
             ->groupBy('siswa_id');
-
-        // Filter jenis ujian
-        $jenisFilter = $request->input('jenis_ujian', '');
-        if ($jenisFilter) {
-            $ujians = $ujians->where('nama_jenis_ujian', $jenisFilter);
-        }
 
         $allJenisUjian = DB::table('ujian_kelas')
             ->join('ujians', 'ujian_kelas.ujian_id', '=', 'ujians.id')
@@ -389,16 +422,143 @@ class GuruWaliKelasController extends Controller
             ->unique()
             ->values();
 
+        // Hitung Statistik Kelas & Per-Siswa
+        $studentSummaries = collect();
+        $totalNilaiKelas = 0;
+        $countSiswaDenganNilai = 0;
+        $tuntasCount = 0;
+        $topScore = -1;
+        $topSiswaNama = '-';
+
+        foreach ($siswas as $siswa) {
+            $nilaiSiswa = $nilaiData->get($siswa->id, collect());
+            $sum = 0;
+            $cnt = 0;
+
+            foreach ($ujians as $ujian) {
+                $record = $nilaiSiswa->firstWhere('ujian_id', $ujian->id);
+                if ($record && $record->nilai_akhir !== null) {
+                    $sum += (float)$record->nilai_akhir;
+                    $cnt++;
+                }
+            }
+
+            $avg = $cnt > 0 ? round($sum / $cnt, 1) : null;
+            if ($avg !== null) {
+                $totalNilaiKelas += $avg;
+                $countSiswaDenganNilai++;
+                if ($avg >= 75) {
+                    $tuntasCount++;
+                }
+                if ($avg > $topScore) {
+                    $topScore = $avg;
+                    $topSiswaNama = $siswa->nama;
+                }
+            }
+
+            $studentSummaries->put($siswa->id, [
+                'avg'    => $avg,
+                'count'  => $cnt,
+                'status' => $avg === null ? 'belum' : ($avg >= 75 ? 'tuntas' : 'kurang'),
+            ]);
+        }
+
+        $rerataKelas = $countSiswaDenganNilai > 0 ? round($totalNilaiKelas / $countSiswaDenganNilai, 1) : 0;
+        $persenTuntas = $countSiswaDenganNilai > 0 ? round(($tuntasCount / $countSiswaDenganNilai) * 100) : 0;
+        if ($topScore < 0) {
+            $topScore = 0;
+        }
+
+        // Hitung Statistik per Mata Pelajaran
+        $mapelStats = collect();
+        $groupedUjiansByMapel = $ujians->groupBy('nama_mapel');
+        $mapels = $groupedUjiansByMapel->keys()->values();
+
+        // Construct Matriks Per-Siswa Per-Mata Pelajaran + Detail Popover
+        $studentMapelMatrix = collect();
+
+        foreach ($siswas as $siswa) {
+            $nilaiSiswa = $nilaiData->get($siswa->id, collect());
+            $mapelScores = collect();
+
+            foreach ($groupedUjiansByMapel as $mapelNama => $mapelUjians) {
+                $mapelUjianIds = $mapelUjians->pluck('id');
+                $records = $nilaiSiswa->whereIn('ujian_id', $mapelUjianIds);
+
+                $sum = 0;
+                $cnt = 0;
+                $details = [];
+
+                foreach ($mapelUjians as $u) {
+                    $rec = $records->firstWhere('ujian_id', $u->id);
+                    $val = $rec ? (float)$rec->nilai_akhir : null;
+                    if ($val !== null) {
+                        $sum += $val;
+                        $cnt++;
+                    }
+                    $details[] = [
+                        'nama_ujian' => $u->nama_ujian,
+                        'jenis'      => $u->nama_jenis_ujian,
+                        'nilai'      => $val,
+                    ];
+                }
+
+                $avg = $cnt > 0 ? round($sum / $cnt, 1) : null;
+                $mapelScores->put($mapelNama, [
+                    'avg'     => $avg,
+                    'count'   => $cnt,
+                    'details' => $details,
+                ]);
+            }
+
+            $studentMapelMatrix->put($siswa->id, $mapelScores);
+        }
+
+        foreach ($groupedUjiansByMapel as $mapelNama => $mapelUjians) {
+            $mapelUjianIds = $mapelUjians->pluck('id');
+            $mapelNilais = collect();
+
+            foreach ($nilaiData as $siswaId => $records) {
+                foreach ($records as $rec) {
+                    if ($mapelUjianIds->contains($rec->ujian_id) && $rec->nilai_akhir !== null) {
+                        $mapelNilais->push((float)$rec->nilai_akhir);
+                    }
+                }
+            }
+
+            $mapelAvg = $mapelNilais->isNotEmpty() ? round($mapelNilais->avg(), 1) : 0;
+            $mapelMax = $mapelNilais->isNotEmpty() ? round($mapelNilais->max(), 1) : 0;
+            $mapelMin = $mapelNilais->isNotEmpty() ? round($mapelNilais->min(), 1) : 0;
+
+            $mapelStats->push([
+                'nama_mapel'  => $mapelNama,
+                'total_ujian' => $mapelUjians->count(),
+                'rerata'      => $mapelAvg,
+                'max'         => $mapelMax,
+                'min'         => $mapelMin,
+            ]);
+        }
+
         return view('guru.wali-kelas.rekap-nilai', compact(
             'waliKelas',
             'kelas',
             'siswas',
             'ujians',
+            'mapels',
             'nilaiData',
+            'allJenisUjian',
             'jenisFilter',
-            'allJenisUjian'
+            'studentSummaries',
+            'studentMapelMatrix',
+            'rerataKelas',
+            'persenTuntas',
+            'tuntasCount',
+            'topScore',
+            'topSiswaNama',
+            'mapelStats'
         ));
     }
+
 
     /**
      * Export: Rekap Nilai ke Excel
