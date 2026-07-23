@@ -236,6 +236,14 @@
             </div>
         </div>
 
+        {{-- SEARCH BAR --}}
+        <div class="d-flex justify-content-end mb-3">
+            <div class="input-group" style="max-width: 300px;">
+                <span class="input-group-text bg-white border-end-0 text-muted"><i class="fa-solid fa-search"></i></span>
+                <input type="text" id="search-student" class="form-control border-start-0 ps-0 form-control-modern" placeholder="Cari nama atau NIS...">
+            </div>
+        </div>
+
         {{-- MONITORING TABLE --}}
         <div class="table-responsive bg-white rounded-4 shadow-sm border border-slate-200" style="overflow: hidden;">
             <table class="table table-hover align-middle mb-0" style="font-size: 0.875rem;">
@@ -273,10 +281,45 @@
     const syncIndicator = document.getElementById('sync-indicator');
     const syncSpinner = document.getElementById('sync-spinner');
     const syncText = document.getElementById('sync-text');
+    const searchInput = document.getElementById('search-student');
     
     // Polling every 5 seconds for real-time feel
     const pollInterval = 5000; 
     let initialLoad = true;
+    let allStudents = [];
+    
+    searchInput.addEventListener('input', () => {
+        renderTable();
+    });
+    
+    function renderTable() {
+        const query = searchInput.value.toLowerCase();
+        let filteredStudents = allStudents;
+        
+        if (query) {
+            filteredStudents = allStudents.filter(row => {
+                const nama = row.nama ? row.nama.toLowerCase() : '';
+                const nis = row.nis ? row.nis.toLowerCase() : '';
+                return nama.includes(query) || nis.includes(query);
+            });
+        }
+        
+        if(filteredStudents.length > 0) {
+            let html = '';
+            filteredStudents.forEach((row, index) => {
+                html += buildRowHtml(row, index + 1);
+            });
+            container.innerHTML = html;
+        } else {
+            container.innerHTML = `
+            <tr>
+                <td colspan="7" class="text-center py-4 text-muted">
+                    <i class="fa-solid fa-users-slash fa-2x mb-3 d-block opacity-25"></i>
+                    Tidak ada data siswa yang cocok dengan pencarian.
+                </td>
+            </tr>`;
+        }
+    }
     
     function fetchMonitoringData() {
         if(!initialLoad) {
@@ -297,25 +340,9 @@
             document.getElementById('stat-mengerjakan').textContent = data.cntMengerjakan;
             document.getElementById('stat-selesai').textContent = data.cntSelesai;
             
-            // Update Cards
-            const students = data.monitoring;
-            const totalSoal = data.totalSoal;
-            
-            if(students.length > 0) {
-                let html = '';
-                students.forEach((row, index) => {
-                    html += buildRowHtml(row, index + 1);
-                });
-                container.innerHTML = html;
-            } else {
-                container.innerHTML = `
-                <tr>
-                    <td colspan="7" class="text-center py-4 text-muted">
-                        <i class="fa-solid fa-users-slash fa-2x mb-3 d-block opacity-25"></i>
-                        Tidak ada data siswa untuk ujian ini.
-                    </td>
-                </tr>`;
-            }
+            // Update Table
+            allStudents = data.monitoring || [];
+            renderTable();
             
             syncSpinner.style.display = 'none';
             syncText.textContent = 'Live Sync: Active';
