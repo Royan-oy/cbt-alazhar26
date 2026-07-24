@@ -682,4 +682,4 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
-@endsectio
+@endsection

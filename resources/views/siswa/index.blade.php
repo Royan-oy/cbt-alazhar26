@@ -210,6 +210,47 @@
 
         .pagination { justify-content: center !important; }
     }
+
+    /* Dropdown action 3-dots */
+    .dropdown-action-btn {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        border: 1px solid var(--border-color);
+        background-color: #fff;
+        color: var(--text-muted);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+    }
+    .dropdown-action-btn:hover, .dropdown-action-btn:focus {
+        background-color: #f8fafc;
+        border-color: var(--border-color);
+        color: var(--primary-dark);
+    }
+    .dropdown-menu-custom {
+        border: none;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        border-radius: 14px;
+        padding: 8px;
+        min-width: 170px;
+    }
+    .dropdown-menu-custom .dropdown-item {
+        border-radius: 10px;
+        padding: 8px 12px;
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--secondary-dark);
+        transition: all 0.2s;
+    }
+    .dropdown-menu-custom .dropdown-item:hover {
+        background-color: #f8fafc;
+    }
+    .dropdown-menu-custom .dropdown-item.text-danger:hover {
+        background-color: #fff1f2;
+        color: #e11d48 !important;
+    }
 </style>
 
 <div class="container-fluid py-2">
@@ -438,33 +479,48 @@
                                 @endif
                             </td>
                             <td class="text-end">
-                                <div class="d-inline-flex">
-
-                                    <a href="{{ route('siswa.show', $item->id) }}"
-                                        class="action-icon-btn btn-icon-info"
-                                        title="Lihat Detail">
-                                        <i class="fa-solid fa-eye"></i>
-                                    </a>
-
-                                    <a href="{{ route('siswa.edit', $item->id) }}"
-                                        class="action-icon-btn btn-icon-edit"
-                                        title="Edit">
-                                        <i class="fa-solid fa-pen"></i>
-                                    </a>
-
-                                    <form action="{{ route('siswa.destroy', $item->id) }}"
-                                        method="POST"
-                                        class="form-delete d-inline">
-                                        @csrf
-                                        @method('DELETE')
-
-                                        <button type="submit"
-                                            class="action-icon-btn btn-icon-delete"
-                                            title="Hapus">
-                                            <i class="fa-solid fa-trash"></i>
-                                        </button>
-                                    </form>
-
+                                <div class="dropdown">
+                                    <button class="dropdown-action-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Menu Aksi">
+                                        <i class="fa-solid fa-ellipsis-vertical"></i>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end dropdown-menu-custom">
+                                        <li>
+                                            <a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('siswa.show', $item->id) }}">
+                                                <i class="fa-solid fa-eye text-info" style="width: 16px;"></i>
+                                                Lihat Detail
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('siswa.edit', $item->id) }}">
+                                                <i class="fa-solid fa-pen text-primary" style="width: 16px;"></i>
+                                                Edit Data
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <button type="button"
+                                                    class="dropdown-item d-flex align-items-center gap-2 btn-reset-modal"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#modalResetPassword"
+                                                    data-id="{{ $item->id }}"
+                                                    data-nama="{{ $item->nama }}"
+                                                    data-nis="{{ $item->nis }}"
+                                                    data-url="{{ route('siswa.reset-password', $item->id) }}">
+                                                <i class="fa-solid fa-key text-warning" style="width: 16px;"></i>
+                                                Reset Password
+                                            </button>
+                                        </li>
+                                        <li><hr class="dropdown-divider my-1"></li>
+                                        <li>
+                                            <form action="{{ route('siswa.destroy', $item->id) }}" method="POST" class="form-delete d-inline w-100">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="dropdown-item text-danger d-flex align-items-center gap-2 w-100 border-0 bg-transparent">
+                                                    <i class="fa-solid fa-trash text-danger" style="width: 16px;"></i>
+                                                    Hapus Siswa
+                                                </button>
+                                            </form>
+                                        </li>
+                                    </ul>
                                 </div>
                             </td>
                         </tr>
@@ -524,6 +580,62 @@
     </div>
 </div>
 
+{{-- Modal Reset Password --}}
+<div class="modal fade" id="modalResetPassword" tabindex="-1" aria-labelledby="modalResetPasswordLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow" style="border-radius: 20px; overflow: hidden;">
+            <div class="modal-header border-0 pb-0 pt-4 px-4">
+                <div>
+                    <h5 class="modal-title fw-bold text-dark" id="modalResetPasswordLabel">Reset Password Siswa</h5>
+                    <p class="text-muted small mb-0" id="resetSiswaMeta">Atur ulang password untuk siswa ini.</p>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="formResetPassword" method="POST" action="">
+                @csrf
+                @method('PATCH')
+                <div class="modal-body p-4">
+                    <div class="alert alert-info bg-info bg-opacity-10 text-info border-0 rounded-3 mb-3 py-2 px-3 small">
+                        <i class="fa-solid fa-circle-info me-1"></i> Gunakan tombol generate untuk membuat 6 digit kode acak secara cepat.
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <label class="form-label fw-semibold mb-0 small">Password Baru</label>
+                            <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-2.5 py-0.5" id="btnModalGenerate" style="font-size: 11px; font-weight: 600;">
+                                <i class="fa-solid fa-wand-magic-sparkles me-1"></i> Generate 6 Digit
+                            </button>
+                        </div>
+                        <div class="input-group">
+                            <input type="text" name="password" id="modalPasswordInput" class="form-control form-control-custom" placeholder="Minimal 6 karakter" required style="border-top-right-radius: 0; border-bottom-right-radius: 0;">
+                            <button type="button" class="btn btn-light border" id="btnModalCopy" title="Salin Password" style="border-radius: 0;">
+                                <i class="fa-regular fa-copy text-secondary"></i>
+                            </button>
+                            <button type="button" class="btn btn-light border toggle-modal-pwd" title="Tampilkan / Sembunyikan Password" style="border-top-left-radius: 0; border-bottom-left-radius: 0; border-top-right-radius: 14px; border-bottom-right-radius: 14px;">
+                                <i class="fa-solid fa-eye-slash text-secondary"></i>
+                            </button>
+                        </div>
+                        <small class="text-muted mt-1" id="modalCopyNotif" style="display:none; color: #059669 !important; font-weight: 600;">
+                            <i class="fa-solid fa-circle-check me-1"></i> Password 6 digit tersalin ke clipboard!
+                        </small>
+                    </div>
+
+                    <div class="mb-2">
+                        <label class="form-label fw-semibold small">Konfirmasi Password Baru</label>
+                        <input type="text" name="password_confirmation" id="modalPasswordConfirmInput" class="form-control form-control-custom" placeholder="Ulangi password baru" required>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0 pb-4 px-4 d-flex justify-content-end gap-2">
+                    <button type="button" class="btn btn-light border px-4 rounded-3 fw-semibold" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary px-4 rounded-3 fw-semibold">
+                        <i class="fa-solid fa-floppy-disk me-1"></i> Simpan Password Baru
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 document.querySelectorAll('.form-delete').forEach(function(form){
@@ -546,6 +658,92 @@ document.querySelectorAll('.form-delete').forEach(function(form){
             }
         });
     });
+});
+
+// Logic Modal Reset Password Siswa
+document.addEventListener('DOMContentLoaded', function () {
+    const modalReset = document.getElementById('modalResetPassword');
+    if (modalReset) {
+        modalReset.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+            const nama = button.getAttribute('data-nama');
+            const nis = button.getAttribute('data-nis');
+            const url = button.getAttribute('data-url');
+
+            const form = document.getElementById('formResetPassword');
+            form.action = url;
+
+            const meta = document.getElementById('resetSiswaMeta');
+            meta.textContent = 'Atur ulang password untuk ' + nama + ' (NIS: ' + (nis || '-') + ')';
+
+            // Auto generate 6 digit angka acak saat modal dibuka
+            const code = Math.floor(100000 + Math.random() * 900000).toString();
+            const pwdInput = document.getElementById('modalPasswordInput');
+            const confirmInput = document.getElementById('modalPasswordConfirmInput');
+
+            pwdInput.value = code;
+            confirmInput.value = code;
+            pwdInput.type = 'text';
+            confirmInput.type = 'text';
+
+            const copyNotif = document.getElementById('modalCopyNotif');
+            if (copyNotif) copyNotif.style.display = 'none';
+        });
+    }
+
+    const btnGenerate = document.getElementById('btnModalGenerate');
+    if (btnGenerate) {
+        btnGenerate.addEventListener('click', function () {
+            const code = Math.floor(100000 + Math.random() * 900000).toString();
+            const pwdInput = document.getElementById('modalPasswordInput');
+            const confirmInput = document.getElementById('modalPasswordConfirmInput');
+
+            pwdInput.value = code;
+            confirmInput.value = code;
+            pwdInput.type = 'text';
+            confirmInput.type = 'text';
+        });
+    }
+
+    const btnCopy = document.getElementById('btnModalCopy');
+    if (btnCopy) {
+        btnCopy.addEventListener('click', function () {
+            const pwdInput = document.getElementById('modalPasswordInput');
+            if (pwdInput && pwdInput.value) {
+                navigator.clipboard.writeText(pwdInput.value).then(function () {
+                    const copyNotif = document.getElementById('modalCopyNotif');
+                    if (copyNotif) {
+                        copyNotif.style.display = 'inline-block';
+                        setTimeout(() => { copyNotif.style.display = 'none'; }, 2500);
+                    }
+                }).catch(function () {
+                    pwdInput.select();
+                    document.execCommand('copy');
+                });
+            }
+        });
+    }
+
+    const toggleModalPwd = document.querySelector('.toggle-modal-pwd');
+    if (toggleModalPwd) {
+        toggleModalPwd.addEventListener('click', function () {
+            const pwdInput = document.getElementById('modalPasswordInput');
+            const confirmInput = document.getElementById('modalPasswordConfirmInput');
+            const icon = this.querySelector('i');
+
+            if (pwdInput.type === 'password') {
+                pwdInput.type = 'text';
+                confirmInput.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                pwdInput.type = 'password';
+                confirmInput.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        });
+    }
 });
 </script>
 
