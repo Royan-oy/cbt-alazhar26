@@ -5,75 +5,167 @@
 @section('content')
 <style>
     :root {
-        --primary-dark: #0f172a;
-        --secondary-dark: #1e293b;
-        --accent-blue: #0ea5e9;
-        --surface-white: #ffffff;
-        --text-muted: #64748b;
-        --border-color: #e2e8f0;
-        --card-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.04), 0 4px 12px -5px rgba(15, 23, 42, 0.04);
+        --sb-bg: #0f172a;
+        --sb-card: #1e293b;
+
+        --primary: #0ea5e9;
+        --primary-dark: #0284c7;
+        --primary-light: #eff8ff;
+        --accent-violet: #818cf8;
+        --accent-violet-light: #eef1ff;
+
+        --ink-900: #0f172a;
+        --ink-700: #334155;
+        --ink-500: #64748b;
+        --surface: #ffffff;
+        --border: #e5e9f2;
+        --card-shadow: 0 10px 30px -8px rgba(15,23,42,.05), 0 4px 12px -6px rgba(15,23,42,.04);
     }
 
     .setup-card {
-        background: var(--surface-white);
-        border: 1px solid var(--border-color);
-        border-radius: 24px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 22px;
         box-shadow: var(--card-shadow);
         overflow: hidden;
     }
 
     .setup-header {
-        background: linear-gradient(135deg, var(--primary-dark), var(--secondary-dark));
-        padding: 35px;
-        color: var(--surface-white);
+        background: linear-gradient(135deg, var(--sb-bg) 0%, var(--sb-card) 60%, #1e293b 100%);
+        padding: 32px;
+        color: #fff;
+        position: relative;
+        overflow: hidden;
     }
+
+    .setup-header::after {
+        content: '';
+        position: absolute;
+        top: -50%; right: -8%;
+        width: 260px; height: 260px;
+        background: radial-gradient(circle, rgba(56,189,248,.22) 0%, transparent 70%);
+        border-radius: 50%;
+        pointer-events: none;
+    }
+
+    .setup-header .d-flex { position: relative; }
+
+    .setup-header .badge {
+        background: rgba(56,189,248,.18) !important;
+        color: #7dd3fc !important;
+        font-weight: 700;
+        letter-spacing: .3px;
+    }
+
+    .setup-header h3 { font-size: 19px; }
 
     .meta-box {
         background: #f8fafc;
-        border: 1px solid var(--border-color);
-        border-radius: 16px;
-        padding: 20px;
+        border: 1px solid var(--border);
+        border-radius: 15px;
+        padding: 18px;
+        transition: all .2s ease;
     }
 
     .token-container {
-        max-width: 400px;
+        max-width: 380px;
         margin: 0 auto;
     }
 
     .token-input {
-        letter-spacing: 8px;
+        letter-spacing: 7px;
         text-transform: uppercase;
         font-weight: 700;
-        font-size: 1.75rem;
+        font-size: 1.6rem;
         text-align: center;
-        border: 2px solid var(--border-color);
-        border-radius: 16px;
-        color: var(--primary-dark);
-        transition: all 0.3s;
+        border: 2px solid var(--border);
+        border-radius: 15px;
+        color: var(--ink-900);
+        background: #f8fafc;
+        transition: all .2s ease;
     }
 
     .token-input:focus {
-        border-color: var(--accent-blue);
-        box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.15);
+        border-color: var(--primary);
+        box-shadow: 0 0 0 4px rgba(14,165,233,.14);
+        background: #fff;
         outline: none;
     }
 
     .btn-start {
-        background: var(--accent-blue);
-        color: var(--surface-white);
+        background: linear-gradient(135deg, var(--sb-bg), var(--primary-dark));
+        color: #fff;
         border: none;
-        border-radius: 16px;
-        padding: 16px 32px;
-        font-weight: 600;
-        transition: all 0.2s;
-        box-shadow: 0 4px 12px rgba(14, 165, 233, 0.2);
+        border-radius: 15px;
+        padding: 15px 30px;
+        font-weight: 700;
+        transition: all .2s ease;
+        box-shadow: 0 8px 18px -6px rgba(2,132,199,.4);
     }
 
     .btn-start:hover {
-        background: #0284c7;
-        color: var(--surface-white);
+        background: linear-gradient(135deg, var(--sb-card), var(--primary));
+        color: #fff;
         transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(14, 165, 233, 0.3);
+        box-shadow: 0 12px 24px -6px rgba(2,132,199,.5);
+    }
+
+    .btn-back-setup {
+        background: #f1f5f9;
+        color: var(--ink-700);
+        border: 1px solid var(--border);
+        border-radius: 15px;
+        padding: 15px 30px;
+        font-weight: 700;
+        transition: all .2s ease;
+    }
+
+    .btn-back-setup:hover {
+        background: #e2e8f0;
+        color: var(--ink-900);
+    }
+
+    .alert-token-info {
+        background: var(--accent-violet-light);
+        color: #4338ca;
+        border-radius: 15px;
+    }
+
+    /* =========================================================
+       RESPONSIVE — TABLET
+       ========================================================= */
+    @media (max-width: 767.98px) {
+        .container.py-4 { padding-left: 12px !important; padding-right: 12px !important; padding-top: 16px !important; }
+
+        .setup-card { border-radius: 18px; }
+
+        .setup-header { padding: 22px; }
+        .setup-header .p-3.rounded-4 { padding: 10px !important; }
+        .setup-header h3 { font-size: 16px; }
+        .setup-header .badge { font-size: 10px !important; }
+
+        .p-4.p-md-5 { padding: 20px !important; }
+
+        .meta-box { padding: 14px; border-radius: 13px; }
+        .meta-box h6 { font-size: 13px; }
+
+        .token-container label { font-size: 14px !important; }
+        .token-input {
+            font-size: 1.3rem;
+            letter-spacing: 5px;
+            padding: 14px !important;
+            border-radius: 13px;
+        }
+
+        .btn-start, .btn-back-setup {
+            padding: 13px 22px;
+            font-size: 13.5px;
+            border-radius: 13px;
+        }
+    }
+
+    @media (max-width: 400px) {
+        .token-input { font-size: 1.1rem; letter-spacing: 3px; }
     }
 </style>
 
@@ -113,7 +205,7 @@
                             <div class="meta-box h-100">
                                 <small class="text-uppercase fw-bold d-block mb-1" style="font-size: 10px; color: var(--text-muted);">Mata Pelajaran</small>
                                 <h6 class="fw-bold mb-0" style="color: var(--primary-dark);">
-                                    <i class="fa-solid fa-book text-primary me-2"></i>
+                                    <i class="fa-solid fa-book me-2" style="color: var(--primary);"></i>
                                     {{ optional(optional($ujian->bankSoal)->mataPelajaran)->nama_mapel ?? '-' }}
                                 </h6>
                             </div>
@@ -122,7 +214,7 @@
                             <div class="meta-box h-100">
                                 <small class="text-uppercase fw-bold d-block mb-1" style="font-size: 10px; color: var(--text-muted);">Jumlah Soal</small>
                                 <h6 class="fw-bold mb-0" style="color: var(--primary-dark);">
-                                    <i class="fa-solid fa-list-check text-success me-2"></i>
+                                    <i class="fa-solid fa-list-check me-2" style="color: var(--accent-violet);"></i>
                                     {{ $totalSoal }} Butir Soal
                                 </h6>
                             </div>
@@ -162,7 +254,7 @@
                                 </div>
                             </div>
                         @else
-                            <div class="alert alert-info rounded-4 border-0 mb-5 p-3 text-center">
+                            <div class="alert alert-token-info border-0 mb-5 p-3 text-center">
                                 <i class="fa-solid fa-circle-info me-2"></i> Ujian ini dapat langsung diakses tanpa menggunakan token pengawas.
                             </div>
                         @endif

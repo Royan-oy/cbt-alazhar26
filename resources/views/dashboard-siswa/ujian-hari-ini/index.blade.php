@@ -4,220 +4,298 @@
 
 @section('content')
 <style>
-    /* Custom Modern Color Palette */
     :root {
-        --primary-dark: #0f172a;
-        --secondary-dark: #1e293b;
-        --accent-blue: #0ea5e9;
-        --surface-white: #ffffff;
-        --text-muted: #64748b;
-        --border-color: #e2e8f0;
-        
-        /* Soft shadow matching the dark slate tone */
-        --card-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.04), 0 4px 12px -5px rgba(15, 23, 42, 0.04);
-        --hover-shadow: 0 20px 40px -5px rgba(14, 165, 233, 0.12);
+        --sb-bg: #0f172a;
+        --sb-card: #1e293b;
+        --sb-text-muted: #64748b;
+        --sb-text-active: #38bdf8;
+
+        --primary: #0ea5e9;        /* aksen utama: sky blue, senada sidebar */
+        --primary-dark: #0284c7;
+        --primary-light: #eff8ff;
+        --accent-violet: #818cf8;  /* variasi sekunder, dipakai terbatas */
+        --accent-violet-light: #eef1ff;
+
+        --ink-900: #0f172a;
+        --ink-700: #334155;
+        --ink-500: #64748b;
+        --ink-400: #94a3b8;
+        --surface: #ffffff;
+        --border: #e5e9f2;
+        --card-shadow: 0 10px 30px -8px rgba(15,23,42,.05), 0 4px 12px -6px rgba(15,23,42,.04);
+        --hover-shadow: 0 22px 44px -10px rgba(14,165,233,.16);
     }
 
-    /* Header Section (Dark Theme) */
+    /* =========================================================
+       HEADER — samakan dengan gelap sidebar
+       ========================================================= */
     .cbt-header {
-        background: linear-gradient(135deg, var(--primary-dark), var(--secondary-dark));
-        padding: 35px;
-        border-radius: 24px;
-        color: var(--surface-white);
-        margin-bottom: 30px;
+        background: linear-gradient(135deg, var(--sb-bg) 0%, var(--sb-card) 60%, #1e293b 100%);
+        padding: 32px;
+        border-radius: 22px;
+        color: #fff;
+        margin-bottom: 26px;
         position: relative;
         overflow: hidden;
     }
+
     .cbt-header::after {
         content: '';
         position: absolute;
-        top: -50%;
-        right: -10%;
-        width: 300px;
-        height: 300px;
-        background: rgba(14, 165, 233, 0.08); /* Glow using accent blue */
+        top: -50%; right: -10%;
+        width: 300px; height: 300px;
+        background: radial-gradient(circle, rgba(56,189,248,.22) 0%, transparent 70%);
         border-radius: 50%;
+        pointer-events: none;
     }
 
-    /* Profile / Info Card */
+    .cbt-header::before {
+        content: '';
+        position: absolute;
+        bottom: -60%; left: -8%;
+        width: 220px; height: 220px;
+        background: radial-gradient(circle, rgba(129,140,248,.12) 0%, transparent 70%);
+        border-radius: 50%;
+        pointer-events: none;
+    }
+
+    .cbt-header h3 { position: relative; font-size: 21px; }
+    .cbt-header p { position: relative; font-size: 13.5px; }
+
+    /* =========================================================
+       INFO CARD (Data Siswa)
+       ========================================================= */
     .info-card {
-        background: var(--surface-white);
-        border-radius: 20px;
-        border: 1px solid var(--border-color);
-        padding: 24px;
-        margin-bottom: 30px;
+        background: var(--surface);
+        border-radius: 18px;
+        border: 1px solid var(--border);
+        padding: 22px;
+        margin-bottom: 26px;
         box-shadow: var(--card-shadow);
     }
-    .info-divider {
-        width: 1px;
-        background-color: var(--border-color);
+
+    .info-divider { width: 1px; background-color: var(--border); }
+
+    /* =========================================================
+       FILTER PILLS
+       ========================================================= */
+    .custom-filter-pills {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        padding-bottom: 2px;
     }
 
-    /* Exam Card Styles */
+    .custom-filter-pills::-webkit-scrollbar { display: none; }
+
+    .custom-filter-pills .nav-link {
+        color: var(--ink-500);
+        background: var(--surface);
+        border: 1px solid var(--border);
+        transition: all .2s ease;
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+
+    .custom-filter-pills .nav-link:hover { background: #f1f5f9; }
+
+    .custom-filter-pills .nav-link.active {
+        background: linear-gradient(135deg, var(--sb-bg), var(--primary-dark)) !important;
+        color: white !important;
+        border-color: transparent;
+        box-shadow: 0 8px 18px -6px rgba(2,132,199,.4);
+    }
+
+    /* =========================================================
+       EXAM CARD
+       ========================================================= */
     .exam-card {
-        background: var(--surface-white);
-        border-radius: 20px;
-        border: 1px solid var(--border-color);
+        background: var(--surface);
+        border-radius: 18px;
+        border: 1px solid var(--border);
         overflow: hidden;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        transition: all .25s cubic-bezier(.4,0,.2,1);
         height: 100%;
         display: flex;
         flex-direction: column;
         box-shadow: var(--card-shadow);
     }
+
     .exam-card:hover {
-        transform: translateY(-5px);
+        transform: translateY(-4px);
         box-shadow: var(--hover-shadow);
-        border-color: var(--accent-blue);
+        border-color: #bae6fd;
     }
+
     .exam-header {
-        padding: 24px;
-        border-bottom: 1px solid var(--border-color);
-        flex-grow: 0;
+        padding: 20px 22px;
+        border-bottom: 1px solid var(--border);
     }
+
     .exam-body {
-        padding: 24px;
+        padding: 22px;
         display: flex;
         flex-direction: column;
         flex-grow: 1;
     }
 
-    /* Modern Badges & Status */
+    /* =========================================================
+       BADGES — status "berlangsung" pakai variasi ungu tipis
+       ========================================================= */
     .status-badge {
-        font-size: 11.5px;
-        padding: 6px 14px;
-        border-radius: 30px;
-        font-weight: 600;
+        font-size: 11px;
+        padding: 6px 13px;
+        border-radius: 999px;
+        font-weight: 700;
         display: inline-flex;
         align-items: center;
         gap: 6px;
-    }
-    .status-belum {
-        background: #f0fdf4;
-        color: #16a34a;
-    }
-    .status-berlangsung {
-        background: #fff7ed;
-        color: #ea580c;
-    }
-    .status-selesai {
-        background: #f1f5f9;
-        color: var(--text-muted);
+        flex-shrink: 0;
     }
 
-    /* Pulsing Dot Effect for Active Exam (Accent Blue) */
+    .status-belum { background: var(--primary-light); color: var(--primary-dark); }
+    .status-berlangsung { background: var(--accent-violet-light); color: #4f46e5; }
+    .status-selesai {
+        background: #ecfdf5;
+        color: #059669;
+    }
+
     .pulse-dot {
-        width: 8px;
-        height: 8px;
-        background-color: var(--accent-blue);
+        width: 7px; height: 7px;
+        background-color: var(--accent-violet);
         border-radius: 50%;
-        box-shadow: 0 0 0 0 rgba(14, 165, 233, 0.7);
+        box-shadow: 0 0 0 0 rgba(129,140,248,.7);
         animation: pulsing 1.5s infinite;
     }
+
     @keyframes pulsing {
-        0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(14, 165, 233, 0.7); }
-        70% { transform: scale(1); box-shadow: 0 0 0 8px rgba(14, 165, 233, 0); }
-        100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(14, 165, 233, 0); }
+        0% { transform: scale(.95); box-shadow: 0 0 0 0 rgba(129,140,248,.7); }
+        70% { transform: scale(1); box-shadow: 0 0 0 8px rgba(129,140,248,0); }
+        100% { transform: scale(.95); box-shadow: 0 0 0 0 rgba(129,140,248,0); }
     }
 
-    /* Info Grid */
+    /* =========================================================
+       DETAIL GRID
+       ========================================================= */
     .detail-box {
         background: #f8fafc;
-        padding: 14px;
-        border-radius: 16px;
+        padding: 13px;
+        border-radius: 14px;
         text-align: center;
-        border: 1px solid var(--border-color);
+        border: 1px solid var(--border);
     }
 
-    /* Modern Buttons */
+    /* =========================================================
+       TOMBOL — aksen biru sidebar
+       ========================================================= */
     .btn-masuk {
-        background: var(--accent-blue);
-        color: var(--surface-white);
+        background: linear-gradient(135deg, var(--sb-bg), var(--primary-dark));
+        color: #fff;
         width: 100%;
-        padding: 14px;
-        border-radius: 16px;
-        font-weight: 600;
+        padding: 13px;
+        border-radius: 14px;
+        font-weight: 700;
         border: none;
-        transition: all 0.2s;
-        box-shadow: 0 4px 12px rgba(14, 165, 233, 0.2);
+        transition: all .2s ease;
+        box-shadow: 0 8px 18px -6px rgba(2,132,199,.35);
     }
+
     .btn-masuk:hover {
-        background: #0284c7; /* Darker accent */
-        color: var(--surface-white);
         transform: translateY(-1px);
-        box-shadow: 0 6px 20px rgba(14, 165, 233, 0.3);
+        box-shadow: 0 12px 24px -6px rgba(2,132,199,.45);
+        color: #fff;
+        background: linear-gradient(135deg, var(--sb-card), var(--primary));
     }
+
     .btn-disabled {
         background: #f1f5f9;
-        color: var(--text-muted);
+        color: var(--ink-500);
         width: 100%;
-        padding: 14px;
-        border-radius: 16px;
-        font-weight: 600;
+        padding: 13px;
+        border-radius: 14px;
+        font-weight: 700;
         border: none;
         cursor: not-allowed;
     }
 
-    /* Empty State */
+    /* =========================================================
+       EMPTY STATE
+       ========================================================= */
     .empty-box {
         text-align: center;
-        padding: 60px 20px;
-        border: 2px dashed var(--border-color);
-        border-radius: 24px;
-        background: #fafafa;
+        padding: 56px 20px;
+        border: 2px dashed var(--border);
+        border-radius: 22px;
+        background: #fafbfc;
     }
 
-    /* SUCCESS MODAL */
-
-    .success-icon{
-
-        width:90px;
-        height:90px;
-
-        margin:auto;
-
-        border-radius:50%;
-
-        display:flex;
-        align-items:center;
-        justify-content:center;
-
-        background:#dcfce7;
-
-        color:#16a34a;
-
-        font-size:45px;
-
-        animation:pop .4s ease;
-
+    /* =========================================================
+       MODAL SUCCESS — icon glow ungu untuk variasi
+       ========================================================= */
+    .success-icon {
+        width: 84px; height: 84px;
+        margin: auto;
+        border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        background: var(--accent-violet-light);
+        color: #4f46e5;
+        font-size: 40px;
+        animation: pop .4s ease;
     }
 
-
-    @keyframes pop{
-
-        from{
-
-            transform:scale(.5);
-
-            opacity:0;
-
-        }
-
-        to{
-
-            transform:scale(1);
-
-            opacity:1;
-
-        }
-
+    @keyframes pop {
+        from { transform: scale(.5); opacity: 0; }
+        to   { transform: scale(1); opacity: 1; }
     }
 
+    .modal-content { border-radius: 22px !important; }
 
-    .modal-content{
+    /* =========================================================
+       RESPONSIVE — TABLET
+       ========================================================= */
+    @media (max-width: 991.98px) {
+        .info-card .col-md-4,
+        .info-card .col-md-3 { margin-bottom: 14px; }
+        .info-divider { display: none !important; }
+    }
 
-        border-radius:24px!important;
+    /* =========================================================
+       RESPONSIVE — HP
+       ========================================================= */
+    @media (max-width: 575.98px) {
+        .container-fluid.px-4 { padding-left: 12px !important; padding-right: 12px !important; }
 
+        .cbt-header { padding: 22px 20px; border-radius: 18px; margin-bottom: 18px;}
+        .cbt-header .d-flex { flex-wrap: wrap; }
+        .cbt-header h3 { font-size: 17px; }
+        .cbt-header p { font-size: 12px; }
+        .cbt-header .p-3.rounded-4 { padding: 10px !important; margin-bottom: 10px; }
+
+        .info-card { padding: 16px; border-radius: 16px; margin-bottom: 18px; }
+        .info-card h6 { font-size: 13px; }
+
+        #section-title { font-size: 14.5px; }
+
+        .custom-filter-pills .nav-link { font-size: 12px !important; padding: 8px 13px !important; }
+
+        .exam-header { padding: 16px 16px; }
+        .exam-header h6 { max-width: 150px !important; font-size: 13.5px; }
+        .exam-header small { font-size: 11px; }
+
+        .exam-body { padding: 16px; }
+        .exam-body .p-3.rounded-4 { padding: 12px !important; margin-bottom: 16px !important; }
+
+        .detail-box { padding: 10px; border-radius: 12px; }
+        .detail-box small { font-size: 10px; }
+        .detail-box .fw-bold { font-size: 12.5px; }
+
+        .btn-masuk, .btn-disabled { padding: 12px; font-size: 13px; border-radius: 12px; }
+
+        .empty-box { padding: 40px 16px; border-radius: 18px; }
+
+        .modal-body.text-center.p-5 { padding: 32px 22px !important; }
+        .success-icon { width: 68px; height: 68px; font-size: 32px; }
     }
 </style>
 
@@ -287,7 +365,7 @@
             <i class="fa-solid fa-calendar-week me-2" style="color: var(--accent-blue);"></i> <span>Jadwal Ujian Aktif</span>
         </h5>
         
-        <div class="nav nav-pills custom-filter-pills gap-2" role="tablist">
+       <div class="nav nav-pills custom-filter-pills gap-2" role="tablist">
             <button class="nav-link active rounded-pill px-3 py-2 btn-filter-tab" data-filter="hari_ini" style="font-size: 13px; font-weight: 600;">
                 <i class="fa-solid fa-calendar-day me-1"></i> Hari Ini
             </button>
@@ -537,24 +615,6 @@ document.addEventListener("DOMContentLoaded",function(){
 </script>
 
 @endif
-
-<style>
-.custom-filter-pills .nav-link {
-    color: var(--text-muted);
-    background: #f8fafc;
-    border: 1px solid var(--border-color);
-    transition: all 0.2s ease;
-}
-.custom-filter-pills .nav-link:hover {
-    background: #e2e8f0;
-}
-.custom-filter-pills .nav-link.active {
-    background: var(--accent-blue) !important;
-    color: white !important;
-    border-color: var(--accent-blue);
-    box-shadow: 0 4px 12px rgba(14, 165, 233, 0.25);
-}
-</style>
 
 <script>
 document.addEventListener("DOMContentLoaded", function() {
