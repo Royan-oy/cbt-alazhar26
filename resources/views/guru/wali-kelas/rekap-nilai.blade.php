@@ -533,15 +533,14 @@
                             @php
                                 $mapelData = $mapelScores->get($mapel);
                                 $mapelAvg  = $mapelData['avg'] ?? null;
+                                $mapelKkm  = $mapelData['kkm'] ?? 75;
                                 $mapelDetails = $mapelData['details'] ?? [];
                                 $jsonDetails = json_encode($mapelDetails);
                             @endphp
                             <td>
                                 @if($mapelAvg !== null)
-                                    @if($mapelAvg >= 80)
+                                    @if($mapelAvg >= $mapelKkm)
                                         <span class="score-chip score-high popover-trigger" tabindex="0" data-mapel="{{ $mapel }}" data-details="{{ $jsonDetails }}">{{ number_format($mapelAvg, 0) }}</span>
-                                    @elseif($mapelAvg >= 70)
-                                        <span class="score-chip score-mid popover-trigger" tabindex="0" data-mapel="{{ $mapel }}" data-details="{{ $jsonDetails }}">{{ number_format($mapelAvg, 0) }}</span>
                                     @else
                                         <span class="score-chip score-low popover-trigger" tabindex="0" data-mapel="{{ $mapel }}" data-details="{{ $jsonDetails }}">{{ number_format($mapelAvg, 0) }}</span>
                                     @endif
@@ -586,9 +585,8 @@
             <div class="px-4 py-3 border-top d-flex flex-column flex-md-row align-items-md-center gap-3" style="background-color: #f8fafc; border-color: var(--border-color) !important; font-size: 0.8125rem; color: #475569;">
                 <div class="fw-semibold me-2"><i class="fa-solid fa-circle-info me-1"></i> Keterangan Nilai & Fitur Interaktif:</div>
                 <div class="d-flex flex-wrap gap-3 align-items-center">
-                    <span class="d-flex align-items-center gap-2"><span class="score-chip score-high" style="min-width:28px;">—</span> ≥ 80 (Baik)</span>
-                    <span class="d-flex align-items-center gap-2"><span class="score-chip score-mid" style="min-width:28px;">—</span> 70–79 (Cukup)</span>
-                    <span class="d-flex align-items-center gap-2"><span class="score-chip score-low" style="min-width:28px;">—</span> &lt; 70 (Perlu Perbaikan)</span>
+                    <span class="d-flex align-items-center gap-2"><span class="score-chip score-high" style="min-width:28px;">—</span> ≥ KKM (Tuntas)</span>
+                    <span class="d-flex align-items-center gap-2"><span class="score-chip score-low" style="min-width:28px;">—</span> &lt; KKM (Belum Tuntas)</span>
                     <span class="text-muted opacity-50">|</span>
                     <span class="text-muted"><i class="fa-solid fa-hand-pointer me-1"></i> Sentuh / Hover angka nilai mapel untuk melihat rincian tiap ujian.</span>
                 </div>
@@ -640,6 +638,7 @@
                             @php
                                 $record = $nilaiSiswa->get($ujian->id);
                                 $nilai  = $record ? (float) $record->nilai_akhir : null;
+                                $kkmUjian = $ujian->kkm ?? 75;
                             @endphp
                             <div class="d-flex align-items-center justify-content-between p-2 rounded-3" style="background: #f8fafc; font-size: 12px;">
                                 <span class="text-dark fw-medium text-truncate me-2" style="max-width: 200px;">
@@ -647,10 +646,8 @@
                                 </span>
                                 <div>
                                     @if($nilai !== null)
-                                        @if($nilai >= 80)
+                                        @if($nilai >= $kkmUjian)
                                             <span class="badge bg-success bg-opacity-10 text-success fw-bold">{{ number_format($nilai, 0) }}</span>
-                                        @elseif($nilai >= 70)
-                                            <span class="badge bg-warning bg-opacity-10 text-warning text-dark fw-bold">{{ number_format($nilai, 0) }}</span>
                                         @else
                                             <span class="badge bg-danger bg-opacity-10 text-danger fw-bold">{{ number_format($nilai, 0) }}</span>
                                         @endif
@@ -752,8 +749,8 @@ document.addEventListener("DOMContentLoaded", function() {
                 const scoreVal = d.nilai !== null ? Math.round(d.nilai) : 'Belum';
                 let badgeStyle = 'background: #f1f5f9; color: #64748b;';
                 if (d.nilai !== null) {
-                    if (d.nilai >= 80) badgeStyle = 'background: #dcfce7; color: #166534; font-weight: 700;';
-                    else if (d.nilai >= 70) badgeStyle = 'background: #fef9c3; color: #854d0e; font-weight: 700;';
+                    const kkm = d.kkm !== undefined ? d.kkm : 75;
+                    if (d.nilai >= kkm) badgeStyle = 'background: #dcfce7; color: #166534; font-weight: 700;';
                     else badgeStyle = 'background: #fee2e2; color: #991b1b; font-weight: 700;';
                 }
                 html += `<div class="d-flex justify-content-between align-items-center gap-3 mb-1.5 pb-1 border-bottom border-light">
