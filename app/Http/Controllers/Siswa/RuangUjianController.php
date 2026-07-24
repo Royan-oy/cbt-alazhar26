@@ -13,105 +13,67 @@ use Illuminate\Support\Facades\Auth;
 class RuangUjianController extends Controller
 {
     public function mulai(Ujian $ujian)
-    {
-        /*
-        |--------------------------------------------------------------------------
-        | CEK SISWA LOGIN
-        |--------------------------------------------------------------------------
-        */
+{
+    $siswa = Auth::user()->siswa;
 
-        $siswa = Auth::user()->siswa;
-
-        if (!$siswa) {
-            abort(403, 'Data siswa tidak ditemukan.');
-        }
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | CEK APAKAH SUDAH PERNAH MENGERJAKAN
-        |--------------------------------------------------------------------------
-        */
-
-        $nilai = Nilai::where('ujian_id', $ujian->id)
-            ->where('siswa_id', $siswa->id)
-            ->first();
-
-
-            
-        if ($nilai && $nilai->status == 'selesai') {
-
-            return redirect()
-                ->route('dashboard-siswa.ujian-hari-ini')
-                ->with('error', 'Ujian sudah dikumpulkan.');
-
-        }
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | CEK WAKTU UJIAN
-        |--------------------------------------------------------------------------
-        */
-
-        $now = Carbon::now();
-
-        if (
-            $now->lt(Carbon::parse($ujian->waktu_mulai)) ||
-            $now->gt(Carbon::parse($ujian->waktu_selesai))
-        ) {
-
-            return redirect()
-                ->route('dashboard-siswa.ujian-hari-ini')
-                ->with(
-                    'error',
-                    'Ujian belum dibuka atau waktu ujian sudah berakhir.'
-                );
-
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | LOAD DATA UJIAN
-        |--------------------------------------------------------------------------
-        */
-
-        $ujian->load([
-            'bankSoal.mataPelajaran',
-            'jenisUjian',
-        ]);
-
-        /*
-        |--------------------------------------------------------------------------
-        | HITUNG JUMLAH SOAL
-        |--------------------------------------------------------------------------
-        */
-
-        $totalSoal = 0;
-
-
-        if ($ujian->bankSoal) {
-
-            $totalSoal = $ujian->bankSoal
-                ->soals()
-                ->count();
-
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | TAMPILKAN HALAMAN TOKEN / KONFIRMASI
-        |--------------------------------------------------------------------------
-        */
-
-        return view(
-            'dashboard-siswa.ruang-ujian.index',
-            compact(
-                'ujian',
-                'totalSoal'
-            )
-        );
+    if (!$siswa) {
+        abort(403, 'Data siswa tidak ditemukan.');
     }
+
+    // Jika sudah selesai tidak boleh masuk lagi
+    $nilai = Nilai::where('ujian_id', $ujian->id)
+        ->where('siswa_id', $siswa->id)
+        ->first();
+
+    if ($nilai && $nilai->status == 'selesai') {
+        return redirect()
+            ->route('dashboard-siswa.ujian-hari-ini')
+            ->with('error', 'Ujian sudah dikumpulkan.');
+    }
+
+    // Cek waktu ujian
+    $now = now();
+
+    if (
+        $now->lt($ujian->waktu_mulai) ||
+        $now->gt($ujian->waktu_selesai)
+    ) {
+        return redirect()
+            ->route('dashboard-siswa.ujian-hari-ini')
+            ->with('error', 'Ujian belum dibuka atau sudah berakhir.');
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Load semua relasi yang dibutuhkan halaman token
+    |--------------------------------------------------------------------------
+    */
+
+    $ujian->load([
+        'bankSoal.soals',
+        'bankSoal.mataPelajaran',
+        'jenisUjian',
+        'tahunAjaran',
+    ]);
+
+    /*
+    |--------------------------------------------------------------------------
+    | Hitung total soal sesuai bank soal yang dipilih ujian
+    |--------------------------------------------------------------------------
+    */
+
+    $totalSoal = optional($ujian->bankSoal)
+        ->soals
+        ->count() ?? 0;
+
+    return view(
+        'dashboard-siswa.ruang-ujian.index',
+        compact(
+            'ujian',
+            'totalSoal'
+        )
+    );
+}
 
     /**
      * PROSES VALIDASI TOKEN SEBELUM MASUK UJIAN
