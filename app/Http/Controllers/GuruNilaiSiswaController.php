@@ -86,13 +86,27 @@ class GuruNilaiSiswaController extends Controller
             abort(404, 'Data ujian tidak ditemukan atau bukan milik Anda.');
         }
 
+        $kelasList = DB::table('ujian_kelas')
+            ->join('kelas', 'ujian_kelas.kelas_id', '=', 'kelas.id')
+            ->where('ujian_kelas.ujian_id', $id)
+            ->select('kelas.id', 'kelas.nama_kelas')
+            ->orderBy('kelas.nama_kelas', 'asc')
+            ->get();
+
         $pesertas = DB::table('nilais')
             ->join('siswas', 'nilais.siswa_id', '=', 'siswas.id')
+            ->leftJoin('siswa_kelas', function($join) use ($ujian) {
+                $join->on('siswas.id', '=', 'siswa_kelas.siswa_id')
+                     ->where('siswa_kelas.tahun_ajaran_id', '=', $ujian->tahun_ajaran_id);
+            })
+            ->leftJoin('kelas', 'siswa_kelas.kelas_id', '=', 'kelas.id')
             ->where('nilais.ujian_id', $id)
             ->select(
                 'siswas.id as siswa_id',
                 'siswas.nama as nama_siswa',
                 'siswas.nis',
+                'kelas.id as kelas_id',
+                'kelas.nama_kelas',
                 'nilais.id as nilai_id',
                 'nilais.status',
                 'nilais.waktu_mulai_kerja',
@@ -100,6 +114,7 @@ class GuruNilaiSiswaController extends Controller
                 'nilais.violation_count',
                 'nilais.nilai_akhir'
             )
+            ->orderBy('kelas.nama_kelas', 'asc')
             ->orderBy('siswas.nama', 'asc')
             ->get();
 
@@ -117,7 +132,7 @@ class GuruNilaiSiswaController extends Controller
             $p->belum_dikoreksi = $unscoredAnswers->get($p->nilai_id, 0);
         }
 
-        return view('guru.nilai-siswa.show', compact('ujian', 'pesertas'));
+        return view('guru.nilai-siswa.show', compact('ujian', 'pesertas', 'kelasList'));
     }
 
     /**
@@ -133,7 +148,7 @@ class GuruNilaiSiswaController extends Controller
             ->join('mata_pelajarans', 'bank_soals.mata_pelajaran_id', '=', 'mata_pelajarans.id')
             ->where('ujians.id', $ujian_id)
             ->whereIn('bank_soals.guru_mapel_id', $guruMapelIds)
-            ->select('ujians.*', 'mata_pelajarans.nama_mapel', 'bank_soals.id as bank_soal_id')
+            ->select('ujians.*', 'mata_pelajarans.nama_mapel', 'bank_soals.id as bank_soal_id', 'bank_soals.kkm')
             ->first();
 
         if (!$ujian) abort(404, 'Ujian tidak ditemukan.');

@@ -346,6 +346,28 @@ class SiswaController extends Controller
     }
 
     /**
+     * Reset password akun siswa.
+     */
+    public function resetPassword(Request $request, Siswa $siswa)
+    {
+        $this->authorizeJenjang($siswa);
+
+        $request->validate([
+            'password' => 'required|string|min:6|confirmed',
+        ], [
+            'password.required'  => 'Password wajib diisi.',
+            'password.min'       => 'Password minimal 6 karakter.',
+            'password.confirmed' => 'Konfirmasi password tidak cocok.',
+        ]);
+
+        $siswa->user()->update([
+            'password' => Hash::make($request->password),
+        ]);
+
+        return redirect()->back()->with('success', 'Password siswa ' . $siswa->nama . ' berhasil di-reset.');
+    }
+
+    /**
      * Pastikan admin_jenjang tidak bisa mengakses siswa di luar jenjangnya.
      */
     private function authorizeJenjang(Siswa $siswa)

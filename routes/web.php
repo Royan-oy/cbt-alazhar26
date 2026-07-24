@@ -129,6 +129,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('siswa-template-download', [SiswaController::class, 'downloadTemplate'])->name('siswa.template');
     Route::post('siswa-import', [SiswaController::class, 'import'])->name('siswa.import');
 
+    Route::patch('siswa/{siswa}/reset-password', [SiswaController::class, 'resetPassword'])->name('siswa.reset-password');
     Route::resource('siswa', SiswaController::class);
 
     Route::patch('ujian/{ujian}/regenerate-token', [UjianController::class, 'regenerateToken'])->name('ujian.regenerate-token');

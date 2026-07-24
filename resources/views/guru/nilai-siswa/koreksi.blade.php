@@ -4,666 +4,590 @@
 
 @section('content')
 <style>
-    .page-header {
-        background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-        border: 1px solid #bae6fd;
-        padding: 2rem 1.5rem;
-        margin-bottom: 2rem;
-        border-radius: 0.75rem;
-        box-shadow: 0 4px 6px -1px rgba(14, 165, 233, 0.1), 0 2px 4px -1px rgba(14, 165, 233, 0.06);
-        position: relative;
+    #koreksi-wrapper {
+        --paper: #f8fafc;
+        --paper-card: #ffffff;
+        --ink: #0f172a;
+        --ink-soft: #64748b;
+        --ink-faint: #94a3b8;
+        --rule: #e2e8f0;
+        --rule-strong: #cbd5e1;
+        --red-pen: #F8285A;
+        --red-pen-dark: #dc2626;
+        --red-pen-soft: #fef2f2;
+        --green-ink: #17C653;
+        --green-soft: #f0fdf4;
+        --gold: #F6C000;
+        --gold-soft: #fffbeb;
+        --accent-blue: #1B84FF;
+        --font-sans: inherit;
+
+        font-family: var(--font-sans);
+        color: var(--ink);
+        background: var(--paper);
+        margin: -1.5rem -1.5rem 0 -1.5rem;
+        padding: 2rem 1.5rem 3rem;
     }
-    
-    .btn-back {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        background: #fff;
-        color: #0369a1;
-        padding: 0.375rem 0.75rem;
-        border-radius: 0.5rem;
-        text-decoration: none;
-        font-size: 0.8125rem;
-        font-weight: 600;
-        border: 1px solid #bae6fd;
-        transition: all 0.2s;
+    #koreksi-wrapper * { box-sizing: border-box; }
+    #koreksi-wrapper .inner { max-width: 1000px; margin: 0 auto; }
+
+    /* ---------- Back link ---------- */
+    .kx-back {
+        display: inline-flex; align-items: center; gap: 0.5rem;
+        color: var(--ink-soft); text-decoration: none;
+        font-size: 0.875rem; font-weight: 600;
         margin-bottom: 1.5rem;
+        padding-bottom: 2px;
+        transition: color 0.15s;
     }
-    .btn-back:hover {
-        background: #0284c7;
-        color: #fff;
-        border-color: #0284c7;
-    }
+    .kx-back:hover { color: var(--accent-blue); }
 
-    .page-title {
-        font-size: 1.5rem;
-        font-weight: 700;
-        color: #0f172a;
-        margin-bottom: 0.25rem;
+    /* ---------- Header: exam slip ---------- */
+    .kx-header {
+        background: var(--paper-card);
+        border: 1px solid var(--rule);
+        border-radius: 12px;
+        padding: 1.75rem 2rem;
+        margin-bottom: 1.5rem;
+        position: relative;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
     }
-    .page-description {
-        color: #475569;
-        font-size: 0.875rem;
-        margin-bottom: 0;
+    .kx-header::before {
+        content: '';
+        position: absolute; left: 0; top: 0; bottom: 0; width: 6px;
+        background: var(--accent-blue);
+        border-radius: 12px 0 0 12px;
     }
-    
-    .info-card {
-        background: #fff;
-        border: 1px solid #bae6fd;
-        border-radius: 0.5rem;
-        padding: 1.25rem;
-        text-align: center;
-        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-        height: 100%;
+    .kx-header-top { display: flex; align-items: center; gap: 1.25rem; }
+    .kx-stamp-icon {
+        width: 54px; height: 54px; border-radius: 50%;
+        border: 2px solid var(--accent-blue);
+        color: var(--accent-blue);
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.35rem; flex-shrink: 0;
+        transform: rotate(-6deg);
+    }
+    .kx-eyebrow {
+        font-size: 0.75rem; font-weight: 700; letter-spacing: 0.08em;
+        text-transform: uppercase; color: var(--ink-soft);
+        margin-bottom: 0.15rem;
+    }
+    .kx-student-name {
+        font-size: 1.75rem; font-weight: 700; color: var(--ink);
+        margin: 0;
+    }
+    .kx-header-meta {
+        margin-top: 1rem; padding-top: 1rem;
+        border-top: 1px dashed var(--rule);
+        font-size: 0.875rem; color: var(--ink-soft);
+        display: flex; flex-wrap: wrap; gap: 0.5rem 0.5rem;
+    }
+    .kx-header-meta .dot { color: var(--ink-faint); }
+    .kx-header-meta strong { color: var(--ink); font-weight: 600; }
+
+    /* ---------- Ledger (scoreboard) ---------- */
+    .kx-ledger {
+        background: var(--paper-card);
+        border: 1px solid var(--rule);
+        border-radius: 12px;
+        margin-bottom: 1.75rem;
         display: flex;
-        flex-direction: column;
-        justify-content: center;
-    }
-    .info-card .number {
-        font-size: 1.75rem;
-        font-weight: 700;
-        margin-bottom: 0.25rem;
-    }
-    .info-card .label {
-        color: #64748b;
-        font-size: 0.75rem;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-    }
-
-    /* Questions & Grading Styles */
-    .question-card {
-        background: #fff;
-        border: 1px solid #e2e8f0;
-        border-radius: 0.75rem;
         overflow: hidden;
-        margin-bottom: 1.5rem;
-        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
     }
-    
-    .question-header {
-        background: #f8fafc;
-        border-bottom: 1px solid #e2e8f0;
-        padding: 1rem 1.5rem;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
+    .kx-ledger-item { flex: 1; padding: 1.25rem 1.5rem; text-align: center; }
+    .kx-ledger-item + .kx-ledger-item { border-left: 1px dashed var(--rule); }
+    .kx-ledger-label {
+        font-size: 0.75rem; font-weight: 700; letter-spacing: 0.05em;
+        text-transform: uppercase; color: var(--ink-soft); margin-bottom: 0.4rem;
     }
-    
-    .question-no {
-        font-weight: 700;
-        color: #0f172a;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
+    .kx-ledger-value {
+        font-size: 1.65rem; font-weight: 700; color: var(--ink);
     }
-    
-    .badge-no {
-        background: #e0f2fe;
-        color: #0284c7;
-        width: 28px; height: 28px;
-        border-radius: 50%;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 0.875rem;
-        font-weight: 700;
-    }
-    
-    .badge-bobot {
-        background: #f1f5f9;
-        color: #475569;
-        padding: 0.25rem 0.75rem;
-        border-radius: 4px;
-        font-size: 0.75rem;
-        font-weight: 600;
-    }
+    .kx-ledger-sub { font-size: 0.85rem; font-weight: 600; color: var(--ink-soft); }
+    .kx-ledger-item.is-highlight { background: var(--green-soft); }
+    .kx-ledger-item.is-highlight .kx-ledger-value { color: var(--green-ink); }
+    .kx-ledger-item.is-alert { background: var(--red-pen-soft); }
+    .kx-ledger-item.is-alert .kx-ledger-value,
+    .kx-ledger-item.is-alert .kx-ledger-label { color: var(--red-pen); }
 
-    .question-body {
-        padding: 1.5rem;
-    }
-    
-    .soal-text {
-        font-size: 0.95rem;
-        color: #334155;
-        margin-bottom: 1.5rem;
-        line-height: 1.6;
-    }
-    
-    .soal-img {
-        max-width: 100%;
-        border-radius: 0.5rem;
-        margin-bottom: 1.5rem;
-        border: 1px solid #e2e8f0;
-    }
-    
-    .answer-box {
-        background: #f0f9ff;
-        border: 1px solid #bae6fd;
-        padding: 1rem 1.25rem;
-        border-radius: 0.5rem;
-        margin-bottom: 1.5rem;
-    }
-    
-    .answer-label {
-        font-size: 0.75rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        color: #0284c7;
-        margin-bottom: 0.5rem;
-        letter-spacing: 0.05em;
-    }
-    
-    .answer-text {
-        font-size: 0.95rem;
-        color: #0f172a;
-        white-space: pre-wrap;
-        margin-bottom: 0;
-    }
-
-    .grading-box {
-        background: #fff;
-        border: 1px solid #e2e8f0;
-        border-radius: 0.5rem;
-        padding: 1.25rem;
-        display: flex;
-        flex-wrap: wrap;
-        gap: 1.5rem;
-        align-items: center;
-    }
-    
-    .grading-title {
-        font-size: 0.75rem;
-        font-weight: 600;
-        color: #475569;
-        margin-bottom: 0.5rem;
-        display: block;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-    }
-    
-    .score-input {
-        width: 100px;
-        text-align: center;
-        font-weight: 700;
-        color: #0f172a;
-        border: 1px solid #cbd5e1;
-        border-radius: 0.375rem;
-        padding: 0.5rem;
+    /* ---------- Folder tabs ---------- */
+    .kx-tabs { display: flex; gap: 0.5rem; margin-bottom: 0; padding: 0 0.25rem; border: 0; }
+    .kx-tab {
+        font-weight: 700; font-size: 0.875rem;
+        color: var(--ink-soft); background: #e2e8f0;
+        border: 1px solid var(--rule); border-bottom: none;
+        border-radius: 10px 10px 0 0;
+        padding: 0.75rem 1.35rem 0.65rem;
+        display: inline-flex; align-items: center; gap: 0.5rem;
+        cursor: pointer; position: relative; top: 1px;
         transition: all 0.2s;
     }
-    .score-input:focus {
-        outline: none;
-        border-color: #0ea5e9;
-        box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.2);
+    .kx-tab .count {
+        background: #cbd5e1; color: var(--ink);
+        font-size: 0.75rem; font-weight: 700; padding: 0.1rem 0.5rem; border-radius: 999px;
     }
-    
-    .status-radio-group {
-        display: flex;
-        gap: 0.75rem;
+    .kx-tab.active {
+        background: var(--paper-card); color: var(--accent-blue);
+        border-color: var(--rule-strong); border-bottom: 1px solid var(--paper-card);
+        box-shadow: 0 -3px 0 var(--accent-blue) inset;
     }
-    
-    .custom-radio {
-        display: none;
+    .kx-tab.active .count { background: #e0f2fe; color: var(--accent-blue); }
+    .kx-tab-panel-body {
+        background: var(--paper-card);
+        border: 1px solid var(--rule-strong);
+        border-radius: 0 12px 12px 12px;
+        padding: 1.75rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
     }
-    .custom-radio-label {
-        padding: 0.375rem 1rem;
-        border: 1px solid #cbd5e1;
-        border-radius: 4px;
-        cursor: pointer;
-        font-size: 0.8125rem;
-        font-weight: 600;
-        color: #64748b;
-        transition: all 0.2s;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.375rem;
+
+    /* ---------- Search ---------- */
+    .kx-search { position: relative; margin-bottom: 1.25rem; }
+    .kx-search i {
+        position: absolute; left: 1rem; top: 50%; transform: translateY(-50%);
+        color: var(--ink-soft); font-size: 0.875rem; pointer-events: none;
     }
-    .custom-radio:checked + .label-benar {
-        border-color: #22c55e;
-        background: #f0fdf4;
-        color: #16a34a;
+    .kx-search input {
+        width: 100%; padding: 0.7rem 1rem 0.7rem 2.5rem;
+        border: 1px solid var(--rule); border-radius: 10px;
+        font-size: 0.875rem; color: var(--ink);
+        background: var(--paper);
     }
-    .custom-radio:checked + .label-salah {
-        border-color: #ef4444;
-        background: #fef2f2;
-        color: #dc2626;
+    .kx-search input:focus { outline: none; border-color: var(--accent-blue); box-shadow: 0 0 0 3px rgba(27, 132, 255, 0.15); }
+    .kx-search-no-result {
+        display: none; text-align: center; padding: 2.5rem 1rem; color: var(--ink-soft); font-size: 0.875rem;
     }
-    
-    .btn-save {
-        background: #0284c7;
-        color: #fff;
-        padding: 0.75rem 2rem;
-        border-radius: 0.5rem;
-        font-weight: 600;
-        border: none;
+
+    /* ---------- Question cards ---------- */
+    .kx-list-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; }
+    .kx-list-title {
+        font-size: 1.2rem; font-weight: 700; color: var(--ink); margin: 0;
+    }
+    .kx-list-hint { font-size: 0.8rem; color: var(--ink-soft); font-weight: 500; }
+
+    .kx-card {
+        border: 1px solid var(--rule); border-radius: 10px;
+        margin-bottom: 1rem; overflow: hidden; background: var(--paper-card);
+    }
+    .kx-card-head {
+        display: flex; align-items: center; gap: 1rem;
+        padding: 1rem 1.35rem; cursor: pointer; background: #ffffff;
+        border: none; width: 100%; text-align: left;
+        transition: background 0.15s;
+    }
+    .kx-card-head[aria-expanded="true"] { background: #f8fafc; }
+    .kx-num {
+        width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0;
+        background: var(--ink); color: #ffffff;
+        font-weight: 700; font-size: 0.875rem;
+        display: flex; align-items: center; justify-content: center;
+    }
+    .kx-card-label { font-weight: 700; font-size: 0.95rem; color: var(--ink); }
+    .kx-card-badges { margin-left: auto; display: flex; align-items: center; gap: 0.6rem; }
+    .kx-card-chevron { color: var(--ink-soft); transition: transform 0.2s; }
+    .kx-card-head[aria-expanded="true"] .kx-card-chevron { transform: rotate(180deg); }
+
+    .kx-weight {
+        font-size: 0.75rem; font-weight: 700; color: var(--ink-soft);
+        background: #f1f5f9; border: 1px solid var(--rule);
+        padding: 0.25rem 0.65rem; border-radius: 6px; white-space: nowrap;
+    }
+
+    /* Solid stamp badges */
+    .kx-stamp {
+        display: inline-flex; align-items: center; gap: 0.35rem;
+        font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em;
+        padding: 0.25rem 0.65rem; border-radius: 6px; white-space: nowrap; color: #ffffff;
+    }
+    .kx-stamp.ok { background: var(--green-ink); }
+    .kx-stamp.no { background: var(--red-pen); }
+    .kx-stamp.pending { background: var(--gold); }
+
+    .kx-card-body { padding: 1.5rem 1.75rem; border-top: 1px solid var(--rule); }
+    .kx-soal-text {
+        font-size: 1rem; line-height: 1.6; color: var(--ink); font-weight: 500;
+        margin-bottom: 1.25rem;
+    }
+    .kx-soal-img { max-width: 100%; border-radius: 8px; border: 1px solid var(--rule); margin-bottom: 1.25rem; }
+
+    .kx-answer {
+        background: var(--paper); border-left: 4px solid var(--accent-blue);
+        border-radius: 0 8px 8px 0; padding: 1rem 1.25rem; margin-bottom: 1.5rem;
+    }
+    .kx-answer-label {
+        font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
+        color: var(--accent-blue); margin-bottom: 0.4rem;
+    }
+    .kx-answer-text { font-size: 0.95rem; color: var(--ink); white-space: pre-wrap; font-weight: 500; }
+
+    /* PG options */
+    .kx-opt {
+        padding: 0.75rem 1rem; border: 1px solid var(--rule); border-radius: 8px;
+        font-size: 0.875rem; margin-bottom: 0.5rem; background: var(--paper-card);
+        display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; font-weight: 500;
+    }
+    .kx-opt.correct-key { background: var(--green-soft); border-color: var(--green-ink); color: var(--green-ink); font-weight: 700; }
+    .kx-opt.student-wrong { background: var(--red-pen-soft); border-color: var(--red-pen); color: var(--red-pen); font-weight: 700; }
+    .kx-opt-tag {
+        font-size: 0.7rem; font-weight: 700; text-transform: uppercase; padding: 0.15rem 0.5rem;
+        border-radius: 4px; background: rgba(0,0,0,0.06); margin-left: auto;
+    }
+
+    /* Grading strip */
+    .kx-grading {
+        border-top: 1px dashed var(--rule); margin-top: 1.5rem; padding-top: 1.25rem;
+        display: flex; flex-wrap: wrap; align-items: center; gap: 1.75rem;
+    }
+    .kx-grading-label {
+        font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
+        color: var(--ink-soft); display: block; margin-bottom: 0.5rem;
+    }
+    .kx-score-circle {
+        width: 88px; text-align: center;
+        font-size: 1.15rem; font-weight: 700; color: var(--ink);
+        border: 2px solid var(--accent-blue); border-radius: 8px;
+        padding: 0.4rem 0.5rem; background: var(--paper-card);
+    }
+    .kx-score-circle:focus { outline: none; box-shadow: 0 0 0 3px rgba(27, 132, 255, 0.15); }
+    .kx-score-wrap { display: flex; align-items: center; gap: 0.6rem; }
+    .kx-score-max { font-size: 0.875rem; color: var(--ink-soft); font-weight: 600; }
+
+    .kx-status-group { display: flex; gap: 0.6rem; }
+    .kx-radio { display: none; }
+    .kx-radio-label {
+        padding: 0.45rem 1.1rem; border: 1.5px solid var(--rule); border-radius: 8px;
+        cursor: pointer; font-size: 0.85rem; font-weight: 700; color: var(--ink-soft);
+        display: inline-flex; align-items: center; gap: 0.4rem; transition: all 0.2s;
+    }
+    .kx-radio:checked + .kx-radio-label.benar { border-color: var(--green-ink); background: var(--green-ink); color: #ffffff; }
+    .kx-radio:checked + .kx-radio-label.salah { border-color: var(--red-pen); background: var(--red-pen); color: #ffffff; }
+
+    .kx-grading-actions { margin-left: auto; display: flex; align-items: center; gap: 0.9rem; }
+    .kx-saved-mark {
+        color: var(--green-ink); font-size: 0.85rem; font-weight: 700; display: none; align-items: center; gap: 0.3rem;
+    }
+    .kx-saved-mark.show { display: inline-flex; }
+    .kx-btn-save {
+        font-weight: 700; font-size: 0.875rem;
+        background: var(--accent-blue); color: #fff; border: none;
+        padding: 0.6rem 1.35rem; border-radius: 99px; cursor: pointer;
+        display: inline-flex; align-items: center; gap: 0.45rem;
+        transition: all 0.2s; box-shadow: 0 2px 4px rgba(27, 132, 255, 0.15);
+    }
+    .kx-btn-save:hover { background: #156ce6; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(27, 132, 255, 0.25); }
+    .kx-btn-save:disabled { opacity: 0.65; cursor: default; }
+
+    /* Empty state */
+    .kx-empty { text-align: center; padding: 3.5rem 1rem; color: var(--ink-soft); }
+    .kx-empty i { font-size: 2.5rem; opacity: 0.35; margin-bottom: 0.75rem; display: block; }
+    .kx-empty h5 { color: var(--ink); font-weight: 700; margin-bottom: 0.25rem; }
+    .kx-empty p { font-size: 0.875rem; margin: 0; }
+
+    /* Sticky footer */
+    .kx-sticky {
+        position: sticky; bottom: 1.25rem;
+        background: #ffffff;
+        border: 1px solid var(--rule); border-radius: 12px;
+        padding: 1rem 1.5rem; display: flex; justify-content: space-between; align-items: center; gap: 1rem;
+        box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+    }
+    .kx-sticky-text strong { font-size: 1rem; color: var(--ink); display: block; font-weight: 700; }
+    .kx-sticky-text span { font-size: 0.8rem; color: var(--ink-soft); }
+    .kx-sticky a {
+        font-weight: 700; font-size: 0.875rem; color: #fff; background: var(--ink);
+        padding: 0.65rem 1.35rem; border-radius: 99px; text-decoration: none; white-space: nowrap;
         transition: background 0.2s;
-        box-shadow: 0 4px 6px -1px rgba(2, 132, 199, 0.2);
     }
-    .btn-save:hover {
-        background: #0369a1;
-    }
-    
-    .sticky-action-bar {
-        position: sticky;
-        bottom: 1.5rem;
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(8px);
-        border: 1px solid #bae6fd;
-        border-radius: 0.75rem;
-        padding: 1rem 1.5rem;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        box-shadow: 0 10px 15px -3px rgba(14, 165, 233, 0.1);
-        z-index: 10;
-    }
+    .kx-sticky a:hover { background: var(--accent-blue); }
 
-    /* PG Accordion Styles */
-    .pg-option-item {
-        padding: 8px 12px;
-        border-radius: 6px;
-        font-size: 13px;
-        margin-bottom: 6px;
-        border: 1px solid #e2e8f0;
-        background-color: #fff;
-    }
-    .pg-option-item.correct-key {
-        background-color: #f0fdf4;
-        border-color: #bbf7d0;
-        color: #166534;
-        font-weight: 600;
-    }
-    .pg-option-item.student-wrong {
-        background-color: #fef2f2;
-        border-color: #fecaca;
-        color: #991b1b;
-        font-weight: 600;
-    }
-    .accordion-button:not(.collapsed) {
-        color: #0369a1;
-        background-color: #f0f9ff;
-        box-shadow: inset 0 -1px 0 #bae6fd;
-    }
-    .accordion-button:focus {
-        box-shadow: none;
-    }
-
-    /* Tab Navigation */
-    .nav-pills .nav-link {
-        color: #64748b;
-        font-weight: 600;
-        padding: 0.75rem 1.5rem;
-        border-radius: 999px;
-        transition: all 0.2s;
-        border: 1px solid transparent;
-    }
-    .nav-pills .nav-link:hover {
-        background: #f1f5f9;
-        color: #0f172a;
-    }
-    .nav-pills .nav-link.active {
-        background: #0284c7;
-        color: #fff;
-        box-shadow: 0 4px 6px -1px rgba(2, 132, 199, 0.2);
-        border-color: #0284c7;
-    }
-
-    /* Search Box */
-    .search-box {
-        position: relative;
-        margin-bottom: 1rem;
-    }
-    .search-box .search-icon {
-        position: absolute;
-        left: 14px;
-        top: 50%;
-        transform: translateY(-50%);
-        color: #94a3b8;
-        font-size: 0.875rem;
-        pointer-events: none;
-    }
-    .search-box input {
-        width: 100%;
-        padding: 0.625rem 1rem 0.625rem 2.5rem;
-        border: 1px solid #e2e8f0;
-        border-radius: 0.5rem;
-        font-size: 0.8125rem;
-        color: #334155;
-        background: #fff;
-        transition: all 0.2s;
-    }
-    .search-box input:focus {
-        outline: none;
-        border-color: #0ea5e9;
-        box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15);
-    }
-    .search-box input::placeholder {
-        color: #94a3b8;
-    }
-    .search-no-result {
-        display: none;
-        text-align: center;
-        padding: 2rem;
-        color: #94a3b8;
-        font-size: 0.875rem;
+    @media (max-width: 640px) {
+        .kx-ledger { flex-direction: column; }
+        .kx-ledger-item + .kx-ledger-item { border-left: none; border-top: 1px dashed var(--rule); }
+        .kx-grading-actions { margin-left: 0; width: 100%; justify-content: space-between; }
+        .kx-sticky { flex-direction: column; align-items: flex-start; }
     }
 </style>
 
-<div class="container-fluid px-0 py-2">
+<div id="koreksi-wrapper">
+<div class="inner">
 
-    {{-- BACK BUTTON --}}
-    <div class="mb-3">
-        <a href="{{ route('dashboard-guru.nilai-siswa.show', $ujian->id) }}" class="btn-back">
-            <i class="fa-solid fa-arrow-left"></i> Kembali ke Daftar Peserta
-        </a>
+    {{-- BACK LINK --}}
+    <a href="{{ route('dashboard-guru.nilai-siswa.show', $ujian->id) }}" class="kx-back">
+        <i class="fa-solid fa-arrow-left"></i> Kembali ke Daftar Peserta
+    </a>
+
+    {{-- HEADER: exam slip --}}
+    <div class="kx-header">
+        <div class="kx-header-top">
+            <div class="kx-stamp-icon"><i class="fa-solid fa-highlighter"></i></div>
+            <div>
+                <div class="kx-eyebrow">Lembar Koreksi Ujian</div>
+                <h1 class="kx-student-name">{{ $siswa->nama }}</h1>
+            </div>
+        </div>
+        <div class="kx-header-meta">
+            <span><strong>{{ $ujian->nama_ujian }}</strong></span>
+            <span class="dot">&bull;</span>
+            <span>KKM <strong>{{ $ujian->kkm ?? 75 }}</strong></span>
+            <span class="dot">&bull;</span>
+            <span>NIS <strong>{{ $siswa->nis ?? '-' }}</strong></span>
+        </div>
     </div>
 
-    {{-- PAGE HEADER --}}
-    <div class="page-header">
-        <div class="header-icon">
-            <i class="fa-solid fa-highlighter"></i>
-        </div>
-        <div>
-            <h1 class="page-title">
-                {{ $siswa->nama }}
-            </h1>
-            <p class="page-description">
-                <i class="fa-solid fa-file-signature text-muted me-1"></i> Ujian: {{ $ujian->nama_ujian }} &bull; 
-                <i class="fa-regular fa-id-badge text-muted me-1"></i> NIS: {{ $siswa->nis ?? '-' }}
-            </p>
-        </div>
-    </div>
-    
     @if(session('error'))
         <div class="alert alert-danger border-0 rounded-3 mb-4">
             <i class="fa-solid fa-circle-exclamation me-2"></i> {{ session('error') }}
         </div>
     @endif
 
-    {{-- HASIL RINGKAS --}}
-    <div class="row g-3 mb-4">
-        <div class="col-12 col-md-4">
-            <div class="info-card">
-                <div class="label">Skor Pilihan Ganda (Otomatis)</div>
-                <div class="number text-success">{{ $skor_pg }} <span style="font-size: 0.875rem; font-weight: normal; color: #64748b;">/ ({{ $benar_pg }}/{{ $total_soal_pg }} Benar)</span></div>
-            </div>
+    {{-- LEDGER --}}
+    <div class="kx-ledger">
+        <div class="kx-ledger-item">
+            <div class="kx-ledger-label">Skor Pilihan Ganda</div>
+            <div class="kx-ledger-value">{{ $skor_pg }} <span class="kx-ledger-sub">({{ $benar_pg }}/{{ $total_soal_pg }} benar)</span></div>
         </div>
-        <div class="col-12 col-md-5">
-            <div class="info-card" style="border-color: #bae6fd; background: #f0f9ff;">
-                <div class="label text-primary">Nilai Akhir Keseluruhan (Sementara)</div>
-                <div class="number text-primary" id="nilai-akhir-display">{{ number_format($nilai_sementara ?? $nilai->nilai_akhir, 2) }} <span style="font-size: 0.875rem; font-weight: normal; color: #0284c7;">/ 100</span></div>
-            </div>
+        <div class="kx-ledger-item is-highlight">
+            <div class="kx-ledger-label">Nilai Akhir Sementara</div>
+            <div class="kx-ledger-value" id="nilai-akhir-display">{{ number_format($nilai_sementara ?? $nilai->nilai_akhir, 2) }} <span class="kx-ledger-sub">/ 100</span></div>
         </div>
-        <div class="col-12 col-md-3">
-            <div class="info-card" style="border-color: {{ $nilai->violation_count > 0 ? '#fecaca' : '#e2e8f0' }}; background: {{ $nilai->violation_count > 0 ? '#fef2f2' : '#f8fafc' }};">
-                <div class="label {{ $nilai->violation_count > 0 ? 'text-danger' : 'text-muted' }}">Pelanggaran Ujian</div>
-                <div class="number {{ $nilai->violation_count > 0 ? 'text-danger' : 'text-muted' }}">{{ $nilai->violation_count }} <span style="font-size: 0.875rem; font-weight: normal;">kali</span></div>
-            </div>
+        <div class="kx-ledger-item {{ $nilai->violation_count > 0 ? 'is-alert' : '' }}">
+            <div class="kx-ledger-label">Pelanggaran</div>
+            <div class="kx-ledger-value">{{ $nilai->violation_count }} <span class="kx-ledger-sub">kali</span></div>
         </div>
     </div>
 
-    {{-- TAB NAVIGATION --}}
-    <div class="row mb-4">
-        <div class="col-12 col-lg-10 mx-auto">
-            <ul class="nav nav-pills gap-2 justify-content-center" id="koreksiTab" role="tablist">
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link active" id="essay-tab" data-bs-toggle="pill" data-bs-target="#essay" type="button" role="tab" aria-controls="essay" aria-selected="true">
-                        <i class="fa-solid fa-pen-ruler me-2"></i>Koreksi Uraian ({{ $jawabans->count() }})
-                    </button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="pg-tab" data-bs-toggle="pill" data-bs-target="#pg" type="button" role="tab" aria-controls="pg" aria-selected="false">
-                        <i class="fa-solid fa-list-check me-2"></i>Pilihan Ganda ({{ $jawabans_pg->count() }})
-                    </button>
-                </li>
-            </ul>
-        </div>
-    </div>
+    {{-- FOLDER TABS --}}
+    <ul class="kx-tabs" id="koreksiTab" role="tablist" style="list-style:none; margin:0;">
+        <li role="presentation" style="display:contents;">
+            <button class="kx-tab active" id="essay-tab" data-bs-toggle="pill" data-bs-target="#essay" type="button" role="tab" aria-controls="essay" aria-selected="true">
+                <i class="fa-solid fa-pen-ruler"></i> Uraian <span class="count">{{ $jawabans->count() }}</span>
+            </button>
+        </li>
+        <li role="presentation" style="display:contents;">
+            <button class="kx-tab" id="pg-tab" data-bs-toggle="pill" data-bs-target="#pg" type="button" role="tab" aria-controls="pg" aria-selected="false">
+                <i class="fa-solid fa-list-check"></i> Pilihan Ganda <span class="count">{{ $jawabans_pg->count() }}</span>
+            </button>
+        </li>
+    </ul>
 
     <div class="tab-content" id="koreksiTabContent">
-        
+
         {{-- TAB ESSAY --}}
         <div class="tab-pane fade show active" id="essay" role="tabpanel" aria-labelledby="essay-tab">
-            @if($jawabans->isEmpty())
-                <div class="card border-0 shadow-sm rounded-4 text-center py-5 col-lg-10 mx-auto">
-                    <div class="card-body">
-                        <i class="fa-solid fa-clipboard-check fa-3x text-muted opacity-25 mb-3 d-block"></i>
-                        <h5 class="fw-bold text-dark mb-1">Tidak Ada Uraian</h5>
-                        <p class="text-muted mb-0" style="font-size: 0.875rem;">Ujian ini tidak memiliki soal essay atau siswa tidak menjawabnya.</p>
+            <div class="kx-tab-panel-body">
+                @if($jawabans->isEmpty())
+                    <div class="kx-empty">
+                        <i class="fa-solid fa-clipboard-check"></i>
+                        <h5>Tidak Ada Uraian</h5>
+                        <p>Ujian ini tidak memiliki soal essay atau siswa tidak menjawabnya.</p>
                     </div>
-                </div>
-            @else
-                <div id="koreksi-container">
-                        <div class="col-12 col-lg-10 mx-auto">
-                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                <h5 class="fw-bold text-dark mb-0"><i class="fa-solid fa-pen-ruler text-warning me-2"></i>Koreksi Manual Soal Uraian</h5>
-                                <span class="text-muted" style="font-size: 12px;"><i class="fa-solid fa-info-circle me-1"></i> Klik soal untuk mengoreksi</span>
-                            </div>
+                @else
+                    <div class="kx-list-header">
+                        <h2 class="kx-list-title">Koreksi Manual Soal Uraian</h2>
+                        <span class="kx-list-hint"><i class="fa-solid fa-info-circle me-1"></i>Klik soal untuk mengoreksi</span>
+                    </div>
 
-                            <div class="search-box">
-                                <i class="fa-solid fa-magnifying-glass search-icon"></i>
-                                <input type="search" id="searchEssay" placeholder="Cari nomor soal atau kata kunci...">
-                            </div>
-                            <div class="search-no-result" id="noResultEssay">
-                                <i class="fa-solid fa-search fa-2x mb-2 d-block opacity-25"></i>
-                                Tidak ada soal yang cocok dengan pencarian.
-                            </div>
-                            
-                            <div class="accordion" id="accordionEssay">
-                                @foreach($jawabans as $j)
-                                <div class="accordion-item border rounded-3 overflow-hidden shadow-sm mb-3" style="border-color: #e2e8f0 !important;">
-                                    <h2 class="accordion-header" id="headingEssay{{ $j->jawaban_id }}">
-                                        <button class="accordion-button collapsed bg-light fw-bold text-dark py-3" type="button" data-bs-toggle="collapse" data-bs-target="#collapseEssay{{ $j->jawaban_id }}" aria-expanded="false" aria-controls="collapseEssay{{ $j->jawaban_id }}">
-                                            <div class="d-flex align-items-center w-100 me-3">
-                                                <span class="badge-no me-3">{{ $loop->iteration }}</span>
-                                                <span>Soal {{ ucfirst($j->jenis_soal) }}</span>
-                                                <div class="ms-auto d-flex align-items-center gap-3">
-                                                    @if(isset($j->is_benar))
-                                                        <span class="badge bg-success-subtle text-success border border-success border-opacity-25" style="font-size: 11px;"><i class="fa-solid fa-check me-1"></i>Sudah Dinilai</span>
-                                                    @else
-                                                        <span class="badge bg-danger-subtle text-danger border border-danger border-opacity-25" style="font-size: 11px;"><i class="fa-solid fa-exclamation-circle me-1"></i>Belum Dinilai</span>
-                                                    @endif
-                                                    <span class="badge-bobot">Bobot: {{ $j->bobot }}</span>
+                    <div class="kx-search">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="search" id="searchEssay" placeholder="Cari nomor soal atau kata kunci...">
+                    </div>
+                    <div class="kx-search-no-result" id="noResultEssay">
+                        <i class="fa-solid fa-search fa-2x mb-2 d-block opacity-25"></i>
+                        Tidak ada soal yang cocok dengan pencarian.
+                    </div>
+
+                    <div id="accordionEssay">
+                        @foreach($jawabans as $j)
+                        <div class="kx-card accordion-item">
+                            <button class="kx-card-head" type="button" data-bs-toggle="collapse" data-bs-target="#collapseEssay{{ $j->jawaban_id }}" aria-expanded="false" aria-controls="collapseEssay{{ $j->jawaban_id }}" id="headingEssay{{ $j->jawaban_id }}">
+                                <span class="kx-num">{{ $loop->iteration }}</span>
+                                <span class="kx-card-label">Soal {{ ucfirst($j->jenis_soal) }}</span>
+                                <div class="kx-card-badges">
+                                    @if(isset($j->is_benar))
+                                        <span class="kx-stamp ok status-badge"><i class="fa-solid fa-check"></i>Dinilai</span>
+                                    @else
+                                        <span class="kx-stamp pending status-badge"><i class="fa-solid fa-clock"></i>Belum</span>
+                                    @endif
+                                    <span class="kx-weight">Bobot {{ $j->bobot }}</span>
+                                </div>
+                                <i class="fa-solid fa-chevron-down kx-card-chevron"></i>
+                            </button>
+                            <div id="collapseEssay{{ $j->jawaban_id }}" class="accordion-collapse collapse" aria-labelledby="headingEssay{{ $j->jawaban_id }}">
+                                <div class="kx-card-body">
+                                    <div class="kx-soal-text">{!! $j->teks_soal !!}</div>
+                                    @if($j->gambar)
+                                        <img src="{{ asset('storage/'.$j->gambar) }}" class="kx-soal-img" alt="Gambar Soal">
+                                    @endif
+
+                                    <div class="kx-answer">
+                                        <div class="kx-answer-label"><i class="fa-solid fa-pen-nib me-1"></i>Jawaban Siswa</div>
+                                        <div class="kx-answer-text">{{ $j->jawaban_text ?? '(Siswa tidak memberikan jawaban)' }}</div>
+                                    </div>
+
+                                    <form class="form-koreksi" onsubmit="simpanKoreksi(event, {{ $j->jawaban_id }})">
+                                        <div class="kx-grading">
+                                            <div>
+                                                <label class="kx-grading-label">Nilai (0 - {{ $j->bobot }})</label>
+                                                <div class="kx-score-wrap">
+                                                    <input type="number" name="koreksi[{{ $j->jawaban_id }}][nilai]"
+                                                           class="kx-score-circle"
+                                                           value="{{ $j->nilai_jawaban ?? 0 }}"
+                                                           min="0" max="{{ $j->bobot }}" step="0.1" required>
+                                                    <span class="kx-score-max">/ {{ $j->bobot }}</span>
                                                 </div>
                                             </div>
-                                        </button>
-                                    </h2>
-                                    <div id="collapseEssay{{ $j->jawaban_id }}" class="accordion-collapse collapse" aria-labelledby="headingEssay{{ $j->jawaban_id }}">
-                                        <div class="accordion-body bg-white p-4">
-                                            {{-- Teks Soal & Gambar --}}
-                                            <div class="soal-text">
-                                                {!! $j->teks_soal !!}
-                                            </div>
-                                            @if($j->gambar)
-                                                <img src="{{ asset('storage/'.$j->gambar) }}" class="soal-img" alt="Gambar Soal">
-                                            @endif
-                                            
-                                            {{-- Jawaban Siswa --}}
-                                            <div class="answer-box">
-                                                <div class="answer-label"><i class="fa-solid fa-pen-nib me-1"></i> Jawaban Siswa:</div>
-                                                <div class="answer-text">{{ $j->jawaban_text ?? '(Siswa tidak memberikan jawaban)' }}</div>
-                                            </div>
-                                            
-                                            {{-- Form Penilaian --}}
-                                            <form class="form-koreksi" onsubmit="simpanKoreksi(event, {{ $j->jawaban_id }})">
-                                            <div class="grading-box">
-                                                <div>
-                                                    <label class="grading-title">Berikan Nilai (0 - {{ $j->bobot }})</label>
-                                                    <div class="d-flex align-items-center gap-2">
-                                                        <input type="number" name="koreksi[{{ $j->jawaban_id }}][nilai]" 
-                                                               class="score-input" 
-                                                               value="{{ $j->nilai_jawaban ?? 0 }}" 
-                                                               min="0" max="{{ $j->bobot }}" step="0.1" required>
-                                                        <span class="text-muted fw-semibold">/ {{ $j->bobot }}</span>
-                                                    </div>
-                                                </div>
-                                                
-                                                <div class="ms-md-auto">
-                                                    <label class="grading-title">Status Keabsahan</label>
-                                                    <div class="status-radio-group">
-                                                        <label>
-                                                            <input type="radio" name="koreksi[{{ $j->jawaban_id }}][is_benar]" value="1" class="custom-radio" {{ $j->is_benar === 1 ? 'checked' : '' }} required>
-                                                            <span class="custom-radio-label label-benar"><i class="fa-solid fa-check"></i> Benar</span>
-                                                        </label>
-                                                        <label>
-                                                            <input type="radio" name="koreksi[{{ $j->jawaban_id }}][is_benar]" value="0" class="custom-radio" {{ $j->is_benar === 0 ? 'checked' : '' }} required>
-                                                            <span class="custom-radio-label label-salah"><i class="fa-solid fa-xmark"></i> Salah</span>
-                                                        </label>
-                                                    </div>
+                                            <div>
+                                                <label class="kx-grading-label">Status Keabsahan</label>
+                                                <div class="kx-status-group">
+                                                    <input type="radio" id="benar-{{ $j->jawaban_id }}" name="koreksi[{{ $j->jawaban_id }}][is_benar]" value="1" class="kx-radio" {{ $j->is_benar === 1 ? 'checked' : '' }} required>
+                                                    <label for="benar-{{ $j->jawaban_id }}" class="kx-radio-label benar"><i class="fa-solid fa-check"></i>Benar</label>
+                                                    <input type="radio" id="salah-{{ $j->jawaban_id }}" name="koreksi[{{ $j->jawaban_id }}][is_benar]" value="0" class="kx-radio" {{ $j->is_benar === 0 ? 'checked' : '' }} required>
+                                                    <label for="salah-{{ $j->jawaban_id }}" class="kx-radio-label salah"><i class="fa-solid fa-xmark"></i>Salah</label>
                                                 </div>
                                             </div>
-                                            <div class="mt-3 d-flex justify-content-end align-items-center">
-                                                <span class="text-success me-3 fw-medium d-none save-indicator" id="save-indicator-{{ $j->jawaban_id }}">
-                                                    <i class="fa-solid fa-check-circle me-1"></i> Tersimpan
+                                            <div class="kx-grading-actions">
+                                                <span class="kx-saved-mark" id="save-indicator-{{ $j->jawaban_id }}">
+                                                    <i class="fa-solid fa-check-circle"></i> Tersimpan
                                                 </span>
-                                                <button type="submit" class="btn btn-primary btn-sm px-4 rounded-3 shadow-sm btn-simpan" id="btn-simpan-{{ $j->jawaban_id }}">
-                                                    <i class="fa-solid fa-save me-1"></i> Simpan Penilaian Ini
+                                                <button type="submit" class="kx-btn-save" id="btn-simpan-{{ $j->jawaban_id }}">
+                                                    <i class="fa-solid fa-save"></i> Simpan Penilaian
                                                 </button>
                                             </div>
-                                            </form>
                                         </div>
-                                    </div>
+                                    </form>
                                 </div>
-                                @endforeach
                             </div>
                         </div>
+                        @endforeach
                     </div>
-                    
-                    <div class="sticky-action-bar col-12 col-lg-10 mx-auto mt-4">
-                        <div class="d-flex flex-column">
-                            <span class="fw-bold text-dark mb-1">Selesai Mengoreksi?</span>
-                            <span class="text-muted" style="font-size: 12px;">Nilai akan tersimpan otomatis setiap Anda mengklik tombol Simpan pada masing-masing soal.</span>
-                        </div>
-                        <a href="{{ route('dashboard-guru.nilai-siswa.show', $ujian->id) }}" class="btn-save text-decoration-none text-center">
-                            <i class="fa-solid fa-arrow-left me-2"></i> Kembali ke Daftar Siswa
-                        </a>
-                    </div>
-                </div>
-            @endif
+                @endif
+            </div>
         </div>
 
-        {{-- TAB PG --}}
+        {{-- TAB PG (READ ONLY) --}}
         <div class="tab-pane fade" id="pg" role="tabpanel" aria-labelledby="pg-tab">
-            @if($jawabans_pg->isEmpty())
-                <div class="card border-0 shadow-sm rounded-4 text-center py-5 col-lg-10 mx-auto">
-                    <div class="card-body">
-                        <i class="fa-solid fa-clipboard-check fa-3x text-muted opacity-25 mb-3 d-block"></i>
-                        <h5 class="fw-bold text-dark mb-1">Tidak Ada Pilihan Ganda</h5>
-                        <p class="text-muted mb-0" style="font-size: 0.875rem;">Ujian ini tidak memiliki soal pilihan ganda.</p>
+            <div class="kx-tab-panel-body">
+                @if($jawabans_pg->isEmpty())
+                    <div class="kx-empty">
+                        <i class="fa-solid fa-clipboard-check"></i>
+                        <h5>Tidak Ada Pilihan Ganda</h5>
+                        <p>Ujian ini tidak memiliki soal pilihan ganda.</p>
                     </div>
-                </div>
-            @else
-                <div class="row">
-                    <div class="col-12 col-lg-10 mx-auto">
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <h5 class="fw-bold text-dark mb-0"><i class="fa-solid fa-list-check text-primary me-2"></i>Rincian Pilihan Ganda</h5>
-                            <span class="badge bg-success fw-normal" style="font-size: 12px;">Skor PG: {{ $skor_pg }} Poin</span>
-                        </div>
+                @else
+                    <div class="kx-list-header">
+                        <h2 class="kx-list-title">Rincian Pilihan Ganda</h2>
+                        <span class="kx-weight" style="color:var(--green-ink); background:var(--green-soft); border-color:#B9D8C7;">Skor PG: {{ $skor_pg }} Poin</span>
+                    </div>
 
-                        <div class="search-box">
-                            <i class="fa-solid fa-magnifying-glass search-icon"></i>
-                            <input type="search" id="searchPG" placeholder="Cari nomor soal atau kata kunci...">
-                        </div>
-                        <div class="search-no-result" id="noResultPG">
-                            <i class="fa-solid fa-search fa-2x mb-2 d-block opacity-25"></i>
-                            Tidak ada soal yang cocok dengan pencarian.
-                        </div>
-                        
-                        <div class="accordion" id="accordionPG">
-                            @foreach($jawabans_pg as $pg)
-                            <div class="accordion-item border rounded-3 overflow-hidden shadow-sm mb-3" style="border-color: #e2e8f0 !important;">
-                                <h2 class="accordion-header" id="headingPG{{ $pg->soal_id }}">
-                                    <button class="accordion-button collapsed bg-light fw-bold text-dark py-3" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePG{{ $pg->soal_id }}" aria-expanded="false" aria-controls="collapsePG{{ $pg->soal_id }}">
-                                        <div class="d-flex align-items-center w-100 me-3">
-                                            <span class="badge-no me-3">{{ $pg->urutan }}</span>
-                                            <span>Soal Pilihan Ganda</span>
-                                            <div class="ms-auto d-flex align-items-center gap-3">
-                                                @if($pg->is_benar === 1)
-                                                    <span class="badge bg-success-subtle text-success border border-success border-opacity-25" style="font-size: 11px;">
-                                                        <i class="fa-solid fa-check me-1"></i> Benar (+{{ $pg->nilai_jawaban }})
-                                                    </span>
-                                                @else
-                                                    <span class="badge bg-danger-subtle text-danger border border-danger border-opacity-25" style="font-size: 11px;">
-                                                        <i class="fa-solid fa-xmark me-1"></i> Salah (0 Poin)
-                                                    </span>
-                                                @endif
-                                            </div>
-                                        </div>
-                                    </button>
-                                </h2>
-                                <div id="collapsePG{{ $pg->soal_id }}" class="accordion-collapse collapse" aria-labelledby="headingPG{{ $pg->soal_id }}">
-                                    <div class="accordion-body bg-white p-4">
-                                        <div class="fw-medium text-dark mb-2">
-                                            {!! $pg->teks_soal !!}
-                                            @if($pg->gambar)
-                                                <div class="mt-2"><img src="{{ asset('storage/'.$pg->gambar) }}" class="soal-img" alt="Gambar Soal"></div>
-                                            @endif
-                                        </div>
-                                        
-                                        <div class="row g-2 mt-3">
-                                            @if(isset($opsi_pg[$pg->soal_id]))
-                                                @foreach($opsi_pg[$pg->soal_id] as $opsi)
-                                                    @php
-                                                        $isSiswaJawaban = ($pg->pilihan_jawaban_id == $opsi->id);
-                                                        $isKunciBenar = ($opsi->is_benar == 1);
-                                                        
-                                                        $class = 'pg-option-item';
-                                                        $icon = '';
-                                                        $badge = '';
-                                                        
-                                                        if ($isKunciBenar && $isSiswaJawaban) {
-                                                            $class .= ' correct-key';
-                                                            $icon = '<i class="fa-solid fa-circle-check me-1"></i>';
-                                                            $badge = '<span class="badge bg-success text-white ms-2">Jawaban Siswa & Kunci Benar</span>';
-                                                        } elseif ($isKunciBenar && !$isSiswaJawaban) {
-                                                            $class .= ' correct-key';
-                                                            $icon = '<i class="fa-solid fa-circle-check me-1"></i>';
-                                                            $badge = '<span class="badge bg-success text-white ms-2">Kunci Jawaban Benar</span>';
-                                                        } elseif (!$isKunciBenar && $isSiswaJawaban) {
-                                                            $class .= ' student-wrong';
-                                                            $icon = '<i class="fa-solid fa-circle-xmark me-1"></i>';
-                                                            $badge = '<span class="badge bg-danger text-white ms-2">Jawaban Siswa (Salah)</span>';
-                                                        }
-                                                    @endphp
-                                                    <div class="col-md-6">
-                                                        <div class="{!! $class !!}">
-                                                            {!! $icon !!} {!! $opsi->teks_pilihan !!} {!! $badge !!}
-                                                        </div>
+                    <div class="kx-search">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="search" id="searchPG" placeholder="Cari nomor soal atau kata kunci...">
+                    </div>
+                    <div class="kx-search-no-result" id="noResultPG">
+                        <i class="fa-solid fa-search fa-2x mb-2 d-block opacity-25"></i>
+                        Tidak ada soal yang cocok dengan pencarian.
+                    </div>
+
+                    <div id="accordionPG">
+                        @foreach($jawabans_pg as $pg)
+                        <div class="kx-card accordion-item">
+                            <button class="kx-card-head" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePG{{ $pg->jawaban_id }}" aria-expanded="false" aria-controls="collapsePG{{ $pg->jawaban_id }}" id="headingPG{{ $pg->jawaban_id }}">
+                                <span class="kx-num">{{ $pg->urutan }}</span>
+                                <span class="kx-card-label">Soal Pilihan Ganda</span>
+                                <div class="kx-card-badges">
+                                    @if($pg->is_benar === 1)
+                                        <span class="kx-stamp ok status-badge"><i class="fa-solid fa-check"></i>Benar (+{{ $pg->nilai_jawaban }})</span>
+                                    @elseif($pg->is_benar === 0)
+                                        <span class="kx-stamp no status-badge"><i class="fa-solid fa-xmark"></i>Salah (0)</span>
+                                    @else
+                                        <span class="kx-stamp pending status-badge"><i class="fa-solid fa-clock"></i>Belum</span>
+                                    @endif
+                                    <span class="kx-weight">Bobot {{ $pg->bobot }}</span>
+                                </div>
+                                <i class="fa-solid fa-chevron-down kx-card-chevron"></i>
+                            </button>
+                            <div id="collapsePG{{ $pg->jawaban_id }}" class="accordion-collapse collapse" aria-labelledby="headingPG{{ $pg->jawaban_id }}">
+                                <div class="kx-card-body">
+                                    <div class="kx-soal-text">
+                                        {!! $pg->teks_soal !!}
+                                        @if($pg->gambar)
+                                            <img src="{{ asset('storage/'.$pg->gambar) }}" class="kx-soal-img d-block mt-2" alt="Gambar Soal">
+                                        @endif
+                                    </div>
+
+                                    <div class="row g-2">
+                                        @if(isset($opsi_pg[$pg->soal_id]))
+                                            @foreach($opsi_pg[$pg->soal_id] as $opsi)
+                                                @php
+                                                    $isSiswaJawaban = ($pg->pilihan_jawaban_id == $opsi->id);
+                                                    $isKunciBenar = ($opsi->is_benar == 1);
+                                                    $optClass = 'kx-opt';
+                                                    $optIcon = '';
+                                                    $optTag = '';
+                                                    if ($isKunciBenar && $isSiswaJawaban) {
+                                                        $optClass .= ' correct-key';
+                                                        $optIcon = '<i class="fa-solid fa-circle-check me-1"></i>';
+                                                        $optTag = '<span class="kx-opt-tag">Jawaban Siswa &amp; Kunci</span>';
+                                                    } elseif ($isKunciBenar && !$isSiswaJawaban) {
+                                                        $optClass .= ' correct-key';
+                                                        $optIcon = '<i class="fa-solid fa-circle-check me-1"></i>';
+                                                        $optTag = '<span class="kx-opt-tag">Kunci Jawaban</span>';
+                                                    } elseif (!$isKunciBenar && $isSiswaJawaban) {
+                                                        $optClass .= ' student-wrong';
+                                                        $optIcon = '<i class="fa-solid fa-circle-xmark me-1"></i>';
+                                                        $optTag = '<span class="kx-opt-tag">Jawaban Siswa</span>';
+                                                    }
+                                                @endphp
+                                                <div class="col-md-6">
+                                                    <div class="{!! $optClass !!}">
+                                                        {!! $optIcon !!} {!! $opsi->teks_pilihan !!} {!! $optTag !!}
                                                     </div>
-                                                @endforeach
-                                            @endif
-                                        </div>
+                                                </div>
+                                            @endforeach
+                                        @endif
                                     </div>
                                 </div>
                             </div>
-                            @endforeach
                         </div>
+                        @endforeach
                     </div>
-                </div>
-            @endif
+                @endif
+            </div>
         </div>
-        
     </div>
+
+    {{-- STICKY FOOTER --}}
+    <div class="kx-sticky">
+        <div class="kx-sticky-text">
+            <strong>Selesai mengoreksi?</strong>
+            <span>Nilai tersimpan otomatis setiap kali Anda menekan tombol Simpan pada masing-masing soal.</span>
+        </div>
+        <a href="{{ route('dashboard-guru.nilai-siswa.show', $ujian->id) }}">
+            <i class="fa-solid fa-arrow-left me-2"></i>Kembali ke Daftar Siswa
+        </a>
+    </div>
+
+</div>
+</div>
 
 <script>
 function simpanKoreksi(event, jawabanId) {
     event.preventDefault();
-    
+
     const form = event.target;
     const btn = document.getElementById('btn-simpan-' + jawabanId);
     const indicator = document.getElementById('save-indicator-' + jawabanId);
-    const badgeContainer = document.querySelector('#headingEssay' + jawabanId + ' .d-flex.align-items-center.gap-3');
-    
-    // Ganti state button ke loading
+    const heading = document.getElementById('headingEssay' + jawabanId);
+    const statusBadge = heading ? heading.querySelector('.status-badge') : null;
+
     const originalBtnText = btn.innerHTML;
-    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i> Menyimpan...';
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan...';
     btn.disabled = true;
-    indicator.classList.add('d-none');
-    
+    indicator.classList.remove('show');
+
     const formData = new FormData(form);
-    
+
     fetch("{{ route('dashboard-guru.nilai-siswa.store-koreksi', ['ujian' => $ujian->id, 'siswa' => $siswa->id]) }}", {
         method: 'POST',
         headers: {
@@ -676,33 +600,26 @@ function simpanKoreksi(event, jawabanId) {
     .then(data => {
         btn.innerHTML = originalBtnText;
         btn.disabled = false;
-        
+
         if (data.success) {
-            // Tampilkan indikator sukses
-            indicator.classList.remove('d-none');
-            
-            // Update angka Nilai Akhir Keseluruhan (Sementara) secara real-time
+            indicator.classList.add('show');
+
             if (data.nilai_akhir !== undefined) {
                 const scoreDisplay = document.getElementById('nilai-akhir-display');
                 if (scoreDisplay) {
-                    scoreDisplay.innerHTML = parseFloat(data.nilai_akhir).toFixed(2) + ' <span style="font-size: 0.875rem; font-weight: normal; color: #0284c7;">/ 100</span>';
+                    scoreDisplay.innerHTML = parseFloat(data.nilai_akhir).toFixed(2) + ' <span class="kx-ledger-sub">/ 100</span>';
                 }
             }
 
-            // Update badge di header accordion
-            if (badgeContainer) {
-                const badgeStatus = badgeContainer.querySelector('.badge:first-child'); // Target badge status
-                if (badgeStatus) {
-                    badgeStatus.className = 'badge bg-success-subtle text-success border border-success border-opacity-25';
-                    badgeStatus.innerHTML = '<i class="fa-solid fa-check me-1"></i>Sudah Dinilai';
-                }
+            if (statusBadge) {
+                statusBadge.className = 'kx-stamp ok status-badge';
+                statusBadge.innerHTML = '<i class="fa-solid fa-check"></i>Dinilai';
             }
-            
+
             setTimeout(() => {
-                indicator.classList.add('d-none');
+                indicator.classList.remove('show');
             }, 3000);
         } else {
-
             alert('Gagal menyimpan: ' + data.message);
         }
     })
@@ -746,6 +663,23 @@ document.addEventListener('DOMContentLoaded', function() {
 
     setupSearch('searchEssay', 'accordionEssay', 'noResultEssay');
     setupSearch('searchPG', 'accordionPG', 'noResultPG');
+
+    // Sync aria-expanded + chevron for our custom collapse headers
+    document.querySelectorAll('.kx-card-head').forEach(function(btn) {
+        const targetId = btn.getAttribute('data-bs-target');
+        const target = document.querySelector(targetId);
+        if (!target) return;
+        target.addEventListener('show.bs.collapse', () => btn.setAttribute('aria-expanded', 'true'));
+        target.addEventListener('hide.bs.collapse', () => btn.setAttribute('aria-expanded', 'false'));
+    });
+
+    // Sync active state on folder tabs
+    document.querySelectorAll('#koreksiTab .kx-tab').forEach(function(tabBtn) {
+        tabBtn.addEventListener('shown.bs.tab', function() {
+            document.querySelectorAll('#koreksiTab .kx-tab').forEach(b => b.classList.remove('active'));
+            tabBtn.classList.add('active');
+        });
+    });
 });
 </script>
 @endsection

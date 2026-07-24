@@ -393,7 +393,8 @@ class GuruWaliKelasController extends Controller
                 'ujians.nama_ujian',
                 'ujians.waktu_selesai',
                 'mata_pelajarans.nama_mapel',
-                'jenis_ujians.nama as nama_jenis_ujian'
+                'jenis_ujians.nama as nama_jenis_ujian',
+                'bank_soals.kkm'
             )
             ->orderBy('ujians.waktu_mulai', 'asc')
             ->get();
@@ -499,6 +500,7 @@ class GuruWaliKelasController extends Controller
                     $details[] = [
                         'nama_ujian' => $u->nama_ujian,
                         'jenis'      => $u->nama_jenis_ujian,
+                        'kkm'        => $u->kkm ?? 75,
                         'nilai'      => $val,
                     ];
                 }
@@ -507,6 +509,7 @@ class GuruWaliKelasController extends Controller
                 $mapelScores->put($mapelNama, [
                     'avg'     => $avg,
                     'count'   => $cnt,
+                    'kkm'     => $mapelUjians->first()->kkm ?? 75,
                     'details' => $details,
                 ]);
             }
@@ -529,6 +532,7 @@ class GuruWaliKelasController extends Controller
             $mapelAvg = $mapelNilais->isNotEmpty() ? round($mapelNilais->avg(), 1) : 0;
             $mapelMax = $mapelNilais->isNotEmpty() ? round($mapelNilais->max(), 1) : 0;
             $mapelMin = $mapelNilais->isNotEmpty() ? round($mapelNilais->min(), 1) : 0;
+            $mapelKkm = $mapelUjians->first()->kkm ?? 75;
 
             $mapelStats->push([
                 'nama_mapel'  => $mapelNama,
@@ -536,6 +540,7 @@ class GuruWaliKelasController extends Controller
                 'rerata'      => $mapelAvg,
                 'max'         => $mapelMax,
                 'min'         => $mapelMin,
+                'kkm'         => $mapelKkm,
             ]);
         }
 
