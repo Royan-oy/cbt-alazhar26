@@ -8,6 +8,8 @@ use App\Models\Ujian;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
+use Barryvdh\DomPDF\Facade as PDF;
 
 class GuruNilaiSiswaController extends Controller
 {
@@ -352,5 +354,146 @@ class GuruNilaiSiswaController extends Controller
             }
             return back()->with('error', 'Terjadi kesalahan saat menyimpan koreksi: ' . $e->getMessage());
         }
+    }
+
+    /**
+     * Export PDF Rekap Ujian Per Ujian (Mendukung Filter Kelas dan Search Query)
+     */
+    public function exportPdf(Request $request, $id)
+    {
+        $guruMapelIds = $this->checkGuruMapel();
+
+        $ujian = DB::table('ujians')
+            ->join('bank_soals', 'ujians.bank_soal_id', '=', 'bank_soals.id')
+            ->join('mata_pelajarans', 'bank_soals.mata_pelajaran_id', '=', 'mata_pelajarans.id')
+            ->leftJoin('jenis_ujians', 'ujians.jenis_ujian_id', '=', 'jenis_ujians.id')
+            ->leftJoin('tahun_ajarans', 'ujians.tahun_ajaran_id', '=', 'tahun_ajarans.id')
+            ->where('ujians.id', $id)
+            ->whereIn('bank_soals.guru_mapel_id', $guruMapelIds)
+            ->select(
+                'ujians.*',
+                'mata_pelajarans.nama_mapel',
+                'jenis_ujians.nama as nama_jenis_ujian',
+                'tahun_ajarans.nama_tahun',
+                'bank_soals.kkm'
+            )
+            ->first();
+
+        if (!$ujian) {
+            abort(404, 'Data ujian tidak ditemukan.');
+        }
+
+        $query = DB::table('nilais')
+            ->join('siswas', 'nilais.siswa_id', '=', 'siswas.id')
+            ->leftJoin('siswa_kelas', function($join) use ($ujian) {
+                $join->on('siswas.id', '=', 'siswa_kelas.siswa_id')
+                     ->where('siswa_kelas.tahun_ajaran_id', '=', $ujian->tahun_ajaran_id);
+            })
+            ->leftJoin('kelas', 'siswa_kelas.kelas_id', '=', 'kelas.id')
+            ->where('nilais.ujian_id', $id)
+            ->select(
+                'siswas.id as siswa_id',
+                'siswas.nama as nama_siswa',
+                'siswas.nis',
+                'kelas.id as kelas_id',
+                'kelas.nama_kelas',
+                'nilais.id as nilai_id',
+                'nilais.status',
+                'nilais.nilai_akhir'
+            );
+
+        $kelasFilterName = null;
+        if ($request->filled('kelas_id') && $request->kelas_id !== 'all') {
+            $query->where('kelas.id', $request->kelas_id);
+            $kelasFilterName = DB::table('kelas')->where('id', $request->kelas_id)->value('nama_kelas');
+        }
+
+        $searchQuery = $request->input('search');
+        if ($searchQuery) {
+            $query->where(function($q) use ($searchQuery) {
+                $q->where('siswas.nama', 'like', "%{$searchQuery}%")
+                  ->orWhere('siswas.nis', 'like', "%{$searchQuery}%")
+                  ->orWhere('kelas.nama_kelas', 'like', "%{$searchQuery}%");
+            });
+        }
+
+        $pesertas = $query->orderBy('kelas.nama_kelas', 'asc')
+            ->orderBy('siswas.nama', 'asc')
+            ->get();
+
+        $scores = $pesertas->pluck('nilai_akhir');
+        $avgScore = $scores->isNotEmpty() ? $scores->avg() : 0;
+        $maxScore = $scores->isNotEmpty() ? $scores->max() : 0;
+        $minScore = $scores->isNotEmpty() ? $scores->min() : 0;
+
+        $pdf = PDF::loadView('pdf.rekap-ujian', compact(
+            'ujian', 'pesertas', 'kelasFilterName', 'searchQuery',
+            'avgScore', 'maxScore', 'minScore'
+        ))->setPaper('a4', 'portrait');
+
+        $fileName = 'Hasil_Ujian_' . Str::slug($ujian->nama_ujian) . '.pdf';
+        return $pdf->download($fileName);
+    }
+
+    /**
+     * Export PDF Transkrip Hasil Ujian Individual Siswa
+     */
+    public function exportSiswaPdf($ujian_id, $siswa_id)
+    {
+        $guruMapelIds = $this->checkGuruMapel();
+
+        $ujian = DB::table('ujians')
+            ->join('bank_soals', 'ujians.bank_soal_id', '=', 'bank_soals.id')
+            ->join('mata_pelajarans', 'bank_soals.mata_pelajaran_id', '=', 'mata_pelajarans.id')
+            ->where('ujians.id', $ujian_id)
+            ->whereIn('bank_soals.guru_mapel_id', $guruMapelIds)
+            ->select('ujians.*', 'mata_pelajarans.nama_mapel', 'bank_soals.id as bank_soal_id', 'bank_soals.kkm')
+            ->first();
+
+        if (!$ujian) abort(404, 'Ujian tidak ditemukan.');
+
+        $siswa = DB::table('siswas')->where('id', $siswa_id)->first();
+        if (!$siswa) abort(404, 'Siswa tidak ditemukan.');
+
+        $nilai = DB::table('nilais')
+            ->where('ujian_id', $ujian_id)
+            ->where('siswa_id', $siswa_id)
+            ->first();
+
+        if (!$nilai) abort(404, 'Siswa belum mengikuti ujian ini.');
+
+        $jawabans = DB::table('jawaban_siswas')
+            ->join('soals', 'jawaban_siswas.soal_id', '=', 'soals.id')
+            ->where('jawaban_siswas.nilai_id', $nilai->id)
+            ->whereIn('soals.jenis_soal', ['essay', 'isian'])
+            ->select(
+                'jawaban_siswas.jawaban_text',
+                'jawaban_siswas.nilai as nilai_jawaban',
+                'jawaban_siswas.is_benar',
+                'soals.teks_soal',
+                'soals.bobot',
+                'soals.urutan',
+                'soals.jenis_soal'
+            )
+            ->orderBy('soals.urutan', 'asc')
+            ->get();
+
+        $jawabans_pg = DB::table('jawaban_siswas')
+            ->join('soals', 'jawaban_siswas.soal_id', '=', 'soals.id')
+            ->where('jawaban_siswas.nilai_id', $nilai->id)
+            ->where('soals.jenis_soal', 'pilihan_ganda')
+            ->select('jawaban_siswas.nilai as nilai_jawaban', 'jawaban_siswas.is_benar')
+            ->get();
+
+        $skor_pg = $jawabans_pg->sum('nilai_jawaban');
+        $benar_pg = $jawabans_pg->where('is_benar', true)->count();
+        $total_soal_pg = $jawabans_pg->count();
+
+        $pdf = PDF::loadView('pdf.transkrip-siswa', compact(
+            'ujian', 'siswa', 'nilai', 'jawabans', 'skor_pg', 'benar_pg', 'total_soal_pg'
+        ))->setPaper('a4', 'portrait');
+
+        $fileName = 'Transkrip_' . Str::slug($siswa->nama) . '_' . Str::slug($ujian->nama_ujian) . '.pdf';
+        return $pdf->download($fileName);
     }
 }

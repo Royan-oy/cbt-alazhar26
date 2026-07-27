@@ -271,6 +271,11 @@
             </div>
 
             <div class="d-flex gap-2 flex-wrap">
+                <a href="{{ route('siswa.export-kartu-pdf', request()->only(['search', 'jenjang', 'kelas'])) }}" class="btn btn-warning text-dark btn-add d-inline-flex align-items-center fw-semibold" target="_blank">
+                    <i class="fa-solid fa-id-card me-2"></i>
+                    Cetak Kartu Ujian (PDF)
+                </a>
+
                 <a href="{{ route('siswa.export', request()->only(['search', 'jenjang', 'kelas'])) }}" class="btn btn-light border btn-add d-inline-flex align-items-center">
                     <i class="fa-solid fa-file-export me-2"></i>
                     Export
@@ -494,6 +499,12 @@
                                             <a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('siswa.edit', $item->id) }}">
                                                 <i class="fa-solid fa-pen text-primary" style="width: 16px;"></i>
                                                 Edit Data
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('siswa.kartu-pdf', $item->id) }}" target="_blank">
+                                                <i class="fa-solid fa-id-card text-purple" style="width: 16px; color: #8b5cf6;"></i>
+                                                Cetak Kartu Ujian
                                             </a>
                                         </li>
                                         <li>

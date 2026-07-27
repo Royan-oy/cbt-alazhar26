@@ -426,9 +426,14 @@
         <div class="ledger-panel">
             <div class="ledger-toolbar">
                 <h2>Daftar Peserta</h2>
-                <div class="search-box">
-                    <i class="fa-solid fa-magnifying-glass"></i>
-                    <input type="search" id="searchSiswa" placeholder="Cari nama atau NIS siswa...">
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+                    <div class="search-box">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="search" id="searchSiswa" placeholder="Cari nama atau NIS siswa...">
+                    </div>
+                    <a href="{{ route('dashboard-guru.nilai-siswa.export-pdf', $ujian->id) }}" id="btnExportPdf" target="_blank" class="btn-export-pdf" style="background-color: #ef4444; color: #ffffff; padding: 0.5rem 0.9rem; border-radius: 0.5rem; font-size: 0.85rem; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 0.4rem; transition: background-color 0.2s;">
+                        <i class="fa-solid fa-file-pdf"></i> Export PDF
+                    </a>
                 </div>
             </div>
 
@@ -536,7 +541,20 @@ document.addEventListener('DOMContentLoaded', function () {
     const rows = document.querySelectorAll('.peserta-row');
     const noResult = document.getElementById('noResult');
     const table = document.querySelector('.ledger-table');
+    const btnExportPdf = document.getElementById('btnExportPdf');
+    const basePdfUrl = "{{ route('dashboard-guru.nilai-siswa.export-pdf', $ujian->id) }}";
     let activeKelas = 'all';
+
+    function updatePdfUrl() {
+        if (!btnExportPdf) return;
+        const searchQuery = searchSiswa ? searchSiswa.value.trim() : '';
+        const params = new URLSearchParams();
+        if (activeKelas !== 'all') params.append('kelas_id', activeKelas);
+        if (searchQuery) params.append('search', searchQuery);
+
+        const queryString = params.toString();
+        btnExportPdf.href = queryString ? `${basePdfUrl}?${queryString}` : basePdfUrl;
+    }
 
     function filterTable() {
         const searchQuery = searchSiswa ? searchSiswa.value.toLowerCase().trim() : '';
@@ -566,6 +584,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 table.style.display = '';
             }
         }
+
+        updatePdfUrl();
     }
 
     railTabs.forEach(tab => {

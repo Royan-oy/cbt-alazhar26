@@ -312,10 +312,15 @@
 <div id="koreksi-wrapper">
 <div class="inner">
 
-    {{-- BACK LINK --}}
-    <a href="{{ route('dashboard-guru.nilai-siswa.show', $ujian->id) }}" class="kx-back">
-        <i class="fa-solid fa-arrow-left"></i> Kembali ke Daftar Peserta
-    </a>
+    {{-- BACK LINK & PDF BUTTON --}}
+    <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+        <a href="{{ route('dashboard-guru.nilai-siswa.show', $ujian->id) }}" class="kx-back mb-0">
+            <i class="fa-solid fa-arrow-left"></i> Kembali ke Daftar Peserta
+        </a>
+        <a href="{{ route('dashboard-guru.nilai-siswa.koreksi.export-pdf', ['ujian' => $ujian->id, 'siswa' => $siswa->id]) }}" target="_blank" class="btn btn-sm rounded-pill px-3 fw-bold d-inline-flex align-items-center gap-1.5" style="background-color: #ef4444; color: #ffffff; text-decoration: none; font-size: 0.85rem; padding: 0.45rem 1rem;">
+            <i class="fa-solid fa-file-pdf me-1"></i> Cetak Transkrip PDF
+        </a>
+    </div>
 
     {{-- HEADER: exam slip --}}
     <div class="kx-header">

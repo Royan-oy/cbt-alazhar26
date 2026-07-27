@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
+use PDF;
 
 class SiswaController extends Controller
 {
@@ -115,9 +116,10 @@ class SiswaController extends Controller
 
         DB::transaction(function () use ($request) {
             $user = new User();
-            $user->nis      = $request->nis;
-            $user->password = Hash::make($request->password);
-            $user->role     = 'siswa';
+            $user->nis            = $request->nis;
+            $user->password       = Hash::make($request->password);
+            $user->password_plain = $request->password;
+            $user->role           = 'siswa';
             $user->save();
 
             $fotoPath = null;
@@ -207,7 +209,8 @@ class SiswaController extends Controller
             ];
 
             if ($request->filled('password')) {
-                $userData['password'] = Hash::make($request->password);
+                $userData['password']       = Hash::make($request->password);
+                $userData['password_plain'] = $request->password;
             }
 
             $siswa->user()->update($userData);
@@ -361,10 +364,85 @@ class SiswaController extends Controller
         ]);
 
         $siswa->user()->update([
-            'password' => Hash::make($request->password),
+            'password'       => Hash::make($request->password),
+            'password_plain' => $request->password,
         ]);
 
         return redirect()->back()->with('success', 'Password siswa ' . $siswa->nama . ' berhasil di-reset.');
+    }
+
+    /**
+     * Export Kartu Ujian PDF secara massal (berdasarkan filter aktif)
+     */
+    public function exportKartuPdf(Request $request)
+    {
+        $user = Auth::user();
+        $isAdminJenjang = $user->role == 'admin_jenjang';
+        $jenjangAdmin = optional($user->admin)->jenjang_id;
+
+        $tahunAktif = TahunAjaran::where('is_aktif', true)->first();
+
+        $query = Siswa::with(['user', 'kelasAktif.kelas.tingkat.jenjang']);
+
+        if ($tahunAktif) {
+            $query->whereHas('siswaKelas', function ($q) use ($tahunAktif) {
+                $q->where('tahun_ajaran_id', $tahunAktif->id);
+            });
+        }
+
+        if ($isAdminJenjang) {
+            $query->whereHas('siswaKelas.kelas.tingkat', function ($q) use ($jenjangAdmin) {
+                $q->where('jenjang_id', $jenjangAdmin);
+            });
+        } else {
+            if ($request->filled('jenjang')) {
+                $query->whereHas('siswaKelas.kelas.tingkat', function ($q) use ($request) {
+                    $q->where('jenjang_id', $request->jenjang);
+                });
+            }
+        }
+
+        if ($request->filled('kelas')) {
+            $query->whereHas('siswaKelas', function ($q) use ($request, $tahunAktif) {
+                $q->where('kelas_id', $request->kelas);
+                if ($tahunAktif) {
+                    $q->where('tahun_ajaran_id', $tahunAktif->id);
+                }
+            });
+        }
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('nama', 'like', "%{$search}%")
+                  ->orWhere('nis', 'like', "%{$search}%")
+                  ->orWhere('nisn', 'like', "%{$search}%");
+            });
+        }
+
+        $siswas = $query->get();
+
+        $pdf = PDF::loadView('siswa.kartu_pdf', compact('siswas', 'tahunAktif'))->setPaper('a4', 'portrait');
+
+        $namaFile = 'Kartu_Ujian_Siswa_' . date('Ymd_His') . '.pdf';
+        return $pdf->stream($namaFile);
+    }
+
+    /**
+     * Cetak Kartu Ujian PDF untuk 1 siswa
+     */
+    public function cetakKartuSinglePdf(Siswa $siswa)
+    {
+        $this->authorizeJenjang($siswa);
+
+        $siswa->load(['user', 'kelasAktif.kelas.tingkat.jenjang']);
+        $tahunAktif = TahunAjaran::where('is_aktif', true)->first();
+        $siswas = collect([$siswa]);
+
+        $pdf = PDF::loadView('siswa.kartu_pdf', compact('siswas', 'tahunAktif'))->setPaper('a4', 'portrait');
+
+        $namaFile = 'Kartu_Ujian_' . \Illuminate\Support\Str::slug($siswa->nama) . '.pdf';
+        return $pdf->stream($namaFile);
     }
 
     /**
