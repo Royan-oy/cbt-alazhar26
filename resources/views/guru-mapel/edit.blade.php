@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Edit Guru Mapel')
+@section('title', 'Edit Penugasan Guru Mapel')
 
 @section('content')
 
@@ -80,6 +80,68 @@
         background-color: var(--accent-blue);
         border-color: var(--accent-blue);
     }
+
+    /* ===============================
+    Penugasan Repeater
+    ==================================*/
+
+    .penugasan-block {
+        border: 1px solid var(--border-color);
+        border-radius: 20px;
+        padding: 20px;
+        margin-bottom: 18px;
+        background: #f8fafc;
+        position: relative;
+    }
+
+    .penugasan-block .penugasan-title {
+        font-weight: 700;
+        font-size: 15px;
+        color: var(--primary-dark);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .penugasan-block .penugasan-title .badge-num {
+        background: var(--accent-blue);
+        color: #fff;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+    }
+
+    .btn-remove-penugasan {
+        border: none;
+        background: rgba(239, 68, 68, 0.08);
+        color: #ef4444;
+        font-weight: 600;
+        font-size: 13px;
+        border-radius: 10px;
+        padding: 6px 12px;
+    }
+
+    .btn-remove-penugasan:hover {
+        background: rgba(239, 68, 68, 0.15);
+    }
+
+    .btn-tambah-penugasan {
+        border: 2px dashed var(--accent-blue);
+        background: rgba(14, 165, 233, 0.05);
+        color: var(--accent-blue);
+        font-weight: 700;
+        border-radius: 16px;
+        padding: 14px;
+        width: 100%;
+    }
+
+    .btn-tambah-penugasan:hover {
+        background: rgba(14, 165, 233, 0.1);
+    }
 </style>
 
 <div class="container-fluid py-2">
@@ -91,7 +153,9 @@
                     PENGGUNA
                 </span>
                 <h3 class="fw-bold mb-1">Edit Penugasan Guru Mapel</h3>
-                <p class="text-light opacity-75 mb-0 small">Perbarui data penugasan guru mengajar.</p>
+                <p class="text-light opacity-75 mb-0 small">
+                    Mengedit semua penugasan <strong>{{ $guru->nama }}</strong> untuk tahun ajaran ini.
+                </p>
             </div>
 
             <a href="{{ route('guru-mapel.index') }}" class="btn-back d-inline-flex align-items-center">
@@ -114,32 +178,11 @@
             </div>
             @endif
 
-            @php
-                $jenjangAktif = optional($guruMapel->guru)->jenjang_id;
-                $kelasTerpilih = $guruMapel->kelas->pluck('id')->toArray();
-            @endphp
-
-            <form action="{{ route('guru-mapel.update', $guruMapel->id) }}" method="POST">
+            <form action="{{ route('guru-mapel.update', $guruMapel->id) }}" method="POST" id="formGuruMapel">
                 @csrf
                 @method('PUT')
 
-                <div class="row g-3">
-
-                    {{-- Jenjang (Super Admin saja) --}}
-                    @if(Auth::user()->role == 'super_admin')
-                    <div class="col-md-6">
-                        <label class="form-label fw-semibold">Jenjang</label>
-                        <select id="jenjang" class="form-select form-control-custom">
-                            <option value="">-- Pilih Jenjang --</option>
-                            @foreach($jenjangs as $jenjang)
-                                <option value="{{ $jenjang->id }}" {{ $jenjangAktif == $jenjang->id ? 'selected' : '' }}>
-                                    {{ $jenjang->nama_jenjang }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="col-md-6"></div>
-                    @endif
+                <div class="row g-3 mb-2">
 
                     {{-- Guru --}}
                     <div class="col-md-6">
@@ -150,12 +193,12 @@
                             class="form-select form-control-custom @error('guru_id') is-invalid @enderror"
                             required>
                             <option value="">-- Pilih Guru --</option>
-                            @foreach($gurus as $guru)
+                            @foreach($gurus as $g)
                                 <option
-                                    value="{{ $guru->id }}"
-                                    data-jenjang="{{ $guru->jenjang_id }}"
-                                    {{ old('guru_id', $guruMapel->guru_id) == $guru->id ? 'selected' : '' }}>
-                                    {{ $guru->nama }}
+                                    value="{{ $g->id }}"
+                                    data-jenjang="{{ $g->jenjang_id }}"
+                                    {{ (old('guru_id', $guru->id)) == $g->id ? 'selected' : '' }}>
+                                    {{ $g->nama }}
                                 </option>
                             @endforeach
                         </select>
@@ -164,77 +207,19 @@
                         @enderror
                     </div>
 
-                    {{-- Mata Pelajaran --}}
-                    <div class="col-md-6">
-                        <label class="form-label fw-semibold">Mata Pelajaran</label>
-                        <select
-                            name="mata_pelajaran_id"
-                            id="mapel"
-                            class="form-select form-control-custom @error('mata_pelajaran_id') is-invalid @enderror"
-                            required>
-                            <option value="">-- Pilih Mata Pelajaran --</option>
-                            @foreach($mataPelajarans as $mapel)
-                                <option
-                                    value="{{ $mapel->id }}"
-                                    data-jenjang="{{ $mapel->jenjang_id }}"
-                                    {{ old('mata_pelajaran_id', $guruMapel->mata_pelajaran_id) == $mapel->id ? 'selected' : '' }}>
-                                    {{ $mapel->nama_mapel }}
-                                </option>
-                            @endforeach
-                        </select>
-                        @error('mata_pelajaran_id')
-                            <div class="invalid-feedback d-block">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    {{-- Kelas --}}
-                    <div class="col-12">
-                        <label class="form-label fw-semibold">Kelas yang Diajar</label>
-
-                        <div class="row g-2">
-                            @foreach($kelasList as $kelas)
-                                <div
-                                    class="col-md-4 kelas-item"
-                                    data-jenjang="{{ $kelas->tingkat->jenjang_id }}">
-
-                                    <div class="kelas-chip">
-                                        <div class="form-check">
-                                            <input
-                                                class="form-check-input"
-                                                type="checkbox"
-                                                name="kelas_id[]"
-                                                value="{{ $kelas->id }}"
-                                                id="kelas{{ $kelas->id }}"
-                                                {{ in_array($kelas->id, old('kelas_id', $kelasTerpilih)) ? 'checked' : '' }}>
-
-                                            <label class="form-check-label fw-semibold" for="kelas{{ $kelas->id }}">
-                                                {{ $kelas->tingkat->nama_tingkat }} - {{ $kelas->nama_kelas }}
-                                            </label>
-                                        </div>
-                                    </div>
-                                </div>
-                            @endforeach
-                        </div>
-
-                        @error('kelas_id')
-                            <div class="invalid-feedback d-block">{{ $message }}</div>
-                        @enderror
-
-                        <small class="text-muted d-block mt-2">Centang kelas yang diampu guru.</small>
-                    </div>
-
                     {{-- Tahun Ajaran --}}
                     <div class="col-md-6">
                         <label class="form-label fw-semibold">Tahun Ajaran</label>
                         <select
                             name="tahun_ajaran_id"
-                            class="form-select form-control-custom @error('tahun_ajaran_id') is-invalid @enderror">
+                            class="form-select form-control-custom @error('tahun_ajaran_id') is-invalid @enderror"
+                            required>
                             @foreach($tahunAjarans as $tahun)
                                 <option
                                     value="{{ $tahun->id }}"
-                                    {{ old('tahun_ajaran_id', $guruMapel->tahun_ajaran_id) == $tahun->id ? 'selected' : '' }}>
+                                    {{ old('tahun_ajaran_id', $tahunAjaranId) == $tahun->id ? 'selected' : '' }}>
                                     {{ $tahun->nama_tahun }} - Semester {{ ucfirst($tahun->semester) }}
-                                    @if($tahun->is_aktif) ⭐ Aktif @endif
+                                    @if($tahun->is_aktif) ⭐ (Aktif) @endif
                                 </option>
                             @endforeach
                         </select>
@@ -245,10 +230,129 @@
 
                 </div>
 
-                <div class="d-flex gap-2 mt-4">
+                <hr class="my-4">
+
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <label class="form-label fw-semibold mb-0">Daftar Penugasan Mata Pelajaran &amp; Kelas</label>
+                </div>
+
+                @error('penugasan')
+                    <div class="alert alert-danger rounded-4 border-0 mb-3 py-2">{{ $message }}</div>
+                @enderror
+
+                <div id="penugasanContainer">
+                    @php
+                        $oldPenugasan = old('penugasan');
+
+                        if (!$oldPenugasan || !is_array($oldPenugasan) || count($oldPenugasan) === 0) {
+                            // Isi dari data yang sudah tersimpan (mode edit)
+                            $oldPenugasan = $penugasanList->map(function ($p) {
+                                return [
+                                    'mata_pelajaran_id' => $p->mata_pelajaran_id,
+                                    'kelas_id'          => $p->kelas->pluck('id')->toArray(),
+                                ];
+                            })->values()->toArray();
+                        }
+
+                        if (count($oldPenugasan) === 0) {
+                            $oldPenugasan = [
+                                ['mata_pelajaran_id' => '', 'kelas_id' => []],
+                            ];
+                        }
+                    @endphp
+
+                    @foreach($oldPenugasan as $i => $item)
+                        <div class="penugasan-block" data-index="{{ $i }}">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <div class="penugasan-title">
+                                    <span class="badge-num penugasan-number">{{ $i + 1 }}</span>
+                                    Penugasan
+                                </div>
+                                <button type="button" class="btn-remove-penugasan">
+                                    <i class="fa-solid fa-trash-can me-1"></i> Hapus Penugasan
+                                </button>
+                            </div>
+
+                            <div class="mb-3">
+
+                                <label class="form-label fw-semibold small">
+                                    Mata Pelajaran
+                                </label>
+
+
+                                <select
+                                    name="penugasan[{{ $i }}][mata_pelajaran_id]"
+                                    class="form-select form-control-custom mapel-select"
+                                    required>
+
+
+                                    <option value="">
+                                        -- Pilih Mata Pelajaran --
+                                    </option>
+
+
+                                    @foreach($mataPelajarans as $mapel)
+
+                                        <option
+                                            value="{{ $mapel->id }}"
+                                            {{ 
+                                                (string) ($item['mata_pelajaran_id'] ?? '') 
+                                                === 
+                                                (string) $mapel->id 
+                                                ? 'selected' 
+                                                : '' 
+                                            }}>
+
+                                            {{ $mapel->nama_mapel }}
+                                            ({{ optional($mapel->jenjang)->nama_jenjang ?? '-' }})
+
+                                        </option>
+
+
+                                    @endforeach
+
+
+                                </select>
+
+                            </div>
+
+                            <div>
+                                <label class="form-label fw-semibold small">Kelas yang Diajar</label>
+                                <div class="row g-2">
+                                    @foreach($kelasList as $kelas)
+                                        <div
+                                            class="col-md-4 kelas-item"
+                                            data-jenjang="{{ $kelas->tingkat->jenjang_id }}">
+                                            <div class="kelas-chip">
+                                                <div class="form-check">
+                                                    <input
+                                                        class="form-check-input"
+                                                        type="checkbox"
+                                                        name="penugasan[{{ $i }}][kelas_id][]"
+                                                        value="{{ $kelas->id }}"
+                                                        id="kelas_{{ $i }}_{{ $kelas->id }}"
+                                                        {{ in_array($kelas->id, $item['kelas_id'] ?? []) ? 'checked' : '' }}>
+                                                    <label class="form-check-label fw-semibold" for="kelas_{{ $i }}_{{ $kelas->id }}">
+                                                        {{ $kelas->tingkat->nama_tingkat }} - {{ $kelas->nama_kelas }}
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+
+                <button type="button" id="btnTambah" class="btn-tambah-penugasan mb-4">
+                    <i class="fa-solid fa-plus me-2"></i> Tambah Mata Pelajaran
+                </button>
+
+                <div class="d-flex gap-2">
                     <button type="submit" class="btn btn-info text-white btn-submit">
                         <i class="fa-solid fa-floppy-disk me-2"></i>
-                        Perbarui Penugasan
+                        Simpan Perubahan
                     </button>
 
                     <a href="{{ route('guru-mapel.index') }}" class="btn btn-light border btn-cancel">
@@ -262,50 +366,127 @@
     </div>
 </div>
 
-@if(Auth::user()->role == 'super_admin')
+{{-- Template kosong untuk blok penugasan baru --}}
+<template id="penugasanTemplate">
+    <div class="penugasan-block" data-index="__INDEX__">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div class="penugasan-title">
+                <span class="badge-num penugasan-number">__INDEX__</span>
+                Penugasan
+            </div>
+            <button type="button" class="btn-remove-penugasan">
+                <i class="fa-solid fa-trash-can me-1"></i> Hapus Penugasan
+            </button>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label fw-semibold small">Mata Pelajaran</label>
+            <select
+                name="penugasan[__INDEX__][mata_pelajaran_id]"
+                class="form-select form-control-custom mapel-select"
+                required>
+                <option value="">-- Pilih Mata Pelajaran --</option>
+                @foreach($mataPelajarans as $mapel)
+                    <option value="{{ $mapel->id }}" data-jenjang="{{ $mapel->jenjang_id }}">
+                        {{ $mapel->nama_mapel }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
+
+        <div>
+            <label class="form-label fw-semibold small">Kelas yang Diajar</label>
+            <div class="row g-2">
+                @foreach($kelasList as $kelas)
+                    <div class="col-md-4 kelas-item" data-jenjang="{{ $kelas->tingkat->jenjang_id }}">
+                        <div class="kelas-chip">
+                            <div class="form-check">
+                                <input
+                                    class="form-check-input"
+                                    type="checkbox"
+                                    name="penugasan[__INDEX__][kelas_id][]"
+                                    value="{{ $kelas->id }}"
+                                    id="kelas___INDEX___{{ $kelas->id }}">
+                                <label class="form-check-label fw-semibold" for="kelas___INDEX___{{ $kelas->id }}">
+                                    {{ $kelas->tingkat->nama_tingkat }} - {{ $kelas->nama_kelas }}
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    </div>
+</template>
+
 <script>
 document.addEventListener('DOMContentLoaded', function () {
 
-    const jenjang = document.getElementById('jenjang');
+    const container     = document.getElementById('penugasanContainer');
+    const templateHtml   = document.getElementById('penugasanTemplate').innerHTML;
+    const btnTambah       = document.getElementById('btnTambah');
 
-    filter(jenjang.value);
+    let index = container.querySelectorAll('.penugasan-block').length;
 
-    jenjang.addEventListener('change', function () {
-        filter(this.value);
-    });
+    function renumber() {
+        container.querySelectorAll('.penugasan-block').forEach(function (block, i) {
+            block.querySelector('.penugasan-number').textContent = i + 1;
+        });
+    }
 
-    function filter(id) {
+    function bindRemove(block) {
+        const btn = block.querySelector('.btn-remove-penugasan');
+        btn.addEventListener('click', function () {
+            if (container.querySelectorAll('.penugasan-block').length <= 1) {
+                alert('Minimal harus ada 1 penugasan mata pelajaran.');
+                return;
+            }
+            block.remove();
+            renumber();
+        });
+    }
 
-        filterSelect('guru', id);
-        filterSelect('mapel', id);
+    function addPenugasan() {
+        const html = templateHtml.split('__INDEX__').join(index);
+        const wrapper = document.createElement('div');
+        wrapper.innerHTML = html.trim();
+        const block = wrapper.firstElementChild;
 
-        document.querySelectorAll('.kelas-item').forEach(function (item) {
+        container.appendChild(block);
+        bindRemove(block);
+        renumber();
+        index++;
+    }
 
-            const checkbox = item.querySelector('input');
+    container.querySelectorAll('.penugasan-block').forEach(bindRemove);
+    renumber();
 
-            if (item.dataset.jenjang === id) {
-                item.style.display = 'block';
-            } else {
-                item.style.display = 'none';
-                checkbox.checked = false;
+    btnTambah.addEventListener('click', addPenugasan);
+
+    document.getElementById('formGuruMapel').addEventListener('submit', function (e) {
+        let valid = true;
+        let firstInvalidBlock = null;
+
+        container.querySelectorAll('.penugasan-block').forEach(function (block) {
+            const mapelSelect = block.querySelector('.mapel-select');
+            const anyKelasChecked = block.querySelectorAll('input[type="checkbox"]:checked').length > 0;
+
+            if (!mapelSelect.value || !anyKelasChecked) {
+                valid = false;
+                if (!firstInvalidBlock) firstInvalidBlock = block;
             }
         });
-    }
 
-    function filterSelect(id, jenjang) {
-
-        const select = document.getElementById(id);
-
-        [...select.options].forEach(function (option) {
-
-            if (option.value === '') return;
-
-            option.hidden = option.dataset.jenjang !== jenjang;
-        });
-    }
+        if (!valid) {
+            e.preventDefault();
+            alert('Setiap penugasan wajib memilih Mata Pelajaran dan minimal 1 Kelas.');
+            if (firstInvalidBlock) {
+                firstInvalidBlock.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+    });
 
 });
 </script>
-@endif
 
 @endsection

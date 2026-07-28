@@ -28,6 +28,6 @@ class Kelas extends Model
         return $this->belongsToMany(
             GuruMapel::class,
             'guru_mapel_kelas'
-        );
+        )->withTimestamps();
     }
 }

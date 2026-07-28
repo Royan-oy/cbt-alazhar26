@@ -103,8 +103,7 @@ Route::middleware(['auth'])->group(function () {
     )->name('guru-mapel.import');
 
     Route::resource('guru-mapel', GuruMapelController::class)
-    ->parameters(['guru-mapel' => 'guru_mapel'])
-    ->except('show');
+    ->parameters(['guru-mapel' => 'guru_mapel']);
 
     Route::resource('wali-kelas', WaliKelasController::class)
     ->parameters(['wali-kelas' => 'wali_kelas'])

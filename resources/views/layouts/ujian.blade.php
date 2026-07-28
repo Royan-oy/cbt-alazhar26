@@ -15,8 +15,9 @@
         }
 
         /* =========================================================
-           HEADER DARURAT — FIXED, selalu terlihat saat discroll
-           ========================================================= */
+        HEADER DARURAT — STICKY, selalu terlihat saat discroll,
+        ikut alur dokumen sehingga tidak pernah menutupi konten
+        ========================================================= */
         .exam-emergency-header {
             background-color: #ffffff;
             border-bottom: 1px solid #e2e8f0;
@@ -25,7 +26,7 @@
             align-items: center;
             justify-content: space-between;
             gap: 14px;
-            position: fixed;   /* <-- diganti dari sticky */
+            position: fixed;
             top: 0;
             left: 0;
             right: 0;
@@ -34,28 +35,16 @@
             box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
         }
 
-        /* Kompensasi tinggi header supaya konten tidak ketutupan */
         .exam-content-wrapper main {
-            padding-top: 64px; /* sesuaikan dengan tinggi header desktop */
-        }
-
-        @media (max-width: 767.98px) {
-            .exam-content-wrapper main {
-                padding-top: 56px; /* header sedikit lebih pendek di tablet/hp */
-            }
-        }
-
-        @media (max-width: 480px) {
-            .exam-content-wrapper main {
-                padding-top: 52px; /* header paling pendek di hp kecil */
-            }
+            transition: padding-top 0.15s ease;
         }
 
         .exam-header-brand {
             display: flex;
             align-items: center;
             gap: 12px;
-            min-width: 0; /* supaya teks bisa ellipsis di flex container */
+            min-width: 0;
+            flex: 1 1 auto;
         }
 
         .exam-header-logos {
@@ -70,6 +59,7 @@
             width: 38px;
             object-fit: contain;
             border-radius: 8px;
+            flex-shrink: 0;
         }
 
         .exam-header-info {
@@ -83,6 +73,7 @@
             display: inline-flex;
             align-items: center;
             gap: 6px;
+            max-width: 100%;
             width: fit-content;
             background: #eff6ff;
             color: #1d4ed8;
@@ -94,13 +85,33 @@
             text-transform: uppercase;
             letter-spacing: 0.3px;
             margin-bottom: 3px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
-        .exam-header-badge i { font-size: 10px; }
+        .exam-header-badge i { font-size: 10px; flex-shrink: 0; }
+
+        .exam-header-badge .badge-meta {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
 
         .exam-header-dot {
             opacity: 0.55;
             font-size: 8px;
+        }
+
+        .exam-header-active-tag {
+            background: #dcfce7;
+            color: #16a34a;
+            font-size: 8.5px;
+            font-weight: 800;
+            padding: 1px 6px;
+            border-radius: 999px;
+            margin-left: 2px;
+            text-transform: uppercase;
         }
 
         .exam-user-name {
@@ -110,6 +121,7 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            max-width: 100%;
         }
 
         .exam-user-role {
@@ -142,11 +154,12 @@
         }
 
         /* =========================================================
-           RESPONSIVE HEADER — TABLET
-           ========================================================= */
+        RESPONSIVE HEADER — TABLET (<= 767.98px)
+        ========================================================= */
         @media (max-width: 767.98px) {
             .exam-emergency-header {
                 padding: 8px 14px;
+                gap: 10px;
             }
 
             .exam-logo {
@@ -159,6 +172,10 @@
                 padding: 2px 8px;
             }
 
+            .exam-header-info {
+                max-width: 240px;
+            }
+
             .exam-user-name {
                 font-size: 12.5px;
             }
@@ -166,48 +183,68 @@
             .exam-user-role {
                 font-size: 8.5px;
             }
+
+            .btn-logout-emergency {
+                padding: 7px 12px;
+                font-size: 11.5px;
+            }
         }
 
         /* =========================================================
-           RESPONSIVE HEADER — HP KECIL
-           ========================================================= */
+        RESPONSIVE HEADER — HP KECIL (<= 480px)
+        ========================================================= */
         @media (max-width: 480px) {
+            .exam-emergency-header {
+                padding: 7px 10px;
+                gap: 8px;
+            }
+
             .exam-header-logos {
                 gap: 5px;
             }
 
             .exam-logo {
-                height: 28px;
-                width: 28px;
+                height: 26px;
+                width: 26px;
                 border-radius: 6px;
             }
 
-            .exam-header-badge .exam-header-dot,
             .exam-header-badge {
                 font-size: 8.5px;
+                padding: 1px 7px;
+            }
+
+            /* Sembunyikan info TA/semester supaya badge tidak wrap
+            ke 2 baris dan header tetap ringkas */
+            .exam-header-badge .badge-meta {
+                display: none;
             }
 
             .exam-header-info {
-                max-width: 150px;
+                max-width: 130px;
             }
 
             .exam-user-name {
-                font-size: 11.5px;
+                font-size: 11px;
             }
 
-            /* Sembunyikan teks "Keluar Darurat", sisakan ikon saja supaya muat */
+            .exam-user-role {
+                font-size: 8px;
+            }
+
+            /* Sembunyikan teks "Keluar Darurat", sisakan ikon saja */
             .btn-logout-text {
                 display: none;
             }
 
             .btn-logout-emergency {
-                padding: 8px 10px;
+                padding: 7px 9px;
             }
         }
 
         /* =========================================================
-           GERBANG FULLSCREEN (tampil sebelum ujian dimulai)
-           ========================================================= */
+        GERBANG FULLSCREEN (tampil sebelum ujian dimulai)
+        ========================================================= */
         #fullscreenGate {
             position: fixed;
             inset: 0;
@@ -263,17 +300,6 @@
         .exam-content-wrapper {
             display: none; /* baru ditampilkan setelah fullscreen aktif */
         }
-
-        .exam-header-active-tag {
-            background: #dcfce7;
-            color: #16a34a;
-            font-size: 8.5px;
-            font-weight: 800;
-            padding: 1px 6px;
-            border-radius: 999px;
-            margin-left: 2px;
-            text-transform: uppercase;
-        }
     </style>
 </head>
 <body>
@@ -307,12 +333,14 @@
                 </div>
 
                 <div class="exam-header-info">
-                    <span class="exam-header-badge">
+                    <span class="exam-header-badge" title="{{ $ujian->jenisUjian->nama ?? 'Ujian' }} — TA {{ $ujian->tahunAjaran->nama_tahun ?? '-' }} {{ optional($ujian->tahunAjaran)->semester }}">
                         <i class="fa-solid fa-file-signature"></i>
                         {{ $ujian->jenisUjian->nama ?? 'Ujian' }}
-                        <span class="exam-header-dot">&bull;</span>
-                        TA {{ $ujian->tahunAjaran->nama_tahun ?? '-' }}
-                        {{ optional($ujian->tahunAjaran)->semester }}
+                        <span class="badge-meta">
+                            <span class="exam-header-dot">&bull;</span>
+                            TA {{ $ujian->tahunAjaran->nama_tahun ?? '-' }}
+                            {{ optional($ujian->tahunAjaran)->semester }}
+                        </span>
                         @if(optional($ujian->tahunAjaran)->is_aktif)
                             <span class="exam-header-active-tag">Aktif</span>
                         @endif
@@ -565,6 +593,38 @@
             e.preventDefault();
             e.returnValue = "";
         });
+    </script>
+
+    <script>
+        /* =========================================================
+        SINKRONISASI TINGGI HEADER FIXED → padding-top konten
+        Dijalankan setiap kali ukuran header berubah (resize,
+        rotate, teks wrap beda, dsb) supaya konten TIDAK PERNAH
+        ketutupan walau tinggi header tidak bisa ditebak pasti.
+        ========================================================= */
+        (function () {
+            const header = document.querySelector('.exam-emergency-header');
+            const main = document.querySelector('.exam-content-wrapper main');
+
+            if (!header || !main) return;
+
+            function syncHeaderHeight() {
+                const h = header.offsetHeight;
+                main.style.paddingTop = h + 'px';
+            }
+
+            // Jalankan saat load & setiap header berubah ukuran
+            if (window.ResizeObserver) {
+                new ResizeObserver(syncHeaderHeight).observe(header);
+            } else {
+                // fallback browser lama
+                window.addEventListener('resize', syncHeaderHeight);
+            }
+
+            window.addEventListener('load', syncHeaderHeight);
+            document.addEventListener('DOMContentLoaded', syncHeaderHeight);
+            syncHeaderHeight();
+        })();
     </script>
 
     @yield('scripts')

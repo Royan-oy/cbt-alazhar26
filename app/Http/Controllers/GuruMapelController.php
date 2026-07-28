@@ -15,287 +15,179 @@ use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\GuruMapelExport;
 use App\Imports\GuruMapelImport;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Pagination\Paginator;
 
 class GuruMapelController extends Controller
 {
     public function index(Request $request)
     {
         $user = Auth::user();
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | QUERY UTAMA
-        |--------------------------------------------------------------------------
-        */
-
+    
+        $tahunAktif = TahunAjaran::where('is_aktif', true)->first();
+    
         $query = GuruMapel::with([
             'guru.jenjang',
             'mataPelajaran',
             'kelas.tingkat',
-            'tahunAjaran'
+            'tahunAjaran',
         ]);
-
-        // Ambil tahun ajaran aktif
-        $tahunAktif = TahunAjaran::where('is_aktif', 1)->first();
-
-        /*
-        |--------------------------------------------------------------------------
-        | ROLE FILTER
-        |--------------------------------------------------------------------------
-        */
-
+    
         if ($user->role == 'admin_jenjang') {
-
-
+    
             $jenjangId = optional($user->admin)->jenjang_id;
-
-
+    
             $query->whereHas('guru', function ($q) use ($jenjangId) {
-
                 $q->where('jenjang_id', $jenjangId);
-
             });
-
-
-
-            // Admin jenjang tidak memilih jenjang
-
+    
             $jenjangs = collect();
-
-
-
-            $gurus = Guru::where('jenjang_id',$jenjangId)
+    
+            $gurus = Guru::where('jenjang_id', $jenjangId)
                 ->orderBy('nama')
                 ->get();
-
-
-
-            $totalGuruMapel = GuruMapel::whereHas('guru', function($q) use($jenjangId){
-
-                $q->where('jenjang_id',$jenjangId);
-
-            })->count();
-
-
-
+    
         } else {
-
-
-
-            $jenjangs = Jenjang::orderBy('nama_jenjang')
-                ->get();
-
-
-
+    
+            $jenjangs = Jenjang::orderBy('nama_jenjang')->get();
+    
             $gurus = Guru::with('jenjang')
                 ->orderBy('nama')
                 ->get();
-
-
-
-            $totalGuruMapel = GuruMapel::count();
-
         }
-
-
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | FILTER SEARCH
-        |--------------------------------------------------------------------------
-        */
-
-
-        if($request->filled('search')){
-
-
+    
+        if ($request->filled('search')) {
+    
             $search = $request->search;
-
-
-            $query->where(function($q) use($search){
-
-
-                $q->whereHas('guru',function($guru) use($search){
-
-                    $guru->where('nama','like','%'.$search.'%');
-
+    
+            $query->where(function ($q) use ($search) {
+    
+                $q->whereHas('guru', function ($guru) use ($search) {
+                    $guru->where('nama', 'like', "%{$search}%");
                 })
-
-                ->orWhereHas('mataPelajaran',function($mapel) use($search){
-
-                    $mapel->where(
-                        'nama_mapel',
-                        'like',
-                        '%'.$search.'%'
-                    );
-
+    
+                ->orWhereHas('mataPelajaran', function ($mapel) use ($search) {
+                    $mapel->where('nama_mapel', 'like', "%{$search}%");
                 });
-
-
+    
             });
-
-
+    
         }
-
-
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | FILTER JENJANG
-        |--------------------------------------------------------------------------
-        */
-
-
-        if($request->filled('jenjang')){
-
-
-            $query->whereHas('guru',function($q) use($request){
-
-                $q->where(
-                    'jenjang_id',
-                    $request->jenjang
-                );
-
+    
+        if ($request->filled('jenjang')) {
+    
+            $query->whereHas('guru', function ($q) use ($request) {
+                $q->where('jenjang_id', $request->jenjang);
             });
-
-
+    
         }
-
-
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | FILTER GURU
-        |--------------------------------------------------------------------------
-        */
-
-
-        if($request->filled('guru')){
-
-
-            $query->where(
-                'guru_id',
-                $request->guru
-            );
-
-
+    
+        if ($request->filled('guru')) {
+    
+            $query->where('guru_id', $request->guru);
+    
         }
-
-
-
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | FILTER TAHUN AJARAN
-        |--------------------------------------------------------------------------
-        */
-
-        // Secara default tampilkan hanya tahun ajaran aktif
+    
         if ($request->filled('tahun_ajaran')) {
-
+    
             $query->where('tahun_ajaran_id', $request->tahun_ajaran);
-
+    
         } elseif ($tahunAktif) {
-
+    
             $query->where('tahun_ajaran_id', $tahunAktif->id);
-
+    
         }
-
+    
         /*
         |--------------------------------------------------------------------------
-        | DATA LIST
+        | Statistik
         |--------------------------------------------------------------------------
         */
-
-
-        $guruMapels = $query
-
-            ->orderByDesc('tahun_ajaran_id')
-
+    
+        $totalGuruMapel = (clone $query)->count();
+    
+        $totalGuru = (clone $query)
+            ->distinct('guru_id')
+            ->count('guru_id');
+    
+        $totalMapel = (clone $query)
+            ->distinct('mata_pelajaran_id')
+            ->count('mata_pelajaran_id');
+    
+        /*
+        |--------------------------------------------------------------------------
+        | Ambil semua data (sesuai filter), lalu group per guru_id
+        |--------------------------------------------------------------------------
+        */
+    
+        $semuaPenugasan = (clone $query)
             ->orderBy('guru_id')
-
-            ->paginate(10)
-
-            ->withQueryString();
-
-
-
-
-
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | DATA FILTER
-        |--------------------------------------------------------------------------
-        */
-
-
-        $tahunAjarans = TahunAjaran::orderByDesc('is_aktif')
-
-            ->orderByDesc('nama_tahun')
-
+            ->orderBy('mata_pelajaran_id')
             ->get();
-
-
-
-
-
-
-
+    
+        $grouped = $semuaPenugasan
+            ->groupBy('guru_id')
+            ->map(function ($items) {
+    
+                $first = $items->first();
+    
+                return (object) [
+                    'guru'        => $first->guru,
+                    'tahunAjaran' => $first->tahunAjaran,
+                    'items'       => $items,
+                    'total_mapel' => $items->count(),
+                    'total_kelas' => $items->pluck('kelas')->collapse()->unique('id')->count(),
+                ];
+            })
+            // FIX: closure biasa, bukan arrow function (fn), supaya jalan di PHP 7
+            ->sortBy(function ($row) {
+                return optional($row->guru)->nama;
+            })
+            ->values();
+    
         /*
         |--------------------------------------------------------------------------
-        | STATISTIK
+        | Pagination manual atas hasil grouping
         |--------------------------------------------------------------------------
         */
-
-
-        $totalGuru = $guruMapels
-
-            ->pluck('guru_id')
-
-            ->unique()
-
-            ->count();
-
-
-
-
-        $totalMapel = $guruMapels
-
-            ->pluck('mata_pelajaran_id')
-
-            ->unique()
-
-            ->count();
-
-
-        return view('guru-mapel.index',compact(
-
+    
+        $perPage     = 10;
+        $currentPage = Paginator::resolveCurrentPage('page');
+    
+        $guruMapels = new LengthAwarePaginator(
+            $grouped->forPage($currentPage, $perPage)->values(),
+            $grouped->count(),
+            $perPage,
+            $currentPage,
+            ['path' => Paginator::resolveCurrentPath()]
+        );
+    
+        $guruMapels->withQueryString();
+    
+        $tahunAjarans = TahunAjaran::orderByDesc('is_aktif')
+            ->orderByDesc('nama_tahun')
+            ->get();
+    
+        return view('guru-mapel.index', compact(
             'guruMapels',
-
             'gurus',
-
             'jenjangs',
-
             'tahunAjarans',
-
+            'tahunAktif',
             'totalGuruMapel',
-
             'totalGuru',
-
-            'totalMapel',
-
-            'tahunAktif'
-
+            'totalMapel'
         ));
-
     }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Method create() — TIDAK ADA PERUBAHAN
+    |--------------------------------------------------------------------------
+    | Query data untuk dropdown/checkbox (guru, mapel, kelas, tahun ajaran)
+    | tetap sama seperti sebelumnya. Filtering per jenjang untuk role
+    | admin_jenjang vs super_admin tetap dipertahankan.
+    */
 
     public function create()
     {
@@ -305,7 +197,7 @@ class GuruMapelController extends Controller
 
             $jenjangId = optional($user->admin)->jenjang_id;
 
-            $jenjangs = Jenjang::where('id', $jenjangId)->get();
+            $jenjangs = Jenjang::whereKey($jenjangId)->get();
 
             $gurus = Guru::where('jenjang_id', $jenjangId)
                 ->orderBy('nama')
@@ -315,10 +207,10 @@ class GuruMapelController extends Controller
                 ->orderBy('nama_mapel')
                 ->get();
 
-            $kelasList = Kelas::whereHas('tingkat', function ($q) use ($jenjangId) {
+            $kelasList = Kelas::with('tingkat')
+                ->whereHas('tingkat', function ($q) use ($jenjangId) {
                     $q->where('jenjang_id', $jenjangId);
                 })
-                ->with('tingkat')
                 ->orderBy('nama_kelas')
                 ->get();
 
@@ -334,7 +226,7 @@ class GuruMapelController extends Controller
                 ->orderBy('nama_mapel')
                 ->get();
 
-            $kelasList = Kelas::with('tingkat')
+            $kelasList = Kelas::with('tingkat.jenjang')
                 ->orderBy('nama_kelas')
                 ->get();
         }
@@ -352,199 +244,300 @@ class GuruMapelController extends Controller
         ));
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | Method store() — DIPERBARUI
+    |--------------------------------------------------------------------------
+    | Sekarang menerima input berbentuk:
+    |
+    |   guru_id
+    |   tahun_ajaran_id
+    |   penugasan => [
+    |       0 => ['mata_pelajaran_id' => x, 'kelas_id' => [1,2,3]],
+    |       1 => ['mata_pelajaran_id' => y, 'kelas_id' => [4,5]],
+    |       ...
+    |   ]
+    |
+    | Setiap item di 'penugasan' merepresentasikan satu blok
+    | "Mata Pelajaran + Kelas" pada form (bisa banyak sekaligus).
+    */
+
     public function store(Request $request)
     {
         $request->validate([
-            'guru_id'           => 'required|exists:gurus,id',
-            'mata_pelajaran_id' => 'required|exists:mata_pelajarans,id',
-            'kelas_id'          => 'required|array|min:1',
-            'kelas_id.*'        => 'exists:kelas,id',
-            'tahun_ajaran_id'   => 'required|exists:tahun_ajarans,id',
+            'guru_id'         => 'required|exists:gurus,id',
+            'tahun_ajaran_id' => 'required|exists:tahun_ajarans,id',
+
+            'penugasan'                     => 'required|array|min:1',
+            'penugasan.*.mata_pelajaran_id' => 'required|exists:mata_pelajarans,id|distinct',
+            'penugasan.*.kelas_id'          => 'required|array|min:1',
+            'penugasan.*.kelas_id.*'        => 'exists:kelas,id',
+        ], [
+            'penugasan.required'                     => 'Minimal harus ada 1 penugasan mata pelajaran.',
+            'penugasan.*.mata_pelajaran_id.required'  => 'Mata pelajaran wajib dipilih untuk setiap penugasan.',
+            'penugasan.*.mata_pelajaran_id.distinct'  => 'Mata pelajaran tidak boleh dipilih lebih dari sekali.',
+            'penugasan.*.kelas_id.required'           => 'Pilih minimal satu kelas untuk setiap penugasan.',
         ]);
 
-        $guru  = Guru::findOrFail($request->guru_id);
-        $mapel = MataPelajaran::findOrFail($request->mata_pelajaran_id);
+        DB::transaction(function () use ($request) {
 
-        if ($guru->jenjang_id != $mapel->jenjang_id) {
+            $guru = Guru::findOrFail($request->guru_id);
 
-            return back()->withInput()->withErrors([
-                'mata_pelajaran_id' => 'Guru dan mata pelajaran harus satu jenjang.'
-            ]);
-        }
+            foreach ($request->penugasan as $item) {
 
-        /*
-        |--------------------------------------------------------------------------
-        | Cek Duplicate Guru Mapel
-        |--------------------------------------------------------------------------
-        */
+                $mapel = MataPelajaran::findOrFail($item['mata_pelajaran_id']);
 
-        $guruMapel = GuruMapel::where('guru_id', $guru->id)
-            ->where('mata_pelajaran_id', $mapel->id)
-            ->where('tahun_ajaran_id', $request->tahun_ajaran_id)
-            ->first();
+                /*
+                |--------------------------------------------------------------------------
+                | Jenjang guru & mapel harus sama
+                |--------------------------------------------------------------------------
+                */
 
-        if (!$guruMapel) {
+                if ($guru->jenjang_id != $mapel->jenjang_id) {
 
-            $guruMapel = GuruMapel::create([
-                'guru_id'           => $guru->id,
-                'mata_pelajaran_id' => $mapel->id,
-                'tahun_ajaran_id'   => $request->tahun_ajaran_id,
-            ]);
-        }
+                    throw \Illuminate\Validation\ValidationException::withMessages([
+                        'penugasan' => 'Guru dan mata pelajaran "' . $mapel->nama_mapel . '" harus berada pada jenjang yang sama.'
+                    ]);
+                }
 
-        foreach ($request->kelas_id as $kelasId) {
+                /*
+                |--------------------------------------------------------------------------
+                | Guru Mapel (satu baris per kombinasi guru + mapel + tahun ajaran)
+                |--------------------------------------------------------------------------
+                */
 
-            $kelas = Kelas::with('tingkat')->findOrFail($kelasId);
-
-            if ($kelas->tingkat->jenjang_id != $guru->jenjang_id) {
-
-                return back()->withInput()->withErrors([
-                    'kelas_id' => 'Ada kelas yang tidak sesuai dengan jenjang guru.'
+                $guruMapel = GuruMapel::firstOrCreate([
+                    'guru_id'           => $guru->id,
+                    'mata_pelajaran_id' => $mapel->id,
+                    'tahun_ajaran_id'   => $request->tahun_ajaran_id,
                 ]);
+
+                /*
+                |--------------------------------------------------------------------------
+                | Simpan kelas untuk penugasan ini
+                |--------------------------------------------------------------------------
+                */
+
+                foreach ($item['kelas_id'] as $kelasId) {
+
+                    $kelas = Kelas::with('tingkat')->findOrFail($kelasId);
+
+                    if ($kelas->tingkat->jenjang_id != $guru->jenjang_id) {
+
+                        throw \Illuminate\Validation\ValidationException::withMessages([
+                            'penugasan' => 'Ada kelas yang berbeda jenjang untuk mata pelajaran "' . $mapel->nama_mapel . '".'
+                        ]);
+                    }
+
+                    $guruMapel->kelas()->syncWithoutDetaching([$kelasId]);
+                }
             }
 
-            DB::table('guru_mapel_kelas')->updateOrInsert(
-                [
-                    'guru_mapel_id' => $guruMapel->id,
-                    'kelas_id'      => $kelasId,
-                ],
-                [
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]
-            );
-        }
+        });
 
         return redirect()
             ->route('guru-mapel.index')
-            ->with('success', 'Penugasan guru mapel berhasil ditambahkan.');
+            ->with('success', 'Penugasan guru berhasil disimpan.');
     }
 
     public function edit(GuruMapel $guru_mapel)
     {
         $this->authorizeJenjang($guru_mapel);
-
+    
+        $guru           = $guru_mapel->guru;
+        $tahunAjaranId  = $guru_mapel->tahun_ajaran_id;
+    
+        $penugasanList = GuruMapel::with(['mataPelajaran', 'kelas'])
+            ->where('guru_id', $guru->id)
+            ->where('tahun_ajaran_id', $tahunAjaranId)
+            ->orderBy('mata_pelajaran_id')
+            ->get();
+    
         $data = $this->formData();
-        $data['guruMapel'] = $guru_mapel;
 
+
+        /*
+        |--------------------------------------------------------------------------
+        | Filter Mata Pelajaran sesuai jenjang guru
+        |--------------------------------------------------------------------------
+        */
+
+        $data['mataPelajarans'] = MataPelajaran::where(
+                'jenjang_id',
+                $guru->jenjang_id
+            )
+            ->orderBy('nama_mapel')
+            ->get();
+
+
+        $data['kelasList'] = Kelas::with('tingkat')
+            ->whereHas('tingkat', function($q) use ($guru){
+
+                $q->where(
+                    'jenjang_id',
+                    $guru->jenjang_id
+                );
+
+            })
+            ->orderBy('nama_kelas')
+            ->get();
+
+
+
+        $data['guruMapel']     = $guru_mapel;
+        $data['guru']          = $guru;
+        $data['tahunAjaranId'] = $tahunAjaranId;
+        $data['penugasanList'] = $penugasanList;
+    
         return view('guru-mapel.edit', $data);
     }
 
     public function update(Request $request, GuruMapel $guru_mapel)
     {
         $this->authorizeJenjang($guru_mapel);
-
-
+    
         $request->validate([
-
-            'guru_id'=>'required|exists:gurus,id',
-
-            'mata_pelajaran_id'=>'required|exists:mata_pelajarans,id',
-
-            'kelas_id'=>'nullable|array',
-
-            'kelas_id.*'=>'exists:kelas,id',
-
-            'tahun_ajaran_id'=>'required|exists:tahun_ajarans,id',
-
-        ],[
-
-            'guru_id.required'=>'Guru wajib dipilih.',
-
-            'mata_pelajaran_id.required'=>'Mata pelajaran wajib dipilih.',
-
-            'tahun_ajaran_id.required'=>'Tahun ajaran wajib dipilih.',
-
+            'guru_id'         => 'required|exists:gurus,id',
+            'tahun_ajaran_id' => 'required|exists:tahun_ajarans,id',
+    
+            'penugasan'                     => 'required|array|min:1',
+            'penugasan.*.mata_pelajaran_id' => 'required|exists:mata_pelajarans,id|distinct',
+            'penugasan.*.kelas_id'          => 'required|array|min:1',
+            'penugasan.*.kelas_id.*'        => 'exists:kelas,id',
+        ], [
+            'penugasan.required'                     => 'Minimal harus ada 1 penugasan mata pelajaran.',
+            'penugasan.*.mata_pelajaran_id.required'  => 'Mata pelajaran wajib dipilih untuk setiap penugasan.',
+            'penugasan.*.mata_pelajaran_id.distinct'  => 'Mata pelajaran tidak boleh dipilih lebih dari sekali.',
+            'penugasan.*.kelas_id.required'           => 'Pilih minimal satu kelas untuk setiap penugasan.',
         ]);
-
-
-
-        $this->validateJenjangMatch($request);
-
-
-
-        $exists = GuruMapel::where('guru_id',$request->guru_id)
-
-            ->where(
-                'mata_pelajaran_id',
-                $request->mata_pelajaran_id
-            )
-
-            ->where(
-                'tahun_ajaran_id',
-                $request->tahun_ajaran_id
-            )
-
-            ->where('id','!=',$guru_mapel->id)
-
-            ->exists();
-
-
-
-        if($exists){
-
-            return back()
-                ->withInput()
-                ->withErrors([
-                    'guru_id'=>'Penugasan guru mapel ini sudah ada.'
-                ]);
-
-        }
-
-
-
-        $guru_mapel->update([
-
-            'guru_id'=>$request->guru_id,
-
-            'mata_pelajaran_id'=>$request->mata_pelajaran_id,
-
-            'tahun_ajaran_id'=>$request->tahun_ajaran_id,
-
-        ]);
-
-
-
-        // update kelas pivot
-
-        $guru_mapel->kelas()->sync(
-            $request->kelas_id ?? []
-        );
-
-
-
+    
+        // Guru + tahun ajaran ASAL (sebelum diedit), dipakai untuk membersihkan
+        // penugasan lama yang sudah tidak ada lagi di submit.
+        $originalGuruId  = $guru_mapel->guru_id;
+        $originalTahunId = $guru_mapel->tahun_ajaran_id;
+    
+        DB::transaction(function () use ($request, $originalGuruId, $originalTahunId) {
+    
+            $guru = Guru::findOrFail($request->guru_id);
+    
+            $keepIds = [];
+    
+            foreach ($request->penugasan as $item) {
+    
+                $mapel = MataPelajaran::findOrFail($item['mata_pelajaran_id']);
+    
+                if ($guru->jenjang_id != $mapel->jenjang_id) {
+                    throw \Illuminate\Validation\ValidationException::withMessages([
+                        'penugasan' => 'Guru dan mata pelajaran "' . $mapel->nama_mapel . '" harus berada pada jenjang yang sama.'
+                    ]);
+                }
+    
+                $guruMapelRow = GuruMapel::updateOrCreate(
+                    [
+                        'guru_id'           => $guru->id,
+                        'mata_pelajaran_id' => $mapel->id,
+                        'tahun_ajaran_id'   => $request->tahun_ajaran_id,
+                    ]
+                );
+    
+                $keepIds[] = $guruMapelRow->id;
+    
+                $kelasIds = [];
+    
+                foreach ($item['kelas_id'] as $kelasId) {
+    
+                    $kelas = Kelas::with('tingkat')->findOrFail($kelasId);
+    
+                    if ($kelas->tingkat->jenjang_id != $guru->jenjang_id) {
+                        throw \Illuminate\Validation\ValidationException::withMessages([
+                            'penugasan' => 'Ada kelas yang berbeda jenjang untuk mata pelajaran "' . $mapel->nama_mapel . '".'
+                        ]);
+                    }
+    
+                    $kelasIds[] = $kelasId;
+                }
+    
+                // sync = kelas yang tidak dicentang lagi otomatis lepas dari mapel ini
+                $guruMapelRow->kelas()->sync($kelasIds);
+            }
+    
+            // Hapus penugasan lama (dari guru + tahun ajaran asal) yang sudah
+            // tidak dikirim lagi di submit (mis. mata pelajaran yang dihapus dari form)
+            GuruMapel::where('guru_id', $originalGuruId)
+                ->where('tahun_ajaran_id', $originalTahunId)
+                ->whereNotIn('id', $keepIds)
+                ->get()
+                ->each(function ($old) {
+                    $old->kelas()->detach();
+                    $old->delete();
+                });
+    
+        });
+    
         return redirect()
             ->route('guru-mapel.index')
-            ->with(
-                'success',
-                'Penugasan guru mapel berhasil diperbarui.'
-            );
-
+            ->with('success', 'Penugasan guru berhasil diperbarui.');
     }
 
-    public function destroy(GuruMapel $guru_mapel)
+    public function show($id)
     {
-        $this->authorizeJenjang($guru_mapel);
+        $guru = Guru::with([
+            'jenjang'
+        ])
+        ->findOrFail($id);
 
 
-        DB::transaction(function () use ($guru_mapel) {
+        $guruMapels = GuruMapel::with([
+            'mataPelajaran',
+            'kelas.tingkat',
+            'tahunAjaran'
+        ])
+        ->where('guru_id', $guru->id)
+        ->orderBy('tahun_ajaran_id','desc')
+        ->get();
 
-            // hapus relasi kelas terlebih dahulu
-            $guru_mapel->kelas()->detach();
 
-            // hapus guru mapel
-            $guru_mapel->delete();
+        $this->authorizeJenjang($guruMapels->first());
+
+
+        return view('guru-mapel.show', compact(
+            'guru',
+            'guruMapels'
+        ));
+    }
+
+    public function destroy($guru_id)
+    {
+
+        DB::transaction(function () use ($guru_id) {
+
+
+            $guruMapels = GuruMapel::where('guru_id',$guru_id)
+                ->get();
+
+
+            foreach($guruMapels as $guruMapel){
+
+                // hapus semua kelas yang terhubung
+                $guruMapel->kelas()->detach();
+
+
+                // hapus penugasan
+                $guruMapel->delete();
+
+            }
+
 
         });
 
 
-
         return redirect()
             ->route('guru-mapel.index')
             ->with(
                 'success',
-                'Penugasan guru mata pelajaran berhasil dihapus.'
+                'Seluruh penugasan guru mata pelajaran berhasil dihapus.'
             );
+
     }
 
     /**
@@ -606,10 +599,6 @@ class GuruMapelController extends Controller
             ->get();
 
 
-
-
-
-
         /*
         |--------------------------------------------------------------------------
         | MAPEL
@@ -633,11 +622,6 @@ class GuruMapelController extends Controller
             ->orderBy('nama_mapel')
 
             ->get();
-
-
-
-
-
 
 
         /*

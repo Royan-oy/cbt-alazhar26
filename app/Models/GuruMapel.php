@@ -9,7 +9,6 @@ class GuruMapel extends Model
     protected $fillable = [
         'guru_id',
         'mata_pelajaran_id',
-        'kelas_id',
         'tahun_ajaran_id',
     ];
 
@@ -30,7 +29,7 @@ class GuruMapel extends Model
             'guru_mapel_kelas',
             'guru_mapel_id',
             'kelas_id'
-        );
+        )->withTimestamps();
     }
 
     public function tahunAjaran()

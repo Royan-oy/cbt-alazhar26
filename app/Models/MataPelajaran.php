@@ -20,4 +20,9 @@ class MataPelajaran extends Model
     {
         return $this->belongsTo(Jenjang::class);
     }
+
+    public function guruMapels()
+    {
+        return $this->hasMany(GuruMapel::class);
+    }
 }

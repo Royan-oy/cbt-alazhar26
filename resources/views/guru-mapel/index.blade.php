@@ -47,6 +47,12 @@
         align-items: center;
         gap: 16px;
         height: 100%;
+        transition: transform .2s, box-shadow .2s;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 28px rgba(15, 23, 42, 0.06);
     }
 
     .stat-icon {
@@ -68,13 +74,35 @@
         padding: 12px;
     }
 
+    /* ===============================
+    Filter Bar
+    ==================================*/
+
+    .filter-bar {
+        background: #f8fafc;
+        border: 1px solid var(--border-color);
+        border-radius: 18px;
+        padding: 16px;
+        margin-bottom: 20px;
+    }
+
+    .filter-label {
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--text-muted);
+        font-weight: 700;
+        margin-bottom: 6px;
+        display: block;
+    }
+
     .form-control-custom {
         border-radius: 14px;
         height: 46px;
         border: 1px solid var(--border-color);
         padding-left: 16px;
         font-size: 14px;
-        background-color: #f8fafc;
+        background-color: #ffffff;
     }
 
     .form-control-custom:focus {
@@ -96,6 +124,22 @@
         padding: 0 20px;
         font-weight: 600;
     }
+
+    .active-filter-chip {
+        background: rgba(14, 165, 233, 0.08);
+        color: var(--accent-blue);
+        border: 1px solid rgba(14, 165, 233, 0.2);
+        font-size: 12px;
+        font-weight: 600;
+        padding: 6px 12px;
+        border-radius: 10px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .active-filter-chip a { color: inherit; text-decoration: none; opacity: .7; }
+    .active-filter-chip a:hover { opacity: 1; }
 
     .table-responsive { border-radius: 16px; overflow: hidden; }
 
@@ -131,6 +175,19 @@
         flex-shrink: 0;
     }
 
+    .mapel-badge {
+        background: #f8fafc;
+        color: var(--secondary-dark);
+        border: 1px solid var(--border-color);
+        font-size: 11px;
+        font-weight: 600;
+        padding: 4px 10px;
+        border-radius: 8px;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+
     .kelas-badge {
         background: #f0f9ff;
         color: #0284c7;
@@ -142,20 +199,134 @@
         display: inline-block;
     }
 
-    .action-icon-btn {
-        width: 40px;
-        height: 40px;
-        border: none;
+    /* ===============================
+    Action Button Group
+    ================================ */
+
+    .action-group {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        justify-content: flex-end;
+    }
+
+
+    /* Base Button */
+
+    .action-btn {
+
+        width: 38px;
+        height: 38px;
+
         border-radius: 12px;
+
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        margin-left: 4px;
+
+        border: none;
+
+        font-size: 14px;
+
         text-decoration: none;
-        transition: all 0.2s ease;
+
+        transition: all .25s ease;
+
+        cursor: pointer;
+
     }
 
-    .action-icon-btn:hover { transform: translateY(-2px); }
+
+    /* Hover */
+
+    .action-btn:hover {
+
+        transform: translateY(-3px);
+
+    }
+
+
+
+    /* Detail */
+
+    .action-detail {
+
+        background: rgba(14,165,233,.12);
+
+        color:#0284c7;
+
+    }
+
+
+    .action-detail:hover {
+
+        background:#0ea5e9;
+
+        color:white;
+
+        box-shadow:0 8px 18px rgba(14,165,233,.25);
+
+    }
+
+
+
+    /* Edit */
+
+    .action-edit {
+
+        background:rgba(13,148,136,.12);
+
+        color:#0d9488;
+
+    }
+
+
+    .action-edit:hover {
+
+        background:#0d9488;
+
+        color:white;
+
+        box-shadow:0 8px 18px rgba(13,148,136,.25);
+
+    }
+
+
+
+    /* Delete */
+
+    .action-delete {
+
+        background:rgba(225,29,72,.1);
+
+        color:#e11d48;
+
+    }
+
+
+    .action-delete:hover {
+
+        background:#e11d48;
+
+        color:white;
+
+        box-shadow:0 8px 18px rgba(225,29,72,.25);
+
+    }
+
+
+    /* form jangan merusak flex */
+
+    .form-delete {
+
+        display:inline-flex;
+
+        margin:0;
+
+    }
+
+    .btn-icon-view { background: rgba(14, 165, 233, 0.1); color: var(--accent-blue); }
+    .btn-icon-view:hover { background: var(--accent-blue); color: white; }
 
     .btn-icon-edit { background: #f0fdfa; color: #0d9488; }
     .btn-icon-edit:hover { background: #0d9488; color: white; }
@@ -179,12 +350,26 @@
         color: white !important;
     }
 
+    /* ===============================
+    Modal Detail Penugasan
+    ==================================*/
+
+    .detail-mapel-block {
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        padding: 16px;
+        background: #f8fafc;
+    }
+
+    .detail-mapel-block + .detail-mapel-block { margin-top: 12px; }
+
     @media (max-width: 768px) {
         .page-header { padding: 24px; border-radius: 18px; text-align: center; }
         .page-header .d-flex { flex-direction: column; gap: 20px; }
         .btn-add { width: 100%; justify-content: center; }
         .form-control-custom, .btn-action-trigger { width: 100%; margin-bottom: 8px; }
         .content-card { padding: 4px; border-radius: 18px; }
+        .filter-bar { border-radius: 16px; }
 
         .table-responsive table, .table-responsive thead, .table-responsive tbody,
         .table-responsive th, .table-responsive td, .table-responsive tr { display: block; }
@@ -377,63 +562,115 @@
         <div class="card-body">
 
             {{-- Filter & Search Form --}}
-            <form method="GET" action="{{ route('guru-mapel.index') }}">
-                <div class="row g-3 mb-4 align-items-center">
+            <div class="filter-bar">
+                <form method="GET" action="{{ route('guru-mapel.index') }}">
+                    <div class="row g-3 align-items-end">
 
-                    <div class="col-lg-4">
-                        <input
-                            type="text"
-                            name="search"
-                            class="form-control form-control-custom"
-                            placeholder="Cari guru atau mata pelajaran..."
-                            value="{{ request('search') }}">
-                    </div>
+                        <div class="col-lg-3 col-md-6">
+                            <label class="filter-label">Cari</label>
+                            <input
+                                type="text"
+                                name="search"
+                                class="form-control form-control-custom"
+                                placeholder="Nama guru atau mata pelajaran..."
+                                value="{{ request('search') }}">
+                        </div>
 
-                    @if(Auth::user()->role == 'super_admin')
-                        <div class="col-lg-3">
-                            <select name="jenjang" class="form-select form-control-custom">
-                                <option value="">-- Semua Jenjang --</option>
-                                @foreach($jenjangs as $jenjang)
-                                    <option value="{{ $jenjang->id }}" {{ request('jenjang') == $jenjang->id ? 'selected' : '' }}>
-                                        {{ $jenjang->nama_jenjang }}
+                        <div class="col-lg-3 col-md-6">
+                            <label class="filter-label">Guru</label>
+                            <select name="guru" class="form-select form-control-custom">
+                                <option value="">-- Semua Guru --</option>
+                                @foreach($gurus as $guru)
+                                    <option value="{{ $guru->id }}" {{ request('guru') == $guru->id ? 'selected' : '' }}>
+                                        {{ $guru->nama }}
                                     </option>
                                 @endforeach
                             </select>
                         </div>
+
+                        @if(Auth::user()->role == 'super_admin')
+                            <div class="col-lg-2 col-md-6">
+                                <label class="filter-label">Jenjang</label>
+                                <select name="jenjang" class="form-select form-control-custom">
+                                    <option value="">-- Semua --</option>
+                                    @foreach($jenjangs as $jenjang)
+                                        <option value="{{ $jenjang->id }}" {{ request('jenjang') == $jenjang->id ? 'selected' : '' }}>
+                                            {{ $jenjang->nama_jenjang }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        @endif
+
+                        <div class="col-lg-{{ Auth::user()->role == 'super_admin' ? '2' : '3' }} col-md-6">
+                            <label class="filter-label">Tahun Ajaran</label>
+                            <select name="tahun_ajaran" class="form-select form-control-custom">
+                                <option value="">-- Semua --</option>
+
+                                @foreach($tahunAjarans as $tahun)
+                                    <option
+                                        value="{{ $tahun->id }}"
+                                        {{ request('tahun_ajaran', optional($tahunAktif)->id) == $tahun->id ? 'selected' : '' }}>
+                                        {{ $tahun->nama_tahun }} - {{ ucfirst($tahun->semester) }}
+                                        @if($tahun->is_aktif) ⭐ @endif
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="col-lg-2 col-md-12">
+                            <div class="d-flex gap-2">
+                                <button type="submit" class="btn btn-dark btn-action-trigger flex-grow-1">
+                                    <i class="fa fa-search me-2"></i>
+                                    Filter
+                                </button>
+
+                                @if(request()->filled('search') || request()->filled('jenjang') || request()->filled('guru') || request()->filled('tahun_ajaran'))
+                                    <a href="{{ route('guru-mapel.index') }}" class="btn btn-light border btn-action-trigger" title="Reset filter">
+                                        <i class="fa-solid fa-rotate"></i>
+                                    </a>
+                                @endif
+                            </div>
+                        </div>
+
+                    </div>
+                </form>
+
+                {{-- Chip filter aktif --}}
+                @if(request()->filled('search') || request()->filled('jenjang') || request()->filled('guru') || request()->filled('tahun_ajaran'))
+                <div class="d-flex flex-wrap gap-2 mt-3">
+
+                    @if(request()->filled('search'))
+                        <span class="active-filter-chip">
+                            Cari: "{{ request('search') }}"
+                            <a href="{{ route('guru-mapel.index', request()->except('search')) }}"><i class="fa-solid fa-xmark"></i></a>
+                        </span>
                     @endif
 
-                    <div class="col-lg-3">
-                        <select name="tahun_ajaran" class="form-select form-control-custom">
-                            <option value="">-- Semua Tahun Ajaran --</option>
+                    @if(request()->filled('guru'))
+                        <span class="active-filter-chip">
+                            Guru: {{ optional($gurus->firstWhere('id', request('guru')))->nama }}
+                            <a href="{{ route('guru-mapel.index', request()->except('guru')) }}"><i class="fa-solid fa-xmark"></i></a>
+                        </span>
+                    @endif
 
-                            @foreach($tahunAjarans as $tahun)
-                                <option
-                                    value="{{ $tahun->id }}"
-                                    {{ request('tahun_ajaran', optional($tahunAktif)->id) == $tahun->id ? 'selected' : '' }}>
-                                    {{ $tahun->nama_tahun }} - {{ ucfirst($tahun->semester) }}
-                                    @if($tahun->is_aktif) ⭐ @endif
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
+                    @if(request()->filled('jenjang'))
+                        <span class="active-filter-chip">
+                            Jenjang: {{ optional($jenjangs->firstWhere('id', request('jenjang')))->nama_jenjang }}
+                            <a href="{{ route('guru-mapel.index', request()->except('jenjang')) }}"><i class="fa-solid fa-xmark"></i></a>
+                        </span>
+                    @endif
 
-                    <div class="col-lg-auto">
-                        <div class="d-flex gap-2">
-                            <button type="submit" class="btn btn-dark btn-action-trigger">
-                                <i class="fa fa-search me-2"></i>
-                                Filter
-                            </button>
-
-                            @if(request()->filled('search') || request()->filled('jenjang') || request()->filled('tahun_ajaran'))
-                                <a href="{{ route('guru-mapel.index') }}" class="btn btn-light border btn-action-trigger">
-                                    <i class="fa-solid fa-rotate"></i>
-                                </a>
-                            @endif
-                        </div>
-                    </div>
+                    @if(request()->filled('tahun_ajaran'))
+                        <span class="active-filter-chip">
+                            Tahun: {{ optional($tahunAjarans->firstWhere('id', request('tahun_ajaran')))->nama_tahun }}
+                            <a href="{{ route('guru-mapel.index', request()->except('tahun_ajaran')) }}"><i class="fa-solid fa-xmark"></i></a>
+                        </span>
+                    @endif
 
                 </div>
-            </form>
+                @endif
+            </div>
 
             {{-- Table --}}
             <div class="table-responsive">
@@ -445,11 +682,11 @@
                             <th>Mata Pelajaran</th>
                             <th>Kelas</th>
                             <th>Tahun Ajaran</th>
-                            <th width="120" class="text-end">Aksi</th>
+                            <th width="80" class="text-end">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse($guruMapels as $item)
+                        @forelse($guruMapels as $row)
                         <tr>
                             <td>
                                 <span class="text-secondary fw-semibold">
@@ -459,59 +696,80 @@
                             <td>
                                 <div class="d-flex align-items-center gap-2">
                                     <div class="avatar-guru bg-primary bg-opacity-10 text-primary">
-                                        {{ strtoupper(substr($item->guru->nama, 0, 1)) }}
+                                        {{ strtoupper(substr($row->guru->nama, 0, 1)) }}
                                     </div>
                                     <div>
-                                        <div class="fw-bold text-dark fs-6">{{ $item->guru->nama }}</div>
-                                        <small class="text-muted">{{ optional($item->guru->jenjang)->nama_jenjang ?? '-' }}</small>
+                                        <div class="fw-bold text-dark fs-6">{{ $row->guru->nama }}</div>
+                                        <small class="text-muted">{{ optional($row->guru->jenjang)->nama_jenjang ?? '-' }}</small>
                                     </div>
                                 </div>
                             </td>
                             <td>
-                                <span class="badge bg-dark bg-opacity-10 text-dark px-2 py-1.5 rounded-3 fw-semibold">
-                                    <i class="fa-solid fa-book me-1"></i>
-                                    {{ $item->mataPelajaran->nama_mapel }}
-                                </span>
+                                <div class="d-flex flex-wrap gap-1">
+                                    @foreach($row->items as $assignment)
+                                        <span class="mapel-badge">
+                                            <i class="fa-solid fa-book"></i>
+                                            {{ $assignment->mataPelajaran->nama_mapel }}
+                                        </span>
+                                    @endforeach
+                                </div>
                             </td>
                             <td>
-                                @if($item->kelas->count())
-                                    <div class="d-flex flex-wrap gap-1 mb-1">
-                                        @foreach($item->kelas as $kelas)
-                                            <span class="kelas-badge">{{ $kelas->nama_kelas }}</span>
-                                        @endforeach
-                                    </div>
-                                    <small class="text-muted">{{ $item->kelas->count() }} Kelas</small>
-                                @else
-                                    <span class="badge bg-secondary bg-opacity-10 text-secondary">Belum ada kelas</span>
-                                @endif
+                                <div class="fw-bold text-dark">{{ $row->total_kelas }} Kelas</div>
+                                <small class="text-muted">{{ $row->total_mapel }} Mata Pelajaran</small>
                             </td>
                             <td>
-                                <div class="fw-semibold text-dark">{{ $item->tahunAjaran->nama_tahun }}</div>
-                                <small class="text-muted">{{ ucfirst($item->tahunAjaran->semester) }}</small>
+                                <div class="fw-semibold text-dark">{{ optional($row->tahunAjaran)->nama_tahun }}</div>
+                                <small class="text-muted">{{ ucfirst(optional($row->tahunAjaran)->semester) }}</small>
                             </td>
                             <td class="text-end">
-                                <div class="d-inline-flex">
 
-                                    <a href="{{ route('guru-mapel.edit', $item->id) }}"
-                                        class="action-icon-btn btn-icon-edit"
-                                        title="Edit">
-                                        <i class="fa-solid fa-pen"></i>
+                                <div class="action-group">
+
+                                    {{-- Detail --}}
+                                    <a href="{{ route('guru-mapel.show', $row->guru->id) }}"
+                                        class="action-btn action-detail"
+                                        title="Lihat Detail">
+
+                                        <i class="fa-solid fa-eye"></i>
+
                                     </a>
 
-                                    <form action="{{ route('guru-mapel.destroy', $item->id) }}"
+
+                                    {{-- Edit --}}
+                                    @if($row->items->first())
+
+                                    <a href="{{ route('guru-mapel.edit', $row->items->first()->id) }}"
+                                        class="action-btn action-edit"
+                                        title="Edit">
+
+                                        <i class="fa-solid fa-pen"></i>
+
+                                    </a>
+
+                                    @endif
+
+
+
+                                    <form action="{{ route('guru-mapel.destroy', $row->guru->id) }}"
                                         method="POST"
-                                        class="form-delete d-inline">
+                                        class="form-delete">
+
                                         @csrf
                                         @method('DELETE')
 
                                         <button type="submit"
-                                            class="action-icon-btn btn-icon-delete"
-                                            title="Hapus">
+                                            class="action-btn action-delete"
+                                            title="Hapus Semua Penugasan">
+
                                             <i class="fa-solid fa-trash"></i>
+
                                         </button>
+
                                     </form>
 
                                 </div>
+
                             </td>
                         </tr>
                         @empty
@@ -533,7 +791,7 @@
             @if($guruMapels->hasPages())
             <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mt-4 pagination-container">
                 <small class="text-muted mb-2 mb-md-0">
-                    Menampilkan <strong>{{ $guruMapels->firstItem() }}</strong> - <strong>{{ $guruMapels->lastItem() }}</strong> dari <strong>{{ $guruMapels->total() }}</strong> data
+                    Menampilkan <strong>{{ $guruMapels->firstItem() }}</strong> - <strong>{{ $guruMapels->lastItem() }}</strong> dari <strong>{{ $guruMapels->total() }}</strong> guru
                 </small>
                 {{ $guruMapels->links('vendor.pagination.bootstrap-4') }}
             </div>
