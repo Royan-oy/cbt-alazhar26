@@ -5,7 +5,7 @@
 @section('content')
 <style>
     /* =========================================
-       MODERN DASHBOARD & REKAP STYLES
+       LEADERBOARD REKAP STYLES
        ========================================= */
     :root {
         --primary-dark: #0f172a;
@@ -84,29 +84,6 @@
         border-bottom-left-radius: 10px;
     }
 
-    /* FILTER PILLS STYLING (SAMAKAN PERSIS DENGAN JADWAL UJIAN INDEX) */
-    .custom-filter-pills .btn-view-mode {
-        color: #64748b;
-        background-color: #ffffff;
-        border: 1px solid #e2e8f0;
-        text-decoration: none;
-        transition: all 0.2s ease;
-        display: inline-flex;
-        align-items: center;
-        font-size: 13px;
-        font-weight: 600;
-    }
-    .custom-filter-pills .btn-view-mode:hover {
-        background-color: #f1f5f9;
-        color: #0284c7;
-    }
-    .custom-filter-pills .btn-view-mode.active {
-        background: linear-gradient(135deg, #38bdf8, #0284c7) !important;
-        color: #ffffff !important;
-        border-color: #0284c7;
-        box-shadow: 0 4px 12px rgba(2, 132, 199, 0.25);
-    }
-
     /* Export Button */
     .export-btn {
         display: inline-flex;
@@ -122,6 +99,7 @@
         border: none;
         box-shadow: 0 4px 10px rgba(16, 185, 129, 0.2);
         transition: all 0.2s ease;
+        cursor: pointer;
     }
     .export-btn:hover {
         background: linear-gradient(135deg, #059669, #047857);
@@ -129,181 +107,261 @@
         transform: translateY(-2px);
         box-shadow: 0 6px 15px rgba(16, 185, 129, 0.3);
     }
+    .export-btn.dropdown-toggle::after {
+        margin-left: 0.35rem;
+    }
 
-    /* Rekap Table Styling (Grouped by Subject - 100% Fit) */
-    .rekap-card {
+    /* =============================================
+       LEADERBOARD TABLE — PREMIUM DESIGN
+       ============================================= */
+    .leaderboard-card {
         background: #ffffff;
         border: 1px solid var(--border-color);
-        border-radius: 1rem;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03);
+        border-radius: 1.25rem;
+        box-shadow: 0 4px 24px -4px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(0, 0, 0, 0.03);
         overflow: hidden;
+        position: relative;
+    }
+    .leaderboard-card::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, #0284c7, #38bdf8, #7dd3fc, #38bdf8, #0284c7);
+        background-size: 200% 100%;
+        animation: shimmerBar 3s ease infinite;
+        z-index: 5;
+    }
+    @keyframes shimmerBar {
+        0%, 100% { background-position: 200% 0; }
+        50% { background-position: 0% 0; }
     }
 
-    .rekap-table-wrapper {
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-        width: 100%;
-    }
-
-    .rekap-table {
+    .leaderboard-table {
         border-collapse: separate;
         border-spacing: 0;
         width: 100%;
         margin-bottom: 0;
     }
 
-    .rekap-table thead th {
-        background: #f8fafc;
-        color: #475569;
-        font-size: 0.75rem;
-        font-weight: 700;
+    .leaderboard-table thead th {
+        background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+        color: #334155;
+        font-size: 0.6875rem;
+        font-weight: 800;
         text-transform: uppercase;
-        letter-spacing: 0.05em;
-        padding: 0.9rem 0.75rem;
-        border-bottom: 2px solid var(--border-color);
-        border-right: 1px solid #f1f5f9;
+        letter-spacing: 0.08em;
+        padding: 1rem 1.25rem;
+        border-bottom: 2px solid #e2e8f0;
         white-space: nowrap;
         text-align: center;
         vertical-align: middle;
     }
-    .rekap-table thead th:first-child,
-    .rekap-table thead th:nth-child(2) {
+    .leaderboard-table thead th:nth-child(2) {
         text-align: left;
     }
 
-    .rekap-table tbody tr {
-        transition: background-color 0.2s ease;
+    .leaderboard-table tbody tr {
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     }
-    .rekap-table tbody tr:hover td { 
-        background-color: #f1f5f9; 
+    .leaderboard-table tbody tr:nth-child(even) td {
+        background-color: #fafbfc;
     }
-    .rekap-table tbody td {
-        padding: 0.75rem;
+    .leaderboard-table tbody tr:hover td {
+        background-color: #eef5ff !important;
+    }
+    .leaderboard-table tbody tr.rank-gold:hover td { background-color: #fefce8 !important; }
+    .leaderboard-table tbody tr.rank-silver:hover td { background-color: #f5f5f5 !important; }
+    .leaderboard-table tbody tr.rank-bronze:hover td { background-color: #fff7ed !important; }
+
+    .leaderboard-table tbody td {
+        padding: 0.875rem 1.25rem;
         font-size: 0.875rem;
         color: #334155;
-        border-bottom: 1px solid var(--border-color);
-        border-right: 1px solid #f1f5f9;
+        border-bottom: 1px solid #f1f5f9;
         vertical-align: middle;
         text-align: center;
-        white-space: nowrap;
         background-color: #ffffff;
+        transition: background-color 0.2s ease;
     }
-    .rekap-table tbody td:first-child,
-    .rekap-table tbody td:nth-child(2) {
+    .leaderboard-table tbody td:nth-child(2) {
         text-align: left;
     }
 
-    /* Sticky Columns Setup */
-    .sticky-col {
-        position: sticky;
-        z-index: 10;
-        background-color: inherit;
+    /* Rank Highlight Rows */
+    .leaderboard-table tbody tr.rank-gold td {
+        background-color: #fffbeb;
     }
-    .rekap-table thead th.sticky-col {
-        background-color: #f8fafc;
-        z-index: 11;
+    .leaderboard-table tbody tr.rank-silver td {
+        background-color: #fafafa;
     }
-    
-    .col-no { left: 0; min-width: 45px; max-width: 45px; }
-    .col-nama { left: 45px; min-width: 220px; max-width: 250px; }
-
-    .rekap-table td.sticky-col, .rekap-table th.sticky-col {
-        box-shadow: 1px 0 0 0 #e2e8f0; 
-        border-right: none !important;
+    .leaderboard-table tbody tr.rank-bronze td {
+        background-color: #fff7ed;
     }
 
-    /* Score Chips & Interactive Popover */
-    .score-chip {
+    /* Ranking Badges */
+    .rank-badge {
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        padding: 0.25rem 0.75rem;
-        border-radius: 9999px;
-        font-size: 0.75rem;
-        font-weight: 700;
-        min-width: 44px;
-        cursor: pointer;
-        transition: transform 0.15s ease;
-    }
-    .score-chip:hover {
-        transform: scale(1.08);
-    }
-    .score-high { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
-    .score-mid  { background: #fef9c3; color: #854d0e; border: 1px solid #fef08a; }
-    .score-low  { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
-    .score-none { background: #f1f5f9; color: #94a3b8; cursor: default; }
-
-    .avg-chip {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        padding: 0.3rem 0.85rem;
-        border-radius: 9999px;
-        font-size: 0.8125rem;
-        font-weight: 800;
-        background: #e0f2fe;
-        color: #0369a1;
-        border: 1px solid #bae6fd;
-        min-width: 50px;
-    }
-
-    .avatar-student {
         width: 36px; height: 36px;
         border-radius: 50%;
-        background: linear-gradient(135deg, #38bdf8, #0284c7);
-        color: #fff;
         font-size: 0.8rem;
+        font-weight: 800;
+        line-height: 1;
+    }
+    .rank-1 {
+        background: linear-gradient(135deg, #fbbf24, #f59e0b);
+        color: #78350f;
+        box-shadow: 0 2px 8px rgba(245, 158, 11, 0.35);
+        animation: pulseGold 2s ease-in-out infinite;
+    }
+    .rank-2 {
+        background: linear-gradient(135deg, #d1d5db, #9ca3af);
+        color: #374151;
+        box-shadow: 0 2px 6px rgba(156, 163, 175, 0.3);
+    }
+    .rank-3 {
+        background: linear-gradient(135deg, #fdba74, #f97316);
+        color: #7c2d12;
+        box-shadow: 0 2px 6px rgba(249, 115, 22, 0.3);
+    }
+    .rank-normal {
+        background: #f1f5f9;
+        color: #94a3b8;
+        font-weight: 600;
+        width: 32px; height: 32px;
+        font-size: 0.75rem;
+    }
+    @keyframes pulseGold {
+        0%, 100% { box-shadow: 0 2px 8px rgba(245, 158, 11, 0.35); }
+        50% { box-shadow: 0 2px 16px rgba(245, 158, 11, 0.55); }
+    }
+
+    /* Avatar */
+    .avatar-student {
+        width: 40px; height: 40px;
+        border-radius: 12px;
+        color: #fff;
+        font-size: 0.85rem;
         font-weight: 700;
         display: inline-flex;
         align-items: center;
         justify-content: center;
         flex-shrink: 0;
-        box-shadow: 0 2px 4px rgba(2, 132, 199, 0.2);
+        transition: transform 0.2s ease;
+    }
+    .leaderboard-table tbody tr:hover .avatar-student {
+        transform: scale(1.08);
+    }
+    .avatar-v1 { background: linear-gradient(135deg, #38bdf8, #0284c7); box-shadow: 0 2px 6px rgba(2, 132, 199, 0.2); }
+    .avatar-v2 { background: linear-gradient(135deg, #a78bfa, #7c3aed); box-shadow: 0 2px 6px rgba(124, 58, 237, 0.2); }
+    .avatar-v3 { background: linear-gradient(135deg, #34d399, #059669); box-shadow: 0 2px 6px rgba(5, 150, 105, 0.2); }
+    .avatar-v4 { background: linear-gradient(135deg, #fb923c, #ea580c); box-shadow: 0 2px 6px rgba(234, 88, 12, 0.2); }
+    .avatar-v5 { background: linear-gradient(135deg, #f472b6, #db2777); box-shadow: 0 2px 6px rgba(219, 39, 119, 0.2); }
+    .avatar-v6 { background: linear-gradient(135deg, #fbbf24, #d97706); box-shadow: 0 2px 6px rgba(217, 119, 6, 0.2); }
+
+    /* Score Chip */
+    .score-chip {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.35rem 1rem;
+        border-radius: 10px;
+        font-size: 0.875rem;
+        font-weight: 800;
+        min-width: 56px;
+        letter-spacing: -0.01em;
+    }
+    .score-high {
+        background: linear-gradient(135deg, #dcfce7, #bbf7d0);
+        color: #15803d;
+        border: 1px solid #86efac;
+        box-shadow: 0 1px 4px rgba(34, 197, 94, 0.12);
+    }
+    .score-low {
+        background: linear-gradient(135deg, #fee2e2, #fecaca);
+        color: #b91c1c;
+        border: 1px solid #fca5a5;
+        box-shadow: 0 1px 4px rgba(239, 68, 68, 0.12);
+    }
+    .score-none {
+        background: #f8fafc;
+        color: #cbd5e1;
+        border: 1px dashed #e2e8f0;
+        font-size: 1rem;
     }
 
-    /* Student Cards (View Mode 2) */
-    .student-card {
-        background: #ffffff;
-        border: 1px solid var(--border-color);
-        border-radius: 1rem;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        overflow: hidden;
-        height: 100%;
-        display: flex;
-        flex-direction: column;
+    /* Detail Button */
+    .btn-detail {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.45rem 1rem;
+        border-radius: 0.625rem;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-decoration: none;
+        color: #0284c7;
+        background: linear-gradient(135deg, #e0f2fe, #bae6fd);
+        border: 1px solid #7dd3fc;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        white-space: nowrap;
     }
-    .student-card:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 10px 20px -3px rgba(0,0,0,0.06);
-        border-color: #cbd5e1;
-    }
-
-    /* Subject Card (View Mode 3) */
-    .subject-summary-card {
-        background: #ffffff;
-        border: 1px solid var(--border-color);
-        border-radius: 1rem;
-        padding: 1.25rem;
-        transition: all 0.3s ease;
-    }
-    .subject-summary-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.05);
+    .btn-detail:hover {
+        background: linear-gradient(135deg, #0284c7, #0369a1);
+        color: #ffffff;
+        border-color: #0284c7;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(2, 132, 199, 0.25);
+        text-decoration: none;
     }
 
-    /* Custom Popover Styling */
-    .popover {
-        border-radius: 0.75rem !important;
-        border: 1px solid #cbd5e1 !important;
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1) !important;
+    /* Empty State */
+    .empty-state-icon {
+        width: 88px; height: 88px;
+        background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
     }
-    .popover-header {
-        background: #f8fafc !important;
-        font-weight: 700 !important;
-        font-size: 12px !important;
-        border-bottom: 1px solid #e2e8f0 !important;
-        border-top-left-radius: 0.75rem !important;
-        border-top-right-radius: 0.75rem !important;
+
+    /* Legend Footer */
+    .legend-footer {
+        background: linear-gradient(180deg, #f8fafc, #f1f5f9);
+        border-top: 1px solid #e2e8f0;
+        padding: 1rem 1.5rem;
+    }
+    .legend-item {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.75rem;
+        color: #64748b;
+        font-weight: 500;
+    }
+    .legend-dot {
+        width: 10px; height: 10px;
+        border-radius: 4px;
+        flex-shrink: 0;
+    }
+    .legend-dot-high { background: linear-gradient(135deg, #4ade80, #22c55e); }
+    .legend-dot-low  { background: linear-gradient(135deg, #f87171, #ef4444); }
+    .legend-dot-none { background: #e2e8f0; border: 1px dashed #cbd5e1; }
+
+    /* Dropdown menu customization */
+    .dropdown-menu {
+        border-radius: 10px !important;
+        border: 1px solid #e2e8f0 !important;
+        box-shadow: 0 10px 24px -4px rgba(15,23,42,0.12) !important;
+        padding: 0.4rem 0 !important;
+    }
+    .dropdown-item {
+        transition: background 0.15s ease;
+    }
+    .dropdown-item:hover {
+        background-color: #f1f5f9 !important;
     }
 
     /* Mobile Responsiveness */
@@ -315,15 +373,20 @@
         .page-header-card h1 {
             font-size: 1.35rem !important;
         }
-        
         .export-btn {
             width: 100%;
             justify-content: center;
         }
-
-        .col-no { min-width: 38px; max-width: 38px; padding: 0.5rem !important; }
-        .col-nama { left: 38px; min-width: 150px; max-width: 160px; padding: 0.5rem !important; white-space: normal; }
-        .col-nama .avatar-student { width: 28px; height: 28px; font-size: 0.7rem; }
+        .leaderboard-table thead th,
+        .leaderboard-table tbody td {
+            padding: 0.65rem 0.75rem;
+        }
+        .avatar-student { width: 34px; height: 34px; font-size: 0.75rem; border-radius: 10px; }
+        .rank-badge { width: 30px; height: 30px; font-size: 0.7rem; }
+        .rank-normal { width: 28px; height: 28px; font-size: 0.65rem; }
+        .score-chip { padding: 0.25rem 0.7rem; font-size: 0.8rem; min-width: 48px; }
+        .btn-detail { padding: 0.35rem 0.75rem; font-size: 0.75rem; }
+        .legend-footer { padding: 0.75rem 1rem; }
     }
 </style>
 
@@ -337,8 +400,8 @@
                     <div>
                         <span class="badge bg-white bg-opacity-10 text-white border border-white border-opacity-25 px-3 py-2 rounded-pill mb-3 d-inline-flex align-items-center gap-2"
                               style="font-size: 0.75rem; font-weight: 600; backdrop-filter: blur(4px);">
-                            <i class="fa-solid fa-clipboard-check"></i>
-                            Rekapitulasi Nilai — Wali Kelas
+                            <i class="fa-solid fa-ranking-star"></i>
+                            Leaderboard Nilai — Wali Kelas
                         </span>
                         <h1 class="fw-bold text-white mb-2" style="font-size: 1.75rem; letter-spacing: -0.5px;">
                             Rekap Nilai Kelas {{ optional($kelas)->nama_kelas ?? '-' }}
@@ -350,10 +413,30 @@
                         </p>
                     </div>
                     <div class="d-flex align-items-center gap-2 flex-wrap">
-                        <a href="{{ route('dashboard-guru.wali-kelas.rekap-nilai.export-pdf') }}" id="btnExportPdf" target="_blank" class="export-btn" style="background-color: #ef4444; border-color: #ef4444; color: #ffffff;">
-                            <i class="fa-solid fa-file-pdf fs-6"></i>
-                            Export PDF
-                        </a>
+                        {{-- DROPDOWN EXPORT PDF --}}
+                        <div class="dropdown d-inline-block">
+                            <button class="export-btn dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false" style="background: linear-gradient(135deg, #ef4444, #dc2626);">
+                                <i class="fa-solid fa-file-pdf fs-6"></i>
+                                Export PDF
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton" style="min-width: 250px;">
+                                <li>
+                                    <a class="dropdown-item py-2 fw-semibold text-dark" style="font-size: 13px;"
+                                       href="{{ route('dashboard-guru.wali-kelas.rekap-nilai.export-pdf') }}" target="_blank">
+                                        <i class="fa-solid fa-list-ol me-2 text-danger"></i> Cetak Leaderboard Kelas
+                                        <small class="d-block text-muted ms-4" style="font-size: 11px;">Semua ujian — format potret</small>
+                                    </a>
+                                </li>
+                                <li id="pdf-jenis-ujian-li" style="display: none;">
+                                    <a class="dropdown-item py-2 fw-semibold text-dark" id="btnExportPdfJenis"
+                                       style="font-size: 13px;" href="#" target="_blank">
+                                        <i class="fa-solid fa-table me-2 text-primary"></i> Cetak Matriks: <span id="pdf-jenis-ujian-text"></span>
+                                        <small class="d-block text-muted ms-4" style="font-size: 11px;">Matriks per mapel — format lanskap</small>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                        {{-- EXPORT EXCEL --}}
                         <a href="{{ route('dashboard-guru.wali-kelas.rekap-nilai.export') }}" class="export-btn">
                             <i class="fa-solid fa-file-excel fs-6"></i>
                             Export Excel
@@ -426,7 +509,7 @@
             <form method="GET" action="{{ route('dashboard-guru.wali-kelas.rekap-nilai') }}">
                 <div class="row g-3 align-items-end">
                     <!-- Cari Nama / NIS -->
-                    <div class="col-12 col-md-5">
+                    <div class="col-12 col-md-7">
                         <label for="search-input" class="form-label text-muted fw-bold mb-2" style="font-size: 11px; letter-spacing: 0.8px;">CARI SISWA</label>
                         <div class="input-group">
                             <span class="input-group-text input-group-text-modern">
@@ -436,18 +519,8 @@
                         </div>
                     </div>
 
-                    <!-- Filter Status Performa -->
-                    <div class="col-12 col-md-3">
-                        <label for="status-filter-select" class="form-label text-muted fw-bold mb-2" style="font-size: 11px; letter-spacing: 0.8px;">STATUS SISWA</label>
-                        <select id="status-filter-select" class="form-control form-control-modern">
-                            <option value="semua">Semua Status</option>
-                            <option value="tuntas">Tuntas (≥ 75)</option>
-                            <option value="kurang">Belum Tuntas (< 75)</option>
-                        </select>
-                    </div>
-
                     <!-- Filter Jenis Ujian -->
-                    <div class="col-12 col-md-4">
+                    <div class="col-12 col-md-5">
                         @if($allJenisUjian->isNotEmpty())
                             <label for="jenis_ujian" class="form-label text-muted fw-bold mb-2" style="font-size: 11px; letter-spacing: 0.8px;">JENIS UJIAN</label>
                             <select name="jenis_ujian" id="jenis_ujian" class="form-control form-control-modern" onchange="this.form.submit()">
@@ -465,406 +538,189 @@
         </div>
     </div>
 
-    <!-- TITLE SECTION & VIEW SWITCHER PILLS (POSISI DISAMAKAN PERSIS DENGAN JADWAL UJIAN INDEX) -->
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
-        <h5 class="fw-bold mb-0" id="section-title" style="color: #0f172a;">
-            <i class="fa-solid fa-table-cells me-2" style="color: #0284c7;"></i> <span>Rekapitulasi Matriks Mapel</span>
+    <!-- LEADERBOARD SECTION TITLE -->
+    <div class="d-flex align-items-center mb-4 gap-2">
+        <h5 class="fw-bold mb-0" style="color: #0f172a;">
+            <i class="fa-solid fa-ranking-star me-2" style="color: #0284c7;"></i> Peringkat Siswa
         </h5>
-        
-        <!-- BUTTON PILLS MODE TAMPILAN -->
-        <div class="nav nav-pills custom-filter-pills gap-2 flex-wrap" role="tablist">
-            <button type="button" class="nav-link active rounded-pill px-3 py-2 btn-view-mode" data-view="matrix">
-                <i class="fa-solid fa-table-cells me-1"></i> Matriks Mapel
-            </button>
-            <button type="button" class="nav-link rounded-pill px-3 py-2 btn-view-mode" data-view="cards">
-                <i class="fa-solid fa-address-card me-1"></i> Kartu Siswa
-            </button>
-            <button type="button" class="nav-link rounded-pill px-3 py-2 btn-view-mode" data-view="mapel">
-                <i class="fa-solid fa-book-open me-1"></i> Analisis Mapel
-            </button>
-        </div>
+        <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3 py-1" style="font-size: 11px; font-weight: 600;">
+            {{ count($siswas) }} siswa
+        </span>
+        @if($jenisFilter)
+            <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 rounded-pill px-3 py-1" style="font-size: 11px; font-weight: 600;">
+                <i class="fa-solid fa-filter me-1"></i> {{ $jenisFilter }}
+            </span>
+        @endif
     </div>
 
-    <!-- VIEW MODE 1: MATRIKS TABEL (GROUPED BY SUBJECT - 100% PAS LAYAR) -->
-    <div id="view-matrix" class="view-content-section">
-        <div class="rekap-card">
-            @if($ujians->isEmpty())
-                <div class="text-center py-5">
-                    <div class="d-inline-flex align-items-center justify-content-center rounded-circle mb-3" style="width: 80px; height: 80px; background-color: #f1f5f9;">
-                        <i class="fa-solid fa-clipboard-list fa-2x text-muted"></i>
-                    </div>
-                    <h5 class="fw-bold mb-1" style="color: #334155;">Belum Ada Data Ujian</h5>
-                    <p class="mb-0 text-muted" style="font-size: 0.875rem;">Ujian untuk kelas ini belum tersedia atau belum dilaksanakan.</p>
+    <!-- LEADERBOARD TABLE -->
+    <div class="leaderboard-card">
+        @if(count($siswas) === 0)
+            <div class="text-center py-5" style="padding-top: 3rem !important;">
+                <div class="empty-state-icon mb-3 mx-auto">
+                    <i class="fa-solid fa-clipboard-list fa-2x" style="color: #94a3b8;"></i>
                 </div>
-            @else
-            <div class="rekap-table-wrapper">
-                <table class="rekap-table">
-                    <thead>
-                        <tr>
-                            <th class="sticky-col col-no">No</th>
-                            <th class="sticky-col col-nama">Nama Siswa & NIS</th>
-                            @foreach($mapels as $mapel)
-                            <th>{{ $mapel }}</th>
-                            @endforeach
-                            <th>Rata-rata</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse($siswas as $idx => $siswa)
-                        @php
-                            $summary = $studentSummaries->get($siswa->id);
-                            $avg = $summary['avg'] ?? null;
-                            $status = $summary['status'] ?? 'belum';
-                            $mapelScores = $studentMapelMatrix->get($siswa->id, collect());
-                        @endphp
-                        <tr class="siswa-row-item" data-nama="{{ strtolower($siswa->nama) }}" data-nis="{{ $siswa->nis }}" data-status="{{ $status }}">
-                            <td class="sticky-col col-no text-muted text-center fw-medium">{{ $idx + 1 }}</td>
-                            
-                            <!-- Nama Siswa + Subtitle NIS (Merged to Save Width) -->
-                            <td class="sticky-col col-nama">
-                                <div class="d-flex align-items-center gap-2.5">
-                                    <div class="avatar-student">{{ strtoupper(substr($siswa->nama, 0, 2)) }}</div>
-                                    <div class="overflow-hidden">
-                                        <span class="fw-semibold text-dark text-truncate d-block" style="max-width: 190px; font-size: 0.875rem;" title="{{ $siswa->nama }}">{{ $siswa->nama }}</span>
-                                        <small class="text-muted font-monospace d-block" style="font-size: 0.75rem;">NIS: {{ $siswa->nis }}</small>
-                                    </div>
-                                </div>
-                            </td>
-
-                            <!-- Nilai Per Mata Pelajaran (dengan Popover Hover/Click Rincian Ujian) -->
-                            @foreach($mapels as $mapel)
-                            @php
-                                $mapelData = $mapelScores->get($mapel);
-                                $mapelAvg  = $mapelData['avg'] ?? null;
-                                $mapelKkm  = $mapelData['kkm'] ?? 75;
-                                $mapelDetails = $mapelData['details'] ?? [];
-                                $jsonDetails = json_encode($mapelDetails);
-                            @endphp
-                            <td>
-                                @if($mapelAvg !== null)
-                                    @if($mapelAvg >= $mapelKkm)
-                                        <span class="score-chip score-high popover-trigger" tabindex="0" data-mapel="{{ $mapel }}" data-details="{{ $jsonDetails }}">{{ number_format($mapelAvg, 0) }}</span>
-                                    @else
-                                        <span class="score-chip score-low popover-trigger" tabindex="0" data-mapel="{{ $mapel }}" data-details="{{ $jsonDetails }}">{{ number_format($mapelAvg, 0) }}</span>
-                                    @endif
-                                @else
-                                    <span class="score-chip score-none">—</span>
-                                @endif
-                            </td>
-                            @endforeach
-
-                            <!-- Rata-rata Keseluruhan -->
-                            <td>
-                                @if($avg !== null)
-                                    <span class="avg-chip">{{ $avg }}</span>
-                                @else
-                                    <span class="score-chip score-none">—</span>
-                                @endif
-                            </td>
-
-                            <!-- Status Ketuntasan -->
-                            <td>
-                                @if($status == 'tuntas')
-                                    <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2.5 py-1.5 rounded-pill fw-semibold" style="font-size: 11px;">Tuntas</span>
-                                @elseif($status == 'kurang')
-                                    <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-2.5 py-1.5 rounded-pill fw-semibold" style="font-size: 11px;">Belum Tuntas</span>
-                                @else
-                                    <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 px-2.5 py-1.5 rounded-pill fw-semibold" style="font-size: 11px;">Belum Ujian</span>
-                                @endif
-                            </td>
-                        </tr>
-                        @empty
-                        <tr>
-                            <td colspan="{{ 4 + count($mapels) }}" class="text-center py-5 text-muted">
-                                Tidak ada data siswa untuk kelas ini.
-                            </td>
-                        </tr>
-                        @endforelse
-                    </tbody>
-                </table>
+                <h5 class="fw-bold mb-2" style="color: #334155;">Belum Ada Data Ujian</h5>
+                <p class="mb-0 text-muted" style="font-size: 0.875rem; max-width: 360px; margin: 0 auto;">Belum ada data ujian dilaksanakan untuk kelas ini.</p>
             </div>
+        @else
+        <div class="table-responsive">
+            <table class="leaderboard-table">
+                <thead>
+                    <tr>
+                        <th style="width: 80px;">
+                            <i class="fa-solid fa-medal me-1" style="font-size: 10px;"></i> Peringkat
+                        </th>
+                        <th>
+                            <i class="fa-solid fa-user me-1" style="font-size: 10px;"></i> Nama Siswa
+                        </th>
+                        <th style="width: 140px;">
+                            <i class="fa-solid fa-chart-simple me-1" style="font-size: 10px;"></i> Rata-Rata
+                        </th>
+                        <th style="width: 120px;">
+                            <i class="fa-solid fa-gear me-1" style="font-size: 10px;"></i> Aksi
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @php
+                        $avatarVariants = ['avatar-v1','avatar-v2','avatar-v3','avatar-v4','avatar-v5','avatar-v6'];
+                    @endphp
+                    @foreach($siswas as $idx => $siswa)
+                    @php
+                        $summary = $studentSummaries->get($siswa->id);
+                        $avg = $summary['avg'] ?? null;
+                        $status = $summary['status'] ?? 'belum';
+                        $rank = $rankMap[$siswa->id] ?? null;
+                        $avatarClass = $avatarVariants[$idx % count($avatarVariants)];
+                        $rowClass = '';
+                        if ($rank === 1) $rowClass = 'rank-gold';
+                        elseif ($rank === 2) $rowClass = 'rank-silver';
+                        elseif ($rank === 3) $rowClass = 'rank-bronze';
+                    @endphp
+                    <tr class="siswa-row-item {{ $rowClass }}" data-nama="{{ strtolower($siswa->nama) }}" data-nis="{{ $siswa->nis }}">
+                        <!-- Peringkat -->
+                        <td>
+                            @if($rank === 1)
+                                <span class="rank-badge rank-1" title="Peringkat 1">🥇</span>
+                            @elseif($rank === 2)
+                                <span class="rank-badge rank-2" title="Peringkat 2">🥈</span>
+                            @elseif($rank === 3)
+                                <span class="rank-badge rank-3" title="Peringkat 3">🥉</span>
+                            @elseif($rank)
+                                <span class="rank-badge rank-normal">{{ $rank }}</span>
+                            @else
+                                <span class="rank-badge rank-normal">—</span>
+                            @endif
+                        </td>
 
-            <!-- LEGEND INFORMASI -->
-            <div class="px-4 py-3 border-top d-flex flex-column flex-md-row align-items-md-center gap-3" style="background-color: #f8fafc; border-color: var(--border-color) !important; font-size: 0.8125rem; color: #475569;">
-                <div class="fw-semibold me-2"><i class="fa-solid fa-circle-info me-1"></i> Keterangan Nilai & Fitur Interaktif:</div>
+                        <!-- Nama Siswa + NIS + Avatar -->
+                        <td>
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="avatar-student {{ $avatarClass }}">{{ strtoupper(substr($siswa->nama, 0, 2)) }}</div>
+                                <div class="overflow-hidden">
+                                    <span class="fw-semibold text-dark text-truncate d-block" style="max-width: 280px; font-size: 0.9rem; line-height: 1.3;" title="{{ $siswa->nama }}">{{ $siswa->nama }}</span>
+                                    <small class="text-muted font-monospace d-block" style="font-size: 0.7rem; opacity: 0.7;">NIS: {{ $siswa->nis }}</small>
+                                </div>
+                            </div>
+                        </td>
+
+                        <!-- Rata-rata -->
+                        <td>
+                            @if($avg !== null)
+                                @if($avg >= 75)
+                                    <span class="score-chip score-high">{{ $avg }}</span>
+                                @else
+                                    <span class="score-chip score-low">{{ $avg }}</span>
+                                @endif
+                            @else
+                                <span class="score-chip score-none">—</span>
+                            @endif
+                        </td>
+
+                        <!-- Aksi -->
+                        <td>
+                            <a href="{{ route('dashboard-guru.wali-kelas.rekap-nilai.detail-siswa', $siswa->id) }}" class="btn-detail" title="Lihat detail nilai {{ $siswa->nama }}">
+                                <i class="fa-solid fa-eye"></i>
+                                Detail
+                            </a>
+                        </td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+
+        <!-- LEGEND FOOTER -->
+        <div class="legend-footer">
+            <div class="d-flex flex-column flex-md-row align-items-md-center gap-3">
                 <div class="d-flex flex-wrap gap-3 align-items-center">
-                    <span class="d-flex align-items-center gap-2"><span class="score-chip score-high" style="min-width:28px;">—</span> ≥ KKM (Tuntas)</span>
-                    <span class="d-flex align-items-center gap-2"><span class="score-chip score-low" style="min-width:28px;">—</span> &lt; KKM (Belum Tuntas)</span>
-                    <span class="text-muted opacity-50">|</span>
-                    <span class="text-muted"><i class="fa-solid fa-hand-pointer me-1"></i> Sentuh / Hover angka nilai mapel untuk melihat rincian tiap ujian.</span>
+                    <span class="legend-item">
+                        <span class="legend-dot legend-dot-high"></span> ≥ KKM (Tuntas)
+                    </span>
+                    <span class="legend-item">
+                        <span class="legend-dot legend-dot-low"></span> &lt; KKM (Belum Tuntas)
+                    </span>
+                    <span class="legend-item">
+                        <span class="legend-dot legend-dot-none"></span> Belum Ujian
+                    </span>
                 </div>
+                <span style="color: #e2e8f0; font-size: 14px;" class="d-none d-md-inline">|</span>
+                <span class="legend-item">
+                    🥇🥈🥉 Peringkat 3 besar berdasarkan rata-rata
+                </span>
             </div>
-            @endif
         </div>
-    </div>
-
-    <!-- VIEW MODE 2: KARTU SISWA (STUDENT CARDS) -->
-    <div id="view-cards" class="view-content-section" style="display: none;">
-        <div class="row g-4" id="student-card-grid">
-            @forelse($siswas as $siswa)
-            @php
-                $summary = $studentSummaries->get($siswa->id);
-                $avg = $summary['avg'] ?? null;
-                $status = $summary['status'] ?? 'belum';
-                $nilaiSiswa = $nilaiData->get($siswa->id, collect())->keyBy('ujian_id');
-            @endphp
-            <div class="col-12 col-md-6 col-xl-4 student-card-wrapper" data-nama="{{ strtolower($siswa->nama) }}" data-nis="{{ $siswa->nis }}" data-status="{{ $status }}">
-                <div class="student-card p-4">
-                    <div class="d-flex align-items-center justify-content-between mb-3">
-                        <div class="d-flex align-items-center gap-3">
-                            <div class="avatar-student" style="width: 44px; height: 44px; font-size: 1rem;">{{ strtoupper(substr($siswa->nama, 0, 2)) }}</div>
-                            <div class="overflow-hidden">
-                                <h6 class="fw-bold text-dark mb-0 text-truncate" title="{{ $siswa->nama }}">{{ $siswa->nama }}</h6>
-                                <small class="text-muted font-monospace">NIS: {{ $siswa->nis }}</small>
-                            </div>
-                        </div>
-                        @if($status == 'tuntas')
-                            <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2.5 py-1.5 rounded-pill fw-semibold" style="font-size: 11px;">Tuntas</span>
-                        @elseif($status == 'kurang')
-                            <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-2.5 py-1.5 rounded-pill fw-semibold" style="font-size: 11px;">Belum Tuntas</span>
-                        @else
-                            <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 px-2.5 py-1.5 rounded-pill fw-semibold" style="font-size: 11px;">Belum Ujian</span>
-                        @endif
-                    </div>
-
-                    <div class="p-3 bg-light rounded-4 mb-3 border" style="border-color: #f1f5f9 !important;">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <span class="text-muted small fw-medium">Rata-Rata Nilai</span>
-                            <span class="fs-5 fw-bold text-primary-custom">{{ $avg !== null ? number_format($avg, 1) : '—' }}</span>
-                        </div>
-                    </div>
-
-                    <div class="mt-auto">
-                        <small class="text-uppercase fw-bold d-block text-muted mb-2" style="font-size: 10px; letter-spacing: 0.5px;">Rincian Ujian Terdaftar</small>
-                        <div class="d-flex flex-column gap-2" style="max-height: 180px; overflow-y: auto;">
-                            @foreach($ujians as $ujian)
-                            @php
-                                $record = $nilaiSiswa->get($ujian->id);
-                                $nilai  = $record ? (float) $record->nilai_akhir : null;
-                                $kkmUjian = $ujian->kkm ?? 75;
-                            @endphp
-                            <div class="d-flex align-items-center justify-content-between p-2 rounded-3" style="background: #f8fafc; font-size: 12px;">
-                                <span class="text-dark fw-medium text-truncate me-2" style="max-width: 200px;">
-                                    {{ $ujian->nama_mapel }} <small class="text-muted">({{ $ujian->nama_ujian }})</small>
-                                </span>
-                                <div>
-                                    @if($nilai !== null)
-                                        @if($nilai >= $kkmUjian)
-                                            <span class="badge bg-success bg-opacity-10 text-success fw-bold">{{ number_format($nilai, 0) }}</span>
-                                        @else
-                                            <span class="badge bg-danger bg-opacity-10 text-danger fw-bold">{{ number_format($nilai, 0) }}</span>
-                                        @endif
-                                    @else
-                                        <span class="text-muted">—</span>
-                                    @endif
-                                </div>
-                            </div>
-                            @endforeach
-                        </div>
-                    </div>
-                </div>
-            </div>
-            @empty
-            <div class="col-12">
-                <div class="text-center py-5 text-muted">Belum ada data siswa.</div>
-            </div>
-            @endforelse
-        </div>
-    </div>
-
-    <!-- VIEW MODE 3: RINGKASAN MAPEL (SUBJECT ANALYSIS) -->
-    <div id="view-mapel" class="view-content-section" style="display: none;">
-        <div class="row g-4">
-            @forelse($mapelStats as $stat)
-            <div class="col-12 col-md-6 col-xl-4">
-                <div class="subject-summary-card">
-                    <div class="d-flex justify-content-between align-items-start mb-3">
-                        <div>
-                            <h6 class="fw-bold text-dark mb-1">{{ $stat['nama_mapel'] }}</h6>
-                            <small class="text-muted"><i class="fa-solid fa-file-lines me-1"></i> {{ $stat['total_ujian'] }} Ujian Dilaksanakan</small>
-                        </div>
-                        <span class="badge bg-primary bg-opacity-10 text-primary-custom px-3 py-2 rounded-pill fw-bold" style="font-size: 14px;">
-                            {{ $stat['rerata'] }}
-                        </span>
-                    </div>
-
-                    <div class="mb-3">
-                        <div class="d-flex justify-content-between small text-muted mb-1" style="font-size: 11px;">
-                            <span>Rerata Capaian Mapel</span>
-                            <span>{{ $stat['rerata'] }}%</span>
-                        </div>
-                        <div class="progress" style="height: 8px; border-radius: 4px; background: #e2e8f0;">
-                            <div class="progress-bar bg-primary" role="progressbar" style="width: {{ min(100, $stat['rerata']) }}%;"></div>
-                        </div>
-                    </div>
-
-                    <div class="row g-2 text-center pt-2 border-top" style="font-size: 12px;">
-                        <div class="col-6">
-                            <span class="text-muted d-block" style="font-size: 11px;">Nilai Tertinggi</span>
-                            <span class="fw-bold text-success"><i class="fa-solid fa-arrow-up me-1"></i> {{ $stat['max'] }}</span>
-                        </div>
-                        <div class="col-6 border-start">
-                            <span class="text-muted d-block" style="font-size: 11px;">Nilai Terendah</span>
-                            <span class="fw-bold text-danger"><i class="fa-solid fa-arrow-down me-1"></i> {{ $stat['min'] }}</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            @empty
-            <div class="col-12">
-                <div class="text-center py-5 text-muted">Belum ada analisis data mata pelajaran.</div>
-            </div>
-            @endforelse
-        </div>
+        @endif
     </div>
 
 </div>
 
-<!-- JAVASCRIPT: VIEW SWITCHER, LIVE SEARCH, DAN BOOTSTRAP POPOVERS -->
+<!-- JAVASCRIPT: LIVE SEARCH & DROPDOWN PDF -->
 <script>
 document.addEventListener("DOMContentLoaded", function() {
-    const viewBtns = document.querySelectorAll('.btn-view-mode');
-    const viewSections = document.querySelectorAll('.view-content-section');
     const searchInput = document.getElementById('search-input');
-    const statusSelect = document.getElementById('status-filter-select');
-    const sectionTitleText = document.querySelector('#section-title span');
-    const sectionTitleIcon = document.querySelector('#section-title i');
-
-    const titleMap = {
-        'matrix': { text: 'Rekapitulasi Matriks Mapel', icon: 'fa-table-cells' },
-        'cards': { text: 'Kartu Performa Siswa', icon: 'fa-address-card' },
-        'mapel': { text: 'Analisis Mata Pelajaran', icon: 'fa-book-open' }
-    };
-
-    // 1. Inisialisasi Bootstrap Popovers tanpa Bocor Kode HTML
-    const popoverTriggers = document.querySelectorAll('.popover-trigger');
-    popoverTriggers.forEach(el => {
-        const detailsJson = el.getAttribute('data-details');
-        const mapelNama = el.getAttribute('data-mapel');
-        if (!detailsJson) return;
-
-        try {
-            const details = JSON.parse(detailsJson);
-            if (!details || details.length === 0) return;
-
-            let html = '<div class="p-1" style="font-size: 12px; min-width: 170px;">';
-            details.forEach(d => {
-                const scoreVal = d.nilai !== null ? Math.round(d.nilai) : 'Belum';
-                let badgeStyle = 'background: #f1f5f9; color: #64748b;';
-                if (d.nilai !== null) {
-                    const kkm = d.kkm !== undefined ? d.kkm : 75;
-                    if (d.nilai >= kkm) badgeStyle = 'background: #dcfce7; color: #166534; font-weight: 700;';
-                    else badgeStyle = 'background: #fee2e2; color: #991b1b; font-weight: 700;';
-                }
-                html += `<div class="d-flex justify-content-between align-items-center gap-3 mb-1.5 pb-1 border-bottom border-light">
-                            <span class="fw-medium text-dark text-truncate" style="max-width: 130px;" title="${d.nama_ujian}">${d.nama_ujian}</span>
-                            <span class="badge rounded-pill px-2 py-1" style="${badgeStyle}">${scoreVal}</span>
-                         </div>`;
-            });
-            html += '</div>';
-
-            new bootstrap.Popover(el, {
-                html: true,
-                trigger: 'hover focus',
-                title: `Rincian: ${mapelNama}`,
-                content: html,
-                placement: 'top'
-            });
-        } catch(e) {}
-    });
-
-    // 2. View Switcher Logic & Header Update
-    viewBtns.forEach(btn => {
-        btn.addEventListener('click', function() {
-            viewBtns.forEach(b => b.classList.remove('active'));
-            this.classList.add('active');
-
-            const targetView = this.dataset.view;
-            viewSections.forEach(sec => {
-                if (sec.id === `view-${targetView}`) {
-                    sec.style.display = 'block';
-                } else {
-                    sec.style.display = 'none';
-                }
-            });
-
-            // Update judul seksi & ikon
-            if (titleMap[targetView] && sectionTitleText && sectionTitleIcon) {
-                sectionTitleText.textContent = titleMap[targetView].text;
-                sectionTitleIcon.className = `fa-solid ${titleMap[targetView].icon} me-2`;
-            }
-        });
-    });
-
-    // 3. Instant Live Search & Status Filter + PDF Sync
-    const btnExportPdf = document.getElementById('btnExportPdf');
     const jenisSelect = document.getElementById('jenis_ujian');
+    const btnExportPdfJenis = document.getElementById('btnExportPdfJenis');
+    const pdfJenisLi = document.getElementById('pdf-jenis-ujian-li');
+    const pdfJenisText = document.getElementById('pdf-jenis-ujian-text');
     const basePdfUrl = "{{ route('dashboard-guru.wali-kelas.rekap-nilai.export-pdf') }}";
 
-    function updatePdfUrl() {
-        if (!btnExportPdf) return;
-        const query = searchInput ? searchInput.value.trim() : '';
-        const statusVal = statusSelect ? statusSelect.value : 'semua';
+    // Dropdown PDF: tampilkan opsi cetak matriks jika jenis ujian dipilih
+    function updatePdfUrls() {
         const jenisVal = jenisSelect ? jenisSelect.value : '';
 
-        const params = new URLSearchParams();
-        if (query) params.append('search', query);
-        if (statusVal && statusVal !== 'semua') params.append('status', statusVal);
-        if (jenisVal) params.append('jenis_ujian', jenisVal);
-
-        const queryString = params.toString();
-        btnExportPdf.href = queryString ? `${basePdfUrl}?${queryString}` : basePdfUrl;
+        if (jenisVal && btnExportPdfJenis && pdfJenisLi && pdfJenisText) {
+            pdfJenisText.textContent = jenisVal;
+            btnExportPdfJenis.href = `${basePdfUrl}?jenis_ujian=${encodeURIComponent(jenisVal)}`;
+            pdfJenisLi.style.display = 'block';
+        } else if (pdfJenisLi) {
+            pdfJenisLi.style.display = 'none';
+        }
     }
 
+    // Live Search filter baris tabel
     function filterStudents() {
-        const query = searchInput.value.toLowerCase().trim();
-        const statusVal = statusSelect.value;
-
-        // Filter Tabel Matriks
+        const query = searchInput ? searchInput.value.toLowerCase().trim() : '';
         const tableRows = document.querySelectorAll('.siswa-row-item');
+
         tableRows.forEach(row => {
             const nama = row.dataset.nama || '';
             const nis = row.dataset.nis || '';
-            const status = row.dataset.status || '';
-
             const matchQuery = !query || nama.includes(query) || nis.includes(query);
-            const matchStatus = (statusVal === 'semua') || (status === statusVal);
-
-            if (matchQuery && matchStatus) {
-                row.style.display = '';
-            } else {
-                row.style.display = 'none';
-            }
+            row.style.display = matchQuery ? '' : 'none';
         });
-
-        // Filter Kartu Siswa
-        const studentCards = document.querySelectorAll('.student-card-wrapper');
-        studentCards.forEach(card => {
-            const nama = card.dataset.nama || '';
-            const nis = card.dataset.nis || '';
-            const status = card.dataset.status || '';
-
-            const matchQuery = !query || nama.includes(query) || nis.includes(query);
-            const matchStatus = (statusVal === 'semua') || (status === statusVal);
-
-            if (matchQuery && matchStatus) {
-                card.style.display = 'block';
-            } else {
-                card.style.display = 'none';
-            }
-        });
-
-        updatePdfUrl();
     }
 
     if (searchInput) {
         searchInput.addEventListener('input', filterStudents);
     }
-    if (statusSelect) {
-        statusSelect.addEventListener('change', filterStudents);
+    if (jenisSelect) {
+        jenisSelect.addEventListener('change', updatePdfUrls);
     }
-    updatePdfUrl();
+
+    // Inisialisasi awal (saat halaman dimuat dengan jenis ujian sudah aktif)
+    updatePdfUrls();
 });
 </script>
 @endsection
