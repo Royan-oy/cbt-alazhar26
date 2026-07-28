@@ -349,7 +349,11 @@
                             <span><i class="fa-solid fa-calendar-alt me-1"></i> Tahun Ajaran {{ optional($waliKelas->tahunAjaran)->nama_tahun ?? '-' }}</span>
                         </p>
                     </div>
-                    <div>
+                    <div class="d-flex align-items-center gap-2 flex-wrap">
+                        <a href="{{ route('dashboard-guru.wali-kelas.rekap-nilai.export-pdf') }}" id="btnExportPdf" target="_blank" class="export-btn" style="background-color: #ef4444; border-color: #ef4444; color: #ffffff;">
+                            <i class="fa-solid fa-file-pdf fs-6"></i>
+                            Export PDF
+                        </a>
                         <a href="{{ route('dashboard-guru.wali-kelas.rekap-nilai.export') }}" class="export-btn">
                             <i class="fa-solid fa-file-excel fs-6"></i>
                             Export Excel
@@ -793,7 +797,26 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     });
 
-    // 3. Instant Live Search & Status Filter
+    // 3. Instant Live Search & Status Filter + PDF Sync
+    const btnExportPdf = document.getElementById('btnExportPdf');
+    const jenisSelect = document.getElementById('jenis_ujian');
+    const basePdfUrl = "{{ route('dashboard-guru.wali-kelas.rekap-nilai.export-pdf') }}";
+
+    function updatePdfUrl() {
+        if (!btnExportPdf) return;
+        const query = searchInput ? searchInput.value.trim() : '';
+        const statusVal = statusSelect ? statusSelect.value : 'semua';
+        const jenisVal = jenisSelect ? jenisSelect.value : '';
+
+        const params = new URLSearchParams();
+        if (query) params.append('search', query);
+        if (statusVal && statusVal !== 'semua') params.append('status', statusVal);
+        if (jenisVal) params.append('jenis_ujian', jenisVal);
+
+        const queryString = params.toString();
+        btnExportPdf.href = queryString ? `${basePdfUrl}?${queryString}` : basePdfUrl;
+    }
+
     function filterStudents() {
         const query = searchInput.value.toLowerCase().trim();
         const statusVal = statusSelect.value;
@@ -831,6 +854,8 @@ document.addEventListener("DOMContentLoaded", function() {
                 card.style.display = 'none';
             }
         });
+
+        updatePdfUrl();
     }
 
     if (searchInput) {
@@ -839,6 +864,7 @@ document.addEventListener("DOMContentLoaded", function() {
     if (statusSelect) {
         statusSelect.addEventListener('change', filterStudents);
     }
+    updatePdfUrl();
 });
 </script>
 @endsection

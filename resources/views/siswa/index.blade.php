@@ -20,12 +20,21 @@
         padding: 32px;
         color: white;
         position: relative;
-        overflow: hidden;
         box-shadow: 0 20px 40px rgba(15, 23, 42, 0.08);
         border: 1px solid rgba(255, 255, 255, 0.05);
+        z-index: 10;
     }
 
-    .page-header::after {
+    .page-header-bg {
+        position: absolute;
+        inset: 0;
+        border-radius: 24px;
+        overflow: hidden;
+        pointer-events: none;
+        z-index: 0;
+    }
+
+    .page-header-bg::after {
         content: '';
         position: absolute;
         width: 300px;
@@ -34,7 +43,11 @@
         right: -50px;
         top: -80px;
         background: radial-gradient(circle, rgba(14, 165, 233, 0.15) 0%, rgba(14, 165, 233, 0) 70%);
-        pointer-events: none;
+    }
+
+    .page-header-content {
+        position: relative;
+        z-index: 1;
     }
 
     .stat-card {
@@ -46,6 +59,7 @@
         display: flex;
         align-items: center;
         gap: 16px;
+        height: 100%;
     }
 
     .stat-icon {
@@ -56,6 +70,7 @@
         align-items: center;
         justify-content: center;
         font-size: 20px;
+        flex-shrink: 0;
     }
 
     .content-card {
@@ -85,8 +100,11 @@
         border-radius: 14px;
         padding: 12px 24px;
         font-weight: 600;
-        box-shadow: 0 4px 12px rgba(14, 165, 233, 0.2);
         white-space: nowrap;
+    }
+
+    .btn-add.btn-info {
+        box-shadow: 0 4px 12px rgba(14, 165, 233, 0.25);
     }
 
     .btn-action-trigger {
@@ -96,7 +114,7 @@
         font-weight: 600;
     }
 
-    .table-responsive { border-radius: 16px; overflow: hidden; }
+    .table-responsive { border-radius: 16px; overflow: visible; }
 
     .table thead th {
         font-size: 11px;
@@ -118,30 +136,6 @@
 
     .table tbody tr:hover { background-color: #f8fafc; }
 
-    .action-icon-btn {
-        width: 40px;
-        height: 40px;
-        border: none;
-        border-radius: 12px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        margin-left: 4px;
-        text-decoration: none;
-        transition: all 0.2s ease;
-    }
-
-    .action-icon-btn:hover { transform: translateY(-2px); }
-
-    .btn-icon-edit { background: #f0fdfa; color: #0d9488; }
-    .btn-icon-edit:hover { background: #0d9488; color: white; }
-
-    .btn-icon-delete { background: #fff5f5; color: #e11d48; }
-    .btn-icon-delete:hover { background: #e11d48; color: white; }
-
-    .btn-icon-info { background: #eff6ff; color: #2563eb; }
-    .btn-icon-info:hover { background: #2563eb; color: white; }
-
     .pagination { gap: 6px; margin-bottom: 0; }
 
     .pagination .page-item .page-link {
@@ -160,11 +154,15 @@
 
     @media (max-width: 768px) {
         .page-header { padding: 24px; border-radius: 18px; text-align: center; }
-        .page-header .d-flex { flex-direction: column; gap: 20px; }
+        .page-header .d-flex.justify-content-between { flex-direction: column; gap: 20px; }
+        .page-header .header-actions { width: 100%; justify-content: center; }
         .btn-add { width: 100%; justify-content: center; }
+        .header-actions .dropdown { width: 100%; }
+        .header-actions .dropdown .btn { width: 100%; justify-content: center; }
         .form-control-custom, .btn-action-trigger { width: 100%; margin-bottom: 8px; }
         .content-card { padding: 4px; border-radius: 18px; }
 
+        .table-responsive { overflow-x: auto; }
         .table-responsive table, .table-responsive thead, .table-responsive tbody,
         .table-responsive th, .table-responsive td, .table-responsive tr { display: block; }
 
@@ -211,7 +209,7 @@
         .pagination { justify-content: center !important; }
     }
 
-    /* Dropdown action 3-dots */
+    /* Dropdown action (dipakai baik untuk toolbar header maupun aksi per baris) */
     .dropdown-action-btn {
         width: 36px;
         height: 36px;
@@ -231,10 +229,11 @@
     }
     .dropdown-menu-custom {
         border: none;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.15);
         border-radius: 14px;
         padding: 8px;
-        min-width: 170px;
+        min-width: 200px;
+        z-index: 1050;
     }
     .dropdown-menu-custom .dropdown-item {
         border-radius: 10px;
@@ -257,7 +256,8 @@
 
     {{-- Header --}}
     <div class="page-header mb-4">
-        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div class="page-header-bg"></div>
+        <div class="page-header-content d-flex justify-content-between align-items-center flex-wrap gap-3">
             <div>
                 <span class="badge bg-info bg-opacity-25 text-info px-3 py-2 rounded-pill mb-2 fw-semibold" style="font-size: 11px; letter-spacing: 0.5px;">
                     PENGGUNA
@@ -270,23 +270,49 @@
                 </p>
             </div>
 
-            <div class="d-flex gap-2 flex-wrap">
-                <a href="{{ route('siswa.export', request()->only(['search', 'jenjang', 'kelas'])) }}" class="btn btn-light border btn-add d-inline-flex align-items-center">
-                    <i class="fa-solid fa-file-export me-2"></i>
-                    Export
-                </a>
+            {{-- Toolbar aksi: 1 tombol utama (Tambah Siswa) + 1 dropdown untuk aksi sekunder --}}
+            <div class="d-flex gap-2 header-actions">
+                <div class="dropdown">
+                    <button class="btn btn-light border btn-add dropdown-toggle d-inline-flex align-items-center"
+                            type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fa-solid fa-ellipsis-vertical me-2"></i>
+                        Aksi Lainnya
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end dropdown-menu-custom">
+                        <li>
+                            <a class="dropdown-item d-flex align-items-center gap-2"
+                               href="{{ route('siswa.export-kartu-pdf', request()->only(['search', 'jenjang', 'kelas'])) }}"
+                               target="_blank">
+                                <i class="fa-solid fa-id-card text-warning" style="width: 16px;"></i>
+                                Cetak Kartu Ujian (PDF)
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item d-flex align-items-center gap-2"
+                               href="{{ route('siswa.export', request()->only(['search', 'jenjang', 'kelas'])) }}">
+                                <i class="fa-solid fa-file-export text-secondary" style="width: 16px;"></i>
+                                Export Data
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('siswa.template') }}">
+                                <i class="fa-solid fa-download text-secondary" style="width: 16px;"></i>
+                                Download Template
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider my-1"></li>
+                        <li>
+                            <button type="button"
+                                    class="dropdown-item d-flex align-items-center gap-2 w-100 border-0 bg-transparent"
+                                    data-bs-toggle="modal" data-bs-target="#modalImportSiswa">
+                                <i class="fa-solid fa-file-excel text-success" style="width: 16px;"></i>
+                                Import Excel
+                            </button>
+                        </li>
+                    </ul>
+                </div>
 
-                <a href="{{ route('siswa.template') }}" class="btn btn-light border btn-add d-inline-flex align-items-center">
-                    <i class="fa-solid fa-download me-2"></i>
-                    Template
-                </a>
-
-                <button type="button" class="btn btn-success text-white btn-add d-inline-flex align-items-center" data-bs-toggle="modal" data-bs-target="#modalImportSiswa">
-                    <i class="fa-solid fa-file-excel me-2"></i>
-                    Import Excel
-                </button>
-
-                <a href="{{ route('siswa.create') }}" class="btn btn-info text-white btn-add d-inline-flex align-items-center">
+                <a href="{{ route('siswa.create') }}" class="btn btn-info text-white btn-add d-inline-flex align-items-center fw-semibold">
                     <i class="fa-solid fa-plus me-2"></i>
                     Tambah Siswa
                 </a>
@@ -294,16 +320,40 @@
         </div>
     </div>
 
-    {{-- Widget Statistik --}}
+    {{-- Widget Statistik: 3 kartu terisi penuh (sebelumnya hanya 1 kartu di grid 4 kolom) --}}
     <div class="row g-3 mb-4">
-        <div class="col-6 col-md-3">
+        <div class="col-sm-6 col-md-4">
             <div class="stat-card">
                 <div class="stat-icon bg-primary bg-opacity-10 text-primary">
                     <i class="fa-solid fa-user-graduate"></i>
                 </div>
                 <div>
-                    <small class="text-muted d-block uppercase fw-semibold" style="font-size: 11px; letter-spacing: 0.5px;">TOTAL SISWA</small>
+                    <small class="text-muted d-block fw-semibold" style="font-size: 11px; letter-spacing: 0.5px;">TOTAL SISWA</small>
                     <h4 class="fw-bold text-dark mb-0 mt-1">{{ $totalSiswa }}</h4>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-md-4">
+            <div class="stat-card">
+                <div class="stat-icon bg-info bg-opacity-10 text-info">
+                    <i class="fa-solid fa-calendar-days"></i>
+                </div>
+                <div>
+                    <small class="text-muted d-block fw-semibold" style="font-size: 11px; letter-spacing: 0.5px;">TAHUN AJARAN AKTIF</small>
+                    <h4 class="fw-bold text-dark mb-0 mt-1">{{ $tahunAktif->nama_tahun ?? '-' }}</h4>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-md-4">
+            <div class="stat-card">
+                <div class="stat-icon {{ isset($tahunAktif) && $tahunAktif->semester == 'ganjil' ? 'bg-primary text-primary' : 'bg-success text-success' }} bg-opacity-10">
+                    <i class="fa-solid fa-layer-group"></i>
+                </div>
+                <div>
+                    <small class="text-muted d-block fw-semibold" style="font-size: 11px; letter-spacing: 0.5px;">SEMESTER AKTIF</small>
+                    <h4 class="fw-bold text-dark mb-0 mt-1">{{ isset($tahunAktif) ? ucfirst($tahunAktif->semester) : '-' }}</h4>
                 </div>
             </div>
         </div>
@@ -344,7 +394,7 @@
 
             {{-- Filter & Search Form --}}
             <form method="GET" action="{{ route('siswa.index') }}">
-                <div class="row g-3 mb-4 align-items-center">
+                <div class="row g-3 mb-3 align-items-center">
 
                     <div class="col-lg-4">
                         <input
@@ -397,37 +447,11 @@
                 </div>
             </form>
 
-            <div class="alert alert-primary border-0 rounded-4 d-flex align-items-center justify-content-between flex-wrap mb-4"
-                style="background:#eff6ff;">
-
-                <div class="d-flex align-items-center">
-                    <i class="fa-solid fa-calendar-days text-primary me-3 fs-4"></i>
-
-                    <div>
-                        <div class="fw-bold text-dark">
-                            Data siswa yang ditampilkan menggunakan kelas aktif.
-                        </div>
-
-                        <small class="text-muted">
-                            Tahun Ajaran
-                            <span class="fw-semibold text-dark">
-                                {{ $tahunAktif->nama_tahun ?? '-' }}
-                            </span>
-                            • Semester
-                            <span class="fw-semibold text-dark">
-                                {{ isset($tahunAktif) ? ucfirst($tahunAktif->semester) : '-' }}
-                            </span>
-                        </small>
-                    </div>
-                </div>
-
-                @if($tahunAktif)
-                    <span class="badge {{ $tahunAktif->semester == 'ganjil' ? 'bg-primary' : 'bg-success' }} px-3 py-2 rounded-pill mt-3 mt-md-0">
-                        Semester {{ ucfirst($tahunAktif->semester) }}
-                    </span>
-                @endif
-
-            </div>
+            {{-- Catatan singkat, tidak lagi mengulang info tahun ajaran/semester yang sudah ada di kartu statistik --}}
+            <p class="text-muted small mb-3">
+                <i class="fa-solid fa-circle-info me-1"></i>
+                Data siswa yang ditampilkan menggunakan kelas aktif pada tahun ajaran &amp; semester berjalan.
+            </p>
 
             {{-- Table --}}
             <div class="table-responsive">
@@ -471,7 +495,7 @@
                             </td>
                             <td>
                                 @if($item->kelasAktif && $item->kelasAktif->kelas)
-                                    <span class="badge bg-dark bg-opacity-10 text-dark px-2 py-1.5 rounded-3 fw-semibold">
+                                    <span class="badge bg-dark bg-opacity-10 text-dark px-2 py-2 rounded-3 fw-semibold">
                                         {{ optional($item->kelasAktif->kelas->tingkat)->nama_tingkat }} - {{ $item->kelasAktif->kelas->nama_kelas }}
                                     </span>
                                 @else
@@ -494,6 +518,12 @@
                                             <a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('siswa.edit', $item->id) }}">
                                                 <i class="fa-solid fa-pen text-primary" style="width: 16px;"></i>
                                                 Edit Data
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('siswa.kartu-pdf', $item->id) }}" target="_blank">
+                                                <i class="fa-solid fa-id-card" style="width: 16px; color: #8b5cf6;"></i>
+                                                Cetak Kartu Ujian
                                             </a>
                                         </li>
                                         <li>
@@ -602,7 +632,7 @@
                     <div class="mb-3">
                         <div class="d-flex justify-content-between align-items-center mb-1">
                             <label class="form-label fw-semibold mb-0 small">Password Baru</label>
-                            <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-2.5 py-0.5" id="btnModalGenerate" style="font-size: 11px; font-weight: 600;">
+                            <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3 py-1" id="btnModalGenerate" style="font-size: 11px; font-weight: 600;">
                                 <i class="fa-solid fa-wand-magic-sparkles me-1"></i> Generate 6 Digit
                             </button>
                         </div>

@@ -128,6 +128,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('siswa-export', [SiswaController::class, 'export'])->name('siswa.export');
     Route::get('siswa-template-download', [SiswaController::class, 'downloadTemplate'])->name('siswa.template');
     Route::post('siswa-import', [SiswaController::class, 'import'])->name('siswa.import');
+    Route::get('siswa-export-kartu-pdf', [SiswaController::class, 'exportKartuPdf'])->name('siswa.export-kartu-pdf');
+    Route::get('siswa/{siswa}/kartu-pdf', [SiswaController::class, 'cetakKartuSinglePdf'])->name('siswa.kartu-pdf');
 
     Route::patch('siswa/{siswa}/reset-password', [SiswaController::class, 'resetPassword'])->name('siswa.reset-password');
     Route::resource('siswa', SiswaController::class);
@@ -178,13 +180,16 @@ Route::middleware(['auth'])->group(function () {
             Route::post('monitoring-siswa/{nilai}/force-submit', [GuruWaliKelasController::class, 'forceSubmit'])->name('monitoring-siswa.force-submit');
             Route::post('monitoring-siswa/{nilai}/reset', [GuruWaliKelasController::class, 'resetUjian'])->name('monitoring-siswa.reset');
             Route::get('rekap-nilai/export', [GuruWaliKelasController::class, 'exportRekap'])->name('rekap-nilai.export');
+            Route::get('rekap-nilai/export-pdf', [GuruWaliKelasController::class, 'exportPdf'])->name('rekap-nilai.export-pdf');
             Route::get('rekap-nilai', [GuruWaliKelasController::class, 'rekapNilai'])->name('rekap-nilai');
         });
         // Nilai Siswa & Koreksi Jawaban (Guru Mapel)
         Route::prefix('nilai-siswa')->name('nilai-siswa.')->group(function () {
             Route::get('/', [GuruNilaiSiswaController::class, 'index'])->name('index');
             Route::get('/{ujian}', [GuruNilaiSiswaController::class, 'show'])->name('show');
+            Route::get('/{ujian}/export-pdf', [GuruNilaiSiswaController::class, 'exportPdf'])->name('export-pdf');
             Route::get('/{ujian}/koreksi/{siswa}', [GuruNilaiSiswaController::class, 'koreksi'])->name('koreksi');
+            Route::get('/{ujian}/koreksi/{siswa}/export-pdf', [GuruNilaiSiswaController::class, 'exportSiswaPdf'])->name('koreksi.export-pdf');
             Route::post('/{ujian}/koreksi/{siswa}', [GuruNilaiSiswaController::class, 'storeKoreksi'])->name('store-koreksi');
         });
     });

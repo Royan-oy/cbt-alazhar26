@@ -167,10 +167,13 @@ class SiswaImport extends DefaultValueBinder implements ToCollection, WithHeadin
 
             DB::transaction(function () use ($nama, $nis, $nisn, $password, $kelas, $tahunAktif) {
 
+                $finalPassword = $password != '' ? $password : (string) rand(100000, 999999);
+
                 $user = User::create([
-                    'nis'      => $nis,
-                    'password' => Hash::make($password != '' ? $password : 'siswa12345'),
-                    'role'     => 'siswa',
+                    'nis'            => $nis,
+                    'password'       => Hash::make($finalPassword),
+                    'password_plain' => $finalPassword,
+                    'role'           => 'siswa',
                 ]);
 
                 $siswaBaru = Siswa::create([
