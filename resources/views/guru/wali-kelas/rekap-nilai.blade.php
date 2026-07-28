@@ -352,14 +352,14 @@
     /* Dropdown menu customization */
     .dropdown {
         position: relative;
-        z-index: 1050;
+        z-index: 10;
     }
     .dropdown-menu {
         border-radius: 10px !important;
         border: 1px solid #e2e8f0 !important;
         box-shadow: 0 10px 24px -4px rgba(15,23,42,0.18) !important;
         padding: 0.4rem 0 !important;
-        z-index: 1060 !important;
+        z-index: 1010 !important;
         position: absolute !important;
     }
     .dropdown-item {
