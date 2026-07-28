@@ -180,6 +180,8 @@ Route::middleware(['auth'])->group(function () {
             Route::post('monitoring-siswa/{nilai}/reset', [GuruWaliKelasController::class, 'resetUjian'])->name('monitoring-siswa.reset');
             Route::get('rekap-nilai/export', [GuruWaliKelasController::class, 'exportRekap'])->name('rekap-nilai.export');
             Route::get('rekap-nilai/export-pdf', [GuruWaliKelasController::class, 'exportPdf'])->name('rekap-nilai.export-pdf');
+            Route::get('rekap-nilai/siswa/{siswa}', [GuruWaliKelasController::class, 'detailNilaiSiswa'])->name('rekap-nilai.detail-siswa');
+            Route::get('rekap-nilai/siswa/{siswa}/export-pdf', [GuruWaliKelasController::class, 'exportPdfSiswa'])->name('rekap-nilai.export-pdf-siswa');
             Route::get('rekap-nilai', [GuruWaliKelasController::class, 'rekapNilai'])->name('rekap-nilai');
         });
         // Nilai Siswa & Koreksi Jawaban (Guru Mapel)

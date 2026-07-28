@@ -360,8 +360,8 @@ class GuruWaliKelasController extends Controller
     }
 
     /**
-     * Halaman: Rekap Nilai
-     * Menampilkan matrix nilai semua siswa untuk semua ujian di kelas ini.
+     * Halaman: Rekap Nilai (Leaderboard)
+     * Menampilkan leaderboard peringkat siswa berdasarkan rata-rata nilai.
      */
     public function rekapNilai(Request $request)
     {
@@ -472,98 +472,265 @@ class GuruWaliKelasController extends Controller
             $topScore = 0;
         }
 
-        // Hitung Statistik per Mata Pelajaran
-        $mapelStats = collect();
-        $groupedUjiansByMapel = $ujians->groupBy('nama_mapel');
-        $mapels = $groupedUjiansByMapel->keys()->values();
-
-        // Construct Matriks Per-Siswa Per-Mata Pelajaran + Detail Popover
-        $studentMapelMatrix = collect();
-
-        foreach ($siswas as $siswa) {
-            $nilaiSiswa = $nilaiData->get($siswa->id, collect());
-            $mapelScores = collect();
-
-            foreach ($groupedUjiansByMapel as $mapelNama => $mapelUjians) {
-                $mapelUjianIds = $mapelUjians->pluck('id');
-                $records = $nilaiSiswa->whereIn('ujian_id', $mapelUjianIds);
-
-                $sum = 0;
-                $cnt = 0;
-                $details = [];
-
-                foreach ($mapelUjians as $u) {
-                    $rec = $records->firstWhere('ujian_id', $u->id);
-                    $val = $rec ? (float)$rec->nilai_akhir : null;
-                    if ($val !== null) {
-                        $sum += $val;
-                        $cnt++;
-                    }
-                    $details[] = [
-                        'nama_ujian' => $u->nama_ujian,
-                        'jenis'      => $u->nama_jenis_ujian,
-                        'kkm'        => $u->kkm ?? 75,
-                        'nilai'      => $val,
-                    ];
-                }
-
-                $avg = $cnt > 0 ? round($sum / $cnt, 1) : null;
-                $mapelScores->put($mapelNama, [
-                    'avg'     => $avg,
-                    'count'   => $cnt,
-                    'kkm'     => $mapelUjians->first()->kkm ?? 75,
-                    'details' => $details,
-                ]);
-            }
-
-            $studentMapelMatrix->put($siswa->id, $mapelScores);
+        // Build ranking — sort students by avg descending for leaderboard
+        $rankMap = [];
+        $sorted = $studentSummaries->filter(function($s) { return $s['avg'] !== null; })->sortByDesc('avg');
+        $currentRank = 0;
+        foreach ($sorted as $sid => $ss) {
+            $currentRank++;
+            $rankMap[$sid] = $currentRank;
         }
 
-        foreach ($groupedUjiansByMapel as $mapelNama => $mapelUjians) {
-            $mapelUjianIds = $mapelUjians->pluck('id');
-            $mapelNilais = collect();
-
-            foreach ($nilaiData as $siswaId => $records) {
-                foreach ($records as $rec) {
-                    if ($mapelUjianIds->contains($rec->ujian_id) && $rec->nilai_akhir !== null) {
-                        $mapelNilais->push((float)$rec->nilai_akhir);
-                    }
-                }
-            }
-
-            $mapelAvg = $mapelNilais->isNotEmpty() ? round($mapelNilais->avg(), 1) : 0;
-            $mapelMax = $mapelNilais->isNotEmpty() ? round($mapelNilais->max(), 1) : 0;
-            $mapelMin = $mapelNilais->isNotEmpty() ? round($mapelNilais->min(), 1) : 0;
-            $mapelKkm = $mapelUjians->first()->kkm ?? 75;
-
-            $mapelStats->push([
-                'nama_mapel'  => $mapelNama,
-                'total_ujian' => $mapelUjians->count(),
-                'rerata'      => $mapelAvg,
-                'max'         => $mapelMax,
-                'min'         => $mapelMin,
-                'kkm'         => $mapelKkm,
-            ]);
-        }
+        // Sort siswas by ranking for leaderboard display
+        $siswas = $siswas->sortBy(function($siswa) use ($rankMap) {
+            return $rankMap[$siswa->id] ?? PHP_INT_MAX;
+        })->values();
 
         return view('guru.wali-kelas.rekap-nilai', compact(
             'waliKelas',
             'kelas',
             'siswas',
-            'ujians',
-            'mapels',
-            'nilaiData',
-            'allJenisUjian',
-            'jenisFilter',
             'studentSummaries',
-            'studentMapelMatrix',
+            'rankMap',
             'rerataKelas',
             'persenTuntas',
             'tuntasCount',
             'topScore',
             'topSiswaNama',
-            'mapelStats'
+            'allJenisUjian',
+            'jenisFilter'
         ));
+    }
+
+    /**
+     * Halaman: Detail Nilai Siswa
+     * Menampilkan rincian nilai per mata pelajaran dan per ujian untuk seorang siswa.
+     */
+    public function detailNilaiSiswa($siswaId)
+    {
+        $waliKelas = $this->getWaliKelasAktif();
+
+        $kelas = DB::table('kelas')
+            ->join('tingkats', 'kelas.tingkat_id', '=', 'tingkats.id')
+            ->where('kelas.id', $waliKelas->kelas_id)
+            ->select('kelas.*', 'tingkats.nama_tingkat')
+            ->first();
+
+        // Validasi bahwa siswa ini memang ada di kelas wali kelas
+        $siswa = DB::table('siswa_kelas')
+            ->join('siswas', 'siswa_kelas.siswa_id', '=', 'siswas.id')
+            ->where('siswa_kelas.kelas_id', $waliKelas->kelas_id)
+            ->where('siswa_kelas.tahun_ajaran_id', $waliKelas->tahun_ajaran_id)
+            ->where('siswas.id', $siswaId)
+            ->select('siswas.id', 'siswas.nama', 'siswas.nis')
+            ->first();
+
+        if (!$siswa) {
+            abort(404, 'Siswa tidak ditemukan di kelas ini.');
+        }
+
+        // Semua ujian untuk kelas ini
+        $ujians = DB::table('ujian_kelas')
+            ->join('ujians', 'ujian_kelas.ujian_id', '=', 'ujians.id')
+            ->join('bank_soals', 'ujians.bank_soal_id', '=', 'bank_soals.id')
+            ->join('mata_pelajarans', 'bank_soals.mata_pelajaran_id', '=', 'mata_pelajarans.id')
+            ->join('jenis_ujians', 'ujians.jenis_ujian_id', '=', 'jenis_ujians.id')
+            ->where('ujian_kelas.kelas_id', $waliKelas->kelas_id)
+            ->where('ujians.tahun_ajaran_id', $waliKelas->tahun_ajaran_id)
+            ->select(
+                'ujians.id',
+                'ujians.nama_ujian',
+                'mata_pelajarans.nama_mapel',
+                'jenis_ujians.nama as nama_jenis_ujian',
+                'bank_soals.kkm'
+            )
+            ->orderBy('mata_pelajarans.nama_mapel', 'asc')
+            ->orderBy('ujians.waktu_mulai', 'asc')
+            ->get();
+
+        // Ambil nilai siswa ini
+        $nilaiSiswa = DB::table('nilais')
+            ->whereIn('ujian_id', $ujians->pluck('id'))
+            ->where('siswa_id', $siswa->id)
+            ->where('status', 'selesai')
+            ->select('ujian_id', 'nilai_akhir')
+            ->get()
+            ->keyBy('ujian_id');
+
+        // Group ujian by mata pelajaran dan hitung statistik per mapel
+        $groupedByMapel = $ujians->groupBy('nama_mapel');
+        $mapelDetails = collect();
+        $totalMapelAvg = 0;
+        $totalMapelCount = 0;
+        $mapelTuntas = 0;
+        $mapelBelumTuntas = 0;
+
+        foreach ($groupedByMapel as $mapelNama => $mapelUjians) {
+            $details = [];
+            $sum = 0;
+            $cnt = 0;
+            $kkm = $mapelUjians->first()->kkm ?? 75;
+
+            foreach ($mapelUjians as $ujian) {
+                $record = $nilaiSiswa->get($ujian->id);
+                $nilai = $record ? (float)$record->nilai_akhir : null;
+                if ($nilai !== null) {
+                    $sum += $nilai;
+                    $cnt++;
+                }
+                $details[] = [
+                    'nama_ujian'  => $ujian->nama_ujian,
+                    'jenis_ujian' => $ujian->nama_jenis_ujian,
+                    'kkm'         => $ujian->kkm ?? 75,
+                    'nilai'       => $nilai,
+                ];
+            }
+
+            $avg = $cnt > 0 ? round($sum / $cnt, 1) : null;
+            $status = $avg === null ? 'belum' : ($avg >= $kkm ? 'tuntas' : 'kurang');
+
+            if ($avg !== null) {
+                $totalMapelAvg += $avg;
+                $totalMapelCount++;
+                if ($avg >= $kkm) {
+                    $mapelTuntas++;
+                } else {
+                    $mapelBelumTuntas++;
+                }
+            }
+
+            $mapelDetails->put($mapelNama, [
+                'avg'     => $avg,
+                'kkm'     => $kkm,
+                'status'  => $status,
+                'count'   => $cnt,
+                'total'   => $mapelUjians->count(),
+                'details' => $details,
+            ]);
+        }
+
+        $rataRataKeseluruhan = $totalMapelCount > 0 ? round($totalMapelAvg / $totalMapelCount, 1) : null;
+        $statusGlobal = $rataRataKeseluruhan === null ? 'belum' : ($rataRataKeseluruhan >= 75 ? 'tuntas' : 'kurang');
+
+        return view('guru.wali-kelas.detail-nilai-siswa', compact(
+            'waliKelas',
+            'kelas',
+            'siswa',
+            'mapelDetails',
+            'rataRataKeseluruhan',
+            'statusGlobal',
+            'mapelTuntas',
+            'mapelBelumTuntas'
+        ));
+    }
+
+    /**
+     * Export PDF: Rapor Nilai Individu Siswa
+     */
+    public function exportPdfSiswa($siswaId)
+    {
+        $waliKelas = $this->getWaliKelasAktif();
+
+        $kelas = DB::table('kelas')
+            ->join('tingkats', 'kelas.tingkat_id', '=', 'tingkats.id')
+            ->where('kelas.id', $waliKelas->kelas_id)
+            ->select('kelas.*', 'tingkats.nama_tingkat')
+            ->first();
+
+        $siswa = DB::table('siswa_kelas')
+            ->join('siswas', 'siswa_kelas.siswa_id', '=', 'siswas.id')
+            ->where('siswa_kelas.kelas_id', $waliKelas->kelas_id)
+            ->where('siswa_kelas.tahun_ajaran_id', $waliKelas->tahun_ajaran_id)
+            ->where('siswas.id', $siswaId)
+            ->select('siswas.id', 'siswas.nama', 'siswas.nis')
+            ->first();
+
+        if (!$siswa) {
+            abort(404, 'Siswa tidak ditemukan di kelas ini.');
+        }
+
+        $activeTahunAjaran = $waliKelas->tahunAjaran;
+
+        $ujians = DB::table('ujian_kelas')
+            ->join('ujians', 'ujian_kelas.ujian_id', '=', 'ujians.id')
+            ->join('bank_soals', 'ujians.bank_soal_id', '=', 'bank_soals.id')
+            ->join('mata_pelajarans', 'bank_soals.mata_pelajaran_id', '=', 'mata_pelajarans.id')
+            ->join('jenis_ujians', 'ujians.jenis_ujian_id', '=', 'jenis_ujians.id')
+            ->where('ujian_kelas.kelas_id', $waliKelas->kelas_id)
+            ->where('ujians.tahun_ajaran_id', $waliKelas->tahun_ajaran_id)
+            ->select(
+                'ujians.id',
+                'ujians.nama_ujian',
+                'mata_pelajarans.nama_mapel',
+                'jenis_ujians.nama as nama_jenis_ujian',
+                'bank_soals.kkm'
+            )
+            ->orderBy('mata_pelajarans.nama_mapel', 'asc')
+            ->orderBy('ujians.waktu_mulai', 'asc')
+            ->get();
+
+        $nilaiSiswa = DB::table('nilais')
+            ->whereIn('ujian_id', $ujians->pluck('id'))
+            ->where('siswa_id', $siswa->id)
+            ->where('status', 'selesai')
+            ->select('ujian_id', 'nilai_akhir')
+            ->get()
+            ->keyBy('ujian_id');
+
+        $groupedByMapel = $ujians->groupBy('nama_mapel');
+        $mapelDetails = collect();
+        $totalMapelAvg = 0;
+        $totalMapelCount = 0;
+
+        foreach ($groupedByMapel as $mapelNama => $mapelUjians) {
+            $details = [];
+            $sum = 0;
+            $cnt = 0;
+            $kkm = $mapelUjians->first()->kkm ?? 75;
+
+            foreach ($mapelUjians as $ujian) {
+                $record = $nilaiSiswa->get($ujian->id);
+                $nilai = $record ? (float)$record->nilai_akhir : null;
+                if ($nilai !== null) {
+                    $sum += $nilai;
+                    $cnt++;
+                }
+                $details[] = [
+                    'nama_ujian'  => $ujian->nama_ujian,
+                    'jenis_ujian' => $ujian->nama_jenis_ujian,
+                    'kkm'         => $ujian->kkm ?? 75,
+                    'nilai'       => $nilai,
+                ];
+            }
+
+            $avg = $cnt > 0 ? round($sum / $cnt, 1) : null;
+            $status = $avg === null ? 'belum' : ($avg >= $kkm ? 'tuntas' : 'kurang');
+
+            if ($avg !== null) {
+                $totalMapelAvg += $avg;
+                $totalMapelCount++;
+            }
+
+            $mapelDetails->put($mapelNama, [
+                'avg'     => $avg,
+                'kkm'     => $kkm,
+                'status'  => $status,
+                'count'   => $cnt,
+                'total'   => $mapelUjians->count(),
+                'details' => $details,
+            ]);
+        }
+
+        $rataRataKeseluruhan = $totalMapelCount > 0 ? round($totalMapelAvg / $totalMapelCount, 1) : null;
+        $statusGlobal = $rataRataKeseluruhan === null ? 'belum' : ($rataRataKeseluruhan >= 75 ? 'tuntas' : 'kurang');
+
+        $pdf = PDF::loadView('pdf.rekap-siswa-individual', compact(
+            'kelas', 'activeTahunAjaran', 'siswa',
+            'mapelDetails', 'rataRataKeseluruhan', 'statusGlobal'
+        ))->setPaper('a4', 'portrait');
+
+        $fileName = 'Rekap_Nilai_' . Str::slug($siswa->nama) . '_' . Str::slug($kelas->nama_kelas) . '.pdf';
+        return $pdf->download($fileName);
     }
 
 
@@ -600,22 +767,14 @@ class GuruWaliKelasController extends Controller
 
         $activeTahunAjaran = $waliKelas->tahunAjaran;
 
-        $siswaQuery = DB::table('siswa_kelas')
+        // Selalu ekspor seluruh siswa kelas (mengabaikan filter pencarian search)
+        $siswas = DB::table('siswa_kelas')
             ->join('siswas', 'siswa_kelas.siswa_id', '=', 'siswas.id')
             ->where('siswa_kelas.kelas_id', $waliKelas->kelas_id)
             ->where('siswa_kelas.tahun_ajaran_id', $waliKelas->tahun_ajaran_id)
             ->select('siswas.id', 'siswas.nama', 'siswas.nis')
-            ->orderBy('siswas.nama', 'asc');
-
-        $searchQuery = $request->input('search', '');
-        if ($searchQuery) {
-            $siswaQuery->where(function($q) use ($searchQuery) {
-                $q->where('siswas.nama', 'like', "%{$searchQuery}%")
-                  ->orWhere('siswas.nis', 'like', "%{$searchQuery}%");
-            });
-        }
-
-        $siswas = $siswaQuery->get();
+            ->orderBy('siswas.nama', 'asc')
+            ->get();
 
         $ujians = DB::table('ujian_kelas')
             ->join('ujians', 'ujian_kelas.ujian_id', '=', 'ujians.id')
@@ -691,25 +850,36 @@ class GuruWaliKelasController extends Controller
             $avgScores->put($siswa->id, $overallAvg);
         }
 
-        $statusFilter = $request->input('status', 'semua');
-        if ($statusFilter !== 'semua') {
-            $siswas = $siswas->filter(function($siswa) use ($avgScores, $statusFilter) {
-                $avg = $avgScores->get($siswa->id);
-                if ($statusFilter === 'tuntas') {
-                    return $avg !== null && $avg >= 75;
-                } elseif ($statusFilter === 'kurang') {
-                    return $avg !== null && $avg < 75;
-                }
-                return true;
+        // KONDISI A: Ekspor Leaderboard Kelas Keseluruhan (Portrait)
+        if (empty($jenisFilter)) {
+            // Urutkan siswa berdasarkan rata-rata tertinggi (leaderboard)
+            $rankMap = [];
+            $sorted = $avgScores->filter(function($avg) { return $avg !== null; })->sortByDesc(function($avg) { return $avg; });
+            $currentRank = 0;
+            foreach ($sorted as $sid => $avg) {
+                $currentRank++;
+                $rankMap[$sid] = $currentRank;
+            }
+
+            $siswas = $siswas->sortBy(function($siswa) use ($rankMap) {
+                return $rankMap[$siswa->id] ?? PHP_INT_MAX;
             })->values();
+
+            $pdf = PDF::loadView('pdf.rekap-leaderboard', compact(
+                'kelas', 'activeTahunAjaran', 'siswas', 'avgScores', 'rankMap'
+            ))->setPaper('a4', 'portrait');
+
+            $fileName = 'Rekap_Leaderboard_' . Str::slug($kelas->nama_kelas) . '.pdf';
+            return $pdf->download($fileName);
         }
 
+        // KONDISI B: Ekspor Matriks Jenis Ujian Terpilih (Landscape)
         $pdf = PDF::loadView('pdf.rekap-wali-kelas', compact(
             'kelas', 'activeTahunAjaran', 'siswas', 'mapels',
-            'matrixData', 'avgScores', 'searchQuery', 'statusFilter', 'jenisFilter'
+            'matrixData', 'avgScores', 'jenisFilter'
         ))->setPaper('a4', 'landscape');
 
-        $fileName = 'Rekap_Nilai_' . Str::slug($kelas->nama_kelas) . '.pdf';
+        $fileName = 'Rekap_Nilai_' . Str::slug($jenisFilter) . '_' . Str::slug($kelas->nama_kelas) . '.pdf';
         return $pdf->download($fileName);
     }
 }

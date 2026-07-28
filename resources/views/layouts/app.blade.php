@@ -83,7 +83,7 @@
         <div class="w-100 d-flex flex-column min-w-0">
             @include('layouts.header')
 
-            <main class="py-4 px-3 flex-grow-1">
+            <main class="p-4 flex-grow-1">
                 @yield('content')
             </main>
         </div>
