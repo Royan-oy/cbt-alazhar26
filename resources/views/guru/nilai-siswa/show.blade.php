@@ -80,7 +80,7 @@
         color: var(--ink-600);
         display: flex;
         flex-wrap: wrap;
-        gap: 0 1rem;
+        gap: 0.4rem 1rem;
     }
     .ticket-meta span { display: inline-flex; align-items: center; gap: 0.35rem; }
 
@@ -107,7 +107,7 @@
         gap: 2.25rem;
         flex-wrap: wrap;
     }
-    .tally-item { display: flex; flex-direction: column; }
+    .tally-item { display: flex; flex-direction: column; flex: 1 1 auto; min-width: 110px; }
     .tally-num {
         font-weight: 700;
         font-size: 1.5rem;
@@ -132,9 +132,6 @@
         gap: 1.5rem;
         align-items: start;
     }
-    @media (max-width: 767px) {
-        .gradebook-body { grid-template-columns: 1fr; }
-    }
 
     .class-rail {
         background: var(--surface);
@@ -148,13 +145,6 @@
         top: 1rem;
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
     }
-    @media (max-width: 767px) {
-        .class-rail {
-            flex-direction: row;
-            overflow-x: auto;
-            position: static;
-        }
-    }
     .rail-title {
         font-size: 0.75rem;
         font-weight: 700;
@@ -163,7 +153,6 @@
         color: var(--ink-600);
         padding: 0.5rem 0.6rem 0.3rem;
     }
-    @media (max-width: 767px) { .rail-title { display: none; } }
     .rail-tab {
         border: none;
         background: transparent;
@@ -203,8 +192,15 @@
         color: var(--ink-900);
         margin: 0;
     }
+    .toolbar-actions {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
     .search-box {
         position: relative;
+        flex: 1 1 auto;
     }
     .search-box input {
         background: var(--surface);
@@ -215,6 +211,7 @@
         width: 260px;
         max-width: 100%;
         color: var(--ink-900);
+        transition: border-color 0.15s, box-shadow 0.15s;
     }
     .search-box input:focus {
         outline: none;
@@ -227,6 +224,25 @@
         transform: translateY(-50%);
         color: var(--ink-600);
         font-size: 0.85rem;
+    }
+
+    .btn-export-pdf {
+        background-color: #ef4444;
+        color: #ffffff;
+        padding: 0.5rem 0.9rem;
+        border-radius: 0.5rem;
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        transition: background-color 0.2s, transform 0.15s;
+        white-space: nowrap;
+    }
+    .btn-export-pdf:hover {
+        background-color: #dc2626;
+        color: #ffffff;
     }
 
     .ledger-card {
@@ -243,6 +259,11 @@
         font-size: 0.875rem;
     }
 
+    .table-responsive {
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
     .ledger-table { width: 100%; border-collapse: collapse; }
     .ledger-table thead th {
         background: var(--paper);
@@ -268,6 +289,14 @@
     .ledger-table tbody tr:last-child td { border-bottom: none; }
     .ledger-table tbody tr:nth-child(even) { background: #fafafa; }
     .ledger-table tbody tr:hover { background: #f1f5f9; }
+
+    /* Table Column Min-Widths for Smooth Mobile Scroll */
+    .ledger-table th.col-no, .ledger-table td.col-no { min-width: 44px; }
+    .ledger-table th.col-student, .ledger-table td.col-student { min-width: 170px; }
+    .ledger-table th.col-time, .ledger-table td.col-time { min-width: 125px; }
+    .ledger-table th.col-violation, .ledger-table td.col-violation { min-width: 105px; }
+    .ledger-table th.col-score, .ledger-table td.col-score { min-width: 95px; }
+    .ledger-table th.col-action, .ledger-table td.col-action { min-width: 95px; }
 
     .idx { font-weight: 600; color: var(--ink-600); font-size: 0.85rem; }
 
@@ -365,6 +394,160 @@
         display: flex; align-items: center; gap: 0.5rem;
         margin-bottom: 1.25rem;
     }
+
+    /* MEDIA QUERIES FOR TABLETS & MOBILE SCREENS */
+    @media (max-width: 991px) {
+        .gradebook {
+            padding: 1.25rem;
+        }
+        .ticket-main {
+            padding: 1.25rem 1.5rem;
+        }
+        .ticket-tally {
+            padding: 1rem 1.5rem;
+            gap: 1.5rem;
+        }
+    }
+
+    @media (max-width: 767px) {
+        .gradebook {
+            padding: 0.85rem;
+            border-radius: 0.75rem;
+        }
+        .back-link {
+            font-size: 0.8rem;
+            margin-bottom: 0.85rem;
+        }
+        .ticket-main {
+            padding: 1rem 1.1rem;
+            gap: 0.85rem;
+        }
+        .ticket-icon {
+            width: 44px; height: 44px;
+            font-size: 1.2rem;
+            border-radius: 0.6rem;
+        }
+        .ticket-title {
+            font-size: 1.2rem;
+            margin-bottom: 0.35rem;
+        }
+        .ticket-meta {
+            font-size: 0.78rem;
+            gap: 0.35rem 0.75rem;
+        }
+        .ticket-perf {
+            margin: 0 1.1rem;
+        }
+        .ticket-perf::before { left: -19px; }
+        .ticket-perf::after { right: -19px; }
+
+        .ticket-tally {
+            padding: 0.85rem 1.1rem;
+            gap: 0.85rem 1.25rem;
+        }
+        .tally-num {
+            font-size: 1.25rem;
+        }
+        .tally-label {
+            font-size: 0.7rem;
+        }
+
+        .gradebook-body {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+        .class-rail {
+            flex-direction: row;
+            overflow-x: auto;
+            position: static;
+            padding: 0.4rem;
+            border-radius: 0.6rem;
+            gap: 0.35rem;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        .class-rail::-webkit-scrollbar {
+            display: none;
+        }
+        .rail-title {
+            display: none;
+        }
+        .rail-tab {
+            flex-shrink: 0;
+            padding: 0.45rem 0.75rem;
+            font-size: 0.8rem;
+            border-left: none;
+        }
+
+        .ledger-toolbar {
+            gap: 0.65rem;
+            margin-bottom: 0.75rem;
+        }
+        .ledger-toolbar h2 {
+            font-size: 1.1rem;
+        }
+        .ledger-table thead th,
+        .ledger-table tbody td {
+            padding: 0.75rem 0.85rem;
+            font-size: 0.8rem;
+        }
+        .stu-stamp {
+            width: 30px; height: 30px;
+            font-size: 0.7rem;
+        }
+        .stu-name {
+            font-size: 0.85rem;
+        }
+        .stu-sub {
+            font-size: 0.7rem;
+        }
+        .action-link {
+            padding: 0.35rem 0.75rem;
+            font-size: 0.75rem;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .gradebook {
+            padding: 0.65rem;
+        }
+        .ticket-main {
+            flex-direction: row;
+            align-items: flex-start;
+        }
+        .toolbar-actions {
+            width: 100%;
+            display: flex;
+            flex-direction: row;
+            gap: 0.5rem;
+        }
+        .search-box {
+            flex: 1;
+            min-width: 0;
+        }
+        .search-box input {
+            width: 100%;
+            font-size: 0.8rem;
+            padding: 0.45rem 0.65rem 0.45rem 1.9rem;
+        }
+        .search-box i {
+            left: 0.65rem;
+            font-size: 0.8rem;
+        }
+        .btn-export-pdf {
+            font-size: 0.8rem;
+            padding: 0.45rem 0.75rem;
+        }
+        .ticket-tally {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+        .tally-item {
+            min-width: 30%;
+        }
+    }
 </style>
 
 <div class="gradebook">
@@ -426,12 +609,12 @@
         <div class="ledger-panel">
             <div class="ledger-toolbar">
                 <h2>Daftar Peserta</h2>
-                <div class="d-flex align-items-center gap-2 flex-wrap">
+                <div class="toolbar-actions">
                     <div class="search-box">
                         <i class="fa-solid fa-magnifying-glass"></i>
                         <input type="search" id="searchSiswa" placeholder="Cari nama atau NIS siswa...">
                     </div>
-                    <a href="{{ route('dashboard-guru.nilai-siswa.export-pdf', $ujian->id) }}" id="btnExportPdf" target="_blank" class="btn-export-pdf" style="background-color: #ef4444; color: #ffffff; padding: 0.5rem 0.9rem; border-radius: 0.5rem; font-size: 0.85rem; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 0.4rem; transition: background-color 0.2s;">
+                    <a href="{{ route('dashboard-guru.nilai-siswa.export-pdf', $ujian->id) }}" id="btnExportPdf" target="_blank" class="btn-export-pdf">
                         <i class="fa-solid fa-file-pdf"></i> Export PDF
                     </a>
                 </div>
@@ -446,19 +629,19 @@
                     <table class="ledger-table">
                         <thead>
                             <tr>
-                                <th style="width: 44px;">No</th>
-                                <th>Nama Siswa</th>
-                                <th>Waktu Selesai</th>
-                                <th>Pelanggaran</th>
-                                <th class="num">Nilai Akhir</th>
-                                <th class="num">Aksi</th>
+                                <th class="col-no" style="width: 44px;">No</th>
+                                <th class="col-student">Nama Siswa</th>
+                                <th class="col-time">Waktu Selesai</th>
+                                <th class="col-violation">Pelanggaran</th>
+                                <th class="col-score num">Nilai Akhir</th>
+                                <th class="col-action num">Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
                             @forelse($pesertas as $i => $p)
                             <tr class="peserta-row" data-kelas-id="{{ $p->kelas_id }}">
-                                <td class="idx">{{ str_pad($i + 1, 2, '0', STR_PAD_LEFT) }}</td>
-                                <td>
+                                <td class="idx col-no">{{ str_pad($i + 1, 2, '0', STR_PAD_LEFT) }}</td>
+                                <td class="col-student">
                                     <div class="stu-row">
                                         <div class="stu-stamp">{{ strtoupper(substr($p->nama_siswa, 0, 2)) }}</div>
                                         <div>
@@ -470,10 +653,10 @@
                                         </div>
                                     </div>
                                 </td>
-                                <td class="idx">
+                                <td class="idx col-time">
                                     {{ $p->waktu_kumpul ? \Carbon\Carbon::parse($p->waktu_kumpul)->format('d M Y, H:i') : '-' }}
                                 </td>
-                                <td>
+                                <td class="col-violation">
                                     @if($p->violation_count == 2)
                                         <span class="tally-marks n2"><i class="fa-solid fa-triangle-exclamation"></i> || {{ $p->violation_count }}x</span>
                                     @elseif($p->violation_count == 1)
@@ -482,7 +665,7 @@
                                         <span class="tally-marks n0">— 0x</span>
                                     @endif
                                 </td>
-                                <td class="num">
+                                <td class="num col-score">
                                     @if($p->status === 'selesai')
                                         @php
                                             $nilai = (float) $p->nilai_akhir;
@@ -498,7 +681,7 @@
                                         <span class="idx">—</span>
                                     @endif
                                 </td>
-                                <td class="num">
+                                <td class="num col-action">
                                     @if($p->status === 'selesai')
                                         @if($p->belum_dikoreksi > 0)
                                             <a href="{{ route('dashboard-guru.nilai-siswa.koreksi', ['ujian' => $ujian->id, 'siswa' => $p->siswa_id]) }}"
@@ -600,4 +783,4 @@ document.addEventListener('DOMContentLoaded', function () {
     if (searchSiswa) searchSiswa.addEventListener('input', filterTable);
 });
 </script>
-@endsection
+@endsection

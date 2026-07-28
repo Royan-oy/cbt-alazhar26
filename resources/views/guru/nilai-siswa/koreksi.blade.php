@@ -563,7 +563,7 @@
     </div>
 
     {{-- STICKY FOOTER --}}
-    <div class="kx-sticky">
+    {{-- <div class="kx-sticky">
         <div class="kx-sticky-text">
             <strong>Selesai mengoreksi?</strong>
             <span>Nilai tersimpan otomatis setiap kali Anda menekan tombol Simpan pada masing-masing soal.</span>
@@ -571,7 +571,7 @@
         <a href="{{ route('dashboard-guru.nilai-siswa.show', $ujian->id) }}">
             <i class="fa-solid fa-arrow-left me-2"></i>Kembali ke Daftar Siswa
         </a>
-    </div>
+    </div> --}}
 
 </div>
 </div>
