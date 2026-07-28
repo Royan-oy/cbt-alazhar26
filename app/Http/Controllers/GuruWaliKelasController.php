@@ -7,7 +7,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Models\Nilai;
 use App\Models\Ujian;
-use App\Exports\RekapNilaiExport;
+use App\Exports\RekapNilaiLeaderboardExport;
+use App\Exports\RekapNilaiMatriksExport;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Str;
 use Barryvdh\DomPDF\Facade as PDF;
@@ -591,9 +592,15 @@ class GuruWaliKelasController extends Controller
             ->select('kelas.*', 'tingkats.nama_tingkat')
             ->first();
 
-        $filename = 'rekap-nilai-' . str_replace(' ', '-', strtolower($kelas->nama_kelas ?? 'kelas')) . '-' . now()->format('Ymd') . '.xlsx';
+        $jenisFilter = $request->input('jenis_ujian', '');
 
-        return Excel::download(new RekapNilaiExport($waliKelas), $filename);
+        if (empty($jenisFilter)) {
+            $filename = 'Rekap_Leaderboard_' . str_replace(' ', '_', $kelas->nama_kelas ?? 'kelas') . '.xlsx';
+            return Excel::download(new RekapNilaiLeaderboardExport($waliKelas), $filename);
+        } else {
+            $filename = 'Rekap_Nilai_' . str_replace(' ', '_', $jenisFilter) . '_' . str_replace(' ', '_', $kelas->nama_kelas ?? 'kelas') . '.xlsx';
+            return Excel::download(new RekapNilaiMatriksExport($waliKelas, $jenisFilter), $filename);
+        }
     }
 
     /**
@@ -698,7 +705,7 @@ class GuruWaliKelasController extends Controller
                 $currentRank++;
                 $rankMap[$sid] = $currentRank;
             }
-            $siswas = $siswas->sortBy(function($s) use ($rankMap) { return $rankMap[$s->id] ?? PHP_INT_MAX; })->values();
+            // Siswa tetap diurutkan berdasarkan nama (absen) — rankMap hanya untuk kolom peringkat
 
             $pdf = PDF::loadView('pdf.rekap-leaderboard', compact(
                 'kelas', 'activeTahunAjaran', 'siswas', 'avgScores', 'rankMap'

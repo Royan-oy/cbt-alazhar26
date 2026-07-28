@@ -29,7 +29,7 @@
         }
         .school-info {
             text-align: center;
-            padding-right: 60px;
+            padding: 0 5px;
         }
         .school-name {
             font-size: 14pt;
@@ -145,15 +145,20 @@
     <!-- KOP SURAT -->
     <table class="header-table">
         <tr>
-            <td style="width: 60px;">
+            <td style="width: 65px; text-align: left;">
                 @if(file_exists(public_path('img/logo-alazhar.png')))
-                    <img src="{{ public_path('img/logo-alazhar.png') }}" class="logo" alt="Logo">
+                    <img src="{{ public_path('img/logo-alazhar.png') }}" class="logo" alt="Logo Al-Azhar">
                 @endif
             </td>
             <td class="school-info">
                 <div class="school-name">Sekolah Islam Al Azhar Pekalongan</div>
                 <div class="sub-school">REKAPITULASI MATRIKS NILAI KELAS - WALI KELAS</div>
-                <div class="school-address">Jl. Al-Azhar No. 1 Pekalongan, Jawa Tengah | Email: info@alazhar-pekalongan.sch.id</div>
+                <div class="school-address">Jl. Pelita II, Kelurahan Banyurip, Kecamatan Pekalongan Selatan, Kota Pekalongan, Jawa Tengah</div>
+            </td>
+            <td style="width: 65px; text-align: right;">
+                @if(file_exists(public_path('img/sigma.png')))
+                    <img src="{{ public_path('img/sigma.png') }}" class="logo" alt="Logo Sigma">
+                @endif
             </td>
         </tr>
     </table>
@@ -178,12 +183,9 @@
         </tr>
     </table>
 
-    @if($searchQuery || $statusFilter !== 'semua' || $jenisFilter)
+    @if($jenisFilter)
     <div class="filter-info">
-        * Filter Aktif &mdash; 
-        @if($searchQuery) Pencarian: <strong>"{{ $searchQuery }}"</strong> | @endif
-        @if($statusFilter !== 'semua') Status: <strong>{{ ucfirst($statusFilter) }}</strong> | @endif
-        @if($jenisFilter) Jenis Ujian: <strong>{{ $jenisFilter }}</strong> @endif
+        * Jenis Ujian: <strong>{{ $jenisFilter }}</strong> &mdash; Dokumen resmi berisi seluruh siswa terdaftar di kelas.
     </div>
     @endif
 

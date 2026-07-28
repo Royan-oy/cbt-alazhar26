@@ -22,7 +22,6 @@
         background: linear-gradient(135deg, var(--primary-dark) 0%, var(--secondary-dark) 100%);
         border: none;
         border-radius: 1.25rem;
-        overflow: hidden;
         position: relative;
         box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.15);
     }
@@ -351,11 +350,17 @@
     .legend-dot-none { background: #e2e8f0; border: 1px dashed #cbd5e1; }
 
     /* Dropdown menu customization */
+    .dropdown {
+        position: relative;
+        z-index: 1050;
+    }
     .dropdown-menu {
         border-radius: 10px !important;
         border: 1px solid #e2e8f0 !important;
-        box-shadow: 0 10px 24px -4px rgba(15,23,42,0.12) !important;
+        box-shadow: 0 10px 24px -4px rgba(15,23,42,0.18) !important;
         padding: 0.4rem 0 !important;
+        z-index: 1060 !important;
+        position: absolute !important;
     }
     .dropdown-item {
         transition: background 0.15s ease;
@@ -436,11 +441,29 @@
                                 </li>
                             </ul>
                         </div>
-                        {{-- EXPORT EXCEL --}}
-                        <a href="{{ route('dashboard-guru.wali-kelas.rekap-nilai.export') }}" class="export-btn">
-                            <i class="fa-solid fa-file-excel fs-6"></i>
-                            Export Excel
-                        </a>
+                        {{-- DROPDOWN EXPORT EXCEL --}}
+                        <div class="dropdown d-inline-block">
+                            <button class="export-btn dropdown-toggle" type="button" id="dropdownExcelButton" data-bs-toggle="dropdown" aria-expanded="false" style="background: linear-gradient(135deg, #10b981, #059669);">
+                                <i class="fa-solid fa-file-excel fs-6"></i>
+                                Export Excel
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownExcelButton" style="min-width: 250px;">
+                                <li>
+                                    <a class="dropdown-item py-2 fw-semibold text-dark" style="font-size: 13px;"
+                                       href="{{ route('dashboard-guru.wali-kelas.rekap-nilai.export') }}" target="_blank">
+                                        <i class="fa-solid fa-list-ol me-2 text-success"></i> Cetak Leaderboard Kelas
+                                        <small class="d-block text-muted ms-4" style="font-size: 11px;">Semua ujian — format rekap</small>
+                                    </a>
+                                </li>
+                                <li id="excel-jenis-ujian-li" style="display: none;">
+                                    <a class="dropdown-item py-2 fw-semibold text-dark" id="btnExportExcelJenis"
+                                       style="font-size: 13px;" href="#" target="_blank">
+                                        <i class="fa-solid fa-table me-2 text-success"></i> Cetak Matriks: <span id="excel-jenis-ujian-text"></span>
+                                        <small class="d-block text-muted ms-4" style="font-size: 11px;">Matriks per mapel — rata-rata mapel</small>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -676,26 +699,44 @@
 
 </div>
 
-<!-- JAVASCRIPT: LIVE SEARCH & DROPDOWN PDF -->
+<!-- JAVASCRIPT: LIVE SEARCH & DROPDOWN EXPORT -->
 <script>
 document.addEventListener("DOMContentLoaded", function() {
     const searchInput = document.getElementById('search-input');
     const jenisSelect = document.getElementById('jenis_ujian');
+    
+    // PDF Elements
     const btnExportPdfJenis = document.getElementById('btnExportPdfJenis');
     const pdfJenisLi = document.getElementById('pdf-jenis-ujian-li');
     const pdfJenisText = document.getElementById('pdf-jenis-ujian-text');
     const basePdfUrl = "{{ route('dashboard-guru.wali-kelas.rekap-nilai.export-pdf') }}";
 
-    // Dropdown PDF: tampilkan opsi cetak matriks jika jenis ujian dipilih
-    function updatePdfUrls() {
+    // Excel Elements
+    const btnExportExcelJenis = document.getElementById('btnExportExcelJenis');
+    const excelJenisLi = document.getElementById('excel-jenis-ujian-li');
+    const excelJenisText = document.getElementById('excel-jenis-ujian-text');
+    const baseExcelUrl = "{{ route('dashboard-guru.wali-kelas.rekap-nilai.export') }}";
+
+    // Dropdown Export: tampilkan opsi cetak matriks jika jenis ujian dipilih
+    function updateExportUrls() {
         const jenisVal = jenisSelect ? jenisSelect.value : '';
 
+        // Update PDF
         if (jenisVal && btnExportPdfJenis && pdfJenisLi && pdfJenisText) {
             pdfJenisText.textContent = jenisVal;
             btnExportPdfJenis.href = `${basePdfUrl}?jenis_ujian=${encodeURIComponent(jenisVal)}`;
             pdfJenisLi.style.display = 'block';
         } else if (pdfJenisLi) {
             pdfJenisLi.style.display = 'none';
+        }
+
+        // Update Excel
+        if (jenisVal && btnExportExcelJenis && excelJenisLi && excelJenisText) {
+            excelJenisText.textContent = jenisVal;
+            btnExportExcelJenis.href = `${baseExcelUrl}?jenis_ujian=${encodeURIComponent(jenisVal)}`;
+            excelJenisLi.style.display = 'block';
+        } else if (excelJenisLi) {
+            excelJenisLi.style.display = 'none';
         }
     }
 
@@ -716,11 +757,11 @@ document.addEventListener("DOMContentLoaded", function() {
         searchInput.addEventListener('input', filterStudents);
     }
     if (jenisSelect) {
-        jenisSelect.addEventListener('change', updatePdfUrls);
+        jenisSelect.addEventListener('change', updateExportUrls);
     }
 
     // Inisialisasi awal (saat halaman dimuat dengan jenis ujian sudah aktif)
-    updatePdfUrls();
+    updateExportUrls();
 });
 </script>
 @endsection

@@ -138,6 +138,7 @@ class DummyExamSeeder extends Seeder
             $siswaUserId = DB::table('users')->insertGetId([
                 'nis'        => $nis,
                 'password'   => Hash::make('siswa123'),
+                'password_plain' => 'siswa123',
                 'role'       => 'siswa',
                 'created_at' => now(),
                 'updated_at' => now(),
