@@ -383,7 +383,7 @@
                                     <th style="width: 180px;" class="text-center">Jenis Ujian</th>
                                     <th style="width: 100px;" class="text-center">KKM</th>
                                     <th style="width: 120px;" class="text-center">Nilai Akhir</th>
-                                    <th style="width: 150px;" class="text-center">Status</th>
+                                    <th style="width: 170px;" class="text-center">Status Koreksi</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -411,13 +411,13 @@
                                         </td>
                                         <td class="text-center">
                                             @if($detail['nilai'] !== null)
-                                                @if($detail['nilai'] >= $detail['kkm'])
+                                                @if(($detail['status_penilaian'] ?? 'selesai') === 'selesai')
                                                     <span class="text-success fw-bold" style="font-size: 12px;">
-                                                        <i class="fa-solid fa-check-circle me-1"></i> Tuntas
+                                                        <i class="fa-solid fa-check-circle me-1"></i> Sudah Dikoreksi
                                                     </span>
                                                 @else
-                                                    <span class="text-danger fw-bold" style="font-size: 12px;">
-                                                        <i class="fa-solid fa-times-circle me-1"></i> Belum Tuntas
+                                                    <span class="text-warning fw-bold" style="font-size: 12px; color: #d97706 !important;">
+                                                        <i class="fa-solid fa-clock me-1"></i> Belum Dikoreksi
                                                     </span>
                                                 @endif
                                             @else

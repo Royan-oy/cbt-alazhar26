@@ -11,7 +11,7 @@
         body {
             font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
             font-size: 10px;
-            color: #0f172a;
+            color: #1f2430;
             background: #ffffff;
             margin: 0;
             padding: 0;
@@ -35,34 +35,49 @@
         }
 
         .card-box {
-            border: 1px solid #cbd5e1;
-            border-radius: 8px;
+            border: 1px solid #d6d3d1;
+            border-radius: 6px;
             overflow: hidden;
             background: #ffffff;
         }
 
         .card-header {
-            background: #0f172a;
+            background: #1f2430;
             color: #ffffff;
-            padding: 7px 10px;
-            text-align: center;
-            border-bottom: 2px solid #0ea5e9;
+            padding: 6px 8px;
+            border-bottom: 2px solid #b08d57;
+        }
+
+        .card-header-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .card-header-table td {
+            vertical-align: middle;
+        }
+
+        .card-header-logo {
+            width: 22px;
+            height: auto;
         }
 
         .card-header .school-name {
-            font-size: 8px;
+            font-size: 7.5px;
             font-weight: 700;
             letter-spacing: 0.5px;
-            color: #38bdf8;
+            color: #c9ad7f;
             text-transform: uppercase;
             margin: 0;
+            text-align: center;
         }
 
         .card-header .card-title {
-            font-size: 10px;
+            font-size: 9.5px;
             font-weight: 800;
-            margin: 2px 0 0 0;
+            margin: 1px 0 0 0;
             letter-spacing: 0.3px;
+            text-align: center;
         }
 
         .card-body {
@@ -87,10 +102,10 @@
         .photo-box {
             width: 48px;
             height: 58px;
-            border: 1px solid #e2e8f0;
-            border-radius: 6px;
+            border: 1px solid #e0ded9;
+            border-radius: 5px;
             overflow: hidden;
-            background: #f8fafc;
+            background: #faf9f7;
             text-align: center;
         }
 
@@ -102,7 +117,7 @@
 
         .photo-placeholder {
             font-size: 7px;
-            color: #94a3b8;
+            color: #a8a29e;
             margin-top: 22px;
             font-weight: 700;
         }
@@ -118,25 +133,25 @@
         }
 
         .info-label {
-            color: #64748b;
+            color: #78716c;
             width: 62px;
             font-weight: 600;
         }
 
         .info-sep {
             width: 8px;
-            color: #94a3b8;
+            color: #a8a29e;
         }
 
         .info-val {
             font-weight: 700;
-            color: #0f172a;
+            color: #1f2430;
         }
 
         .cred-box {
-            background: #f0f9ff;
-            border: 1px dashed #bae6fd;
-            border-radius: 6px;
+            background: #faf8f4;
+            border: 1px solid #e2d9c3;
+            border-radius: 5px;
             padding: 4px 6px;
             margin-top: 4px;
         }
@@ -147,25 +162,25 @@
         }
 
         .cred-label {
-            color: #0369a1;
+            color: #8a6d3b;
             font-weight: 700;
             width: 62px;
         }
 
         .cred-val {
             font-weight: 800;
-            color: #0284c7;
+            color: #1f2430;
             font-family: monospace;
             font-size: 11px;
             letter-spacing: 0.5px;
         }
 
         .card-footer {
-            background: #f8fafc;
-            border-top: 1px solid #f1f5f9;
+            background: #faf9f7;
+            border-top: 1px solid #ece9e4;
             padding: 4px 8px;
             font-size: 7.5px;
-            color: #64748b;
+            color: #78716c;
             text-align: center;
         }
 
@@ -181,8 +196,24 @@
         <div class="card-wrapper">
             <div class="card-box">
                 <div class="card-header">
-                    <p class="school-name">SEKOLAH ISLAM AL AZHAR PEKALONGAN</p>
-                    <h4 class="card-title">KARTU PESERTA UJIAN CBT</h4>
+                    <table class="card-header-table">
+                        <tr>
+                            <td style="width: 26px; text-align: left;">
+                                @if(file_exists(public_path('img/logo-alazhar.png')))
+                                    <img src="{{ public_path('img/logo-alazhar.png') }}" class="card-header-logo" alt="Logo">
+                                @endif
+                            </td>
+                            <td>
+                                <p class="school-name">SEKOLAH ISLAM AL AZHAR PEKALONGAN</p>
+                                <h4 class="card-title">KARTU PESERTA UJIAN CBT</h4>
+                            </td>
+                            <td style="width: 26px; text-align: right;">
+                                @if(file_exists(public_path('img/sigma.png')))
+                                    <img src="{{ public_path('img/sigma.png') }}" class="card-header-logo" alt="Sigma">
+                                @endif
+                            </td>
+                        </tr>
+                    </table>
                 </div>
 
                 <div class="card-body">
@@ -229,12 +260,12 @@
                         <table class="cred-table">
                             <tr>
                                 <td class="cred-label">Username</td>
-                                <td style="width: 8px; color: #0284c7;">:</td>
+                                <td style="width: 8px; color: #8a6d3b;">:</td>
                                 <td class="cred-val">{{ $siswa->nis }}</td>
                             </tr>
                             <tr>
                                 <td class="cred-label">Password</td>
-                                <td style="width: 8px; color: #0284c7;">:</td>
+                                <td style="width: 8px; color: #8a6d3b;">:</td>
                                 <td class="cred-val">{{ optional($siswa->user)->password_plain ?? '-' }}</td>
                             </tr>
                         </table>

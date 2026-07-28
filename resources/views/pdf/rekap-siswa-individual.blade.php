@@ -29,7 +29,7 @@
         }
         .school-info {
             text-align: center;
-            padding-right: 60px;
+            padding: 0 5px;
         }
         .school-name {
             font-size: 14pt;
@@ -115,8 +115,8 @@
         .text-left { text-align: left; }
         .badge-tuntas { color: #166534; font-weight: bold; }
         .badge-kurang { color: #991b1b; font-weight: bold; }
+        .badge-menunggu { color: #d97706; font-weight: bold; }
         .badge-belum { color: #64748b; font-style: italic; }
-
         /* Signature Table */
         .signature-table {
             width: 100%;
@@ -140,26 +140,28 @@
     </style>
 </head>
 <body>
-
     <!-- Header Kop Surat -->
     <table class="header-table">
         <tr>
-            <td style="width: 70px;">
-                <!-- Menggunakan base64 logo jika ada atau tulisan jika tidak ada image -->
-                <span style="font-weight: bold; color: #0284c7; font-size: 18pt;">CBT</span>
+            <td style="width: 65px; text-align: left;">
+                @if(file_exists(public_path('img/logo-alazhar.png')))
+                    <img src="{{ public_path('img/logo-alazhar.png') }}" class="logo" alt="Logo Al-Azhar">
+                @endif
             </td>
             <td class="school-info">
-                <div class="school-name">SMP AL AZHAR 26</div>
+                <div class="school-name">Sekolah Islam Al Azhar Pekalongan</div>
                 <div class="sub-school">Laporan Hasil Ujian Siswa</div>
-                <div class="school-address">Jl. Lingkar Utara, Sendangadi, Mlati, Sleman, Yogyakarta</div>
+                <div class="school-address">Jl. Pelita II, Kelurahan Banyurip, Kecamatan Pekalongan Selatan, Kota Pekalongan, Jawa Tengah</div>
+            </td>
+            <td style="width: 65px; text-align: right;">
+                @if(file_exists(public_path('img/sigma.png')))
+                    <img src="{{ public_path('img/sigma.png') }}" class="logo" alt="Logo Sigma">
+                @endif
             </td>
         </tr>
     </table>
-
     <hr class="header-line">
-
     <div class="doc-title">Rincian Hasil Ujian Kelas</div>
-
     <!-- Meta Info -->
     <table class="meta-table">
         <tr>
@@ -189,7 +191,6 @@
             </td>
         </tr>
     </table>
-
     <!-- Data Ujian Tabel -->
     <table class="data-table">
         <thead>
@@ -198,7 +199,7 @@
                 <th style="width: 15%;">Jenis Ujian</th>
                 <th style="width: 10%;">KKM</th>
                 <th style="width: 10%;">Nilai</th>
-                <th style="width: 15%;">Status</th>
+                <th style="width: 17%;">Status Koreksi</th>
             </tr>
         </thead>
         <tbody>
@@ -228,10 +229,10 @@
                         </td>
                         <td class="text-center">
                             @if($detail['nilai'] !== null)
-                                @if($detail['nilai'] >= $detail['kkm'])
-                                    <span class="badge-tuntas">Tuntas</span>
+                                @if(($detail['status_penilaian'] ?? 'selesai') === 'selesai')
+                                    <span class="badge-tuntas">Sudah Dikoreksi</span>
                                 @else
-                                    <span class="badge-kurang">Belum Tuntas</span>
+                                    <span class="badge-menunggu">Belum Dikoreksi</span>
                                 @endif
                             @else
                                 <span class="badge-belum">Belum Diikuti</span>
@@ -246,7 +247,6 @@
             @endforelse
         </tbody>
     </table>
-
     <!-- Signature Area -->
     <table class="signature-table">
         <tr>
@@ -265,6 +265,5 @@
             </td>
         </tr>
     </table>
-
 </body>
 </html>

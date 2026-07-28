@@ -29,7 +29,7 @@
         }
         .school-info {
             text-align: center;
-            padding-right: 60px;
+            padding: 0 5px;
         }
         .school-name {
             font-size: 14pt;
@@ -116,7 +116,6 @@
         .badge-tuntas { color: #166534; font-weight: bold; }
         .badge-kurang { color: #991b1b; font-weight: bold; }
         .badge-belum { color: #64748b; font-style: italic; }
-
         /* Signature Table */
         .signature-table {
             width: 100%;
@@ -140,25 +139,28 @@
     </style>
 </head>
 <body>
-
     <!-- Header Kop Surat -->
     <table class="header-table">
         <tr>
-            <td style="width: 70px;">
-                <span style="font-weight: bold; color: #0284c7; font-size: 18pt;">CBT</span>
+            <td style="width: 65px; text-align: left;">
+                @if(file_exists(public_path('img/logo-alazhar.png')))
+                    <img src="{{ public_path('img/logo-alazhar.png') }}" class="logo" alt="Logo Al-Azhar">
+                @endif
             </td>
             <td class="school-info">
-                <div class="school-name">SMP AL AZHAR 26</div>
+                <div class="school-name">Sekolah Islam Al Azhar Pekalongan</div>
                 <div class="sub-school">Laporan Rekapitulasi Leaderboard Kelas</div>
-                <div class="school-address">Jl. Lingkar Utara, Sendangadi, Mlati, Sleman, Yogyakarta</div>
+                <div class="school-address">Jl. Pelita II, Kelurahan Banyurip, Kecamatan Pekalongan Selatan, Kota Pekalongan, Jawa Tengah</div>
+            </td>
+            <td style="width: 65px; text-align: right;">
+                @if(file_exists(public_path('img/sigma.png')))
+                    <img src="{{ public_path('img/sigma.png') }}" class="logo" alt="Logo Sigma">
+                @endif
             </td>
         </tr>
     </table>
-
     <hr class="header-line">
-
     <div class="doc-title">REKAP LEADERBOARD NILAI SISWA</div>
-
     <!-- Meta Info -->
     <table class="meta-table">
         <tr>
@@ -174,16 +176,15 @@
             <td class="meta-val">: {{ count($siswas) }} Siswa</td>
         </tr>
     </table>
-
     <!-- Leaderboard Table -->
     <table class="data-table">
         <thead>
             <tr>
-                <th style="width: 12%;">Peringkat</th>
+                <th style="width: 8%;">No</th>
                 <th style="width: 18%;">NIS</th>
-                <th style="width: 45%;">Nama Siswa</th>
-                <th style="width: 13%;">Rata-Rata</th>
-                <th style="width: 12%;">Status</th>
+                <th style="width: 42%;">Nama Siswa</th>
+                <th style="width: 14%;">Rata-Rata</th>
+                <th style="width: 18%;">Peringkat</th>
             </tr>
         </thead>
         <tbody>
@@ -197,38 +198,27 @@
                     elseif ($rank === 3) $rowClass = 'rank-row-3';
                 @endphp
                 <tr class="{{ $rowClass }}">
-                    <td class="text-center">
-                        @if($rank === 1)
-                            🥇 1
-                        @elseif($rank === 2)
-                            🥈 2
-                        @elseif($rank === 3)
-                            🥉 3
-                        @elseif($rank)
-                            {{ $rank }}
-                        @else
-                            —
-                        @endif
-                    </td>
+                    <td class="text-center">{{ $idx + 1 }}</td>
                     <td class="text-center">{{ $siswa->nis }}</td>
                     <td>{{ $siswa->nama }}</td>
-                    <td class="text-center fw-bold">{{ $avg !== null ? $avg : '—' }}</td>
+                    <td class="text-center" style="font-weight: bold;">{{ $avg !== null ? $avg : '—' }}</td>
                     <td class="text-center">
-                        @if($avg !== null)
-                            @if($avg >= 75)
-                                <span class="badge-tuntas">Tuntas</span>
-                            @else
-                                <span class="badge-kurang">Kurang</span>
-                            @endif
+                        @if($rank === 1)
+                            🥇 Ke-1
+                        @elseif($rank === 2)
+                            🥈 Ke-2
+                        @elseif($rank === 3)
+                            🥉 Ke-3
+                        @elseif($rank)
+                            Ke-{{ $rank }}
                         @else
-                            <span class="badge-belum">Belum</span>
+                            —
                         @endif
                     </td>
                 </tr>
             @endforeach
         </tbody>
     </table>
-
     <!-- Signature Area -->
     <table class="signature-table">
         <tr>
@@ -247,6 +237,5 @@
             </td>
         </tr>
     </table>
-
 </body>
 </html>

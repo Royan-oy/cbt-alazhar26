@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Rekap Nilai Ujian Kelas - {{ $kelas->nama_kelas }}</title>
+    <title>Rekap Nilai Kelas - {{ $kelas->nama_kelas }}</title>
     <style>
         @page {
             margin: 1.2cm 1.2cm 1.2cm 1.2cm;
@@ -10,7 +10,7 @@
         }
         body {
             font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-            font-size: 8.5pt;
+            font-size: 9pt;
             color: #1e293b;
             line-height: 1.3;
         }
@@ -23,9 +23,13 @@
         .header-table td {
             vertical-align: middle;
         }
+        .logo {
+            width: 60px;
+            height: auto;
+        }
         .school-info {
             text-align: center;
-            padding-right: 60px;
+            padding: 0 5px;
         }
         .school-name {
             font-size: 14pt;
@@ -67,19 +71,20 @@
             margin-bottom: 10px;
             background-color: #f8fafc;
             border: 1px solid #cbd5e1;
+            padding: 6px 10px;
         }
         .meta-table td {
-            padding: 5px 10px;
-            font-size: 8pt;
+            padding: 3px 6px;
+            font-size: 8.5pt;
         }
         .meta-label {
             font-weight: bold;
             color: #475569;
-            width: 15%;
+            width: 12%;
         }
         .meta-val {
             color: #0f172a;
-            width: 35%;
+            width: 38%;
         }
         /* Matrix Data Table */
         .matrix-table {
@@ -90,7 +95,7 @@
         .matrix-table th {
             background-color: #0f172a;
             color: #ffffff;
-            font-size: 7.5pt;
+            font-size: 8pt;
             font-weight: bold;
             text-transform: uppercase;
             padding: 6px 4px;
@@ -140,13 +145,20 @@
     <!-- KOP SURAT -->
     <table class="header-table">
         <tr>
-            <td style="width: 70px;">
-                <span style="font-weight: bold; color: #0284c7; font-size: 18pt;">CBT</span>
+            <td style="width: 65px; text-align: left;">
+                @if(file_exists(public_path('img/logo-alazhar.png')))
+                    <img src="{{ public_path('img/logo-alazhar.png') }}" class="logo" alt="Logo Al-Azhar">
+                @endif
             </td>
             <td class="school-info">
-                <div class="school-name">SMP AL AZHAR 26</div>
+                <div class="school-name">Sekolah Islam Al Azhar Pekalongan</div>
                 <div class="sub-school">REKAPITULASI MATRIKS NILAI KELAS - WALI KELAS</div>
-                <div class="school-address">Jl. Lingkar Utara, Sendangadi, Mlati, Sleman, Yogyakarta</div>
+                <div class="school-address">Jl. Pelita II, Kelurahan Banyurip, Kecamatan Pekalongan Selatan, Kota Pekalongan, Jawa Tengah</div>
+            </td>
+            <td style="width: 65px; text-align: right;">
+                @if(file_exists(public_path('img/sigma.png')))
+                    <img src="{{ public_path('img/sigma.png') }}" class="logo" alt="Logo Sigma">
+                @endif
             </td>
         </tr>
     </table>
@@ -159,34 +171,36 @@
     <table class="meta-table">
         <tr>
             <td class="meta-label">Kelas:</td>
-            <td class="meta-val"><strong>{{ $kelas->nama_kelas }} ({{ $kelas->nama_tingkat }})</strong></td>
+            <td class="meta-val"><strong>{{ $kelas->nama_kelas }}</strong></td>
             <td class="meta-label">Wali Kelas:</td>
-            <td class="meta-val"><strong>{{ Auth::user()->name }}</strong></td>
+            <td class="meta-val"><strong>{{ Auth::user()->nama }}</strong></td>
         </tr>
         <tr>
             <td class="meta-label">Tahun Ajaran:</td>
             <td class="meta-val">{{ $activeTahunAjaran->nama_tahun ?? '-' }}</td>
-            <td class="meta-label">Jenis Ujian:</td>
-            <td class="meta-val"><strong>{{ $jenisFilter }}</strong></td>
+            <td class="meta-label">Jumlah Siswa:</td>
+            <td class="meta-val">{{ count($siswas) }} Siswa Terdaftar</td>
         </tr>
     </table>
 
+    @if($jenisFilter)
     <div class="filter-info">
-        * Dokumen resmi berisi daftar seluruh siswa terdaftar di kelas.
+        * Jenis Ujian: <strong>{{ $jenisFilter }}</strong> &mdash; Dokumen resmi berisi seluruh siswa terdaftar di kelas.
     </div>
+    @endif
 
     <!-- TABEL MATRIKS NILAI -->
     <table class="matrix-table">
         <thead>
             <tr>
-                <th style="width: 4%;">NO</th>
-                <th style="width: 10%;">NIS</th>
-                <th style="width: 25%;">NAMA SISWA</th>
+                <th style="width: 3%;">NO</th>
+                <th style="width: 8%;">NIS</th>
+                <th style="width: 22%;">NAMA SISWA</th>
                 @foreach($mapels as $mapel)
                     <th>{{ strtoupper($mapel) }}</th>
                 @endforeach
-                <th style="width: 8%;">RATA-RATA</th>
-                <th style="width: 10%;">STATUS</th>
+                <th style="width: 7%;">RATA2</th>
+                <th style="width: 8%;">STATUS</th>
             </tr>
         </thead>
         <tbody>
@@ -234,7 +248,7 @@
             @empty
             <tr>
                 <td colspan="{{ count($mapels) + 5 }}" class="text-center" style="padding: 15px; color: #64748b;">
-                    Tidak ada siswa terdaftar.
+                    Tidak ada siswa yang sesuai kriteria filter.
                 </td>
             </tr>
             @endforelse
@@ -246,16 +260,16 @@
         <tr>
             <td style="width: 50%;">
                 Mengetahui,<br>
-                Kepala Sekolah
+                Kepala Sekolah Islam Al Azhar Pekalongan
                 <div class="sig-space"></div>
                 <span class="sig-name">( ________________________ )</span>
             </td>
             <td style="width: 50%;">
-                Sleman, {{ now()->translatedFormat('d F Y') }}<br>
+                Pekalongan, {{ \Carbon\Carbon::now()->isoFormat('D MMMM Y') }}<br>
                 Wali Kelas {{ $kelas->nama_kelas }},
                 <div class="sig-space"></div>
-                <span class="sig-name">{{ Auth::user()->name }}</span><br>
-                <span style="font-size: 8pt; color: #64748b;">NIP. ......................................</span>
+                <span class="sig-name">{{ Auth::user()->nama }}</span><br>
+                <span style="font-size: 8pt; color: #64748b;">NIP. {{ Auth::user()->guru->nip ?? '-' }}</span>
             </td>
         </tr>
     </table>
