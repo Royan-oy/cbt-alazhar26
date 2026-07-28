@@ -115,6 +115,7 @@
         .text-left { text-align: left; }
         .badge-tuntas { color: #166534; font-weight: bold; }
         .badge-kurang { color: #991b1b; font-weight: bold; }
+        .badge-menunggu { color: #d97706; font-weight: bold; }
         .badge-belum { color: #64748b; font-style: italic; }
         /* Signature Table */
         .signature-table {
@@ -198,7 +199,7 @@
                 <th style="width: 15%;">Jenis Ujian</th>
                 <th style="width: 10%;">KKM</th>
                 <th style="width: 10%;">Nilai</th>
-                <th style="width: 15%;">Status</th>
+                <th style="width: 17%;">Status Koreksi</th>
             </tr>
         </thead>
         <tbody>
@@ -228,10 +229,10 @@
                         </td>
                         <td class="text-center">
                             @if($detail['nilai'] !== null)
-                                @if($detail['nilai'] >= $detail['kkm'])
-                                    <span class="badge-tuntas">Tuntas</span>
+                                @if(($detail['status_penilaian'] ?? 'selesai') === 'selesai')
+                                    <span class="badge-tuntas">Sudah Dikoreksi</span>
                                 @else
-                                    <span class="badge-kurang">Belum Tuntas</span>
+                                    <span class="badge-menunggu">Belum Dikoreksi</span>
                                 @endif
                             @else
                                 <span class="badge-belum">Belum Diikuti</span>

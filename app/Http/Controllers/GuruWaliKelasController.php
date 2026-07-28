@@ -763,7 +763,7 @@ class GuruWaliKelasController extends Controller
             ->whereIn('ujian_id', $ujians->pluck('id'))
             ->where('siswa_id', $siswaId)
             ->where('status', 'selesai')
-            ->select('ujian_id', 'nilai_akhir')
+            ->select('ujian_id', 'nilai_akhir', 'status_penilaian')
             ->get()
             ->keyBy('ujian_id');
 
@@ -788,10 +788,11 @@ class GuruWaliKelasController extends Controller
                     $cnt++;
                 }
                 $details[] = [
-                    'nama_ujian'  => $ujian->nama_ujian,
-                    'jenis_ujian' => $ujian->nama_jenis_ujian,
-                    'kkm'         => $kkm,
-                    'nilai'       => $nilai,
+                    'nama_ujian'       => $ujian->nama_ujian,
+                    'jenis_ujian'      => $ujian->nama_jenis_ujian,
+                    'kkm'              => $kkm,
+                    'nilai'            => $nilai,
+                    'status_penilaian' => $rec ? $rec->status_penilaian : 'belum',
                 ];
             }
 
@@ -863,7 +864,7 @@ class GuruWaliKelasController extends Controller
             ->whereIn('ujian_id', $ujians->pluck('id'))
             ->where('siswa_id', $siswaId)
             ->where('status', 'selesai')
-            ->select('ujian_id', 'nilai_akhir')
+            ->select('ujian_id', 'nilai_akhir', 'status_penilaian')
             ->get()
             ->keyBy('ujian_id');
 
@@ -886,10 +887,11 @@ class GuruWaliKelasController extends Controller
                     $cnt++;
                 }
                 $details[] = [
-                    'nama_ujian'  => $ujian->nama_ujian,
-                    'jenis_ujian' => $ujian->nama_jenis_ujian,
-                    'kkm'         => $kkm,
-                    'nilai'       => $nilai,
+                    'nama_ujian'       => $ujian->nama_ujian,
+                    'jenis_ujian'      => $ujian->nama_jenis_ujian,
+                    'kkm'              => $kkm,
+                    'nilai'            => $nilai,
+                    'status_penilaian' => $rec ? $rec->status_penilaian : 'belum',
                 ];
             }
 
