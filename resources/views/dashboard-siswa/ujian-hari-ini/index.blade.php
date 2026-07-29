@@ -593,8 +593,18 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     }
 
-    // Initialize with default active tab (hari_ini)
-    applyFilter('hari_ini');
+    // Initialize with default active tab (hari_ini) or from url query param
+    const urlParams = new URLSearchParams(window.location.search);
+    const initialFilter = urlParams.get('filter') || 'hari_ini';
+    
+    const targetBtn = Array.from(filterBtns).find(btn => btn.dataset.filter === initialFilter);
+    if (targetBtn) {
+        filterBtns.forEach(b => b.classList.remove('active'));
+        targetBtn.classList.add('active');
+        applyFilter(initialFilter);
+    } else {
+        applyFilter('hari_ini');
+    }
 
     filterBtns.forEach(btn => {
         btn.addEventListener('click', function() {

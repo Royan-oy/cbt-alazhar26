@@ -492,7 +492,7 @@
                             <small class="text-white-50">Batas waktu {{ \Carbon\Carbon::parse($ujianBerjalan->waktu_selesai)->format('H:i') }} WIB &middot; Durasi {{ $ujianBerjalan->durasi_minimal }} menit</small>
                         </div>
                     </div>
-                    <a href="#" class="btn btn-light fw-bold px-4 py-2 rounded-3">
+                    <a href="{{ route('dashboard-siswa.ujian.kerja', $ujianBerjalan->id) }}" class="btn btn-light fw-bold px-4 py-2 rounded-3">
                         <i class="fa-solid fa-arrow-right me-2"></i>Lanjutkan Sekarang
                     </a>
                 </div>
@@ -570,7 +570,7 @@
                                             <small class="d-block"><i class="fa-regular fa-clock me-1"></i>{{ $ujian->display_tanggal }}</small>
                                         </td>
                                         <td class="text-center" data-label="Status">
-                                            @if($ujian->status_waktu == 'akan_datang')
+                                            @if($ujian->status_waktu == 'belum_mulai')
                                                 <span class="exam-status-badge status-belum"><i class="fa-regular fa-calendar-days"></i> Akan Datang</span>
                                             @elseif($ujian->status_siswa == 'Belum Dikerjakan')
                                                 <span class="exam-status-badge status-berjalan"><i class="fa-solid fa-hourglass-start"></i> Belum Dikerjakan</span>
@@ -582,18 +582,18 @@
                                         </td>
                                         <td class="text-end" data-label="Aksi">
                                             @if($ujian->status_siswa == 'Belum Dikerjakan')
-                                                @if($ujian->status_waktu == 'akan_datang')
+                                                @if($ujian->status_waktu == 'belum_mulai')
                                                     <button class="btn btn-secondary text-white btn-exam-action" disabled>Belum Mulai</button>
-                                                @elseif($ujian->status_waktu == 'selesai')
+                                                @elseif($ujian->status_waktu == 'berakhir')
                                                     <button class="btn btn-danger text-white btn-exam-action" disabled>Berakhir</button>
                                                 @else
-                                                    <a href="#" class="btn btn-primary btn-exam-action">Mulai</a>
+                                                    <a href="{{ route('dashboard-siswa.ujian.mulai', $ujian->id) }}" class="btn btn-primary btn-exam-action">Mulai</a>
                                                 @endif
                                             @elseif($ujian->status_siswa == 'Sedang Mengerjakan')
-                                                @if($ujian->status_waktu == 'selesai')
+                                                @if($ujian->status_waktu == 'berakhir')
                                                     <button class="btn btn-danger text-white btn-exam-action" disabled>Waktu Habis</button>
                                                 @else
-                                                    <a href="#" class="btn btn-warning text-dark btn-exam-action">Lanjutkan</a>
+                                                    <a href="{{ route('dashboard-siswa.ujian.kerja', $ujian->id) }}" class="btn btn-warning text-dark btn-exam-action">Lanjutkan</a>
                                                 @endif
                                             @else
                                                 <button class="btn btn-light border btn-exam-action text-muted" disabled>
@@ -711,7 +711,7 @@
                     @endif --}}
                     @if(Auth::user()->role == 'guru')
                     <div class="col-6 col-md-3">
-                        <a href="#" class="quick-action-btn">
+                        <a href="{{ route('dashboard-guru.bank-soal.create') }}" class="quick-action-btn">
                             <div class="quick-icon-box"><i class="fa-solid fa-circle-plus"></i></div>
                             Buat Bank Soal
                         </a>
@@ -726,7 +726,7 @@
 
                     @if($isWaliKelas ?? false)
                     <div class="col-6 col-md-3">
-                        <a href="#" class="quick-action-btn">
+                        <a href="{{ route('dashboard-guru.wali-kelas.rekap-nilai') }}" class="quick-action-btn">
                             <div class="quick-icon-box"><i class="fa-solid fa-file-export"></i></div>
                             Rekap Kelas
                         </a>
@@ -735,30 +735,30 @@
 
                     @if(Auth::user()->role == 'siswa')
                     <div class="col-6 col-md-3">
-                        <a href="#" class="quick-action-btn primary">
+                        <a href="{{ route('dashboard-siswa.ujian-hari-ini') }}" class="quick-action-btn primary">
                             <div class="quick-icon-box"><i class="fa-solid fa-play"></i></div>
                             Masuk Ruang Ujian
                         </a>
                     </div>
                     <div class="col-6 col-md-3">
-                        <a href="#" class="quick-action-btn">
+                        <a href="{{ route('dashboard-siswa.ujian-hari-ini', ['filter' => 'riwayat']) }}" class="quick-action-btn">
                             <div class="quick-icon-box"><i class="fa-solid fa-clock-rotate-left"></i></div>
                             Riwayat Ujian
                         </a>
                     </div>
                     <div class="col-6 col-md-3">
-                        <a href="#" class="quick-action-btn">
+                        <a href="{{ route('pengaturan-akun.index') }}" class="quick-action-btn">
                             <div class="quick-icon-box"><i class="fa-solid fa-user"></i></div>
                             Profil Saya
                         </a>
                     </div>
                     @endif
 
-                    <div class="col-12 col-md-3 ms-md-auto d-flex align-items-center justify-content-md-end mt-2 mt-md-0">
+                    {{-- <div class="col-12 col-md-3 ms-md-auto d-flex align-items-center justify-content-md-end mt-2 mt-md-0">
                         <span class="secure-badge">
                             <i class="fa-solid fa-shield-halved"></i> Sesi Enkripsi Terlindungi
                         </span>
-                    </div>
+                    </div> --}}
 
                 </div>
             </div>
