@@ -222,17 +222,13 @@ class RuangUjianController extends Controller
 
         // Load soal
         $ujian->load([
-            'bankSoal.soals' => function ($query) use ($ujian) {
-                if ($ujian->acak_soal) {
-                    $query->orderBy('urutan');
-                } else {
-                    $query->orderBy('urutan');
-                }
+            'bankSoal.soals' => function ($query) {
+                $query->orderBy('urutan');
             },
             'bankSoal.soals.pilihanJawabans',
             'bankSoal.mataPelajaran',
-            'jenisUjian',      // <-- tambahkan
-            'tahunAjaran',     // <-- tambahkan
+            'jenisUjian',
+            'tahunAjaran',
         ]);
 
         // Pastikan bank soal ada
@@ -241,6 +237,23 @@ class RuangUjianController extends Controller
         }
 
         $soals = $ujian->bankSoal->soals;
+
+        // Acak urutan soal secara konsisten per siswa (berdasarkan ID Nilai)
+        if ($ujian->acak_soal) {
+            $soals = $soals->shuffle($nilai->id);
+        }
+
+        // Acak urutan pilihan jawaban secara konsisten per siswa
+        if ($ujian->acak_jawaban) {
+            foreach ($soals as $soal) {
+                if ($soal->pilihanJawabans) {
+                    $soal->setRelation(
+                        'pilihanJawabans',
+                        $soal->pilihanJawabans->shuffle($nilai->id + $soal->id)
+                    );
+                }
+            }
+        }
 
         // Ambil jawaban yang sudah tersimpan
         $jawaban = $nilai->jawabanSiswas()

@@ -407,18 +407,7 @@
                             Acak Urutan Jawaban: {{ $ujian->acak_jawaban ? 'Ya' : 'Tidak' }}
                         </div>
                     </div>
-                    <div class="col-md-6">
-                        <div class="setting-badge">
-                            <i class="fa-solid {{ $ujian->tampilkan_nilai ? 'fa-circle-check text-success' : 'fa-circle-xmark text-muted' }}"></i>
-                            Tampilkan Nilai Langsung: {{ $ujian->tampilkan_nilai ? 'Ya' : 'Tidak' }}
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="setting-badge">
-                            <i class="fa-solid {{ $ujian->tampilkan_pembahasan ? 'fa-circle-check text-success' : 'fa-circle-xmark text-muted' }}"></i>
-                            Tampilkan Pembahasan: {{ $ujian->tampilkan_pembahasan ? 'Ya' : 'Tidak' }}
-                        </div>
-                    </div>
+
                 </div>
             </div>
 

@@ -1009,7 +1009,7 @@
                                 class="btn-option">
 
                                 <span class="option-badge">
-                                    {{ $pilihan->kode }}
+                                    {{ chr(65 + $loop->index) }}
                                 </span>
 
                                 <span class="option-text">

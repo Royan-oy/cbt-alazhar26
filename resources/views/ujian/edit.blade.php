@@ -335,29 +335,7 @@
                                 </div>
                             </div>
 
-                            <div class="col-md-6">
-                                <div class="toggle-option">
-                                    <div>
-                                        <div class="fw-semibold">Tampilkan Nilai Langsung</div>
-                                        <small class="text-muted">Siswa lihat skor setelah submit</small>
-                                    </div>
-                                    <div class="form-check form-switch">
-                                        <input class="form-check-input" type="checkbox" name="tampilkan_nilai" value="1" {{ old('tampilkan_nilai', $ujian->tampilkan_nilai) ? 'checked' : '' }}>
-                                    </div>
-                                </div>
-                            </div>
 
-                            <div class="col-md-6">
-                                <div class="toggle-option">
-                                    <div>
-                                        <div class="fw-semibold">Tampilkan Pembahasan</div>
-                                        <small class="text-muted">Siswa lihat kunci & pembahasan</small>
-                                    </div>
-                                    <div class="form-check form-switch">
-                                        <input class="form-check-input" type="checkbox" name="tampilkan_pembahasan" value="1" {{ old('tampilkan_pembahasan', $ujian->tampilkan_pembahasan) ? 'checked' : '' }}>
-                                    </div>
-                                </div>
-                            </div>
                         </div>
                     </div>
 

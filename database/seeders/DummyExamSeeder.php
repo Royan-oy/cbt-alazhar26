@@ -389,8 +389,6 @@ class DummyExamSeeder extends Seeder
                 'token'                => $tokenUjian,
                 'acak_soal'            => true,
                 'acak_jawaban'         => true,
-                'tampilkan_nilai'      => true,
-                'tampilkan_pembahasan' => true,
                 'created_at'           => now(),
                 'updated_at'           => now(),
             ]);
