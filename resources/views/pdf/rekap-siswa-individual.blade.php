@@ -206,7 +206,12 @@
             @forelse($mapelDetails as $mapelNama => $data)
                 <!-- Mapel Header Row -->
                 <tr class="mapel-row">
-                    <td colspan="3">{{ $mapelNama }}</td>
+                    <td colspan="3">
+                        {{ $mapelNama }}
+                        <span style="font-weight: normal; font-size: 8pt; color: #475569; margin-left: 6px;">
+                            (Guru: {{ $data['nama_guru'] ?? '—' }})
+                        </span>
+                    </td>
                     <td class="text-center">{{ $data['avg'] !== null ? $data['avg'] : '—' }}</td>
                     <td class="text-center">
                         @if($data['status'] === 'tuntas')
