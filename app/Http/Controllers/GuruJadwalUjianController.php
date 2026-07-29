@@ -72,7 +72,7 @@ class GuruJadwalUjianController extends Controller
 
     public function show($id)
     {
-        $ujian = Ujian::with(['bankSoal.mataPelajaran', 'jenisUjian'])->findOrFail($id);
+        $ujian = Ujian::with(['bankSoal.mataPelajaran', 'bankSoal.guruMapel.guru', 'jenisUjian'])->findOrFail($id);
         return view('guru.jadwal-ujian.show', compact('ujian'));
     }
 }
