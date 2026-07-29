@@ -593,15 +593,6 @@
             e.preventDefault();
             e.returnValue = "";
         });
-
-        /* =========================================================
-        DETEKSI BACK-FORWARD CACHE (BFCache / SWIPE BACK HISTORY)
-        ========================================================= */
-        window.addEventListener("pageshow", function (event) {
-            if (event.persisted || (window.performance && window.performance.navigation && window.performance.navigation.type === 2)) {
-                window.location.reload();
-            }
-        });
     </script>
 
     <script>

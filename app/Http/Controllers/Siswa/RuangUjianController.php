@@ -28,7 +28,7 @@ class RuangUjianController extends Controller
     if ($nilai && $nilai->status == 'selesai') {
         return redirect()
             ->route('dashboard-siswa.ujian-hari-ini')
-            ->with('error', 'Ujian sudah selesai dan tidak dapat diakses kembali.');
+            ->with('error', 'Ujian sudah dikumpulkan.');
     }
 
     // Cek waktu ujian
@@ -66,15 +66,13 @@ class RuangUjianController extends Controller
         ->soals
         ->count() ?? 0;
 
-    return response()->view(
+    return view(
         'dashboard-siswa.ruang-ujian.index',
         compact(
             'ujian',
             'totalSoal'
         )
-    )->header('Cache-Control', 'no-cache, no-store, max-age=0, must-revalidate')
-     ->header('Pragma', 'no-cache')
-     ->header('Expires', 'Sat, 01 Jan 1990 00:00:00 GMT');
+    );
 }
 
     /**
@@ -95,7 +93,7 @@ class RuangUjianController extends Controller
             ->route('dashboard-siswa.ujian-hari-ini')
             ->with(
                 'error',
-                'Ujian sudah selesai dan tidak dapat diakses kembali.'
+                'Ujian sudah pernah dikerjakan.'
             );
 
         }
@@ -139,24 +137,6 @@ class RuangUjianController extends Controller
      */
     public function kerja(Ujian $ujian)
     {
-        // Ambil data siswa yang login
-        $siswa = Auth::user()->siswa;
-
-        if (!$siswa) {
-            abort(403, 'Data siswa tidak ditemukan.');
-        }
-
-        // Cek terlebih dahulu jika ujian sudah selesai
-        $nilai = Nilai::where('ujian_id', $ujian->id)
-            ->where('siswa_id', $siswa->id)
-            ->first();
-
-        if ($nilai && $nilai->status == 'selesai') {
-            return redirect()
-                ->route('dashboard-siswa.ujian-hari-ini')
-                ->with('error', 'Ujian sudah selesai dan tidak dapat diakses kembali.');
-        }
-
         // Pengaman: Jika siswa mencoba bypass URL tanpa submit token lewat form
         if (!session('ujian_terverifikasi_' . $ujian->id)) {
             return redirect()
@@ -164,15 +144,31 @@ class RuangUjianController extends Controller
                 ->with('error', 'Silakan masukkan token terlebih dahulu untuk mengakses ujian.');
         }
 
-        if (!$nilai) {
-            $nilai = Nilai::create([
-                'ujian_id' => $ujian->id,
-                'siswa_id' => $siswa->id,
-                'waktu_mulai_kerja' => now(),
-                'status' => 'mengerjakan',
-            ]);
+        // Ambil data siswa yang login
+        $siswa = Auth::user()->siswa;
+
+        if (!$siswa) {
+            abort(403, 'Data siswa tidak ditemukan.');
         }
 
+        // Buat atau ambil data pengerjaan ujian
+        $nilai = Nilai::firstOrCreate(
+            [
+                'ujian_id' => $ujian->id,
+                'siswa_id' => $siswa->id,
+            ],
+            [
+                'waktu_mulai_kerja' => now(),
+                'status' => 'mengerjakan',
+            ]
+        );
+
+        if ($nilai->status == 'selesai') {
+
+            return redirect()
+                ->route('dashboard-siswa.ujian-hari-ini')
+                ->with('error', 'Ujian sudah selesai.');
+        }
 
         // Load soal
         $ujian->load([
@@ -212,7 +208,7 @@ class RuangUjianController extends Controller
             ->addMinutes((int) $ujian->durasi_minimal);
         
 
-        return response()->view(
+        return view(
             'dashboard-siswa.ruang-ujian.kerja',
             compact(
                 'ujian',
@@ -223,9 +219,7 @@ class RuangUjianController extends Controller
                 'violationCount',
                 'minSelesai'
             )
-        )->header('Cache-Control', 'no-cache, no-store, max-age=0, must-revalidate')
-         ->header('Pragma', 'no-cache')
-         ->header('Expires', 'Sat, 01 Jan 1990 00:00:00 GMT');
+        );
     }
 
     public function submit(Request $request, Ujian $ujian)
