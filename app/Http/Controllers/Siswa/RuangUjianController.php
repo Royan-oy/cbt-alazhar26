@@ -175,18 +175,30 @@ class RuangUjianController extends Controller
      */
     public function kerja(Ujian $ujian)
     {
-        // Pengaman: Jika siswa mencoba bypass URL tanpa submit token lewat form
-        if (!session('ujian_terverifikasi_' . $ujian->id)) {
-            return redirect()
-                ->route('dashboard-siswa.ujian.mulai', $ujian->id)
-                ->with('error', 'Silakan masukkan token terlebih dahulu untuk mengakses ujian.');
-        }
-
         // Ambil data siswa yang login
         $siswa = Auth::user()->siswa;
 
         if (!$siswa) {
             abort(403, 'Data siswa tidak ditemukan.');
+        }
+
+        // Cek langsung apakah siswa sudah menyelesaikan ujian ini
+        $nilaiExist = Nilai::where('ujian_id', $ujian->id)
+            ->where('siswa_id', $siswa->id)
+            ->first();
+
+        if ($nilaiExist && $nilaiExist->status == 'selesai') {
+            session()->forget('ujian_terverifikasi_' . $ujian->id);
+            return redirect()
+                ->route('dashboard-siswa.ujian-hari-ini')
+                ->with('error', 'Anda telah menyelesaikan ujian ini dan tidak dapat kembali ke halaman ujian.');
+        }
+
+        // Pengaman: Jika siswa mencoba bypass URL tanpa submit token lewat form
+        if (!session('ujian_terverifikasi_' . $ujian->id)) {
+            return redirect()
+                ->route('dashboard-siswa.ujian.mulai', $ujian->id)
+                ->with('error', 'Silakan masukkan token terlebih dahulu untuk mengakses ujian.');
         }
 
         // Buat atau ambil data pengerjaan ujian
@@ -202,7 +214,7 @@ class RuangUjianController extends Controller
         );
 
         if ($nilai->status == 'selesai') {
-
+            session()->forget('ujian_terverifikasi_' . $ujian->id);
             return redirect()
                 ->route('dashboard-siswa.ujian-hari-ini')
                 ->with('error', 'Ujian sudah selesai.');
@@ -246,18 +258,22 @@ class RuangUjianController extends Controller
             ->addMinutes((int) $ujian->durasi_minimal);
         
 
-        return view(
-            'dashboard-siswa.ruang-ujian.kerja',
-            compact(
-                'ujian',
-                'soals',
-                'nilai',
-                'jawaban',
-                'currentQuestion',
-                'violationCount',
-                'minSelesai'
+        return response()
+            ->view(
+                'dashboard-siswa.ruang-ujian.kerja',
+                compact(
+                    'ujian',
+                    'soals',
+                    'nilai',
+                    'jawaban',
+                    'currentQuestion',
+                    'violationCount',
+                    'minSelesai'
+                )
             )
-        );
+            ->header('Cache-Control', 'no-cache, no-store, max-age=0, must-revalidate')
+            ->header('Pragma', 'no-cache')
+            ->header('Expires', 'Sat, 01 Jan 1990 00:00:00 GMT');
     }
 
     public function submit(Request $request, Ujian $ujian)

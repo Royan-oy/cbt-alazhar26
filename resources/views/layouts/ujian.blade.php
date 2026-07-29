@@ -565,6 +565,15 @@
             e.preventDefault();
             e.returnValue = "";
         });
+
+        /* =========================================================
+        DETEKSI KEMBALI / SWAP BACK DARI BFCACHE
+        ========================================================= */
+        window.addEventListener("pageshow", function (event) {
+            if (event.persisted || (window.performance && (window.performance.navigation && window.performance.navigation.type === 2 || (performance.getEntriesByType && performance.getEntriesByType("navigation")[0] && performance.getEntriesByType("navigation")[0].type === "back_forward")))) {
+                window.location.replace("{{ route('dashboard-siswa.ujian-hari-ini') }}");
+            }
+        });
     </script>
 
     @yield('scripts')
