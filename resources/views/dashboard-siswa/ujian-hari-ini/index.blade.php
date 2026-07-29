@@ -301,6 +301,17 @@
 
 <div class="container-fluid px-4 py-2">
 
+    {{-- ALERT PESAN JIKA ADA ERROR --}}
+    @if(session('error'))
+        <div class="alert alert-danger alert-dismissible fade show rounded-4 border-0 shadow-sm mb-3 d-flex align-items-center" role="alert" style="background-color: #fef2f2; color: #991b1b;">
+            <i class="fa-solid fa-circle-exclamation fs-5 me-3 text-danger"></i>
+            <div>
+                <strong>Akses Ditolak:</strong> {{ session('error') }}
+            </div>
+            <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
+
     {{-- HEADER --}}
     <div class="cbt-header shadow-sm">
         <div class="d-flex align-items-center">
