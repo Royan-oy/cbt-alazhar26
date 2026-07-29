@@ -540,40 +540,63 @@
         margin: 0 auto;
         display: flex;
         gap: 10px;
+        justify-content: center;
+        align-items: center;
     }
 
     .exam-bottom-nav .btn {
-        flex: 1;
-        color: #fff;
-        border: none;
         border-radius: var(--radius-sm);
         padding: 12px 14px;
         font-weight: 700;
         font-size: 13.5px;
-        background: var(--accent-blue);
-        transition: filter 0.15s ease;
+        transition: all 0.15s ease;
     }
 
-    .exam-bottom-nav .btn:hover { filter: brightness(1.05); }
-
     .exam-bottom-nav .btn:disabled {
-        background: var(--border-color) !important;
-        color: #94a3b8;
+        background: #f1f5f9 !important;
+        color: #94a3b8 !important;
+        border-color: #e2e8f0 !important;
         cursor: not-allowed;
     }
 
-    #btnPrev {
+    #btnPrev, #btnNext {
         background: #ffffff;
         color: #475569;
         border: 1px solid #cbd5e1 !important;
         flex: 0 0 auto;
-        min-width: 118px;
+        min-width: 130px;
+    }
+
+    #btnPrev:hover:not(:disabled), #btnNext:hover:not(:disabled) {
+        background: #f8fafc;
+        color: #0f172a;
+        border-color: #94a3b8 !important;
     }
 
     #btnRagu {
         flex: 0 0 auto;
         min-width: 130px;
         background: var(--warning);
+        color: #ffffff;
+    }
+
+    #btnRagu:hover:not(:disabled) {
+        filter: brightness(1.05);
+    }
+
+    #btnFinishBottom {
+        display: none;
+        flex: 0 0 auto;
+        min-width: 150px;
+        background: linear-gradient(135deg, #10b981, #059669);
+        color: #ffffff;
+        border: none !important;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+    }
+
+    #btnFinishBottom:hover {
+        background: linear-gradient(135deg, #059669, #047857);
+        box-shadow: 0 6px 16px rgba(16, 185, 129, 0.35);
     }
 
     /* =========================================================
@@ -801,7 +824,7 @@
         .exam-topbar { align-items: flex-start; }
         .exam-time-pills { width: 100%; }
         .time-pill { flex: 1; justify-content: center; }
-        #btnPrev, #btnRagu { min-width: 0; }
+        #btnPrev, #btnRagu, #btnNext, #btnFinishBottom { min-width: 0; flex: 1; }
         .exam-bottom-nav .btn span.btn-label-full { display: none; }
     }
 
@@ -1063,6 +1086,10 @@
         <button type="button" class="btn" id="btnNext" onclick="navigateQuestion(1)">
             <span class="btn-label-full">Selanjutnya</span> <i class="fa-solid fa-arrow-right ms-2"></i>
         </button>
+
+        <button type="button" class="btn" id="btnFinishBottom" onclick="confirmFinish()" style="display: none;">
+            <i class="fa-solid fa-cloud-arrow-up me-2"></i><span class="btn-label-full">Selesaikan Ujian</span>
+        </button>
     </div>
 </div>
 
@@ -1149,6 +1176,22 @@
             </button>
             <button type="button" class="btn-yakin-finish" onclick="submitFinalExam()">
                 <i class="fa-solid fa-cloud-arrow-up me-1"></i> Ya, Selesaikan
+            </button>
+        </div>
+    </div>
+</div>
+
+{{-- MODAL NOTIFIKASI WAKTU MINIMAL SELESAI UJIAN --}}
+<div class="finish-exam-overlay" id="timeNoticeOverlay">
+    <div class="finish-exam-modal">
+        <div class="finish-exam-icon" style="background: #fffbeb; color: #d97706; border: 1px solid #fde68a;">
+            <i class="fa-solid fa-clock"></i>
+        </div>
+        <h5>Belum Bisa Selesaikan Ujian</h5>
+        <p id="timeNoticeMessage" style="font-size: 13.5px; color: #475569; line-height: 1.6;"></p>
+        <div class="finish-exam-actions" style="justify-content: center;">
+            <button type="button" class="btn-yakin-finish" style="background: #0284c7; width: 100%; justify-content: center;" onclick="closeTimeNoticeModal()">
+                <i class="fa-solid fa-check me-1"></i> Saya Mengerti
             </button>
         </div>
     </div>
@@ -1247,24 +1290,21 @@
     }
 
     function updateFinishButtonState() {
-        const btn = document.getElementById('btnFinishExam');
+        const btnDrawer = document.getElementById('btnFinishExam');
+        const btnBottom = document.getElementById('btnFinishBottom');
         const notice = document.getElementById('finishExamNotice');
-        if (!btn) return;
 
         const allAnswered = checkAllAnswered();
-        const now = new Date().getTime();
-        const timeRequirementMet = now >= minSelesaiTime;
 
-        if (allAnswered && timeRequirementMet) {
-            btn.disabled = false;
-            notice.textContent = '';
+        if (allAnswered) {
+            if (btnDrawer) btnDrawer.style.display = 'block';
+            if (btnBottom) btnBottom.style.display = 'inline-flex';
         } else {
-            btn.disabled = true;
-            let pesan = [];
-            if (!allAnswered) pesan.push('semua soal belum terisi');
-            if (!timeRequirementMet) pesan.push(`baru bisa diselesaikan pukul ${formatJam(minSelesaiTime)}`);
-            notice.textContent = 'Belum bisa diselesaikan: ' + pesan.join(' & ');
+            if (btnDrawer) btnDrawer.style.display = 'none';
+            if (btnBottom) btnBottom.style.display = 'none';
         }
+
+        if (notice) notice.textContent = '';
     }
 
     document.addEventListener("DOMContentLoaded", function() {
@@ -1349,7 +1389,6 @@
         btnNext.disabled = (currentIdx === totalQuestions - 1);
 
         btnNext.innerHTML = '<span class="btn-label-full">Selanjutnya</span> <i class="fa-solid fa-arrow-right ms-2"></i>';
-        btnNext.style.background = 'var(--accent-blue)';
 
         if (raguStates[currentIdx]) {
             btnRagu.style.background = '#dc2626';
@@ -1433,10 +1472,25 @@
     }
 
     function confirmFinish() {
-        const btn = document.getElementById('btnFinishExam');
-        if (btn && btn.disabled) return;
+        const allAnswered = checkAllAnswered();
+        if (!allAnswered) return;
+
+        const now = new Date().getTime();
+        const timeRequirementMet = now >= minSelesaiTime;
+
+        if (!timeRequirementMet) {
+            const jamStr = formatJam(minSelesaiTime);
+            document.getElementById('timeNoticeMessage').innerHTML =
+                `Semua soal telah terisi. Namun, ujian baru dapat diselesaikan pada pukul <strong>${jamStr} WIB</strong>.<br><br>Silakan periksa kembali jawaban Anda.`;
+            document.getElementById('timeNoticeOverlay').classList.add('show');
+            return;
+        }
 
         document.getElementById("finishExamOverlay").classList.add("show");
+    }
+
+    function closeTimeNoticeModal() {
+        document.getElementById('timeNoticeOverlay').classList.remove('show');
     }
 
     function closeFinishModal() {

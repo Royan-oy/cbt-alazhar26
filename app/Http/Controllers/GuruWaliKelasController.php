@@ -726,7 +726,7 @@ class GuruWaliKelasController extends Controller
             ))->setPaper('a4', 'portrait');
 
             $fileName = 'Rekap_Leaderboard_' . Str::slug($kelas->nama_kelas) . '.pdf';
-            return $pdf->download($fileName);
+            return $pdf->stream($fileName);
         }
 
         // KONDISI B: Dengan filter jenis ujian → Matriks Nilai (Landscape)
