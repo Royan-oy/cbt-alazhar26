@@ -25,9 +25,6 @@ class Kelas extends Model
 
     public function guruMapels()
     {
-        return $this->belongsToMany(
-            GuruMapel::class,
-            'guru_mapel_kelas'
-        )->withTimestamps();
+        return $this->belongsToMany(GuruMapel::class, 'guru_mapel_kelas', 'kelas_id', 'guru_mapel_id');
     }
 }

@@ -684,6 +684,117 @@
         .stat-card { flex-direction: column; align-items: flex-start; text-align: left; }
         .stat-card .stat-icon { margin-bottom: 4px; }
     }
+
+    /* =====================================================
+    MODERN EXAM BUTTON
+    ===================================================== */
+
+    .btn-exam-modern{
+        display:inline-flex;
+        align-items:center;
+        justify-content:center;
+        gap:6px;
+        min-width:73px;
+        height:36px;
+        padding:0 14px;
+        border:none;
+        border-radius:10px;
+        font-size:12px;
+        font-weight:600;
+        text-decoration:none;
+        transition:.25s ease;
+        box-shadow:0 3px 10px rgba(15,23,42,.08);
+    }
+
+    .btn-exam-modern i{
+        font-size:11px;
+    }
+
+    .btn-exam-modern:hover{
+        transform:translateY(-2px);
+        text-decoration:none;
+    }
+
+    .btn-exam-modern:disabled{
+        opacity:1;
+        cursor:not-allowed;
+        box-shadow:none;
+    }
+
+    /* Belum mulai */
+    .btn-exam-wait{
+        background:#f1f5f9;
+        color:#64748b;
+        border:1px solid #e2e8f0;
+    }
+
+    /* Berakhir */
+    .btn-exam-end{
+        background:#fef2f2;
+        color:#dc2626;
+        border:1px solid #fecaca;
+    }
+
+    /* Mulai */
+    .btn-exam-start{
+        background:linear-gradient(135deg,#2563eb,#3b82f6);
+        color:#fff;
+    }
+
+    .btn-exam-start:hover{
+        color:#fff;
+        box-shadow:0 8px 18px rgba(37,99,235,.28);
+    }
+
+    /* Lanjutkan */
+    .btn-exam-continue{
+        background:linear-gradient(135deg,#f59e0b,#fbbf24);
+        color:#fff;
+    }
+
+    .btn-exam-continue:hover{
+        color:#fff;
+        box-shadow:0 8px 18px rgba(245,158,11,.28);
+    }
+
+    /* Selesai */
+    .btn-exam-done{
+        background:linear-gradient(135deg,#10b981,#34d399);
+        color:#fff;
+    }
+
+    /* ==========================
+    MOBILE
+    ========================== */
+
+    @media (max-width:768px){
+
+        .btn-exam-modern{
+            width:100%;
+            min-width:unset;
+            height:34px;
+            font-size:11px;
+            border-radius:9px;
+            padding:0 12px;
+            gap:5px;
+        }
+
+        .btn-exam-modern i{
+            font-size:10px;
+        }
+
+    }
+
+    @media (max-width:480px){
+
+        .btn-exam-modern{
+            height:32px;
+            font-size:10.5px;
+            border-radius:8px;
+            padding:0 10px;
+        }
+
+    }
 </style>
 
 <div class="container-fluid px-0">
@@ -832,10 +943,20 @@
     @if(Auth::user()->role == 'siswa')
 
     @php
-        $ujianBerjalan = collect($ujian_hari_ini ?? [])->firstWhere('status_siswa', 'Sedang Mengerjakan');
-        $jumlahBelum = collect($ujian_hari_ini ?? [])->where('status_siswa', 'Belum Dikerjakan')->count();
-        $jumlahBerjalan = collect($ujian_hari_ini ?? [])->where('status_siswa', 'Sedang Mengerjakan')->count();
-        $jumlahSelesai = collect($ujian_hari_ini ?? [])->where('status_siswa', 'Selesai')->count();
+    $jumlahBelum = collect($ujian_hari_ini ?? [])
+        ->where('status_siswa','belum')
+        ->count();
+
+    $jumlahBerjalan = collect($ujian_hari_ini ?? [])
+        ->where('status_siswa','mengerjakan')
+        ->count();
+
+    $jumlahSelesai = collect($ujian_hari_ini ?? [])
+        ->where('status_siswa','selesai')
+        ->count();
+
+    $ujianBerjalan = collect($ujian_hari_ini ?? [])
+        ->firstWhere('status_siswa','mengerjakan');
     @endphp
 
     @if($ujianBerjalan)
@@ -930,62 +1051,87 @@
                                             </span>
                                         </td>
                                         <td class="text-center" data-label="Status">
-                                            @if($ujian->status_waktu == 'akan_datang')
-                                                <span class="exam-status-badge status-belum"><i class="fa-regular fa-calendar-days"></i> Akan Datang</span>
-                                            @elseif($ujian->status_siswa == 'Belum Dikerjakan')
-                                                <span class="exam-status-badge status-berjalan"><i class="fa-solid fa-hourglass-start"></i> Belum Dikerjakan</span>
-                                            @elseif($ujian->status_siswa == 'Sedang Mengerjakan')
-                                                <span class="exam-status-badge status-berjalan pulse-badge"><i class="fa-solid fa-spinner"></i> Sedang Mengerjakan</span>
+                                            @if($ujian->status_waktu == 'belum_mulai')
+
+                                                <span class="exam-status-badge status-belum">
+                                                    <i class="fa-regular fa-calendar-days"></i>
+                                                    Belum Mulai
+                                                </span>
+
+                                            @elseif($ujian->status_waktu == 'berakhir')
+
+                                                <span class="exam-status-badge status-selesai">
+                                                    <i class="fa-solid fa-hourglass-end"></i>
+                                                    Berakhir
+                                                </span>
+
+                                            @elseif($ujian->status_siswa == 'belum')
+
+                                                <span class="exam-status-badge status-belum">
+                                                    <i class="fa-solid fa-pen"></i>
+                                                    Belum Dikerjakan
+                                                </span>
+
+                                            @elseif($ujian->status_siswa == 'mengerjakan')
+
+                                                <span class="exam-status-badge status-berjalan pulse-badge">
+                                                    <i class="fa-solid fa-spinner"></i>
+                                                    Sedang Mengerjakan
+                                                </span>
+
                                             @else
-                                                <span class="exam-status-badge status-selesai"><i class="fa-solid fa-circle-check"></i> Selesai</span>
+
+                                                <span class="exam-status-badge status-selesai">
+                                                    <i class="fa-solid fa-circle-check"></i>
+                                                    Sudah Selesai
+                                                </span>
+
                                             @endif
                                         </td>
                                         <td class="text-end" data-label="Aksi">
 
-                                            @if($ujian->status_waktu == 'akan_datang')
+                                            @if($ujian->status_waktu == 'belum_mulai')
 
-                                                <button class="btn btn-secondary text-white btn-exam-action" disabled>
-                                                    <i class="fa-regular fa-clock me-1"></i>
-                                                    Belum Mulai
-                                                </button>
+<button class="btn-exam-modern btn-exam-wait" disabled>
+    <i class="fa-regular fa-clock"></i>
+    Belum Mulai
+</button>
 
-                                            @elseif($ujian->status_waktu == 'selesai')
+@elseif($ujian->status_waktu == 'berakhir')
 
-                                                <button class="btn btn-danger text-white btn-exam-action" disabled>
-                                                    <i class="fa-solid fa-hourglass-end me-1"></i>
-                                                    Berakhir
-                                                </button>
+<button class="btn-exam-modern btn-exam-end" disabled>
+    <i class="fa-solid fa-hourglass-end"></i>
+    Berakhir
+</button>
 
-                                            @else
+@else
 
-                                                @if($ujian->status_siswa == 'Belum Dikerjakan')
+    @if($ujian->status_siswa == 'belum')
 
-                                                    <a href="{{ route('dashboard-siswa.ujian.mulai', $ujian->id) }}"
-                                                    class="btn btn-primary btn-exam-action position-relative"
-                                                    style="z-index:10;">
-                                                        <i class="fa-solid fa-play me-1"></i>
-                                                        Mulai
-                                                    </a>
+        <a href="{{ route('dashboard-siswa.ujian.mulai',$ujian->id) }}"
+           class="btn-exam-modern btn-exam-start">
+            <i class="fa-solid fa-play"></i>
+            Mulai
+        </a>
 
-                                                @elseif($ujian->status_siswa == 'Sedang Mengerjakan')
+    @elseif($ujian->status_siswa == 'mengerjakan')
 
-                                                    <a href="{{ route('dashboard-siswa.ujian.mulai', $ujian->id) }}"
-                                                    class="btn btn-warning text-dark btn-exam-action position-relative"
-                                                    style="z-index:10;">
-                                                        <i class="fa-solid fa-arrow-rotate-right me-1"></i>
-                                                        Lanjutkan
-                                                    </a>
+        <a href="{{ route('dashboard-siswa.ujian.mulai',$ujian->id) }}"
+           class="btn-exam-modern btn-exam-continue">
+            <i class="fa-solid fa-arrow-rotate-right"></i>
+            Lanjutkan
+        </a>
 
-                                                @else
+    @else
 
-                                                    <button class="btn btn-light border text-muted btn-exam-action" disabled>
-                                                        <i class="fa-solid fa-circle-check text-success me-1"></i>
-                                                        Selesai
-                                                    </button>
+        <button class="btn-exam-modern btn-exam-done" disabled>
+            <i class="fa-solid fa-circle-check"></i>
+            Selesai
+        </button>
 
-                                                @endif
+    @endif
 
-                                            @endif
+@endif
 
                                         </td>
                                     </tr>

@@ -123,50 +123,58 @@ class DashboardController extends Controller
 
             // 2. Map data ujian untuk mengecek status pengerjaan siswa secara real-time
             $ujian_with_status = $ujians->map(function ($ujian) use ($user, $sekarang) {
-                // Cek riwayat di tabel nilais berdasarkan ujian_id dan user_id siswa
-                $riwayat = DB::table('nilais')
-                    ->where('ujian_id', $ujian->id)
-                    ->where('siswa_id', $user->siswa->id)
-                    ->first();      
 
-                $waktuMulai = \Carbon\Carbon::parse($ujian->waktu_mulai);
-                $waktuSelesai = \Carbon\Carbon::parse($ujian->waktu_selesai);
-                
-                $isWaktuAktif = $sekarang->between($waktuMulai, $waktuSelesai);
+    $riwayat = DB::table('nilais')
+        ->where('ujian_id', $ujian->id)
+        ->where('siswa_id', $user->siswa->id)
+        ->first();
 
-                // Tentukan status berdasarkan data di tabel nilais
-                if (!$riwayat) {
-                    $ujian->status_siswa = 'Belum Dikerjakan';
-                    $ujian->badge_color  = 'bg-danger';
-                } elseif ($riwayat->status == 'mengerjakan') {
-                    $ujian->status_siswa = 'Sedang Mengerjakan';
-                    $ujian->badge_color  = 'bg-warning text-dark';
-                } else {
-                    $ujian->status_siswa = 'Sudah Selesai';
-                    $ujian->badge_color  = 'bg-success';
-                }
+    $mulai = \Carbon\Carbon::parse($ujian->waktu_mulai);
+    $selesai = \Carbon\Carbon::parse($ujian->waktu_selesai);
 
-                $ujian->is_aktif = $isWaktuAktif;
+    // ==========================
+    // STATUS WAKTU
+    // ==========================
+    if ($sekarang->lt($mulai)) {
 
-                if ($sekarang->lt($waktuMulai)) {
-                    $ujian->status_waktu = 'belum_mulai';
-                } elseif ($sekarang->gt($waktuSelesai)) {
-                    $ujian->status_waktu = 'berakhir';
-                } else {
-                    $ujian->status_waktu = 'aktif';
-                }
+        $ujian->status_waktu = 'belum_mulai';
 
-                // Kalkulasi durasi aktual
-                $ujian->durasi_menit = $waktuMulai->diffInMinutes($waktuSelesai);
+    } elseif ($sekarang->gt($selesai)) {
 
-                // Format tampilan tanggal
-                $startStr = $waktuMulai->isToday() ? 'Hari ini, ' . $waktuMulai->format('H:i') : $waktuMulai->format('d M Y, H:i');
-                $endStr = $waktuSelesai->isToday() ? 'Hari ini, ' . $waktuSelesai->format('H:i') : $waktuSelesai->format('d M Y, H:i');
-                $ujian->display_tanggal = $startStr . ' - ' . $endStr;
+        $ujian->status_waktu = 'berakhir';
 
-                return $ujian;
-            });
+    } else {
 
+        $ujian->status_waktu = 'aktif';
+
+    }
+
+    // ==========================
+    // STATUS SISWA (database nilais)
+    // ==========================
+
+    if (!$riwayat) {
+
+        $ujian->status_siswa = 'belum';
+
+    } else {
+
+        $ujian->status_siswa = $riwayat->status;
+        // nilainya:
+        // belum
+        // mengerjakan
+        // selesai
+    }
+
+    $ujian->durasi_menit = $mulai->diffInMinutes($selesai);
+
+    $ujian->display_tanggal =
+        $mulai->format('d M Y H:i')
+        .' - '.
+        $selesai->format('H:i');
+
+    return $ujian;
+});
             // Sort agar ujian yang sedang aktif berada di paling atas, lalu diikuti yang belum lewat
             $ujian_with_status = $ujian_with_status->sortByDesc(function ($ujian) {
                 return $ujian->is_aktif ? 1 : 0;

@@ -8,6 +8,7 @@ use App\Models\JenisUjian;
 use App\Models\Kelas;
 use App\Models\TahunAjaran;
 use App\Models\Jenjang;
+use App\Models\GuruMapel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -135,6 +136,8 @@ class UjianController extends Controller
         $this->authorizeJenjangBankSoal($bankSoal);
         $this->authorizeJenjangKelas($request->kelas_id, $bankSoal->jenjang_id);
 
+        $this->authorizeKelasSesuaiGuruBankSoal($request->kelas_id, $bankSoal);
+
         $ujian = Ujian::create([
             'bank_soal_id'         => $request->bank_soal_id,
             'jenis_ujian_id'       => $request->jenis_ujian_id,
@@ -222,6 +225,8 @@ class UjianController extends Controller
         $this->authorizeJenjangBankSoal($bankSoal);
         $this->authorizeJenjangKelas($request->kelas_id, $bankSoal->jenjang_id);
 
+        $this->authorizeKelasSesuaiGuruBankSoal($request->kelas_id, $bankSoal);
+
         if ($ujian->token_aktif) {
             return back()->withInput()->withErrors([
                 'bank_soal_id' => 'Ujian ini tokennya sedang aktif (sedang berjalan), nonaktifkan token dulu sebelum mengubah jadwal.',
@@ -276,14 +281,20 @@ class UjianController extends Controller
      */
     private function formData()
     {
-        $jenjangAdmin = optional(Auth::user()->admin)->jenjang_id;
-        $isAdminJenjang = Auth::user()->role == 'admin_jenjang';
+        $user = Auth::user();
+        $jenjangAdmin = optional($user->admin)->jenjang_id;
+        $isAdminJenjang = $user->role == 'admin_jenjang';
 
         $jenjangs = $isAdminJenjang
             ? Jenjang::where('id', $jenjangAdmin)->get()
             : Jenjang::orderBy('nama_jenjang', 'asc')->get();
 
-        $bankSoals = BankSoal::with(['mataPelajaran', 'jenjang'])
+        $bankSoals = BankSoal::with([
+                'mataPelajaran',
+                'jenjang',
+                'guruMapel.guru',
+                'guruMapel.kelas.tingkat'
+            ])
             ->where('is_publish', true)
             ->when($isAdminJenjang, function ($query) use ($jenjangAdmin) {
                 $query->where('jenjang_id', $jenjangAdmin);
@@ -291,6 +302,9 @@ class UjianController extends Controller
             ->orderBy('nama_bank_soal', 'asc')
             ->get();
 
+        // daftar kelas mentah (masih dibatasi jenjang untuk admin_jenjang).
+        // Filter presisi "kelas yang diajar guru pembuat bank soal" dilakukan
+        // di JS lewat $bankSoalKelasMap begitu bank soal dipilih.
         $kelasList = Kelas::with('tingkat.jenjang')
             ->when($isAdminJenjang, function ($query) use ($jenjangAdmin) {
                 $query->whereHas('tingkat', function ($q) use ($jenjangAdmin) {
@@ -303,7 +317,20 @@ class UjianController extends Controller
         $jenisUjians = JenisUjian::where('aktif', true)->orderBy('nama', 'asc')->get();
         $tahunAjarans = TahunAjaran::orderByDesc('is_aktif')->orderByDesc('nama_tahun')->get();
 
-        return compact('jenjangs', 'bankSoals', 'kelasList', 'jenisUjians', 'tahunAjarans');
+        // mapping bank_soal_id => [kelas_id, ...]
+        // kelas diambil dari guru_mapel milik bank soal itu (guru_mapel_id),
+        // yang sudah otomatis mengunci kombinasi guru + mapel + tahun ajaran.
+        $bankSoalKelasMap = [];
+
+        foreach ($bankSoals as $bs) {
+            $bankSoalKelasMap[$bs->id] = $bs->guruMapel
+                ? $bs->guruMapel->kelas->pluck('id')->toArray()
+                : [];
+        }
+
+        return compact(
+            'jenjangs', 'bankSoals', 'kelasList', 'jenisUjians', 'tahunAjarans', 'bankSoalKelasMap'
+        );
     }
 
     /**
@@ -330,6 +357,25 @@ class UjianController extends Controller
         foreach ($kelasList as $kelas) {
             if (optional($kelas->tingkat)->jenjang_id != $jenjangId) {
                 abort(422, 'Ada kelas yang tidak sesuai dengan jenjang bank soal.');
+            }
+        }
+    }
+
+    /**
+     * Pastikan kelas yang dipilih benar-benar ada di guru_mapel_kelas
+     * milik guru_mapel dari bank soal ini. Berlaku untuk semua role
+     * (super_admin, admin_jenjang, guru) karena ini aturan data, bukan
+     * aturan hak akses per-role.
+     */
+    private function authorizeKelasSesuaiGuruBankSoal(array $kelasIds, BankSoal $bankSoal)
+    {
+        $allowedKelasIds = $bankSoal->guruMapel
+            ? $bankSoal->guruMapel->kelas->pluck('id')->toArray()
+            : [];
+
+        foreach ($kelasIds as $kelasId) {
+            if (!in_array($kelasId, $allowedKelasIds)) {
+                abort(422, 'Ada kelas yang tidak diajar oleh guru pembuat bank soal ini.');
             }
         }
     }

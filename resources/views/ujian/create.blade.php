@@ -177,8 +177,13 @@
                                 <option
                                     value="{{ $bs->id }}"
                                     data-jenjang="{{ $bs->jenjang_id }}"
+                                    data-mapel="{{ $bs->mata_pelajaran_id }}"
+                                    data-tahun="{{ $bs->tahun_ajaran_id }}"
                                     {{ old('bank_soal_id') == $bs->id ? 'selected' : '' }}>
-                                    {{ $bs->nama_bank_soal }} ({{ optional($bs->mataPelajaran)->nama_mapel }})
+
+                                    {{ $bs->nama_bank_soal }}
+                                    ({{ optional($bs->mataPelajaran)->nama_mapel }})
+
                                 </option>
                             @endforeach
                         </select>
@@ -274,13 +279,15 @@
                     {{-- Kelas --}}
                     <div class="col-12">
                         <div class="section-label">Kelas Peserta</div>
-
-                        <div class="row g-2">
-                            @foreach($kelasList as $kelas)
+                        <small class="text-muted d-block mb-2">Kelas yang tampil adalah kelas yang diajar oleh guru pembuat bank soal yang dipilih.</small>
+                    
+                        <div class="row g-2" id="kelasContainer">
+                            @forelse($kelasList as $kelas)
                                 <div
                                     class="col-md-3 kelas-item"
-                                    data-jenjang="{{ optional($kelas->tingkat)->jenjang_id }}">
-
+                                    data-jenjang="{{ optional($kelas->tingkat)->jenjang_id }}"
+                                    data-kelas-id="{{ $kelas->id }}">
+                    
                                     <div class="kelas-chip">
                                         <div class="form-check">
                                             <input
@@ -290,21 +297,25 @@
                                                 value="{{ $kelas->id }}"
                                                 id="kelas{{ $kelas->id }}"
                                                 {{ in_array($kelas->id, old('kelas_id', [])) ? 'checked' : '' }}>
-
+                    
                                             <label class="form-check-label fw-semibold" for="kelas{{ $kelas->id }}">
                                                 {{ optional($kelas->tingkat)->nama_tingkat }} - {{ $kelas->nama_kelas }}
                                             </label>
                                         </div>
                                     </div>
                                 </div>
-                            @endforeach
+                            @empty
+                                <div class="col-12">
+                                    <div class="alert alert-warning rounded-4 mb-0">Tidak ada data kelas.</div>
+                                </div>
+                            @endforelse
                         </div>
-
+                    
                         @error('kelas_id')
                             <div class="invalid-feedback d-block">{{ $message }}</div>
                         @enderror
-
-                        <small class="text-muted d-block mt-2">Pastikan kelas yang dipilih satu jenjang dengan bank soal.</small>
+                    
+                        <small class="text-muted d-block mt-2">Pilih Bank Soal terlebih dahulu untuk melihat kelas yang tersedia.</small>
                     </div>
 
                     {{-- Pengaturan --}}
@@ -436,5 +447,53 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 </script>
 @endif
+
+<script>
+    window.bankSoalKelasMap = @json($bankSoalKelasMap ?? []);
+</script>
+ 
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+ 
+    const bankSoalSelect = document.getElementById('bankSoal');
+    const kelasItems      = document.querySelectorAll('.kelas-item');
+    const map              = window.bankSoalKelasMap || {};
+ 
+    function filterKelas() {
+ 
+        const bankSoalId = bankSoalSelect ? bankSoalSelect.value : '';
+ 
+        // belum pilih bank soal -> sembunyikan semua kelas
+        if (!bankSoalId) {
+            kelasItems.forEach(function (item) {
+                item.style.display = 'none';
+                item.querySelector('input').checked = false;
+            });
+            return;
+        }
+ 
+        const allowedKelasIds = (map[bankSoalId] || []).map(String);
+ 
+        kelasItems.forEach(function (item) {
+            const kelasId = item.dataset.kelasId;
+ 
+            if (allowedKelasIds.includes(kelasId)) {
+                item.style.display = 'block';
+            } else {
+                item.style.display = 'none';
+                item.querySelector('input').checked = false;
+            }
+        });
+    }
+ 
+    if (bankSoalSelect) {
+        bankSoalSelect.addEventListener('change', filterKelas);
+    }
+ 
+    // jalankan saat load pertama (misal ada old input / validasi gagal)
+    filterKelas();
+ 
+});
+</script>
 
 @endsection

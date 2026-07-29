@@ -274,14 +274,17 @@
                         @enderror
                     </div>
 
+                    {{-- Kelas --}}
                     <div class="col-12">
                         <div class="section-label">Kelas Peserta</div>
+                        <small class="text-muted d-block mb-2">Kelas yang tampil adalah kelas yang diajar oleh guru pembuat bank soal yang dipilih.</small>
 
-                        <div class="row g-2">
-                            @foreach($kelasList as $kelas)
+                        <div class="row g-2" id="kelasContainer">
+                            @forelse($kelasList as $kelas)
                                 <div
                                     class="col-md-3 kelas-item"
-                                    data-jenjang="{{ optional($kelas->tingkat)->jenjang_id }}">
+                                    data-jenjang="{{ optional($kelas->tingkat)->jenjang_id }}"
+                                    data-kelas-id="{{ $kelas->id }}">
 
                                     <div class="kelas-chip">
                                         <div class="form-check">
@@ -299,12 +302,18 @@
                                         </div>
                                     </div>
                                 </div>
-                            @endforeach
+                            @empty
+                                <div class="col-12">
+                                    <div class="alert alert-warning rounded-4 mb-0">Tidak ada data kelas.</div>
+                                </div>
+                            @endforelse
                         </div>
 
                         @error('kelas_id')
                             <div class="invalid-feedback d-block">{{ $message }}</div>
                         @enderror
+
+                        <small class="text-muted d-block mt-2">Pilih Bank Soal terlebih dahulu untuk melihat kelas yang tersedia.</small>
                     </div>
 
                     <div class="col-12">
@@ -380,32 +389,60 @@
     </div>
 </div>
 
-@if(Auth::user()->role == 'super_admin')
+{{-- mapping bank_soal_id => [kelas_id, ...], dikirim dari controller --}}
+<script>
+    window.bankSoalKelasMap = @json($bankSoalKelasMap ?? []);
+</script>
+
 <script>
 document.addEventListener('DOMContentLoaded', function () {
 
-    const jenjang = document.getElementById('jenjang');
+    const bankSoalSelect = document.getElementById('bankSoal');
+    const jenjangSelect   = document.getElementById('jenjang'); // hanya ada untuk super_admin
+    const kelasItems      = document.querySelectorAll('.kelas-item');
+    const map              = window.bankSoalKelasMap || {};
 
-    filter(jenjang.value);
+    // Satu fungsi yang menerapkan SEMUA filter kelas sekaligus:
+    // 1) harus diajar oleh guru mapel pembuat bank soal yang dipilih
+    // 2) (khusus super_admin) harus satu jenjang dengan yang dipilih
+    function applyKelasFilters() {
 
-    jenjang.addEventListener('change', function () {
-        filter(this.value);
-    });
+        const bankSoalId = bankSoalSelect ? bankSoalSelect.value : '';
+        const jenjangId   = jenjangSelect ? jenjangSelect.value : null;
 
-    function filter(id) {
+        if (!bankSoalId) {
+            kelasItems.forEach(function (item) {
+                item.style.display = 'none';
+                item.querySelector('input').checked = false;
+            });
+            return;
+        }
 
-        filterSelect('bankSoal', id);
+        const allowedKelasIds = (map[bankSoalId] || []).map(String);
 
-        document.querySelectorAll('.kelas-item').forEach(function (item) {
+        kelasItems.forEach(function (item) {
+            const kelasId = item.dataset.kelasId;
 
-            const checkbox = item.querySelector('input');
+            const cocokGuruMapel = allowedKelasIds.includes(kelasId);
+            const cocokJenjang   = jenjangSelect ? item.dataset.jenjang === jenjangId : true;
 
-            if (item.dataset.jenjang === id) {
+            if (cocokGuruMapel && cocokJenjang) {
                 item.style.display = 'block';
             } else {
                 item.style.display = 'none';
-                checkbox.checked = false;
+                item.querySelector('input').checked = false;
             }
+        });
+    }
+
+    if (bankSoalSelect) {
+        bankSoalSelect.addEventListener('change', applyKelasFilters);
+    }
+
+    if (jenjangSelect) {
+        jenjangSelect.addEventListener('change', function () {
+            filterSelect('bankSoal', this.value);
+            applyKelasFilters();
         });
     }
 
@@ -421,8 +458,13 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    // saat load: terapkan berdasarkan nilai yang sudah tersimpan di ujian ini
+    if (jenjangSelect) {
+        filterSelect('bankSoal', jenjangSelect.value);
+    }
+    applyKelasFilters();
+
 });
 </script>
-@endif
 
 @endsection

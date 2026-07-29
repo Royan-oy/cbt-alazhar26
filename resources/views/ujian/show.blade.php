@@ -177,11 +177,74 @@
         font-weight: 600;
     }
 
+    /* --- Guru Pengampu card --- */
+    .guru-card {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        background: linear-gradient(135deg, #f0f9ff, #f8fafc);
+        border: 1px solid rgba(14, 165, 233, 0.15);
+        border-radius: 18px;
+        padding: 18px;
+    }
+
+    .guru-avatar {
+        width: 56px;
+        height: 56px;
+        min-width: 56px;
+        border-radius: 16px;
+        background: linear-gradient(135deg, var(--accent-blue), #0284c7);
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+        font-size: 20px;
+        letter-spacing: 0.5px;
+        overflow: hidden;
+    }
+
+    .guru-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .guru-name {
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--secondary-dark);
+        margin-bottom: 2px;
+    }
+
+    .guru-meta {
+        font-size: 12.5px;
+        color: var(--text-muted);
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px 10px;
+    }
+
+    .guru-meta span i { width: 14px; text-align: center; }
+
+    .mapel-pill {
+        background: #fff;
+        border: 1px solid var(--border-color);
+        color: var(--secondary-dark);
+        font-size: 11.5px;
+        font-weight: 700;
+        padding: 4px 10px;
+        border-radius: 999px;
+        margin-top: 8px;
+        display: inline-block;
+    }
+
     @media (max-width: 768px) {
         .page-header { padding: 24px; border-radius: 18px; text-align: center; }
         .page-header .d-flex { flex-direction: column; gap: 16px; }
         .content-card { padding: 16px; }
         .token-value { font-size: 30px; letter-spacing: 6px; }
+        .guru-card { flex-direction: column; text-align: center; }
     }
 </style>
 
@@ -371,6 +434,67 @@
         {{-- Kolom Kanan --}}
         <div class="col-lg-8">
 
+            @php
+                $guruMapel = optional($ujian->bankSoal)->guruMapel;
+                $guru = optional($guruMapel)->guru;
+
+                if ($guru) {
+                    $inisial = '';
+
+                    foreach (explode(' ', $guru->nama) as $index => $kata) {
+                        if ($index >= 2) {
+                            break;
+                        }
+
+                        $inisial .= mb_substr($kata, 0, 1);
+                    }
+
+                    $inisial = strtoupper($inisial);
+                } else {
+                    $inisial = '?';
+                }
+            @endphp
+
+            <div class="content-card mb-4">
+                <div class="section-title">
+                    <i class="fa-solid fa-chalkboard-user text-primary"></i>
+                    Guru Pengampu
+                </div>
+
+                @if($guru)
+                    <div class="guru-card">
+                        <div class="guru-avatar">
+                            @if(!empty($guru->foto))
+                                <img src="{{ asset('storage/' . $guru->foto) }}" alt="{{ $guru->nama }}">
+                            @else
+                                {{ strtoupper($inisial) }}
+                            @endif
+                        </div>
+
+                        <div>
+                            <div class="guru-name">{{ $guru->nama }}</div>
+                            <div class="guru-meta">
+                                @if(!empty($guru->nip))
+                                    <span><i class="fa-solid fa-id-card"></i> NIP {{ $guru->nip }}</span>
+                                @endif
+                                @if(!empty($guru->no_hp))
+                                    <span><i class="fa-solid fa-phone"></i> {{ $guru->no_hp }}</span>
+                                @endif
+                            </div>
+                            <span class="mapel-pill">
+                                <i class="fa-solid fa-book me-1"></i>
+                                {{ optional(optional($ujian->bankSoal)->mataPelajaran)->nama_mapel ?? '-' }}
+                            </span>
+                        </div>
+                    </div>
+                @else
+                    <div class="alert alert-secondary border-0 rounded-4 mb-0">
+                        <i class="fa-solid fa-circle-info me-2"></i>
+                        Data guru pengampu bank soal ini tidak ditemukan.
+                    </div>
+                @endif
+            </div>
+
             <div class="content-card mb-4">
                 <div class="section-title">
                     <i class="fa-solid fa-users text-primary"></i>
@@ -407,18 +531,6 @@
                             Acak Urutan Jawaban: {{ $ujian->acak_jawaban ? 'Ya' : 'Tidak' }}
                         </div>
                     </div>
-                    <div class="col-md-6">
-                        <div class="setting-badge">
-                            <i class="fa-solid {{ $ujian->tampilkan_nilai ? 'fa-circle-check text-success' : 'fa-circle-xmark text-muted' }}"></i>
-                            Tampilkan Nilai Langsung: {{ $ujian->tampilkan_nilai ? 'Ya' : 'Tidak' }}
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="setting-badge">
-                            <i class="fa-solid {{ $ujian->tampilkan_pembahasan ? 'fa-circle-check text-success' : 'fa-circle-xmark text-muted' }}"></i>
-                            Tampilkan Pembahasan: {{ $ujian->tampilkan_pembahasan ? 'Ya' : 'Tidak' }}
-                        </div>
-                    </div>
                 </div>
             </div>
 
@@ -435,6 +547,10 @@
                 <div class="info-item">
                     <div class="info-label">Mata Pelajaran</div>
                     <div class="info-value">{{ optional(optional($ujian->bankSoal)->mataPelajaran)->nama_mapel ?? '-' }}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Guru Pembuat</div>
+                    <div class="info-value">{{ $guru->nama ?? '-' }}</div>
                 </div>
             </div>
 

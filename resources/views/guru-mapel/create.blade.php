@@ -298,12 +298,15 @@
                                     required>
                                     <option value="">-- Pilih Mata Pelajaran --</option>
                                     @foreach($mataPelajarans as $mapel)
-                                        <option
-                                            value="{{ $mapel->id }}"
-                                            data-jenjang="{{ $mapel->jenjang_id }}"
-                                            {{ (string) ($item['mata_pelajaran_id'] ?? '') === (string) $mapel->id ? 'selected' : '' }}>
-                                            {{ $mapel->nama_mapel }}
-                                        </option>
+                                    <option
+                                        value="{{ $mapel->id }}"
+                                        data-jenjang="{{ $mapel->jenjang_id }}"
+                                        {{ (string)($item['mata_pelajaran_id'] ?? '') === (string)$mapel->id ? 'selected' : '' }}>
+
+                                        {{ $mapel->nama_mapel }}
+                                        ({{ optional($mapel->jenjang)->nama_jenjang }})
+
+                                    </option>
                                     @endforeach
                                 </select>
                             </div>
@@ -379,9 +382,14 @@
                 required>
                 <option value="">-- Pilih Mata Pelajaran --</option>
                 @foreach($mataPelajarans as $mapel)
-                    <option value="{{ $mapel->id }}" data-jenjang="{{ $mapel->jenjang_id }}">
-                        {{ $mapel->nama_mapel }}
-                    </option>
+                <option
+                    value="{{ $mapel->id }}"
+                    data-jenjang="{{ $mapel->jenjang_id }}">
+
+                    {{ $mapel->nama_mapel }}
+                    ({{ optional($mapel->jenjang)->nama_jenjang }})
+
+                </option>
                 @endforeach
             </select>
         </div>
@@ -419,6 +427,20 @@ document.addEventListener('DOMContentLoaded', function () {
     const btnTambah      = document.getElementById('btnTambah');
     const jenjangSelect  = document.getElementById('jenjang'); // null jika bukan super_admin
     const guruSelect     = document.getElementById('guru');
+
+    guruSelect.addEventListener('change', function () {
+
+        if (jenjangSelect) return;
+
+        const option = this.selectedOptions[0];
+
+        if (!option) return;
+
+        const jenjangId = option.dataset.jenjang;
+
+        applyJenjangFilterToAllBlocks(jenjangId);
+
+    });
 
     let index = container.querySelectorAll('.penugasan-block').length;
 
@@ -494,20 +516,44 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    /* =========================================================
-       Tambah blok penugasan baru dari template
-    ========================================================= */
-    function addPenugasan() {
-        const html = templateHtml.split('__INDEX__').join(index);
+   function addPenugasan() {
+
+        const html = templateHtml.replaceAll('__INDEX__', index);
+
         const wrapper = document.createElement('div');
         wrapper.innerHTML = html.trim();
+
         const block = wrapper.firstElementChild;
 
         container.appendChild(block);
+
         bindRemove(block);
-        applyJenjangFilter(block, jenjangSelect ? jenjangSelect.value : '');
+
+        // ========================================
+        // Tentukan jenjang yang dipakai
+        // ========================================
+
+        let jenjangId = '';
+
+        // Jika Super Admin
+        if (jenjangSelect) {
+
+            jenjangId = jenjangSelect.value;
+
+        }
+        // Jika Admin Jenjang
+        else if (guruSelect.selectedOptions.length) {
+
+            jenjangId = guruSelect.selectedOptions[0].dataset.jenjang;
+
+        }
+
+        applyJenjangFilter(block, jenjangId);
+
         renumber();
+
         index++;
+
     }
 
     /* =========================================================
@@ -515,6 +561,15 @@ document.addEventListener('DOMContentLoaded', function () {
     ========================================================= */
     container.querySelectorAll('.penugasan-block').forEach(bindRemove);
     renumber();
+
+    // Untuk Admin Jenjang
+    if (!jenjangSelect && guruSelect.selectedOptions.length) {
+
+        applyJenjangFilterToAllBlocks(
+            guruSelect.selectedOptions[0].dataset.jenjang
+        );
+
+    }
 
     btnTambah.addEventListener('click', addPenugasan);
 
