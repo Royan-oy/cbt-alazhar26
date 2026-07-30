@@ -36,15 +36,189 @@ class DashboardController extends Controller
 
         // Ambil data dinamis berdasarkan role masing-masing
         if ($user->role == 'super_admin') {
-            $data['total_jenjang'] = DB::table('jenjangs')->count(); // Sesuaikan nama tabel Anda
-            $data['total_users'] = DB::table('users')->count();
+            $data['total_jenjang']      = DB::table('jenjangs')->count();
+            $data['total_users']        = DB::table('users')->count();
+            $data['total_admin_jenjang']= DB::table('users')->where('role', 'admin_jenjang')->count();
+            $data['total_guru']         = DB::table('users')->where('role', 'guru')->count();
+            $data['total_siswa']        = DB::table('users')->where('role', 'siswa')->count();
+            $data['total_bank_soal']    = DB::table('bank_soals')->count();
+            $data['active_tahun_ajaran']= $activeTahunAjaran;
+
+            // 1. Monitoring Live Ujian Hari Ini
+            $sekarang = now();
+            $ujiansHariIni = \App\Models\Ujian::with([
+                    'bankSoal.mataPelajaran', 
+                    'bankSoal.jenjang', 
+                    'kelas', 
+                    'jenisUjian'
+                ])
+                ->where(function($query) use ($sekarang) {
+                    $query->whereDate('waktu_mulai', $sekarang->toDateString())
+                          ->orWhere(function($q) use ($sekarang) {
+                              $q->where('waktu_mulai', '<=', $sekarang)
+                                ->where('waktu_selesai', '>=', $sekarang);
+                          });
+                })
+                ->orderBy('waktu_mulai', 'desc')
+                ->get();
+
+            $ujiansHariIni->transform(function ($ujian) use ($sekarang) {
+                $mulai = \Carbon\Carbon::parse($ujian->waktu_mulai);
+                $selesai = \Carbon\Carbon::parse($ujian->waktu_selesai);
+
+                if ($sekarang->lt($mulai)) {
+                    $ujian->status_waktu = 'belum_mulai';
+                } elseif ($sekarang->gt($selesai)) {
+                    $ujian->status_waktu = 'berakhir';
+                } else {
+                    $ujian->status_waktu = 'aktif';
+                }
+
+                $siswaMengerjakan = DB::table('nilais')
+                    ->where('ujian_id', $ujian->id)
+                    ->where('status', 'mengerjakan')
+                    ->count();
+
+                $siswaSelesai = DB::table('nilais')
+                    ->where('ujian_id', $ujian->id)
+                    ->where('status', 'selesai')
+                    ->count();
+
+                $ujian->siswa_mengerjakan = $siswaMengerjakan;
+                $ujian->siswa_selesai     = $siswaSelesai;
+                $ujian->total_peserta     = $siswaMengerjakan + $siswaSelesai;
+
+                return $ujian;
+            });
+
+            $data['ujians_hari_ini']   = $ujiansHariIni;
+            $data['total_ujian_aktif'] = $ujiansHariIni->where('status_waktu', 'aktif')->count();
+
+            // 2. Ringkasan Aktivitas Per Jenjang
+            $jenjangs = \App\Models\Jenjang::with(['tingkats.kelas'])->get();
+            $jenjangList = $jenjangs->map(function ($jenjang) use ($activeTahunAjaran) {
+                // Admin jenjang penanggung jawab
+                $admin = \App\Models\Admin::where('jenjang_id', $jenjang->id)
+                    ->whereHas('user', function($q) {
+                        $q->where('role', 'admin_jenjang');
+                    })->first();
+
+                // Total kelas under this jenjang
+                $tingkatIds = $jenjang->tingkats->pluck('id');
+                $totalKelas = \App\Models\Kelas::whereIn('tingkat_id', $tingkatIds)->count();
+
+                // Total siswa in classes under this jenjang
+                $kelasIds = \App\Models\Kelas::whereIn('tingkat_id', $tingkatIds)->pluck('id');
+                
+                $siswaQuery = DB::table('siswa_kelas')
+                    ->whereIn('kelas_id', $kelasIds);
+                
+                if ($activeTahunAjaran) {
+                    $siswaQuery->where('tahun_ajaran_id', $activeTahunAjaran->id);
+                }
+                
+                $totalSiswa = $siswaQuery->distinct('siswa_id')->count('siswa_id');
+
+                // Total bank soal for this jenjang
+                $totalBankSoal = DB::table('bank_soals')
+                    ->where('jenjang_id', $jenjang->id)
+                    ->count();
+
+                return (object) [
+                    'id'              => $jenjang->id,
+                    'nama_jenjang'    => $jenjang->nama_jenjang,
+                    'slug'            => $jenjang->slug,
+                    'admin_nama'      => $admin ? $admin->nama : 'Belum Ditentukan',
+                    'total_kelas'     => $totalKelas,
+                    'total_siswa'     => $totalSiswa,
+                    'total_bank_soal' => $totalBankSoal,
+                ];
+            });
+
+            $data['jenjang_summary'] = $jenjangList;
         } 
         
         elseif ($user->role == 'admin_jenjang') {
-            // Admin jenjang menghitung data yang sesuai dengan kelas/jenjangnya
-            $data['total_kelas'] = DB::table('kelas')->count(); 
-            $data['total_siswa'] = DB::table('users')->where('role', 'siswa')->count();
-            $data['total_mapel'] = DB::table('mata_pelajarans')->count();
+            $admin   = \App\Models\Admin::with('jenjang')->where('user_id', $user->id)->first();
+            $jenjang = $admin ? $admin->jenjang : null;
+
+            $data['admin_info']          = $admin;
+            $data['jenjang']             = $jenjang;
+            $data['active_tahun_ajaran'] = $activeTahunAjaran;
+
+            if ($jenjang) {
+                $tingkatIds = \App\Models\Tingkat::where('jenjang_id', $jenjang->id)->pluck('id');
+                $kelases    = \App\Models\Kelas::with('tingkat')->whereIn('tingkat_id', $tingkatIds)->get();
+                $kelasIds   = $kelases->pluck('id');
+
+                $data['total_kelas'] = $kelases->count();
+
+                // Total Siswa di jenjang ini (pada tahun ajaran aktif)
+                $siswaQuery = DB::table('siswa_kelas')
+                    ->whereIn('kelas_id', $kelasIds);
+
+                if ($activeTahunAjaran) {
+                    $siswaQuery->where('tahun_ajaran_id', $activeTahunAjaran->id);
+                }
+
+                $data['total_siswa'] = $siswaQuery->distinct('siswa_id')->count('siswa_id');
+
+                // Total Guru Mapel di jenjang ini
+                $countGuruMapel = DB::table('guru_mapels')
+                    ->whereIn('id', function($q) use ($kelasIds) {
+                        $q->select('guru_mapel_id')
+                          ->from('guru_mapel_kelas')
+                          ->whereIn('kelas_id', $kelasIds);
+                    })
+                    ->distinct('guru_id')
+                    ->count('guru_id');
+
+                if ($countGuruMapel == 0) {
+                    $countGuruMapel = DB::table('guru_mapels')->distinct('guru_id')->count('guru_id');
+                }
+
+                $data['total_guru_mapel'] = $countGuruMapel;
+
+                // Total Bank Soal di jenjang ini
+                $data['total_bank_soal'] = DB::table('bank_soals')
+                    ->where('jenjang_id', $jenjang->id)
+                    ->count();
+
+                // Ringkasan Kelas & Wali Kelas Unit
+                $data['ringkasan_kelas'] = $kelases->map(function ($kelas) use ($activeTahunAjaran) {
+                    $wali = null;
+                    if ($activeTahunAjaran) {
+                        $waliRecord = \App\Models\WaliKelas::with('guru')
+                            ->where('kelas_id', $kelas->id)
+                            ->where('tahun_ajaran_id', $activeTahunAjaran->id)
+                            ->first();
+
+                        if ($waliRecord && $waliRecord->guru) {
+                            $wali = $waliRecord->guru->nama;
+                        }
+                    }
+
+                    $jmlSiswaQuery = DB::table('siswa_kelas')
+                        ->where('kelas_id', $kelas->id);
+                    if ($activeTahunAjaran) {
+                        $jmlSiswaQuery->where('tahun_ajaran_id', $activeTahunAjaran->id);
+                    }
+
+                    return (object) [
+                        'id'           => $kelas->id,
+                        'nama_kelas'   => $kelas->nama_kelas,
+                        'nama_tingkat' => $kelas->tingkat->nama_tingkat ?? '-',
+                        'wali_kelas'   => $wali ?? 'Belum Diatur',
+                        'total_siswa'  => $jmlSiswaQuery->distinct('siswa_id')->count('siswa_id'),
+                    ];
+                });
+            } else {
+                $data['total_kelas']      = 0;
+                $data['total_siswa']      = 0;
+                $data['total_guru_mapel'] = 0;
+                $data['total_bank_soal']  = 0;
+                $data['ringkasan_kelas']  = collect();
+            }
         } 
         
         elseif ($user->role == 'guru') {
