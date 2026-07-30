@@ -351,7 +351,12 @@
                                 <i class="fa-solid fa-book"></i>
                             </div>
                             <div>
-                                <h6 class="fw-bold text-dark mb-0" style="font-size: 0.95rem;">{{ $mapelNama }}</h6>
+                                <h6 class="fw-bold text-dark mb-0" style="font-size: 0.95rem;">
+                                    {{ $mapelNama }}
+                                    <span class="text-muted fw-normal" style="font-size: 0.8rem; margin-left: 6px;">
+                                        (Guru: {{ $data['nama_guru'] ?? '—' }})
+                                    </span>
+                                </h6>
                                 <small class="text-muted" style="font-size: 11px;">KKM Mapel: {{ $data['kkm'] }}</small>
                             </div>
                         </div>
@@ -363,11 +368,11 @@
                                     <span class="fw-bold text-dark" style="font-size: 0.95rem;">{{ $data['avg'] }}</span>
                                 </div>
 
-                                @if($data['status'] === 'tuntas')
+                                {{-- @if($data['status'] === 'tuntas')
                                     <span class="badge-status badge-tuntas">Tuntas ({{ $data['avg'] }})</span>
                                 @else
                                     <span class="badge-status badge-kurang">Kurang ({{ $data['avg'] }})</span>
-                                @endif
+                                @endif --}}
                             @else
                                 <span class="badge-status badge-belum">Belum Ujian</span>
                             @endif

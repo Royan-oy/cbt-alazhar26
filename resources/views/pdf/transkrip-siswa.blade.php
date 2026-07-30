@@ -17,41 +17,45 @@
         .header-table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
         .header-table td {
             vertical-align: middle;
         }
         .logo {
-            width: 65px;
+            width: 70px;
+            height: auto;
+        }
+        .logo-right {
+            width: 90px;
             height: auto;
         }
         .school-info {
             text-align: center;
             padding: 0 5px;
         }
-        .school-name {
-            font-size: 14pt;
+        .header-title {
+            font-size: 15pt;
             font-weight: bold;
-            color: #0f172a;
+            color: #1b365d;
             text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 2px;
         }
-        .sub-school {
+        .school-name {
             font-size: 11pt;
-            font-weight: bold;
-            color: #0284c7;
-            margin-top: 2px;
+            font-weight: 600;
+            color: #334155;
+            margin-bottom: 2px;
         }
         .school-address {
-            font-size: 8pt;
+            font-size: 8.5pt;
             color: #64748b;
-            margin-top: 3px;
         }
         .header-line {
             border: 0;
-            border-top: 2px solid #0f172a;
-            border-bottom: 1px solid #0f172a;
-            height: 2px;
+            border-bottom: 2px solid #1b365d;
+            margin-top: 6px;
             margin-bottom: 15px;
         }
         /* Document Title */
@@ -172,19 +176,19 @@
     <!-- KOP SURAT -->
     <table class="header-table">
         <tr>
-            <td style="width: 65px; text-align: left;">
+            <td style="width: 70px; text-align: left;">
                 @if(file_exists(public_path('img/logo-alazhar.png')))
                     <img src="{{ public_path('img/logo-alazhar.png') }}" class="logo" alt="Logo Al-Azhar">
                 @endif
             </td>
             <td class="school-info">
-                <div class="school-name">Sekolah Islam Al Azhar Pekalongan</div>
-                <div class="sub-school">LEMBAR HASIL & DETAIL JAWABAN SISWA</div>
-                <div class="school-address">Jl. Pelita II, Kelurahan Banyurip, Kecamatan Pekalongan Selatan, Kota Pekalongan, Jawa Tengah</div>
+                <div class="header-title">TRANSKRIP UJIAN SISWA</div>
+                <div class="school-name">Sekolah Islam Al-Azhar Pekalongan</div>
+                <div class="school-address">Jl. Pelita II, Banyurip Alit, Kec. Pekalongan Sel., Kota Pekalongan</div>
             </td>
-            <td style="width: 65px; text-align: right;">
+            <td style="width: 90px; text-align: right;">
                 @if(file_exists(public_path('img/sigma.png')))
-                    <img src="{{ public_path('img/sigma.png') }}" class="logo" alt="Logo Sigma">
+                    <img src="{{ public_path('img/sigma.png') }}" class="logo-right" alt="Logo Sigma">
                 @endif
             </td>
         </tr>

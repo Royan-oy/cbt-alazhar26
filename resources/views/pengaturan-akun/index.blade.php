@@ -481,7 +481,7 @@
             <div class="premium-card p-4 text-center">
                 <div class="section-title text-start mb-4">Foto Profil</div>
                 
-                <div class="profile-img-container mb-4" onclick="document.getElementById('fotoInput').click();" style="cursor: pointer;" title="Klik untuk mengubah foto">
+                <div class="profile-img-container mb-3" onclick="document.getElementById('fotoInput').click();" style="cursor: pointer;" title="Klik untuk mengubah foto">
                     @if(Auth::user()->guru && !empty(Auth::user()->guru->foto) && \Illuminate\Support\Facades\Storage::disk('public')->exists(Auth::user()->guru->foto))
                         <img src="{{ asset('storage/' . Auth::user()->guru->foto) }}" alt="Foto Profil">
                     @else
@@ -493,9 +493,26 @@
                 </div>
 
                 <h5 class="fw-bold text-dark mb-1">{{ Auth::user()->nama ?? Auth::user()->name ?? 'Nama Pengguna' }}</h5>
-                <p class="text-muted mb-3" style="font-size: 14px;">{{ ucfirst(Auth::user()->role ?? 'Pengguna') }}</p>
+                <p class="text-muted mb-2" style="font-size: 14px;">{{ ucfirst(Auth::user()->role ?? 'Pengguna') }}</p>
 
-                <div class="d-grid gap-2">
+                @if(isset($guru) && $guru)
+                    <div class="d-flex flex-wrap justify-content-center gap-1 mb-3">
+                        <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25 px-3 py-1.5 rounded-pill fw-semibold" style="font-size: 12px;">
+                            <i class="fa-solid fa-school me-1"></i> {{ optional($guru->jenjang)->nama_jenjang ?? 'Jenjang Belum Set' }}
+                        </span>
+                        @if($guru->waliKelas->isNotEmpty())
+                            <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-3 py-1.5 rounded-pill fw-semibold" style="font-size: 12px;">
+                                <i class="fa-solid fa-user-check me-1"></i> Wali Kelas {{ $guru->waliKelas->map(function($wk) { return optional($wk->kelas)->nama_kelas; })->filter()->implode(', ') }}
+                            </span>
+                        @else
+                            <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 px-3 py-1.5 rounded-pill fw-semibold" style="font-size: 12px;">
+                                <i class="fa-solid fa-user-slash me-1"></i> Bukan Wali Kelas
+                            </span>
+                        @endif
+                    </div>
+                @endif
+
+                <div class="d-grid gap-2 mt-3">
                     <button type="button" class="btn btn-light" onclick="document.getElementById('fotoInput').click();" style="border-radius: 10px; font-size: 14px; font-weight: 600; color: #475569; border: 1px solid #e2e8f0;">
                         <i class="fa-solid fa-upload me-2"></i> Unggah Foto Baru
                     </button>
@@ -515,7 +532,11 @@
         <!-- Form Details -->
         <div class="col-12 col-lg-8">
             <div class="premium-card p-4 p-md-5">
-                <div class="section-title mb-4">Informasi Personal</div>
+                
+                <!-- 1. Informasi Personal & Akademik Guru -->
+                <div class="section-title mb-4">
+                    <i class="fa-solid fa-id-card text-primary me-2"></i> Informasi Personal Guru
+                </div>
                 
                 <div class="row g-3 mb-4">
                     <div class="col-md-6">
@@ -524,16 +545,77 @@
                     </div>
                     <div class="col-md-6">
                         <label for="nip" class="form-label-premium">NIP / NUPTK</label>
-                        <input type="text" class="form-control form-control-premium" id="nip" placeholder="Masukkan NIP atau NUPTK" value="{{ Auth::user()->guru->nip ?? '' }}" readonly>
+                        <input type="text" class="form-control form-control-premium" id="nip" placeholder="Masukkan NIP atau NUPTK" value="{{ optional($guru)->nip ?? (Auth::user()->guru->nip ?? '-') }}" readonly>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="email" class="form-label-premium">Alamat Email</label>
+                        <input type="email" class="form-control form-control-premium" id="email" placeholder="contoh@sekolah.com" value="{{ Auth::user()->email ?? '-' }}" readonly>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="jenjang" class="form-label-premium">Jenjang</label>
+                        <input type="text" class="form-control form-control-premium" id="jenjang" value="{{ optional(optional($guru)->jenjang)->nama_jenjang ?? 'Belum Diatur' }}" readonly>
+                    </div>
+                    <div class="col-md-12">
+                        <label for="statusWaliKelas" class="form-label-premium">Status Wali Kelas</label>
+                        @php
+                            $waliKelasText = 'Bukan Wali Kelas';
+                            if (isset($guru) && $guru && $guru->waliKelas->isNotEmpty()) {
+                                $listWali = $guru->waliKelas->map(function($wk) {
+                                    $k = optional($wk->kelas)->nama_kelas;
+                                    $ta = optional($wk->tahunAjaran)->nama_tahun;
+                                    return $k ? ($ta ? "Kelas {$k} (TA {$ta})" : "Kelas {$k}") : null;
+                                })->filter()->implode(', ');
+                                $waliKelasText = 'Wali Kelas ' . $listWali;
+                            }
+                        @endphp
+                        <input type="text" class="form-control form-control-premium" id="statusWaliKelas" value="{{ $waliKelasText }}" readonly>
                     </div>
                 </div>
 
-                <div class="mb-4">
-                    <label for="email" class="form-label-premium">Alamat Email</label>
-                    <input type="email" class="form-control form-control-premium" id="email" placeholder="contoh@sekolah.com" value="{{ Auth::user()->email ?? '' }}" readonly>
+                <!-- 2. Mata Pelajaran yang Diampu -->
+                <div class="section-title mt-5 mb-4">
+                    <i class="fa-solid fa-book-bookmark text-primary me-2"></i> Mata Pelajaran yang Diampu
                 </div>
 
-                <div class="section-title mt-5 mb-4">Keamanan & Password</div>
+                @if(isset($guru) && $guru && $guru->guruMapels->isNotEmpty())
+                    <div class="row g-3 mb-4">
+                        @foreach($guru->guruMapels as $gm)
+                            <div class="col-12 col-md-6">
+                                <div class="p-3 rounded-3 border bg-light h-100">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <div class="fw-bold text-dark" style="font-size: 14px;">
+                                            <i class="fa-solid fa-book-open text-primary me-2"></i>
+                                            {{ optional($gm->mataPelajaran)->nama_mapel ?? '-' }}
+                                        </div>
+                                        <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25" style="font-size: 11px;">
+                                            TA {{ optional($gm->tahunAjaran)->nama_tahun ?? '-' }}
+                                        </span>
+                                    </div>
+                                    <div class="text-muted small mt-2">
+                                        <i class="fa-solid fa-door-open me-1 text-secondary"></i> Kelas:
+                                        @if($gm->kelas->isNotEmpty())
+                                            @foreach($gm->kelas as $k)
+                                                <span class="badge bg-white text-dark border px-2 py-1 me-1" style="font-size: 11px;">{{ $k->nama_kelas }}</span>
+                                            @endforeach
+                                        @else
+                                            <span class="text-muted fst-italic">Semua Kelas / Belum diatur</span>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                @else
+                    <div class="p-4 text-center rounded-3 mb-4" style="background-color: #f8fafc; border: 1px dashed #cbd5e1;">
+                        <i class="fa-regular fa-folder-open mb-2 text-muted" style="font-size: 28px;"></i>
+                        <p class="text-muted small mb-0">Belum ada mata pelajaran yang diampu.</p>
+                    </div>
+                @endif
+
+                <!-- 3. Keamanan & Password -->
+                <div class="section-title mt-5 mb-4">
+                    <i class="fa-solid fa-shield-halved text-primary me-2"></i> Keamanan & Password
+                </div>
 
                 <div class="alert alert-info border-0 d-flex align-items-center mb-4" style="background-color: #f0f9ff; color: #0369a1; border-radius: 10px; font-size: 13px;">
                     <i class="fa-solid fa-circle-info me-3 fs-5"></i>

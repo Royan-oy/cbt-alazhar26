@@ -110,8 +110,6 @@ class UjianController extends Controller
             'kelas_id.*'            => 'exists:kelas,id',
             'acak_soal'             => 'nullable|boolean',
             'acak_jawaban'          => 'nullable|boolean',
-            'tampilkan_nilai'       => 'nullable|boolean',
-            'tampilkan_pembahasan'  => 'nullable|boolean',
         ], [
             'bank_soal_id.required'   => 'Bank soal wajib dipilih.',
             'jenis_ujian_id.required' => 'Jenis ujian wajib dipilih.',
@@ -146,8 +144,6 @@ class UjianController extends Controller
             'token'                => Ujian::generateToken(),
             'acak_soal'            => $request->boolean('acak_soal'),
             'acak_jawaban'         => $request->boolean('acak_jawaban'),
-            'tampilkan_nilai'      => $request->boolean('tampilkan_nilai'),
-            'tampilkan_pembahasan' => $request->boolean('tampilkan_pembahasan'),
         ]);
 
         $ujian->kelas()->sync($request->kelas_id);
@@ -197,8 +193,6 @@ class UjianController extends Controller
             'kelas_id.*'            => 'exists:kelas,id',
             'acak_soal'             => 'nullable|boolean',
             'acak_jawaban'          => 'nullable|boolean',
-            'tampilkan_nilai'       => 'nullable|boolean',
-            'tampilkan_pembahasan'  => 'nullable|boolean',
         ], [
             'bank_soal_id.required'   => 'Bank soal wajib dipilih.',
             'jenis_ujian_id.required' => 'Jenis ujian wajib dipilih.',
@@ -238,8 +232,6 @@ class UjianController extends Controller
             'durasi_minimal'       => $request->durasi_minimal,
             'acak_soal'            => $request->boolean('acak_soal'),
             'acak_jawaban'         => $request->boolean('acak_jawaban'),
-            'tampilkan_nilai'      => $request->boolean('tampilkan_nilai'),
-            'tampilkan_pembahasan' => $request->boolean('tampilkan_pembahasan'),
         ]);
 
         $ujian->kelas()->sync($request->kelas_id);

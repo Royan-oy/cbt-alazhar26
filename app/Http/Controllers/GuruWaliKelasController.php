@@ -426,6 +426,8 @@ class GuruWaliKelasController extends Controller
             ->unique()
             ->values();
 
+        $groupedUjiansByMapel = $ujians->groupBy('nama_mapel');
+
         // Hitung Statistik Kelas & Per-Siswa
         $studentSummaries = collect();
         $totalNilaiKelas = 0;
@@ -436,18 +438,31 @@ class GuruWaliKelasController extends Controller
 
         foreach ($siswas as $siswa) {
             $nilaiSiswa = $nilaiData->get($siswa->id, collect());
-            $sum = 0;
-            $cnt = 0;
+            $totalAvgSum = 0;
+            $totalAvgCnt = 0;
 
-            foreach ($ujians as $ujian) {
-                $record = $nilaiSiswa->firstWhere('ujian_id', $ujian->id);
-                if ($record && $record->nilai_akhir !== null) {
-                    $sum += (float)$record->nilai_akhir;
-                    $cnt++;
+            foreach ($groupedUjiansByMapel as $mapelNama => $mapelUjians) {
+                $sumMapel = 0;
+                $cntMapel = 0;
+                $records = $nilaiSiswa->whereIn('ujian_id', $mapelUjians->pluck('id'));
+
+                foreach ($mapelUjians as $u) {
+                    $rec = $records->firstWhere('ujian_id', $u->id);
+                    $val = $rec ? (float)$rec->nilai_akhir : null;
+                    if ($val !== null) {
+                        $sumMapel += $val;
+                        $cntMapel++;
+                    }
+                }
+
+                $avgMapel = $cntMapel > 0 ? round($sumMapel / $cntMapel, 1) : null;
+                if ($avgMapel !== null) {
+                    $totalAvgSum += $avgMapel;
+                    $totalAvgCnt++;
                 }
             }
 
-            $avg = $cnt > 0 ? round($sum / $cnt, 1) : null;
+            $avg = $totalAvgCnt > 0 ? round($totalAvgSum / $totalAvgCnt, 1) : null;
             if ($avg !== null) {
                 $totalNilaiKelas += $avg;
                 $countSiswaDenganNilai++;
@@ -462,7 +477,7 @@ class GuruWaliKelasController extends Controller
 
             $studentSummaries->put($siswa->id, [
                 'avg'    => $avg,
-                'count'  => $cnt,
+                'count'  => $totalAvgCnt,
                 'status' => $avg === null ? 'belum' : ($avg >= 75 ? 'tuntas' : 'kurang'),
             ]);
         }
@@ -475,7 +490,6 @@ class GuruWaliKelasController extends Controller
 
         // Hitung Statistik per Mata Pelajaran
         $mapelStats = collect();
-        $groupedUjiansByMapel = $ujians->groupBy('nama_mapel');
         $mapels = $groupedUjiansByMapel->keys()->values();
 
         // Construct Matriks Per-Siswa Per-Mata Pelajaran + Detail Popover
@@ -712,7 +726,7 @@ class GuruWaliKelasController extends Controller
             ))->setPaper('a4', 'portrait');
 
             $fileName = 'Rekap_Leaderboard_' . Str::slug($kelas->nama_kelas) . '.pdf';
-            return $pdf->download($fileName);
+            return $pdf->stream($fileName);
         }
 
         // KONDISI B: Dengan filter jenis ujian → Matriks Nilai (Landscape)
@@ -747,6 +761,8 @@ class GuruWaliKelasController extends Controller
             ->join('bank_soals', 'ujians.bank_soal_id', '=', 'bank_soals.id')
             ->join('mata_pelajarans', 'bank_soals.mata_pelajaran_id', '=', 'mata_pelajarans.id')
             ->join('jenis_ujians', 'ujians.jenis_ujian_id', '=', 'jenis_ujians.id')
+            ->leftJoin('guru_mapels', 'bank_soals.guru_mapel_id', '=', 'guru_mapels.id')
+            ->leftJoin('gurus', 'guru_mapels.guru_id', '=', 'gurus.id')
             ->where('ujian_kelas.kelas_id', $waliKelas->kelas_id)
             ->where('ujians.tahun_ajaran_id', $waliKelas->tahun_ajaran_id)
             ->select(
@@ -754,7 +770,8 @@ class GuruWaliKelasController extends Controller
                 'ujians.nama_ujian',
                 'mata_pelajarans.nama_mapel',
                 'jenis_ujians.nama as nama_jenis_ujian',
-                'bank_soals.kkm'
+                'bank_soals.kkm',
+                'gurus.nama as nama_guru'
             )
             ->orderBy('ujians.waktu_mulai', 'asc')
             ->get();
@@ -776,6 +793,7 @@ class GuruWaliKelasController extends Controller
 
         foreach ($groupedUjiansByMapel as $mapelNama => $mapelUjians) {
             $kkm = $mapelUjians->first()->kkm ?? 75;
+            $namaGuru = $mapelUjians->first()->nama_guru ?? '—';
             $details = [];
             $sum = 0;
             $cnt = 0;
@@ -808,10 +826,11 @@ class GuruWaliKelasController extends Controller
             }
 
             $mapelDetails->put($mapelNama, [
-                'avg'     => $avg,
-                'kkm'     => $kkm,
-                'status'  => $status,
-                'details' => $details,
+                'avg'       => $avg,
+                'kkm'       => $kkm,
+                'status'    => $status,
+                'details'   => $details,
+                'nama_guru' => $namaGuru,
             ]);
         }
 
@@ -848,6 +867,8 @@ class GuruWaliKelasController extends Controller
             ->join('bank_soals', 'ujians.bank_soal_id', '=', 'bank_soals.id')
             ->join('mata_pelajarans', 'bank_soals.mata_pelajaran_id', '=', 'mata_pelajarans.id')
             ->join('jenis_ujians', 'ujians.jenis_ujian_id', '=', 'jenis_ujians.id')
+            ->leftJoin('guru_mapels', 'bank_soals.guru_mapel_id', '=', 'guru_mapels.id')
+            ->leftJoin('gurus', 'guru_mapels.guru_id', '=', 'gurus.id')
             ->where('ujian_kelas.kelas_id', $waliKelas->kelas_id)
             ->where('ujians.tahun_ajaran_id', $waliKelas->tahun_ajaran_id)
             ->select(
@@ -855,7 +876,8 @@ class GuruWaliKelasController extends Controller
                 'ujians.nama_ujian',
                 'mata_pelajarans.nama_mapel',
                 'jenis_ujians.nama as nama_jenis_ujian',
-                'bank_soals.kkm'
+                'bank_soals.kkm',
+                'gurus.nama as nama_guru'
             )
             ->orderBy('ujians.waktu_mulai', 'asc')
             ->get();
@@ -875,6 +897,7 @@ class GuruWaliKelasController extends Controller
 
         foreach ($groupedUjiansByMapel as $mapelNama => $mapelUjians) {
             $kkm = $mapelUjians->first()->kkm ?? 75;
+            $namaGuru = $mapelUjians->first()->nama_guru ?? '—';
             $details = [];
             $sum = 0;
             $cnt = 0;
@@ -904,10 +927,11 @@ class GuruWaliKelasController extends Controller
             }
 
             $mapelDetails->put($mapelNama, [
-                'avg'     => $avg,
-                'kkm'     => $kkm,
-                'status'  => $status,
-                'details' => $details,
+                'avg'       => $avg,
+                'kkm'       => $kkm,
+                'status'    => $status,
+                'details'   => $details,
+                'nama_guru' => $namaGuru,
             ]);
         }
 

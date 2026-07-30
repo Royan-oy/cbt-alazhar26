@@ -21,8 +21,6 @@ class Ujian extends Model
         'token',
         'acak_soal',
         'acak_jawaban',
-        'tampilkan_nilai',
-        'tampilkan_pembahasan',
     ];
 
     protected $casts = [
@@ -30,8 +28,6 @@ class Ujian extends Model
         'waktu_selesai'         => 'datetime',
         'acak_soal'             => 'boolean',
         'acak_jawaban'          => 'boolean',
-        'tampilkan_nilai'       => 'boolean',
-        'tampilkan_pembahasan'  => 'boolean',
     ];
 
     public function bankSoal()
