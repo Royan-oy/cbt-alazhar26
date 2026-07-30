@@ -314,11 +314,20 @@ h5.fw-bold, h6.fw-bold { color: var(--ink-900) !important; }
     overflow: hidden;
 }
 
-.urgent-card::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(circle at top right, rgba(255,255,255,.15), transparent 60%);
+.urgent-card::after{
+    content:'';
+    position:absolute;
+    inset:0;
+    background:radial-gradient(circle at top right,
+        rgba(255,255,255,.15),
+        transparent 60%);
+    pointer-events:none;
+    z-index:0;
+}
+
+.urgent-card > *{
+    position:relative;
+    z-index:1;
 }
 
 .urgent-label {
@@ -763,7 +772,7 @@ MOBILE
 @media (max-width:768px){
 
     .btn-exam-modern{
-        width:100%;
+        width:50%;
         min-width:unset;
         height:34px;
         font-size:11px;

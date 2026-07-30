@@ -31,7 +31,8 @@ $ujianBerjalan = collect($ujian_hari_ini ?? [])
                     </div>
                 </div>
 
-                <a href="{{ route('dashboard-siswa.ujian.kerja', $ujianBerjalan->id) }}" class="btn btn-light fw-bold px-4 py-2 rounded-3">
+                <a href="{{ route('dashboard-siswa.ujian.kerja', ['ujian' => $ujianBerjalan->id]) }}"
+                   class="btn btn-light fw-bold px-4 py-2 rounded-3">
                     <i class="fa-solid fa-arrow-right me-2"></i>Lanjutkan Sekarang
                 </a>
             </div>
@@ -249,32 +250,42 @@ $ujianBerjalan = collect($ujian_hari_ini ?? [])
 </div>
 
 @if(count($ujian_hari_ini ?? []) > 0)
+@push('js')
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-    const ctx = document.getElementById('statusChart');
-    if (!ctx) return;
+(function() {
+    function initChart() {
+        const ctx = document.getElementById('statusChart');
+        if (!ctx) return;
 
-    new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-            labels: ['Belum Dikerjakan', 'Sedang Berjalan', 'Selesai'],
-            datasets: [{
-                data: [{{ $jumlahBelum }}, {{ $jumlahBerjalan }}, {{ $jumlahSelesai }}],
-                backgroundColor: ['#2563eb', '#d97706', '#059669'],
-                borderWidth: 0,
-                cutout: '72%',
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { display: false },
-                tooltip: { enabled: true }
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Belum Dikerjakan', 'Sedang Berjalan', 'Selesai'],
+                datasets: [{
+                    data: [{{ $jumlahBelum }}, {{ $jumlahBerjalan }}, {{ $jumlahSelesai }}],
+                    backgroundColor: ['#2563eb', '#d97706', '#059669'],
+                    borderWidth: 0,
+                    cutout: '72%',
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { enabled: true }
+                }
             }
-        }
-    });
-});
+        });
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initChart);
+    } else {
+        initChart();
+    }
+})();
 </script>
+@endpush
 @endif
