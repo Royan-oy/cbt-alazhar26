@@ -32,7 +32,7 @@ $ujianBerjalan = collect($ujian_hari_ini ?? [])
                 </div>
 
                 <a href="{{ route('dashboard-siswa.ujian.kerja', ['ujian' => $ujianBerjalan->id]) }}"
-                   class="btn btn-light fw-bold px-4 py-2 rounded-3">
+                   class="btn btn-light fw-bold px-4 py-2 rounded-3" style="font-size: 13px;">
                     <i class="fa-solid fa-arrow-right me-2"></i>Lanjutkan Sekarang
                 </a>
             </div>
@@ -41,16 +41,23 @@ $ujianBerjalan = collect($ujian_hari_ini ?? [])
 </div>
 @endif
 
-<h5 class="fw-bold text-dark mb-3" style="font-size: 14px; letter-spacing: 0.3px;">Ringkasan Evaluasi Anda</h5>
+<div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+    <h2 class="section-heading mb-0">
+        <i class="fa-solid fa-chart-pie"></i>Ringkasan Evaluasi Anda
+    </h2>
+    <span class="chip chip-indigo">
+        <i class="fa-solid fa-user-graduate"></i> Mode Siswa
+    </span>
+</div>
 
-<div class="row g-3 mb-4">
+<div class="row g-2 g-sm-3 mb-4">
     <div class="col-6 col-md-4">
-        <div class="stat-card stat-card-accent-blue">
+        <div class="stat-card stat-card-accent-indigo">
             <div class="stat-icon"><i class="fa-solid fa-pen-to-square"></i></div>
             <div class="stat-body">
                 <span class="stat-label">Ujian Tersedia</span>
                 <h3>{{ count($ujian_hari_ini ?? []) }} <small>Hari Ini</small></h3>
-                <span class="stat-caption">Jadwal aktif untuk Anda</span>
+                <span class="stat-caption is-accent"><i class="fa-solid fa-calendar-day me-1"></i>Jadwal aktif untuk Anda</span>
             </div>
         </div>
     </div>
@@ -60,7 +67,7 @@ $ujianBerjalan = collect($ujian_hari_ini ?? [])
             <div class="stat-body">
                 <span class="stat-label">Ujian Diselesaikan</span>
                 <h3>{{ $riwayat_ujian ?? 0 }} <small>Riwayat</small></h3>
-                <span class="stat-caption">Total sepanjang waktu</span>
+                <span class="stat-caption is-accent"><i class="fa-solid fa-circle-check me-1"></i>Total sepanjang waktu</span>
             </div>
         </div>
     </div>
@@ -70,18 +77,17 @@ $ujianBerjalan = collect($ujian_hari_ini ?? [])
     <div class="col-12 col-lg-8">
         <div class="content-card h-100">
             <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
-                <div class="section-title">
-                    <i class="fa-solid fa-calendar-day text-primary"></i>
-                    Jadwal Ujian
-                </div>
-                <a href="{{ route('dashboard-siswa.ujian-hari-ini') }}" class="text-primary text-decoration-none small fw-semibold">
+                <h2 class="section-heading mb-0">
+                    <i class="fa-solid fa-calendar-day"></i>Jadwal Ujian Hari Ini
+                </h2>
+                <a href="{{ route('dashboard-siswa.ujian-hari-ini') }}" class="btn btn-brand-primary rounded-pill px-3 py-1.5" style="font-size: 12px;">
                     Lihat semua <i class="fa-solid fa-arrow-right ms-1"></i>
                 </a>
             </div>
 
             @if(isset($ujian_hari_ini) && count($ujian_hari_ini) > 0)
                 <div class="table-responsive" style="max-height: 380px; overflow-y: auto;">
-                    <table class="table align-middle mb-0">
+                    <table class="table table-academic align-middle mb-0">
                         <thead>
                             <tr>
                                 <th>Nama Ujian</th>
@@ -94,15 +100,14 @@ $ujianBerjalan = collect($ujian_hari_ini ?? [])
                             @foreach($ujian_hari_ini as $ujian)
                                 <tr>
                                     <td data-label="Nama Ujian">
-                                        <div class="text-end">
-                                            <div class="fw-bold text-dark">{{ $ujian->nama_ujian }}</div>
-                                            <small class="text-muted">Durasi: {{ $ujian->durasi_menit }} Menit</small>
+                                        <div>
+                                            <div class="fw-bold text-dark" style="font-size: 13.5px;">{{ $ujian->nama_ujian }}</div>
+                                            <small class="text-muted"><i class="fa-regular fa-clock me-1"></i>Durasi: {{ $ujian->durasi_menit }} Menit</small>
                                         </div>
                                     </td>
-                                    <td class="text-muted text-end" data-label="Batas Waktu">
-                                        <span class="cell-datetime">
-                                            <i class="fa-regular fa-clock"></i>
-                                            {{ $ujian->display_tanggal }}
+                                    <td data-label="Batas Waktu">
+                                        <span class="small text-secondary fw-semibold">
+                                            <i class="fa-regular fa-calendar me-1"></i>{{ $ujian->display_tanggal }}
                                         </span>
                                     </td>
                                     <td class="text-center" data-label="Status">
@@ -122,8 +127,8 @@ $ujianBerjalan = collect($ujian_hari_ini ?? [])
                                                 Belum Dikerjakan
                                             </span>
                                         @elseif($ujian->status_siswa == 'mengerjakan')
-                                            <span class="exam-status-badge status-berjalan pulse-badge">
-                                                <i class="fa-solid fa-spinner"></i>
+                                            <span class="exam-status-badge status-berjalan">
+                                                <i class="fa-solid fa-spinner fa-spin"></i>
                                                 Sedang Mengerjakan
                                             </span>
                                         @else
@@ -136,31 +141,26 @@ $ujianBerjalan = collect($ujian_hari_ini ?? [])
                                     <td class="text-end" data-label="Aksi">
                                         @if($ujian->status_waktu == 'belum_mulai')
                                             <button class="btn-exam-modern btn-exam-wait" disabled>
-                                                <i class="fa-regular fa-clock"></i>
-                                                Belum Mulai
+                                                <i class="fa-regular fa-clock"></i> Belum Mulai
                                             </button>
                                         @elseif($ujian->status_waktu == 'berakhir')
                                             <button class="btn-exam-modern btn-exam-end" disabled>
-                                                <i class="fa-solid fa-hourglass-end"></i>
-                                                Berakhir
+                                                <i class="fa-solid fa-hourglass-end"></i> Berakhir
                                             </button>
                                         @else
                                             @if($ujian->status_siswa == 'belum')
                                                 <a href="{{ route('dashboard-siswa.ujian.mulai',$ujian->id) }}"
                                                    class="btn-exam-modern btn-exam-start">
-                                                    <i class="fa-solid fa-play"></i>
-                                                    Mulai
+                                                    <i class="fa-solid fa-play"></i> Mulai
                                                 </a>
                                             @elseif($ujian->status_siswa == 'mengerjakan')
                                                 <a href="{{ route('dashboard-siswa.ujian.mulai',$ujian->id) }}"
                                                    class="btn-exam-modern btn-exam-continue">
-                                                    <i class="fa-solid fa-arrow-rotate-right"></i>
-                                                    Lanjutkan
+                                                    <i class="fa-solid fa-arrow-rotate-right"></i> Lanjutkan
                                                 </a>
                                             @else
                                                 <button class="btn-exam-modern btn-exam-done" disabled>
-                                                    <i class="fa-solid fa-circle-check"></i>
-                                                    Selesai
+                                                    <i class="fa-solid fa-circle-check"></i> Selesai
                                                 </button>
                                             @endif
                                         @endif
@@ -171,9 +171,9 @@ $ujianBerjalan = collect($ujian_hari_ini ?? [])
                     </table>
                 </div>
             @else
-                <div class="empty-state">
-                    <i class="fa-regular fa-calendar-check"></i>
-                    <p class="text-secondary small mb-0 fw-semibold">Alhamdulillah, tidak ada jadwal ujian aktif untuk Anda saat ini.</p>
+                <div class="empty-state py-4">
+                    <i class="fa-regular fa-calendar-check text-muted opacity-50 mb-2" style="font-size: 36px;"></i>
+                    <p class="text-secondary small mb-1 fw-semibold">Alhamdulillah, tidak ada jadwal ujian aktif untuk Anda saat ini.</p>
                     <p class="text-muted small mb-0">Jadwal ujian baru akan muncul otomatis di sini saat sudah waktunya.</p>
                 </div>
             @endif
@@ -182,10 +182,9 @@ $ujianBerjalan = collect($ujian_hari_ini ?? [])
 
     <div class="col-12 col-lg-4">
         <div class="content-card h-100">
-            <div class="section-title mb-3">
-                <i class="fa-solid fa-chart-pie text-primary"></i>
-                Status Hari Ini
-            </div>
+            <h2 class="section-heading mb-3">
+                <i class="fa-solid fa-chart-pie"></i>Status Hari Ini
+            </h2>
 
             @if(count($ujian_hari_ini ?? []) > 0)
                 <div style="position: relative; height: 180px;">
@@ -193,24 +192,24 @@ $ujianBerjalan = collect($ujian_hari_ini ?? [])
                 </div>
                 <div class="d-flex flex-column gap-2 mt-3">
                     <div class="d-flex align-items-center justify-content-between">
-                        <span class="legend-dot" style="background:#2563eb; color:#2563eb;"></span>
-                        <span class="flex-grow-1 small ms-2">Belum Dikerjakan</span>
-                        <strong class="small">{{ $jumlahBelum }}</strong>
+                        <span class="legend-dot" style="background:#2563eb;"></span>
+                        <span class="flex-grow-1 small ms-2 fw-semibold text-secondary">Belum Dikerjakan</span>
+                        <strong class="small fw-bold text-dark">{{ $jumlahBelum }}</strong>
                     </div>
                     <div class="d-flex align-items-center justify-content-between">
                         <span class="legend-dot" style="background:#d97706;"></span>
-                        <span class="flex-grow-1 small ms-2">Sedang Berjalan</span>
-                        <strong class="small">{{ $jumlahBerjalan }}</strong>
+                        <span class="flex-grow-1 small ms-2 fw-semibold text-secondary">Sedang Berjalan</span>
+                        <strong class="small fw-bold text-dark">{{ $jumlahBerjalan }}</strong>
                     </div>
                     <div class="d-flex align-items-center justify-content-between">
                         <span class="legend-dot" style="background:#059669;"></span>
-                        <span class="flex-grow-1 small ms-2">Selesai</span>
-                        <strong class="small">{{ $jumlahSelesai }}</strong>
+                        <span class="flex-grow-1 small ms-2 fw-semibold text-secondary">Selesai</span>
+                        <strong class="small fw-bold text-dark">{{ $jumlahSelesai }}</strong>
                     </div>
                 </div>
             @else
                 <div class="empty-state py-4">
-                    <i class="fa-regular fa-face-smile"></i>
+                    <i class="fa-regular fa-face-smile text-muted opacity-50 mb-2" style="font-size: 36px;"></i>
                     <p class="text-muted small mb-0">Belum ada data untuk ditampilkan.</p>
                 </div>
             @endif
@@ -222,26 +221,25 @@ $ujianBerjalan = collect($ujian_hari_ini ?? [])
     <div class="col-12">
         <div class="content-card">
             <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
-                <div class="section-title">
-                    <i class="fa-solid fa-bolt"></i>
-                    Aksi Pintasan
-                </div>
-                <span class="secure-badge">
+                <h2 class="section-heading mb-0">
+                    <i class="fa-solid fa-bolt"></i>Aksi Pintasan Siswa
+                </h2>
+                <span class="chip chip-emerald">
                     <i class="fa-solid fa-shield-halved"></i> Sesi Enkripsi Terlindungi
                 </span>
             </div>
 
             <div class="quick-action-grid">
-                <a href="{{ route('dashboard-siswa.scan-token.index') }}" class="quick-action-btn primary">
-                    <div class="quick-icon-box"><i class="fa-solid fa-qrcode"></i></div>
+                <a href="{{ route('dashboard-siswa.scan-token.index') }}" class="quick-action-btn-sm accent-indigo">
+                    <div class="quick-icon-box-sm"><i class="fa-solid fa-qrcode"></i></div>
                     <span>Scan Token Ujian</span>
                 </a>
-                <a href="{{ route('dashboard-siswa.ujian-hari-ini') }}" class="quick-action-btn accent-blue">
-                    <div class="quick-icon-box"><i class="fa-solid fa-calendar-day"></i></div>
+                <a href="{{ route('dashboard-siswa.ujian-hari-ini') }}" class="quick-action-btn-sm accent-blue">
+                    <div class="quick-icon-box-sm"><i class="fa-solid fa-calendar-day"></i></div>
                     <span>Jadwal Ujian</span>
                 </a>
-                <a href="{{ route('pengaturan-akun.index') }}" class="quick-action-btn accent-slate">
-                    <div class="quick-icon-box"><i class="fa-solid fa-user"></i></div>
+                <a href="{{ route('pengaturan-akun.index') }}" class="quick-action-btn-sm accent-slate">
+                    <div class="quick-icon-box-sm"><i class="fa-solid fa-user"></i></div>
                     <span>Profil Saya</span>
                 </a>
             </div>
