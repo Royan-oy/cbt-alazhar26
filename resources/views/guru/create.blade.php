@@ -86,6 +86,45 @@
         height: 100%;
         object-fit: cover;
     }
+
+    /* ============================================
+       RESPONSIVE: TABLET & MOBILE (<= 768px)
+       ============================================ */
+    @media (max-width: 768px) {
+        .container-fluid.py-2 { padding-left: 12px; padding-right: 12px; }
+
+        /* Header */
+        .page-header { padding: 22px 18px; border-radius: 20px; }
+        .page-header .d-flex.justify-content-between {
+            flex-direction: column;
+            align-items: stretch !important;
+            gap: 16px;
+        }
+        .page-header h3 { font-size: 19px; margin-bottom: 4px; }
+        .page-header p.small { font-size: 12.5px; }
+        .page-header .badge { font-size: 10px !important; padding: 6px 12px !important; }
+        .btn-back { width: 100%; justify-content: center; }
+
+        /* Content card */
+        .content-card { padding: 4px; border-radius: 20px; }
+        .card-body.p-4 { padding: 16px !important; }
+
+        /* Foto upload */
+        .foto-preview-box { width: 64px; height: 64px; }
+        .d-flex.align-items-center.gap-3.mb-4 { gap: 12px !important; }
+
+        /* Password input group - tombol ikon lebih besar untuk sentuhan */
+        .input-group .btn.border { width: 44px; }
+
+        /* Tombol aksi bawah */
+        .d-flex.gap-2.mt-4 { flex-direction: column-reverse; }
+        .btn-submit, .btn-cancel {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    }
 </style>
 
 <div class="container-fluid py-2">
@@ -213,7 +252,7 @@
                         @enderror
                     </div>
 
-                    <div class="col-md-6"></div>
+                    <div class="col-md-6 d-none d-md-block"></div>
 
                     <div class="col-md-6">
                         <label class="form-label fw-semibold">Password</label>

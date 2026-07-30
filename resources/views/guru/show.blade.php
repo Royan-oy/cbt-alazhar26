@@ -175,10 +175,65 @@
 
     font-weight:600;
 
+    display:inline-block;
+
+    margin-bottom:4px;
+
 }
 
 
+.btn-header-action {
+    border-radius: 12px;
+    font-weight: 600;
+    padding: 10px 20px;
+    white-space: nowrap;
+}
 
+/* ============================================
+   RESPONSIVE: TABLET & MOBILE (<= 768px)
+   ============================================ */
+@media (max-width: 768px) {
+    .container-fluid.py-3 { padding-left: 12px; padding-right: 12px; }
+
+    /* Header */
+    .page-header { padding: 22px 18px; border-radius: 20px; }
+    .page-header .d-flex.justify-content-between {
+        flex-direction: column;
+        align-items: stretch !important;
+        gap: 16px !important;
+    }
+    .page-header h3 { font-size: 19px; }
+    .page-header p.mb-0 { font-size: 12.5px; }
+    .page-header .badge { font-size: 10px !important; }
+
+    .page-header > .d-flex > div:last-child {
+        display: flex;
+        gap: 8px;
+        width: 100%;
+    }
+    .page-header > .d-flex > div:last-child a {
+        flex: 1;
+        margin: 0 !important;
+        text-align: center;
+        justify-content: center;
+        display: inline-flex;
+        align-items: center;
+    }
+
+    /* Content cards */
+    .content-card { padding: 16px; border-radius: 18px; }
+
+    .profile-photo,
+    .profile-fallback { width: 88px; height: 88px; font-size: 28px; }
+
+    .section-title { font-size: 14.5px; margin-bottom: 14px; }
+
+    .wali-box { padding: 12px; }
+    .mapel-card { padding: 14px; }
+
+    .info-item { padding: 11px 0; }
+    .info-value { font-size: 13.5px; }
+}
 </style>
 
 
@@ -231,7 +286,7 @@
 
 
             <a href="{{ route('guru.edit',$guru->id) }}"
-               class="btn btn-info text-white rounded-3 me-2">
+               class="btn btn-info text-white btn-header-action rounded-3 me-2">
 
 
                 <i class="fa-solid fa-pen me-2"></i>
@@ -244,7 +299,7 @@
 
 
             <a href="{{ route('guru.index') }}"
-               class="btn btn-outline-light rounded-3">
+               class="btn btn-outline-light btn-header-action rounded-3">
 
 
                 <i class="fa-solid fa-arrow-left me-2"></i>
@@ -543,7 +598,7 @@ Mata Pelajaran yang Diampu
 <div class="mb-2">
 
 
-<strong>
+<strong class="d-block mb-2">
 
 Kelas :
 
@@ -588,7 +643,7 @@ Tidak ada kelas
 
 Tahun Ajaran :
 
-{{ optional($gm->tahunAjaran)->nama_tahun ?? '-' }}
+{{ optional($gm->tahunAjaran)->nama_tahun ?? '-' }} - {{ ucfirst(optional($gm->tahunAjaran)->semester ?? '-') }}
 
 
 </div>

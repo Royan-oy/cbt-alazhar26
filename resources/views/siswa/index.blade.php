@@ -152,64 +152,7 @@
         color: white !important;
     }
 
-    @media (max-width: 768px) {
-        .page-header { padding: 24px; border-radius: 18px; text-align: center; }
-        .page-header .d-flex.justify-content-between { flex-direction: column; gap: 20px; }
-        .page-header .header-actions { width: 100%; justify-content: center; }
-        .btn-add { width: 100%; justify-content: center; }
-        .header-actions .dropdown { width: 100%; }
-        .header-actions .dropdown .btn { width: 100%; justify-content: center; }
-        .form-control-custom, .btn-action-trigger { width: 100%; margin-bottom: 8px; }
-        .content-card { padding: 4px; border-radius: 18px; }
-
-        .table-responsive { overflow-x: auto; }
-        .table-responsive table, .table-responsive thead, .table-responsive tbody,
-        .table-responsive th, .table-responsive td, .table-responsive tr { display: block; }
-
-        .table-responsive thead tr { position: absolute; top: -9999px; left: -9999px; }
-
-        .table-responsive tr {
-            border: 1px solid var(--border-color);
-            border-radius: 16px;
-            margin-bottom: 16px;
-            padding: 12px;
-            background: #fff;
-        }
-
-        .table-responsive td {
-            border: none;
-            border-bottom: 1px dashed #f1f5f9;
-            position: relative;
-            padding-left: 45% !important;
-            text-align: right !important;
-            min-height: 48px;
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-        }
-
-        .table-responsive td:before {
-            position: absolute;
-            left: 12px;
-            width: 40%;
-            white-space: nowrap;
-            text-align: left;
-            font-weight: 700;
-            color: var(--text-muted);
-            font-size: 11px;
-            text-transform: uppercase;
-        }
-
-        .table-responsive td:nth-of-type(1):before { content: "No"; }
-        .table-responsive td:nth-of-type(2):before { content: "Nama"; }
-        .table-responsive td:nth-of-type(3):before { content: "NIS"; }
-        .table-responsive td:nth-of-type(4):before { content: "Kelas"; }
-        .table-responsive td:nth-of-type(5):before { content: "Aksi"; }
-
-        .pagination { justify-content: center !important; }
-    }
-
-    /* Dropdown action (dipakai baik untuk toolbar header maupun aksi per baris) */
+    /* Dropdown action (dipakai baik untuk toolbar header maupun aksi per baris/kartu) */
     .dropdown-action-btn {
         width: 36px;
         height: 36px;
@@ -250,6 +193,144 @@
         background-color: #fff1f2;
         color: #e11d48 !important;
     }
+
+    /* ============================================
+       KARTU SISWA UNTUK TAMPILAN MOBILE
+       ============================================ */
+    .siswa-card-mobile {
+        background: #fff;
+        border: 1px solid var(--border-color);
+        border-radius: 18px;
+        padding: 14px;
+        margin-bottom: 12px;
+        transition: box-shadow 0.15s ease;
+    }
+    .siswa-card-mobile:active {
+        box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
+    }
+    .siswa-card-mobile .siswa-avatar-wrap {
+        width: 44px;
+        height: 44px;
+        flex-shrink: 0;
+    }
+    .siswa-card-mobile .siswa-avatar-wrap img,
+    .siswa-card-mobile .siswa-avatar-wrap .siswa-avatar-fallback {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        object-fit: cover;
+    }
+    .siswa-card-mobile .siswa-avatar-fallback {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 15px;
+    }
+    .siswa-card-mobile .siswa-card-name {
+        font-size: 14.5px;
+        line-height: 1.3;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 1;
+        -webkit-box-orient: vertical;
+    }
+    .siswa-card-mobile .siswa-card-meta {
+        font-size: 12px;
+    }
+    .siswa-card-mobile hr {
+        margin: 12px 0;
+        opacity: 1;
+        border-color: #f1f5f9;
+    }
+    .siswa-card-empty-mobile {
+        text-align: center;
+        padding: 48px 16px;
+        background: #fff;
+        border: 1px dashed var(--border-color);
+        border-radius: 18px;
+    }
+
+    /* ============================================
+       RESPONSIVE: TABLET & MOBILE (<= 768px)
+       ============================================ */
+    @media (max-width: 768px) {
+        .container-fluid.py-2 { padding-left: 12px; padding-right: 12px; }
+
+        /* Header */
+        .page-header { padding: 22px 18px; border-radius: 20px; text-align: left; }
+        .page-header-content.d-flex { flex-direction: column; align-items: stretch !important; gap: 18px !important; }
+        .page-header h3 { font-size: 19px; margin-bottom: 4px; }
+        .page-header p.small { font-size: 12.5px; }
+        .page-header .badge { font-size: 10px !important; padding: 6px 12px !important; }
+
+        .header-actions { width: 100%; display: flex; gap: 8px; }
+        .header-actions .dropdown { flex: 0 0 auto; }
+        .header-actions .dropdown .btn-add {
+            width: 48px;
+            height: 48px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .header-actions .dropdown .btn-add i { margin: 0 !important; font-size: 15px; }
+        .header-actions .dropdown .btn-add-label { display: none; }
+        .header-actions a.btn-add {
+            flex: 1;
+            width: auto;
+            justify-content: center;
+            height: 48px;
+        }
+
+        /* Kartu Statistik: grid 2 kolom, ringkas */
+        .row.g-3.mb-4 { margin-bottom: 18px !important; row-gap: 12px !important; }
+        .row.g-3.mb-4 > [class*="col-"] { flex: 0 0 50%; max-width: 50%; }
+        .stat-card {
+            flex-direction: column;
+            align-items: flex-start;
+            padding: 14px;
+            border-radius: 16px;
+            gap: 8px;
+        }
+        .stat-icon { width: 36px; height: 36px; font-size: 15px; border-radius: 11px; }
+        .stat-card h4 { font-size: 16px; margin-top: 4px !important; }
+        .stat-card small { font-size: 9.5px; letter-spacing: 0.3px !important; }
+
+        /* Kartu konten utama */
+        .content-card { padding: 14px; border-radius: 20px; }
+
+        /* Form filter & pencarian */
+        form .row.g-3.mb-3 { row-gap: 10px; }
+        .form-control-custom, .btn-action-trigger { width: 100%; }
+        .col-lg-auto .d-flex.gap-2 { width: 100%; }
+        .col-lg-auto .d-flex.gap-2 .btn-action-trigger { height: 46px; }
+        .col-lg-auto .d-flex.gap-2 button[type="submit"] { flex: 1; }
+        .col-lg-auto .d-flex.gap-2 a.btn-action-trigger { flex: 0 0 46px; width: 46px; padding: 0; display: flex; align-items: center; justify-content: center; }
+
+        /* Alert & notifikasi */
+        .alert.rounded-4 { padding: 14px !important; font-size: 13px; }
+
+        /* Dropdown item lebih besar untuk sentuhan */
+        .dropdown-menu-custom .dropdown-item { padding: 10px 12px; font-size: 13.5px; }
+        .dropdown-action-btn { width: 38px; height: 38px; }
+
+        /* Pagination */
+        .pagination-container { justify-content: center !important; }
+        .pagination { justify-content: center !important; flex-wrap: wrap; gap: 5px; }
+        .pagination .page-item .page-link { padding: 8px 13px; font-size: 13px; border-radius: 10px !important; }
+
+        /* Modal */
+        .modal-dialog { margin: 14px; }
+        .modal-header, .modal-body, .modal-footer { padding-left: 18px !important; padding-right: 18px !important; }
+        .modal-title { font-size: 16px; }
+    }
+
+    @media (max-width: 400px) {
+        .row.g-3.mb-4 > [class*="col-"] { flex: 0 0 100%; max-width: 100%; }
+        .stat-card { flex-direction: row; align-items: center; }
+    }
 </style>
 
 <div class="container-fluid py-2">
@@ -274,9 +355,9 @@
             <div class="d-flex gap-2 header-actions">
                 <div class="dropdown">
                     <button class="btn btn-light border btn-add dropdown-toggle d-inline-flex align-items-center"
-                            type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Aksi Lainnya">
                         <i class="fa-solid fa-ellipsis-vertical me-2"></i>
-                        Aksi Lainnya
+                        <span class="btn-add-label">Aksi Lainnya</span>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end dropdown-menu-custom">
                         <li>
@@ -320,7 +401,7 @@
         </div>
     </div>
 
-    {{-- Widget Statistik: 3 kartu terisi penuh (sebelumnya hanya 1 kartu di grid 4 kolom) --}}
+    {{-- Widget Statistik --}}
     <div class="row g-3 mb-4">
         <div class="col-sm-6 col-md-4">
             <div class="stat-card">
@@ -437,7 +518,7 @@
                             </button>
 
                             @if(request()->filled('search') || request()->filled('jenjang') || request()->filled('kelas'))
-                                <a href="{{ route('siswa.index') }}" class="btn btn-light border btn-action-trigger">
+                                <a href="{{ route('siswa.index') }}" class="btn btn-light border btn-action-trigger" title="Reset Filter">
                                     <i class="fa-solid fa-rotate"></i>
                                 </a>
                             @endif
@@ -447,14 +528,13 @@
                 </div>
             </form>
 
-            {{-- Catatan singkat, tidak lagi mengulang info tahun ajaran/semester yang sudah ada di kartu statistik --}}
             <p class="text-muted small mb-3">
                 <i class="fa-solid fa-circle-info me-1"></i>
                 Data siswa yang ditampilkan menggunakan kelas aktif pada tahun ajaran &amp; semester berjalan.
             </p>
 
-            {{-- Table --}}
-            <div class="table-responsive">
+            {{-- Table (Desktop & Tablet ke atas) --}}
+            <div class="table-responsive d-none d-md-block">
                 <table class="table align-middle">
                     <thead>
                         <tr>
@@ -567,6 +647,102 @@
                         @endforelse
                     </tbody>
                 </table>
+            </div>
+
+            {{-- Kartu Siswa (Mobile) --}}
+            <div class="d-md-none">
+                @forelse($siswas as $item)
+                <div class="siswa-card-mobile">
+                    <div class="d-flex align-items-start justify-content-between gap-2">
+                        <div class="d-flex align-items-center gap-2" style="min-width: 0;">
+                            <div class="siswa-avatar-wrap">
+                                @if($item->foto)
+                                    <img src="{{ asset('storage/' . $item->foto) }}" alt="{{ $item->nama }}">
+                                @else
+                                    <div class="siswa-avatar-fallback bg-primary bg-opacity-10 text-primary">
+                                        {{ strtoupper(substr($item->nama, 0, 1)) }}
+                                    </div>
+                                @endif
+                            </div>
+                            <div style="min-width: 0;">
+                                <div class="fw-bold text-dark siswa-card-name">{{ $item->nama }}</div>
+                                <div class="text-muted siswa-card-meta">
+                                    NIS {{ $item->nis }}@if($item->nisn) &middot; NISN {{ $item->nisn }}@endif
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="dropdown flex-shrink-0">
+                            <button class="dropdown-action-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Menu Aksi">
+                                <i class="fa-solid fa-ellipsis-vertical"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end dropdown-menu-custom">
+                                <li>
+                                    <a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('siswa.show', $item->id) }}">
+                                        <i class="fa-solid fa-eye text-info" style="width: 16px;"></i>
+                                        Lihat Detail
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('siswa.edit', $item->id) }}">
+                                        <i class="fa-solid fa-pen text-primary" style="width: 16px;"></i>
+                                        Edit Data
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('siswa.kartu-pdf', $item->id) }}" target="_blank">
+                                        <i class="fa-solid fa-id-card" style="width: 16px; color: #8b5cf6;"></i>
+                                        Cetak Kartu Ujian
+                                    </a>
+                                </li>
+                                <li>
+                                    <button type="button"
+                                            class="dropdown-item d-flex align-items-center gap-2 btn-reset-modal"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#modalResetPassword"
+                                            data-id="{{ $item->id }}"
+                                            data-nama="{{ $item->nama }}"
+                                            data-nis="{{ $item->nis }}"
+                                            data-url="{{ route('siswa.reset-password', $item->id) }}">
+                                        <i class="fa-solid fa-key text-warning" style="width: 16px;"></i>
+                                        Reset Password
+                                    </button>
+                                </li>
+                                <li><hr class="dropdown-divider my-1"></li>
+                                <li>
+                                    <form action="{{ route('siswa.destroy', $item->id) }}" method="POST" class="form-delete d-inline w-100">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="dropdown-item text-danger d-flex align-items-center gap-2 w-100 border-0 bg-transparent">
+                                            <i class="fa-solid fa-trash text-danger" style="width: 16px;"></i>
+                                            Hapus Siswa
+                                        </button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <div class="d-flex align-items-center justify-content-between">
+                        @if($item->kelasAktif && $item->kelasAktif->kelas)
+                            <span class="badge bg-dark bg-opacity-10 text-dark px-2 py-2 rounded-3 fw-semibold">
+                                {{ optional($item->kelasAktif->kelas->tingkat)->nama_tingkat }} - {{ $item->kelasAktif->kelas->nama_kelas }}
+                            </span>
+                        @else
+                            <span class="badge bg-secondary bg-opacity-10 text-secondary">Belum ada kelas</span>
+                        @endif
+                        <span class="text-muted small fw-semibold">#{{ $loop->iteration + ($siswas->firstItem() - 1) }}</span>
+                    </div>
+                </div>
+                @empty
+                <div class="siswa-card-empty-mobile">
+                    <i class="fa-solid fa-user-graduate fa-2x text-muted mb-3 opacity-50"></i>
+                    <h6 class="fw-bold text-secondary mb-1">Belum ada data siswa</h6>
+                    <small class="text-muted">Silakan sesuaikan filter Anda atau tambahkan siswa baru.</small>
+                </div>
+                @endforelse
             </div>
 
             {{-- Pagination --}}

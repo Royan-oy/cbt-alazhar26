@@ -222,6 +222,60 @@
         gap: 6px;
         margin-top: 8px;
     }
+
+    /* ============================================
+       RESPONSIVE: TABLET & MOBILE (<= 768px)
+       ============================================ */
+    @media (max-width: 768px) {
+        .container-fluid.py-2 { padding-left: 12px; padding-right: 12px; }
+
+        /* Header */
+        .page-header { padding: 22px 18px; border-radius: 20px; }
+        .page-header .d-flex.justify-content-between {
+            flex-direction: column;
+            align-items: stretch !important;
+            gap: 16px;
+        }
+        .page-header h3 { font-size: 19px; margin-bottom: 4px; }
+        .page-header p.small { font-size: 12.5px; }
+        .page-header .badge { font-size: 10px !important; padding: 6px 12px !important; }
+        .btn-back { width: 100%; justify-content: center; }
+
+        /* Content card */
+        .content-card { padding: 4px; border-radius: 20px; }
+        .card-body.p-4 { padding: 16px !important; }
+
+        /* Foto upload */
+        .foto-preview-box { width: 64px; height: 64px; }
+        .form-section .d-flex.align-items-center.gap-3.mb-4 { gap: 12px !important; }
+
+        /* Section header */
+        .form-section { margin-bottom: 22px; }
+        .section-eyebrow { margin-bottom: 14px; }
+        .section-eyebrow .section-title { font-size: 12.5px; }
+        .section-eyebrow .badge-step { width: 20px; height: 20px; font-size: 10px; }
+
+        /* Password box */
+        .password-box { padding: 16px; border-radius: 16px; }
+        .password-box-header { flex-direction: column; align-items: stretch; gap: 10px; margin-bottom: 14px; }
+        .btn-generate {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 11px 16px;
+        }
+        .input-group-custom .btn-icon { width: 44px; }
+
+        /* Tombol aksi bawah */
+        .d-flex.gap-2.mt-4 { flex-direction: column-reverse; }
+        .btn-submit, .btn-cancel {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    }
 </style>
 
 <div class="container-fluid py-2">
