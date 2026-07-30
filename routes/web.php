@@ -190,6 +190,7 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/', [GuruNilaiSiswaController::class, 'index'])->name('index');
             Route::get('/{ujian}', [GuruNilaiSiswaController::class, 'show'])->name('show');
             Route::get('/{ujian}/export-pdf', [GuruNilaiSiswaController::class, 'exportPdf'])->name('export-pdf');
+            Route::get('/{ujian}/export-excel', [GuruNilaiSiswaController::class, 'exportExcel'])->name('export-excel');
             Route::get('/{ujian}/koreksi/{siswa}', [GuruNilaiSiswaController::class, 'koreksi'])->name('koreksi');
             Route::get('/{ujian}/koreksi/{siswa}/export-pdf', [GuruNilaiSiswaController::class, 'exportSiswaPdf'])->name('koreksi.export-pdf');
             Route::post('/{ujian}/koreksi/{siswa}', [GuruNilaiSiswaController::class, 'storeKoreksi'])->name('store-koreksi');

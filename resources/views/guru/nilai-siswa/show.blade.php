@@ -226,6 +226,25 @@
         font-size: 0.85rem;
     }
 
+    .btn-export-excel {
+        background-color: #16a34a;
+        color: #ffffff;
+        padding: 0.5rem 0.9rem;
+        border-radius: 0.5rem;
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        transition: background-color 0.2s, transform 0.15s;
+        white-space: nowrap;
+    }
+    .btn-export-excel:hover {
+        background-color: #15803d;
+        color: #ffffff;
+    }
+
     .btn-export-pdf {
         background-color: #ef4444;
         color: #ffffff;
@@ -520,10 +539,11 @@
             width: 100%;
             display: flex;
             flex-direction: row;
+            flex-wrap: wrap;
             gap: 0.5rem;
         }
         .search-box {
-            flex: 1;
+            flex: 0 0 100%;
             min-width: 0;
         }
         .search-box input {
@@ -535,9 +555,11 @@
             left: 0.65rem;
             font-size: 0.8rem;
         }
-        .btn-export-pdf {
+        .btn-export-pdf, .btn-export-excel {
+            flex: 1;
+            justify-content: center;
             font-size: 0.8rem;
-            padding: 0.45rem 0.75rem;
+            padding: 0.45rem 0.5rem;
         }
         .ticket-tally {
             display: flex;
@@ -614,6 +636,9 @@
                         <i class="fa-solid fa-magnifying-glass"></i>
                         <input type="search" id="searchSiswa" placeholder="Cari nama atau NIS siswa...">
                     </div>
+                    <a href="{{ route('dashboard-guru.nilai-siswa.export-excel', $ujian->id) }}" id="btnExportExcel" class="btn-export-excel">
+                        <i class="fa-solid fa-file-excel"></i> Export Excel
+                    </a>
                     <a href="{{ route('dashboard-guru.nilai-siswa.export-pdf', $ujian->id) }}" id="btnExportPdf" target="_blank" class="btn-export-pdf">
                         <i class="fa-solid fa-file-pdf"></i> Export PDF
                     </a>
@@ -725,18 +750,24 @@ document.addEventListener('DOMContentLoaded', function () {
     const noResult = document.getElementById('noResult');
     const table = document.querySelector('.ledger-table');
     const btnExportPdf = document.getElementById('btnExportPdf');
+    const btnExportExcel = document.getElementById('btnExportExcel');
     const basePdfUrl = "{{ route('dashboard-guru.nilai-siswa.export-pdf', $ujian->id) }}";
+    const baseExcelUrl = "{{ route('dashboard-guru.nilai-siswa.export-excel', $ujian->id) }}";
     let activeKelas = 'all';
 
-    function updatePdfUrl() {
-        if (!btnExportPdf) return;
+    function updateExportUrls() {
         const searchQuery = searchSiswa ? searchSiswa.value.trim() : '';
         const params = new URLSearchParams();
         if (activeKelas !== 'all') params.append('kelas_id', activeKelas);
         if (searchQuery) params.append('search', searchQuery);
 
         const queryString = params.toString();
-        btnExportPdf.href = queryString ? `${basePdfUrl}?${queryString}` : basePdfUrl;
+        if (btnExportPdf) {
+            btnExportPdf.href = queryString ? `${basePdfUrl}?${queryString}` : basePdfUrl;
+        }
+        if (btnExportExcel) {
+            btnExportExcel.href = queryString ? `${baseExcelUrl}?${queryString}` : baseExcelUrl;
+        }
     }
 
     function filterTable() {
@@ -768,7 +799,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }
 
-        updatePdfUrl();
+        updateExportUrls();
     }
 
     railTabs.forEach(tab => {

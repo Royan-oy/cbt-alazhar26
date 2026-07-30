@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Barryvdh\DomPDF\Facade as PDF;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\RekapUjianExport;
 
 class GuruNilaiSiswaController extends Controller
 {
@@ -432,7 +434,85 @@ class GuruNilaiSiswaController extends Controller
         ))->setPaper('a4', 'portrait');
 
         $fileName = 'Hasil_Ujian_' . Str::slug($ujian->nama_ujian) . '.pdf';
-        return $pdf->download($fileName);
+        return $pdf->stream($fileName);
+    }
+
+    /**
+     * Export Excel Rekap Ujian Per Ujian (Mendukung Filter Kelas dan Search Query)
+     */
+    public function exportExcel(Request $request, $id)
+    {
+        $guruMapelIds = $this->checkGuruMapel();
+
+        $ujian = DB::table('ujians')
+            ->join('bank_soals', 'ujians.bank_soal_id', '=', 'bank_soals.id')
+            ->join('mata_pelajarans', 'bank_soals.mata_pelajaran_id', '=', 'mata_pelajarans.id')
+            ->leftJoin('jenis_ujians', 'ujians.jenis_ujian_id', '=', 'jenis_ujians.id')
+            ->leftJoin('tahun_ajarans', 'ujians.tahun_ajaran_id', '=', 'tahun_ajarans.id')
+            ->where('ujians.id', $id)
+            ->whereIn('bank_soals.guru_mapel_id', $guruMapelIds)
+            ->select(
+                'ujians.*',
+                'mata_pelajarans.nama_mapel',
+                'jenis_ujians.nama as nama_jenis_ujian',
+                'tahun_ajarans.nama_tahun',
+                'bank_soals.kkm'
+            )
+            ->first();
+
+        if (!$ujian) {
+            abort(404, 'Data ujian tidak ditemukan.');
+        }
+
+        $query = DB::table('nilais')
+            ->join('siswas', 'nilais.siswa_id', '=', 'siswas.id')
+            ->leftJoin('siswa_kelas', function($join) use ($ujian) {
+                $join->on('siswas.id', '=', 'siswa_kelas.siswa_id')
+                     ->where('siswa_kelas.tahun_ajaran_id', '=', $ujian->tahun_ajaran_id);
+            })
+            ->leftJoin('kelas', 'siswa_kelas.kelas_id', '=', 'kelas.id')
+            ->where('nilais.ujian_id', $id)
+            ->select(
+                'siswas.id as siswa_id',
+                'siswas.nama as nama_siswa',
+                'siswas.nis',
+                'kelas.id as kelas_id',
+                'kelas.nama_kelas',
+                'nilais.id as nilai_id',
+                'nilais.status',
+                'nilais.nilai_akhir'
+            );
+
+        $kelasFilterName = null;
+        if ($request->filled('kelas_id') && $request->kelas_id !== 'all') {
+            $query->where('kelas.id', $request->kelas_id);
+            $kelasFilterName = DB::table('kelas')->where('id', $request->kelas_id)->value('nama_kelas');
+        }
+
+        $searchQuery = $request->input('search');
+        if ($searchQuery) {
+            $query->where(function($q) use ($searchQuery) {
+                $q->where('siswas.nama', 'like', "%{$searchQuery}%")
+                  ->orWhere('siswas.nis', 'like', "%{$searchQuery}%")
+                  ->orWhere('kelas.nama_kelas', 'like', "%{$searchQuery}%");
+            });
+        }
+
+        $pesertas = $query->orderBy('kelas.nama_kelas', 'asc')
+            ->orderBy('siswas.nama', 'asc')
+            ->get();
+
+        $scores = $pesertas->pluck('nilai_akhir');
+        $avgScore = $scores->isNotEmpty() ? $scores->avg() : 0;
+        $maxScore = $scores->isNotEmpty() ? $scores->max() : 0;
+        $minScore = $scores->isNotEmpty() ? $scores->min() : 0;
+
+        $fileName = 'Hasil_Ujian_' . Str::slug($ujian->nama_ujian) . '.xlsx';
+
+        return Excel::download(new RekapUjianExport(
+            $ujian, $pesertas, $kelasFilterName, $searchQuery,
+            $avgScore, $maxScore, $minScore
+        ), $fileName);
     }
 
     /**
