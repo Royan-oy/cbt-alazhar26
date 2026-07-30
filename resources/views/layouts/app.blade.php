@@ -74,6 +74,7 @@
         .sidebar .nav-link.active i { color: var(--sb-text-active); }
         .style-header .shadow-hover-danger:hover { background-color: #fff1f2; border-radius: 10px; }
     </style>
+    @stack('css')
 </head>
 <body>
 
@@ -103,5 +104,6 @@
     </script>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    @stack('js')
 </body>
 </html>
