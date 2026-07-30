@@ -8,39 +8,71 @@
 
 @section('content')
 
-<div class="container-fluid px-0">
+@php
+    $jamSekarang = now()->format('H');
+    $sapaanWaktu = $jamSekarang < 11 ? 'Selamat Pagi' : ($jamSekarang < 15 ? 'Selamat Siang' : ($jamSekarang < 18 ? 'Selamat Sore' : 'Selamat Malam'));
+    $namaUser = Auth::user()->nama ?? 'Pengguna';
 
-    {{-- Header Sambutan (Berlaku untuk semua role) --}}
+    // Inisial avatar
+    $kataNama = preg_split('/\s+/', trim($namaUser));
+    $inisialUser = strtoupper(substr($kataNama[0] ?? 'U', 0, 1) . substr($kataNama[1] ?? '', 0, 1));
+
+    // Progres semester (opsional)
+    $persenSemester = null;
+    if (isset($active_tahun_ajaran) && !empty($active_tahun_ajaran->tanggal_mulai) && !empty($active_tahun_ajaran->tanggal_selesai)) {
+        try {
+            $mulaiTa   = \Carbon\Carbon::parse($active_tahun_ajaran->tanggal_mulai);
+            $selesaiTa = \Carbon\Carbon::parse($active_tahun_ajaran->tanggal_selesai);
+            $totalHariTa = max($mulaiTa->diffInDays($selesaiTa), 1);
+            $hariBerjalan = min(max($mulaiTa->diffInDays(now(), false), 0), $totalHariTa);
+            $persenSemester = (int) round(($hariBerjalan / $totalHariTa) * 100);
+        } catch (\Throwable $e) {
+            $persenSemester = null;
+        }
+    }
+@endphp
+
+<div class="container-fluid px-0 py-2">
+
+    {{-- Header Sambutan (Berlaku untuk Super Admin, Admin Jenjang, & Siswa) --}}
     <div class="row mb-4">
         <div class="col-12">
             <div class="page-header">
-                <span class="page-header-badge">
-                    <i class="fa-solid fa-circle-check"></i>
-                    Portal Akademik Aktif
-                </span>
+                <div class="page-header-top">
+                    <div>
+                        <h1>{{ $sapaanWaktu }}, {{ $namaUser }} 👋</h1>
 
-                <h1 class="fw-bold text-white mb-2" style="font-size: 26px;">
-                    {{ $sapaanWaktu = now()->format('H') < 11 ? 'Selamat Pagi' : (now()->format('H') < 15 ? 'Selamat Siang' : (now()->format('H') < 18 ? 'Selamat Sore' : 'Selamat Malam')) }},
-                    {{ Auth::user()->nama }} 👋
-                </h1>
+                        <p class="page-header-sub">
+                            Anda login sebagai
+                            <strong class="hl-cyan">
+                                @switch(Auth::user()->role)
+                                    @case('super_admin') Super Administrator @break
+                                    @case('admin_jenjang') Administrator Jenjang @break
+                                    @case('siswa') Siswa @break
+                                    @default Pengguna
+                                @endswitch
+                            </strong>
+                            di <strong class="hl-white">CBT Smart Online</strong> Sekolah Islam Al Azhar Pekalongan.
+                        </p>
 
-                <p class="mb-2" style="font-size:14px;color:#cbd5e1;line-height:1.8;">
-                    Anda login sebagai
-                    <strong class="text-info">
-                        @switch(Auth::user()->role)
-                            @case('super_admin') Super Administrator @break
-                            @case('admin_jenjang') Administrator Jenjang @break
-                            @case('siswa') Siswa @break
-                            @default Pengguna
-                        @endswitch
-                    </strong>
-                    di <strong class="text-white">CBT Smart Online</strong> Sekolah Islam Al Azhar Pekalongan.
-                </p>
+                        <div class="page-header-meta">
+                            <i class="fa-regular fa-calendar"></i>
+                            {{ now()->translatedFormat('l, d F Y') }}
+                        </div>
 
-                <div class="page-header-meta">
-                    <i class="fa-regular fa-calendar"></i>
-                    {{ now()->translatedFormat('l, d F Y') }}
-                </div>  
+                        @if(!is_null($persenSemester))
+                            <div class="semester-progress">
+                                <div class="semester-progress-label">
+                                    <span>Progres Tahun Ajaran {{ $active_tahun_ajaran->nama_tahun ?? '' }}</span>
+                                    <b>{{ $persenSemester }}%</b>
+                                </div>
+                                <div class="semester-progress-track">
+                                    <div class="semester-progress-fill" style="width: {{ $persenSemester }}%;"></div>
+                                </div>
+                            </div>
+                        @endif
+                    </div>
+                </div>
             </div>
         </div>
     </div>
