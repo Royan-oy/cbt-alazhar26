@@ -91,6 +91,23 @@
         box-shadow: 0 2px 6px rgba(0,0,0,0.05);
     }
 
+    .user-avatar{
+        width:40px;
+        height:40px;
+        border-radius:12px;
+        object-fit:cover;
+        object-position:center;
+        border:2px solid #fff;
+        box-shadow:
+            0 0 0 2px rgba(14,165,233,.15),
+            0 6px 18px rgba(15,23,42,.12);
+        transition:.25s;
+    }
+
+    .user-avatar:hover{
+        transform:scale(1.05);
+    }
+
     .btn-logout-premium {
         background-color: transparent;
         color: #64748b;
@@ -203,9 +220,34 @@
                             {{ str_replace('_', ' ', Auth::user()->role) }}
                         </span>
                     </div>
-                    <div class="user-avatar-placeholder">
-                        {{ strtoupper(substr(Auth::user()->nama, 0, 2)) }}
-                    </div>
+                    @php
+                    $user = Auth::user();
+                    $foto = null;
+
+                    if($user->role == 'guru' && optional($user->guru)->foto){
+                        $foto = asset('storage/'.$user->guru->foto);
+                    }
+
+                    if($user->role == 'siswa' && optional($user->siswa)->foto){
+                        $foto = asset('storage/'.$user->siswa->foto);
+                    }
+                    @endphp
+
+                    @if($foto)
+                        <img
+                            src="{{ $foto }}"
+                            alt="{{ $user->nama }}"
+                            class="user-avatar"
+                            onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+
+                        <div class="user-avatar-placeholder" style="display:none;">
+                            {{ strtoupper(substr($user->nama,0,2)) }}
+                        </div>
+                    @else
+                        <div class="user-avatar-placeholder">
+                            {{ strtoupper(substr($user->nama,0,2)) }}
+                        </div>
+                    @endif
                 </div>
                 
                 <div class="vr bg-secondary opacity-20 d-none d-sm-block" style="height: 24px;"></div>

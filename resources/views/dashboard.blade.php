@@ -321,11 +321,20 @@
         overflow: hidden;
     }
 
-    .urgent-card::after {
-        content: '';
-        position: absolute;
-        inset: 0;
-        background: radial-gradient(circle at top right, rgba(255,255,255,.15), transparent 60%);
+    .urgent-card::after{
+        content:'';
+        position:absolute;
+        inset:0;
+        background:radial-gradient(circle at top right,
+            rgba(255,255,255,.15),
+            transparent 60%);
+        pointer-events:none;
+        z-index:0;
+    }
+
+    .urgent-card > *{
+        position:relative;
+        z-index:1;
     }
 
     .urgent-label {
@@ -770,7 +779,7 @@
     @media (max-width:768px){
 
         .btn-exam-modern{
-            width:100%;
+            width:50%;
             min-width:unset;
             height:34px;
             font-size:11px;
@@ -975,9 +984,10 @@
                         </div>
                     </div>
 
-                    <a href="{{ route('dashboard-siswa.ujian.kerja', $ujianBerjalan->id) }}" class="btn btn-light fw-bold px-4 py-2 rounded-3">
-                        <i class="fa-solid fa-arrow-right me-2"></i>Lanjutkan Sekarang
-
+                    <a href="{{ route('dashboard-siswa.ujian.kerja', ['ujian' => $ujianBerjalan->id]) }}"
+                    class="btn btn-light fw-bold px-4 py-2 rounded-3">
+                        <i class="fa-solid fa-arrow-right me-2"></i>
+                        Lanjutkan Sekarang
                     </a>
                 </div>
             </div>

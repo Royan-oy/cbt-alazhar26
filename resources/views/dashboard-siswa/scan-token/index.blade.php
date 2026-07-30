@@ -256,6 +256,211 @@
         color: #0284c7;
         border: 1px solid rgba(14, 165, 233, 0.2);
     }
+
+    /* =========================================================
+    MOBILE RESPONSIVE
+    ========================================================= */
+    @media (max-width: 768px){
+
+        .token-container{
+            min-height:auto;
+            padding:14px;
+            align-items:flex-start;
+        }
+
+        .token-card{
+            border-radius:18px;
+        }
+
+        .token-header{
+            padding:24px 18px;
+        }
+
+        .token-header h3{
+            font-size:20px;
+            margin-bottom:6px;
+        }
+
+        .token-header p{
+            font-size:12px !important;
+            line-height:1.6;
+        }
+
+        .token-icon-wrap{
+            width:56px;
+            height:56px;
+            border-radius:16px;
+            margin-bottom:14px;
+        }
+
+        .token-icon-wrap i{
+            font-size:22px;
+        }
+
+        .token-body{
+            padding:22px 18px;
+        }
+
+        .alert{
+            padding:12px 14px;
+            font-size:13px;
+            margin-bottom:18px !important;
+        }
+
+        .token-input{
+            font-size:22px !important;
+            letter-spacing:5px !important;
+            padding:16px !important;
+            border-radius:14px !important;
+        }
+
+        .token-input::placeholder{
+            font-size:15px;
+            letter-spacing:2px;
+        }
+
+        .btn-submit-token{
+            height:50px;
+            padding:0 18px;
+            margin-top:18px;
+            font-size:14px;
+            border-radius:14px;
+        }
+
+        /* ================= MODAL ================= */
+
+        .confirm-modal-overlay{
+            padding:14px;
+        }
+
+        .confirm-modal-box{
+            max-width:100%;
+            border-radius:18px;
+        }
+
+        .modal-top-bar{
+            padding:18px 16px;
+        }
+
+        .modal-top-bar h5{
+            font-size:18px;
+        }
+
+        .modal-top-bar p{
+            font-size:12px !important;
+        }
+
+        .modal-check-icon{
+            width:38px;
+            height:38px;
+            margin-bottom:8px;
+        }
+
+        .modal-body-content{
+            padding:16px;
+        }
+
+        .ujian-type-badge{
+            font-size:10px;
+            padding:5px 10px;
+        }
+
+        .info-row{
+            gap:10px;
+            padding:10px 0;
+        }
+
+        .info-icon{
+            width:32px;
+            height:32px;
+            border-radius:9px;
+            font-size:12px;
+        }
+
+        .info-label{
+            font-size:9px;
+        }
+
+        .info-value{
+            font-size:12px;
+            line-height:1.5;
+            word-break:break-word;
+        }
+
+        .btn-batal,
+        .btn-yakin{
+            height:44px;
+            font-size:13px;
+            border-radius:10px;
+        }
+
+    }
+
+    /* =========================================================
+    EXTRA SMALL DEVICE
+    ========================================================= */
+
+    @media (max-width:480px){
+
+        .token-container{
+            padding:10px;
+        }
+
+        .token-card{
+            border-radius:16px;
+        }
+
+        .token-header{
+            padding:20px 16px;
+        }
+
+        .token-header h3{
+            font-size:18px;
+        }
+
+        .token-header p{
+            font-size:11px !important;
+        }
+
+        .token-icon-wrap{
+            width:50px;
+            height:50px;
+            border-radius:14px;
+        }
+
+        .token-icon-wrap i{
+            font-size:20px;
+        }
+
+        .token-body{
+            padding:18px 16px;
+        }
+
+        .token-input{
+            font-size:20px !important;
+            letter-spacing:4px !important;
+            padding:14px !important;
+        }
+
+        .btn-submit-token{
+            height:46px;
+            font-size:13px;
+        }
+
+        .modal-body-content{
+            padding:14px;
+        }
+
+        .info-value{
+            font-size:11.5px;
+        }
+
+        .btn-batal,
+        .btn-yakin{
+            height:42px;
+            font-size:12px;
+        }
+    }
 </style>
 
 <div class="container-fluid">
