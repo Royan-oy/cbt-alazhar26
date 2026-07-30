@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Siswa;
+use App\Models\Guru;
 
 class PengaturanAkunController extends Controller
 {
@@ -19,6 +20,7 @@ class PengaturanAkunController extends Controller
     {
         $user = Auth::user();
         $siswa = null;
+        $guru = null;
         $riwayatKelas = collect();
 
         if ($user->role === 'siswa') {
@@ -33,9 +35,20 @@ class PengaturanAkunController extends Controller
                     return optional($sk->tahunAjaran)->id ?? $sk->id;
                 })->values();
             }
+        } else {
+            if ($user->guru) {
+                $guru = Guru::with([
+                    'jenjang',
+                    'waliKelas.kelas',
+                    'waliKelas.tahunAjaran',
+                    'guruMapels.mataPelajaran',
+                    'guruMapels.kelas',
+                    'guruMapels.tahunAjaran'
+                ])->where('user_id', $user->id)->first();
+            }
         }
 
-        return view('pengaturan-akun.index', compact('user', 'siswa', 'riwayatKelas'));
+        return view('pengaturan-akun.index', compact('user', 'siswa', 'guru', 'riwayatKelas'));
     }
 
     /**

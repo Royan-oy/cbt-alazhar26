@@ -98,6 +98,16 @@
                             <div class="info-value">{{ $ujian->bankSoal->mataPelajaran->nama_mapel  }}</div>
                         </div>
                     </div>
+
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="icon-box bg-soft-primary text-primary-custom me-3">
+                            <i class="fa-solid fa-user-tie"></i>
+                        </div>
+                        <div>
+                            <div class="info-label">Guru Mapel</div>
+                            <div class="info-value">{{ optional(optional(optional($ujian->bankSoal)->guruMapel)->guru)->nama ?? '-' }}</div>
+                        </div>
+                    </div>
                     
                     <div class="d-flex align-items-center">
                         <div class="icon-box bg-soft-warning text-warning-custom me-3">

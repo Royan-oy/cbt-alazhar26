@@ -6,22 +6,44 @@
     <title>@yield('title', 'Sedang Ujian - CBT Online Sekolah')</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@6..72,500;6..72,600;6..72,700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
     <style>
+        /* =========================================================
+        DESIGN TOKENS — Tema Dark Slate & Sky Blue (Dashboard Style)
+        ========================================================= */
+        :root {
+            --primary-dark: #0f172a;
+            --secondary-dark: #1e293b;
+            --accent-blue: #0ea5e9;
+            --accent-blue-light: #38bdf8;
+            --accent-blue-dark: #0284c7;
+            --surface-white: #ffffff;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --paper-bg: #f8fafc;
+            --danger: #ef4444;
+            --danger-soft: #fef2f2;
+            --success: #10b981;
+        }
+
         html, body {
-            background-color: #f8fafc;
+            background-color: var(--paper-bg);
             overflow-x: hidden;
             min-height: 100vh;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            color: #1e293b;
         }
 
         /* =========================================================
-        HEADER DARURAT — STICKY, selalu terlihat saat discroll,
-        ikut alur dokumen sehingga tidak pernah menutupi konten
-        ========================================================= */
+           HEADER DARURAT — FIXED, selalu terlihat saat discroll
+           ========================================================= */
         .exam-emergency-header {
-            background-color: #ffffff;
-            border-bottom: 1px solid #e2e8f0;
-            padding: 10px 20px;
+            background: linear-gradient(135deg, #ffffff 0%, #f0f9ff 100%);
+            border-bottom: 1px solid #bae6fd;
+            padding: 11px 22px;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -32,7 +54,7 @@
             right: 0;
             width: 100%;
             z-index: 1030;
-            box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+            box-shadow: 0 4px 15px rgba(14, 165, 233, 0.08);
         }
 
         .exam-content-wrapper main {
@@ -43,8 +65,7 @@
             display: flex;
             align-items: center;
             gap: 12px;
-            min-width: 0;
-            flex: 1 1 auto;
+            min-width: 0; /* supaya teks bisa ellipsis di flex container */
         }
 
         .exam-header-logos {
@@ -52,11 +73,13 @@
             align-items: center;
             gap: 8px;
             flex-shrink: 0;
+            padding-right: 12px;
+            border-right: 1px solid #e2e8f0;
         }
 
         .exam-logo {
-            height: 38px;
-            width: 38px;
+            height: 36px;
+            width: 36px;
             object-fit: contain;
             border-radius: 8px;
             flex-shrink: 0;
@@ -75,49 +98,29 @@
             gap: 6px;
             max-width: 100%;
             width: fit-content;
-            background: #eff6ff;
-            color: #1d4ed8;
-            border: 1px solid #bfdbfe;
+            background: #ffffff;
+            color: #0284c7;
+            border: 1px solid #bae6fd;
             padding: 2px 10px;
             border-radius: 999px;
-            font-size: 10.5px;
+            font-size: 10px;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.3px;
             margin-bottom: 3px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
         }
 
-        .exam-header-badge i { font-size: 10px; flex-shrink: 0; }
-
-        .exam-header-badge .badge-meta {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-        }
+        .exam-header-badge i { font-size: 10px; }
 
         .exam-header-dot {
             opacity: 0.55;
             font-size: 8px;
         }
 
-        .exam-header-active-tag {
-            background: #dcfce7;
-            color: #16a34a;
-            font-size: 8.5px;
-            font-weight: 800;
-            padding: 1px 6px;
-            border-radius: 999px;
-            margin-left: 2px;
-            text-transform: uppercase;
-        }
-
         .exam-user-name {
-            font-size: 13.5px;
-            font-weight: 700;
-            color: #1e293b;
+            font-size: 14px;
+            font-weight: 800;
+            color: #0f172a;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -129,13 +132,13 @@
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            color: #94a3b8;
+            color: #64748b;
         }
 
         .btn-logout-emergency {
-            background-color: transparent;
-            color: #64748b;
-            border: 1px solid #e2e8f0;
+            background-color: #fef2f2;
+            color: #dc2626;
+            border: 1px solid #fecaca;
             padding: 8px 14px;
             border-radius: 10px;
             font-size: 12px;
@@ -148,9 +151,10 @@
         }
 
         .btn-logout-emergency:hover {
-            background-color: #fff1f2;
-            color: #f43f5e;
-            border-color: #ffe4e6;
+            background-color: #ef4444;
+            color: #ffffff;
+            border-color: #ef4444;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25);
         }
 
         /* =========================================================
@@ -211,13 +215,6 @@
 
             .exam-header-badge {
                 font-size: 8.5px;
-                padding: 1px 7px;
-            }
-
-            /* Sembunyikan info TA/semester supaya badge tidak wrap
-            ke 2 baris dan header tetap ringkas */
-            .exam-header-badge .badge-meta {
-                display: none;
             }
 
             .exam-header-info {
@@ -225,14 +222,10 @@
             }
 
             .exam-user-name {
-                font-size: 11px;
+                font-size: 11.5px;
             }
 
-            .exam-user-role {
-                font-size: 8px;
-            }
-
-            /* Sembunyikan teks "Keluar Darurat", sisakan ikon saja */
+            /* Sembunyikan teks "Keluar Darurat", sisakan ikon saja supaya muat */
             .btn-logout-text {
                 display: none;
             }
@@ -248,7 +241,9 @@
         #fullscreenGate {
             position: fixed;
             inset: 0;
-            background: linear-gradient(135deg, #0f172a, #1e293b);
+            background:
+                radial-gradient(circle at 15% 12%, rgba(14, 165, 233, 0.15), transparent 50%),
+                linear-gradient(135deg, var(--primary-dark), var(--secondary-dark));
             z-index: 2000;
             display: flex;
             align-items: center;
@@ -258,44 +253,63 @@
             padding: 24px;
         }
 
+        #fullscreenGate .gate-kicker {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 2.5px;
+            text-transform: uppercase;
+            color: var(--accent-blue-light);
+            margin-bottom: 18px;
+        }
+
         #fullscreenGate .gate-icon {
-            width: 84px;
-            height: 84px;
-            border-radius: 20px;
-            background: rgba(56, 189, 248, 0.12);
+            width: 82px;
+            height: 82px;
+            border-radius: 50%;
+            background: rgba(14, 165, 233, 0.12);
+            border: 1px solid rgba(56, 189, 248, 0.3);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 34px;
-            color: #38bdf8;
-            margin-bottom: 24px;
+            font-size: 30px;
+            color: var(--accent-blue-light);
+            margin-bottom: 26px;
+            box-shadow: 0 0 25px rgba(14, 165, 233, 0.2);
         }
 
         #fullscreenGate h4 {
             color: #ffffff;
             font-weight: 700;
-            margin-bottom: 10px;
+            font-size: 24px;
+            margin-bottom: 12px;
         }
 
         #fullscreenGate p {
             color: #94a3b8;
             font-size: 14px;
             max-width: 420px;
-            margin-bottom: 28px;
+            margin-bottom: 30px;
+            line-height: 1.6;
         }
 
         #btnStartExam {
             background: linear-gradient(135deg, #0ea5e9, #0284c7);
             color: #ffffff;
             border: none;
-            padding: 14px 36px;
-            border-radius: 14px;
+            padding: 14px 38px;
+            border-radius: 12px;
             font-weight: 700;
-            font-size: 15px;
+            font-size: 14.5px;
+            letter-spacing: 0.2px;
             box-shadow: 0 10px 25px -5px rgba(14, 165, 233, 0.4);
+            transition: filter 0.2s ease, transform 0.2s ease;
         }
 
-        #btnStartExam:hover { filter: brightness(1.08); }
+        #btnStartExam:hover {
+            filter: brightness(1.08);
+            transform: translateY(-2px);
+            box-shadow: 0 14px 30px -5px rgba(14, 165, 233, 0.5);
+        }
 
         .exam-content-wrapper {
             display: none; /* baru ditampilkan setelah fullscreen aktif */
@@ -308,6 +322,7 @@
     {{-- GERBANG: WAJIB FULLSCREEN DULU SEBELUM LIHAT SOAL --}}
     {{-- ================================================= --}}
     <div id="fullscreenGate">
+        <span class="gate-kicker">CBT Online Sekolah</span>
         <div class="gate-icon">
             <i class="fa-solid fa-expand"></i>
         </div>
@@ -593,6 +608,47 @@
             e.preventDefault();
             e.returnValue = "";
         });
+
+        /* =========================================================
+        DETEKSI BACK-FORWARD CACHE (BFCache / SWIPE BACK HISTORY)
+        ========================================================= */
+        window.addEventListener("pageshow", function (event) {
+            if (event.persisted || (window.performance && window.performance.navigation && window.performance.navigation.type === 2)) {
+                window.location.reload();
+            }
+        });
+    </script>
+
+    <script>
+        /* =========================================================
+        SINKRONISASI TINGGI HEADER FIXED → padding-top konten
+        Dijalankan setiap kali ukuran header berubah (resize,
+        rotate, teks wrap beda, dsb) supaya konten TIDAK PERNAH
+        ketutupan walau tinggi header tidak bisa ditebak pasti.
+        ========================================================= */
+        (function () {
+            const header = document.querySelector('.exam-emergency-header');
+            const main = document.querySelector('.exam-content-wrapper main');
+
+            if (!header || !main) return;
+
+            function syncHeaderHeight() {
+                const h = header.offsetHeight;
+                main.style.paddingTop = h + 'px';
+            }
+
+            // Jalankan saat load & setiap header berubah ukuran
+            if (window.ResizeObserver) {
+                new ResizeObserver(syncHeaderHeight).observe(header);
+            } else {
+                // fallback browser lama
+                window.addEventListener('resize', syncHeaderHeight);
+            }
+
+            window.addEventListener('load', syncHeaderHeight);
+            document.addEventListener('DOMContentLoaded', syncHeaderHeight);
+            syncHeaderHeight();
+        })();
     </script>
 
     <script>

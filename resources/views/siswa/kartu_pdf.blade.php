@@ -224,7 +224,7 @@
                                     @if($siswa->foto && file_exists(public_path('storage/' . $siswa->foto)))
                                         <img src="{{ public_path('storage/' . $siswa->foto) }}" alt="Foto">
                                     @else
-                                        <div class="photo-placeholder">FOTO</div>
+                                        <img src="data:image/svg+xml;base64,{{ base64_encode('<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 125\'><rect width=\'100\' height=\'125\' fill=\'#94a3b8\'/><circle cx=\'50\' cy=\'44\' r=\'26\' fill=\'#ffffff\'/><path d=\'M0,125 C0,72 100,72 100,125 Z\' fill=\'#ffffff\'/></svg>') }}" alt="Foto" style="width:100%;height:100%;object-fit:cover;">
                                     @endif
                                 </div>
                             </td>

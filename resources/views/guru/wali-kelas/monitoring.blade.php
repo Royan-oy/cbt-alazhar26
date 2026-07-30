@@ -238,7 +238,7 @@
                         <th class="py-3 px-4 text-center" width="15%">Pelanggaran</th>
                         <th class="py-3 px-4 text-center" width="15%">Mulai</th>
                         <th class="py-3 px-4 text-center" width="15%">Selesai</th>
-                        <th class="py-3 px-4 text-center" width="5%">Aksi</th>
+                        {{-- <th class="py-3 px-4 text-center" width="5%">Aksi</th> --}}
                     </tr>
                 </thead>
                 <tbody id="monitoring-container" style="border-top: none;">

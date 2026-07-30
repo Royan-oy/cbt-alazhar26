@@ -974,11 +974,10 @@
                             <small class="text-white-50">Batas waktu {{ \Carbon\Carbon::parse($ujianBerjalan->waktu_selesai)->format('H:i') }} WIB </small>
                         </div>
                     </div>
-                    <a href="{{ route('dashboard-siswa.ujian.mulai',$ujianBerjalan->id) }}"
-                    class="btn btn-light fw-bold px-4 py-2 rounded-3 position-relative"
-                    style="z-index:999; pointer-events:auto;">
-                        <i class="fa-solid fa-arrow-right me-2"></i>
-                        Lanjutkan Sekarang
+
+                    <a href="{{ route('dashboard-siswa.ujian.kerja', $ujianBerjalan->id) }}" class="btn btn-light fw-bold px-4 py-2 rounded-3">
+                        <i class="fa-solid fa-arrow-right me-2"></i>Lanjutkan Sekarang
+
                     </a>
                 </div>
             </div>
@@ -1290,7 +1289,11 @@
                             <span>Profil Saya</span>
                         </a>
                     @endif
-
+                    {{-- <div class="col-12 col-md-3 ms-md-auto d-flex align-items-center justify-content-md-end mt-2 mt-md-0">
+                        <span class="secure-badge">
+                            <i class="fa-solid fa-shield-halved"></i> Sesi Enkripsi Terlindungi
+                        </span>
+                    </div> --}}
                 </div>
             </div>
         </div>

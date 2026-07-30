@@ -301,6 +301,27 @@
 
 <div class="container-fluid px-4 py-2">
 
+    {{-- ALERT BOOTSTRAP --}}
+    @if(session('error'))
+        <div class="alert alert-danger alert-dismissible fade show rounded-4 border-0 shadow-sm mb-4" role="alert" style="background-color: #fef2f2; color: #991b1b; border: 1px solid #fecaca !important;">
+            <div class="d-flex align-items-center">
+                <i class="fa-solid fa-circle-xmark me-2 fs-5 text-danger"></i>
+                <div class="fw-semibold">{{ session('error') }}</div>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
+
+    @if(session('warning'))
+        <div class="alert alert-warning alert-dismissible fade show rounded-4 border-0 shadow-sm mb-4" role="alert" style="background-color: #fffbeb; color: #92400e; border: 1px solid #fde68a !important;">
+            <div class="d-flex align-items-center">
+                <i class="fa-solid fa-triangle-exclamation me-2 fs-5 text-warning"></i>
+                <div class="fw-semibold">{{ session('warning') }}</div>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
+
     {{-- HEADER --}}
     <div class="cbt-header shadow-sm">
         <div class="d-flex align-items-center">
@@ -653,8 +674,18 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     }
 
-    // Initialize with default active tab (hari_ini)
-    applyFilter('hari_ini');
+    // Initialize with default active tab (hari_ini) or from url query param
+    const urlParams = new URLSearchParams(window.location.search);
+    const initialFilter = urlParams.get('filter') || 'hari_ini';
+    
+    const targetBtn = Array.from(filterBtns).find(btn => btn.dataset.filter === initialFilter);
+    if (targetBtn) {
+        filterBtns.forEach(b => b.classList.remove('active'));
+        targetBtn.classList.add('active');
+        applyFilter(initialFilter);
+    } else {
+        applyFilter('hari_ini');
+    }
 
     filterBtns.forEach(btn => {
         btn.addEventListener('click', function() {
