@@ -187,14 +187,16 @@ class GuruNilaiSiswaController extends Controller
             ->orderBy('soals.urutan', 'asc')
             ->get();
 
-        // Ambil soal Pilihan Ganda dan jawaban siswa
+        // Ambil soal Pilihan Ganda, PG Kompleks, Benar/Salah, & Mencocokkan (Koreksi Otomatis)
         $jawabans_pg = DB::table('jawaban_siswas')
             ->join('soals', 'jawaban_siswas.soal_id', '=', 'soals.id')
             ->where('jawaban_siswas.nilai_id', $nilai->id)
-            ->where('soals.jenis_soal', 'pilihan_ganda')
+            ->whereIn('soals.jenis_soal', ['pilihan_ganda', 'pilihan_ganda_kompleks', 'benar_salah', 'mencocokkan'])
             ->select(
                 'jawaban_siswas.id as jawaban_id',
                 'jawaban_siswas.pilihan_jawaban_id',
+                'jawaban_siswas.jawaban_text',
+                'jawaban_siswas.jawaban_json',
                 'jawaban_siswas.nilai as nilai_jawaban',
                 'jawaban_siswas.is_benar',
                 'soals.id as soal_id',
@@ -207,7 +209,14 @@ class GuruNilaiSiswaController extends Controller
             ->orderBy('soals.urutan', 'asc')
             ->get();
 
-        // Ambil opsi pilihan ganda untuk soal-soal PG tersebut
+        // Decode JSON jawaban_json
+        foreach ($jawabans_pg as $jp) {
+            if ($jp->jawaban_json) {
+                $jp->jawaban_json = is_array($jp->jawaban_json) ? $jp->jawaban_json : json_decode($jp->jawaban_json, true);
+            }
+        }
+
+        // Ambil opsi pilihan_jawabans untuk semua soal koreksi otomatis
         $soal_pg_ids = $jawabans_pg->pluck('soal_id');
         $opsi_pg = DB::table('pilihan_jawabans')
             ->whereIn('soal_id', $soal_pg_ids)
@@ -215,7 +224,7 @@ class GuruNilaiSiswaController extends Controller
             ->get()
             ->groupBy('soal_id');
 
-        // Hitung total skor PG dan jumlah benar PG
+        // Hitung total skor otomatis dan jumlah benar PG/Otomatis
         $skor_pg = $jawabans_pg->sum('nilai_jawaban');
         $benar_pg = $jawabans_pg->where('is_benar', true)->count();
         $total_soal_pg = $jawabans_pg->count();
@@ -229,17 +238,18 @@ class GuruNilaiSiswaController extends Controller
             ->where('nilai_id', $nilai->id)
             ->sum('nilai');
 
+        $potongan = (float) ($nilai->potongan_pelanggaran ?? 0);
         $nilai_sementara = 0;
         if ($totalBobot > 0) {
-            $nilai_sementara = round(($totalSkorSiswa / $totalBobot) * 100, 2);
+            $nilaiKotor = ($totalSkorSiswa / $totalBobot) * 100;
+            $nilai_sementara = max(0, round($nilaiKotor - $potongan, 2));
         }
 
         // Jika di DB nilai_akhir masih 0 tetapi siswa sudah memiliki nilai sementara, update nilai_akhir
-        if ($nilai->nilai_akhir == 0 && $nilai_sementara > 0) {
+        if ($nilai->nilai_akhir == 0 && ($nilai_sementara > 0 || $potongan > 0)) {
             DB::table('nilais')->where('id', $nilai->id)->update(['nilai_akhir' => $nilai_sementara]);
             $nilai->nilai_akhir = $nilai_sementara;
         }
-
 
         return view('guru.nilai-siswa.koreksi', compact(
             'ujian', 'siswa', 'nilai', 'jawabans', 'jawabans_pg', 'opsi_pg', 'skor_pg', 'benar_pg', 'total_soal_pg', 'nilai_sementara'
@@ -264,6 +274,13 @@ class GuruNilaiSiswaController extends Controller
         if (!$ujian) abort(403);
 
         $nilai = Nilai::where('ujian_id', $ujian_id)->where('siswa_id', $siswa_id)->firstOrFail();
+
+        // Simpan potongan nilai pelanggaran jika dikirimkan
+        if ($request->has('potongan_pelanggaran')) {
+            $nilai->update([
+                'potongan_pelanggaran' => max(0, (float) $request->input('potongan_pelanggaran'))
+            ]);
+        }
 
         $koreksiData = $request->input('koreksi', []); // format: [jawaban_id => ['nilai' => X, 'is_benar' => 1/0]]
 
@@ -310,9 +327,11 @@ class GuruNilaiSiswaController extends Controller
                 ->whereIn('soals.jenis_soal', ['essay', 'isian'])
                 ->sum('jawaban_siswas.nilai');
 
+            $potongan = (float) ($nilai->potongan_pelanggaran ?? 0);
             $nilaiAkhir = 0;
             if ($totalBobot > 0) {
-                $nilaiAkhir = ($totalSkorSiswa / $totalBobot) * 100;
+                $nilaiKotor = ($totalSkorSiswa / $totalBobot) * 100;
+                $nilaiAkhir = max(0, round($nilaiKotor - $potongan, 2));
             }
 
             // Cek apakah masih ada jawaban essay/isian yang belum dinilai (is_benar null)

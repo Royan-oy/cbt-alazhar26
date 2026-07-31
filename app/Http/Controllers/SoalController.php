@@ -15,10 +15,6 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class SoalController extends Controller
 {
-    /**
-     * Pastikan bank soal ini benar-benar milik guru yang sedang login.
-     * (pola sama seperti GuruBankSoalController::authorizeOwnership)
-     */
     private function authorizeBankSoal(BankSoal $bankSoal)
     {
         $guru = Auth::user()->guru;
@@ -28,6 +24,13 @@ class SoalController extends Controller
             403,
             'Anda tidak memiliki akses ke bank soal ini.'
         );
+    }
+
+    private function authorizeNotLocked(BankSoal $bankSoal)
+    {
+        if ($bankSoal->isLocked()) {
+            abort(403, 'Bank Soal ini terkunci karena sedang atau telah digunakan dalam Ujian. Silakan duplikat Bank Soal jika ingin membuat versi revisi.');
+        }
     }
 
     public function index(BankSoal $bank_soal)
@@ -42,6 +45,7 @@ class SoalController extends Controller
     public function create(BankSoal $bank_soal)
     {
         $this->authorizeBankSoal($bank_soal);
+        $this->authorizeNotLocked($bank_soal);
 
         return view('guru.bank-soal.soal.create', compact('bank_soal'));
     }
@@ -56,6 +60,7 @@ class SoalController extends Controller
     public function import(Request $request, BankSoal $bank_soal)
     {
         $this->authorizeBankSoal($bank_soal);
+        $this->authorizeNotLocked($bank_soal);
 
         $request->validate([
             'file_import' => 'required|file|mimes:xlsx,xls|max:2048',
@@ -87,21 +92,16 @@ class SoalController extends Controller
     public function store(Request $request, BankSoal $bank_soal)
     {
         $this->authorizeBankSoal($bank_soal);
+        $this->authorizeNotLocked($bank_soal);
 
         $request->validate([
-            'jenis_soal' => 'required|in:pilihan_ganda,essay,isian',
+            'jenis_soal' => 'required|in:pilihan_ganda,pilihan_ganda_kompleks,benar_salah,mencocokkan,isian,essay',
             'teks_soal' => 'required|string',
             'bobot' => 'required|numeric|min:1',
             'gambar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        if ($request->jenis_soal === 'pilihan_ganda') {
-            $request->validate([
-                'teks_pilihan' => 'required|array|min:2',
-                'teks_pilihan.*' => 'required|string',
-                'jawaban_benar' => 'required|integer',
-            ]);
-        }
+        $this->validasiDinamisPilihan($request);
 
         DB::beginTransaction();
         try {
@@ -119,9 +119,7 @@ class SoalController extends Controller
                 'urutan' => $bank_soal->soals()->count() + 1,
             ]);
 
-            if ($request->jenis_soal === 'pilihan_ganda') {
-                $this->simpanPilihanJawaban($soal, $request->teks_pilihan, $request->jawaban_benar);
-            }
+            $this->simpanPilihanJawaban($soal, $request);
 
             DB::commit();
 
@@ -137,6 +135,7 @@ class SoalController extends Controller
     public function edit(BankSoal $bank_soal, Soal $soal)
     {
         $this->authorizeBankSoal($bank_soal);
+        $this->authorizeNotLocked($bank_soal);
         abort_unless($soal->bank_soal_id === $bank_soal->id, 404);
 
         $soal->load(['pilihanJawabans' => function ($q) {
@@ -149,22 +148,17 @@ class SoalController extends Controller
     public function update(Request $request, BankSoal $bank_soal, Soal $soal)
     {
         $this->authorizeBankSoal($bank_soal);
+        $this->authorizeNotLocked($bank_soal);
         abort_unless($soal->bank_soal_id === $bank_soal->id, 404);
 
         $request->validate([
-            'jenis_soal' => 'required|in:pilihan_ganda,essay,isian',
+            'jenis_soal' => 'required|in:pilihan_ganda,pilihan_ganda_kompleks,benar_salah,mencocokkan,isian,essay',
             'teks_soal' => 'required|string',
             'bobot' => 'required|numeric|min:1',
             'gambar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        if ($request->jenis_soal === 'pilihan_ganda') {
-            $request->validate([
-                'teks_pilihan' => 'required|array|min:2',
-                'teks_pilihan.*' => 'required|string',
-                'jawaban_benar' => 'required|integer',
-            ]);
-        }
+        $this->validasiDinamisPilihan($request);
 
         DB::beginTransaction();
         try {
@@ -175,29 +169,22 @@ class SoalController extends Controller
             ];
 
             if ($request->hasFile('gambar')) {
-                // Ganti gambar: hapus file lama (kalau ada), simpan yang baru
                 if ($soal->gambar) {
                     Storage::disk('public')->delete($soal->gambar);
                 }
                 $dataUpdate['gambar'] = $request->file('gambar')->store('soal-gambar', 'public');
             } elseif ($request->boolean('remove_gambar')) {
-                // Guru menekan "Hapus Gambar" tanpa upload gambar baru
                 if ($soal->gambar) {
                     Storage::disk('public')->delete($soal->gambar);
                 }
                 $dataUpdate['gambar'] = null;
             }
-            // Kalau tidak ada file baru & remove_gambar=0, gambar lama dibiarkan apa adanya.
 
             $soal->update($dataUpdate);
 
-            // Opsi lama dihapus & diganti baru — supaya tidak ada opsi "nyangkut"
-            // kalau guru mengubah jumlah opsi atau mengganti jenis soal.
             $soal->pilihanJawabans()->delete();
 
-            if ($request->jenis_soal === 'pilihan_ganda') {
-                $this->simpanPilihanJawaban($soal, $request->teks_pilihan, $request->jawaban_benar);
-            }
+            $this->simpanPilihanJawaban($soal, $request);
 
             DB::commit();
 
@@ -213,14 +200,13 @@ class SoalController extends Controller
     public function destroy(BankSoal $bank_soal, Soal $soal)
     {
         $this->authorizeBankSoal($bank_soal);
+        $this->authorizeNotLocked($bank_soal);
         abort_unless($soal->bank_soal_id === $bank_soal->id, 404);
 
-        // Hapus file gambar dari storage (kalau ada) sebelum baris DB-nya dihapus
         if ($soal->gambar) {
             Storage::disk('public')->delete($soal->gambar);
         }
 
-        // pilihan_jawabans ikut terhapus otomatis (cascadeOnDelete di migration)
         $soal->delete();
 
         return redirect()
@@ -228,22 +214,96 @@ class SoalController extends Controller
             ->with('success', 'Soal berhasil dihapus');
     }
 
-    /**
-     * Simpan opsi pilihan ganda. Kode opsi (A, B, C, ...) digenerate otomatis
-     * dari urutan input — supaya jumlah opsi fleksibel (2-26), tidak dihardcode
-     * 5 opsi seperti implementasi sebelumnya.
-     */
-    private function simpanPilihanJawaban(Soal $soal, array $teksPilihan, $jawabanBenarIndex)
+    private function validasiDinamisPilihan(Request $request): void
+    {
+        if ($request->jenis_soal === 'pilihan_ganda') {
+            $request->validate([
+                'teks_pilihan' => 'required|array|min:2',
+                'teks_pilihan.*' => 'required|string',
+                'jawaban_benar' => 'required|integer',
+            ]);
+        } elseif ($request->jenis_soal === 'pilihan_ganda_kompleks') {
+            $request->validate([
+                'teks_pilihan' => 'required|array|min:2',
+                'teks_pilihan.*' => 'required|string',
+                'jawaban_benar_kompleks' => 'required|array|min:1',
+            ]);
+        } elseif ($request->jenis_soal === 'benar_salah') {
+            $request->validate([
+                'teks_pernyataan' => 'required|array|min:1',
+                'teks_pernyataan.*' => 'required|string',
+                'kunci_bs' => 'required|array',
+            ]);
+        } elseif ($request->jenis_soal === 'mencocokkan') {
+            $request->validate([
+                'item_kiri' => 'required|array|min:1',
+                'item_kiri.*' => 'required|string',
+                'item_kanan' => 'required|array|min:1',
+                'item_kanan.*' => 'required|string',
+            ]);
+        } elseif ($request->jenis_soal === 'isian') {
+            $request->validate([
+                'kunci_isian' => 'required|string',
+            ]);
+        }
+    }
+
+    private function simpanPilihanJawaban(Soal $soal, Request $request): void
     {
         $kodeList = range('A', 'Z');
 
-        foreach (array_values($teksPilihan) as $index => $teks) {
+        if ($request->jenis_soal === 'pilihan_ganda') {
+            foreach (array_values($request->teks_pilihan) as $index => $teks) {
+                PilihanJawaban::create([
+                    'soal_id' => $soal->id,
+                    'kode' => $kodeList[$index] ?? null,
+                    'teks_pilihan' => $teks,
+                    'is_benar' => ((int) $request->jawaban_benar === $index),
+                    'urutan' => $index + 1,
+                ]);
+            }
+        } elseif ($request->jenis_soal === 'pilihan_ganda_kompleks') {
+            $checkedIndices = array_map('intval', (array) $request->jawaban_benar_kompleks);
+            foreach (array_values($request->teks_pilihan) as $index => $teks) {
+                PilihanJawaban::create([
+                    'soal_id' => $soal->id,
+                    'kode' => $kodeList[$index] ?? null,
+                    'teks_pilihan' => $teks,
+                    'is_benar' => in_array($index, $checkedIndices, true),
+                    'urutan' => $index + 1,
+                ]);
+            }
+        } elseif ($request->jenis_soal === 'benar_salah') {
+            foreach (array_values($request->teks_pernyataan) as $index => $teks) {
+                $kunciVal = $request->kunci_bs[$index] ?? 'salah';
+                PilihanJawaban::create([
+                    'soal_id' => $soal->id,
+                    'kode' => (string) ($index + 1),
+                    'teks_pilihan' => $teks,
+                    'is_benar' => ($kunciVal === 'benar'),
+                    'urutan' => $index + 1,
+                ]);
+            }
+        } elseif ($request->jenis_soal === 'mencocokkan') {
+            $kiri = array_values($request->item_kiri);
+            $kanan = array_values($request->item_kanan);
+            foreach ($kiri as $index => $teksKiri) {
+                PilihanJawaban::create([
+                    'soal_id' => $soal->id,
+                    'kode' => (string) ($index + 1),
+                    'teks_pilihan' => $teksKiri,
+                    'pasangan' => $kanan[$index] ?? '',
+                    'is_benar' => true,
+                    'urutan' => $index + 1,
+                ]);
+            }
+        } elseif ($request->jenis_soal === 'isian') {
             PilihanJawaban::create([
                 'soal_id' => $soal->id,
-                'kode' => $kodeList[$index] ?? null,
-                'teks_pilihan' => $teks,
-                'is_benar' => ((int) $jawabanBenarIndex === $index),
-                'urutan' => $index + 1,
+                'kode' => '1',
+                'teks_pilihan' => trim($request->kunci_isian),
+                'is_benar' => true,
+                'urutan' => 1,
             ]);
         }
     }

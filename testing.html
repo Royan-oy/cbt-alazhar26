@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Visualisasi Alur & UI Menu Nilai Siswa (Koreksi Jawaban Guru)</title>
+    <title>Simulasi & Prototype UI 6 Jenis Soal CBT Al-Azhar 26</title>
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- FontAwesome 6 -->
@@ -13,570 +13,691 @@
 
     <style>
         :root {
-            --primary-bg: #0f172a;
-            --card-bg: #ffffff;
-            --border-color: #e2e8f0;
-            --accent-blue: #0284c7;
-            --accent-green: #10b981;
-            --accent-amber: #f59e0b;
-            --accent-rose: #f43f5e;
-            --text-dark: #1e293b;
+            --primary-dark: #0f172a;
+            --secondary-dark: #1e293b;
+            --accent-blue: #0ea5e9;
+            --accent-blue-light: #38bdf8;
+            --accent-blue-dark: #0284c7;
+            --surface-white: #ffffff;
             --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --paper-bg: #f8fafc;
+            --danger: #ef4444;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --card-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.05), 0 4px 12px -5px rgba(15, 23, 42, 0.03);
+            --radius-lg: 20px;
+            --radius-md: 14px;
+            --radius-sm: 10px;
         }
 
         body {
+            background: var(--paper-bg);
             font-family: 'Inter', sans-serif;
-            background-color: #f8fafc;
-            color: var(--text-dark);
-            padding-bottom: 80px;
+            color: #1e293b;
+            padding-bottom: 60px;
         }
 
-        /* Top Bar Header Visualizer */
-        .visualizer-header {
+        /* Top Bar Prototype Header */
+        .proto-header {
             background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
             color: white;
-            padding: 2.5rem 0;
-            border-bottom: 3px solid var(--accent-blue);
+            padding: 1.8rem 0;
+            border-bottom: 4px solid var(--accent-blue);
             margin-bottom: 2rem;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
         }
 
-        /* Custom Nav Pills for Prototype Tabs */
-        .nav-pills-custom .nav-link {
-            color: #64748b;
+        /* Question Type Nav Pills */
+        .nav-type-pills .nav-link {
+            color: #475569;
             font-weight: 600;
-            padding: 12px 24px;
+            font-size: 13px;
+            padding: 10px 18px;
             border-radius: 12px;
-            border: 1px solid #e2e8f0;
+            border: 1px solid #cbd5e1;
             background: white;
-            transition: all 0.25s ease;
-        }
-
-        .nav-pills-custom .nav-link:hover {
-            color: var(--accent-blue);
-            border-color: var(--accent-blue);
-            background: #f0f9ff;
-        }
-
-        .nav-pills-custom .nav-link.active {
-            background: linear-gradient(135deg, #0284c7, #0369a1);
-            color: white;
-            border-color: #0284c7;
-            box-shadow: 0 10px 20px -5px rgba(2, 132, 199, 0.3);
-        }
-
-        /* Diagram Box Flow */
-        .flow-step-card {
-            background: white;
-            border: 1px solid var(--border-color);
-            border-radius: 16px;
-            padding: 1.5rem;
-            position: relative;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
-            height: 100%;
-        }
-
-        .flow-step-badge {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            background: var(--accent-blue);
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            font-size: 14px;
-            margin-bottom: 1rem;
-        }
-
-        /* Mockup Containers */
-        .mockup-window {
-            background: white;
-            border: 1px solid var(--border-color);
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: 0 15px 35px -5px rgba(15, 23, 42, 0.08);
-        }
-
-        .mockup-header {
-            background: #f1f5f9;
-            padding: 12px 20px;
-            border-bottom: 1px solid var(--border-color);
+            transition: all 0.2s ease;
             display: flex;
             align-items: center;
             gap: 8px;
         }
 
-        .window-dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            display: inline-block;
+        .nav-type-pills .nav-link:hover {
+            color: var(--accent-blue-dark);
+            border-color: var(--accent-blue-light);
+            background: #f0f9ff;
         }
 
-        .mockup-body {
-            padding: 24px;
-            background-color: #ffffff;
+        .nav-type-pills .nav-link.active {
+            background: linear-gradient(135deg, #0ea5e9, #0284c7);
+            color: white;
+            border-color: #0284c7;
+            box-shadow: 0 8px 16px -4px rgba(14, 165, 233, 0.35);
         }
 
-        /* UI Element Badges */
-        .status-badge {
-            font-size: 11px;
-            font-weight: 700;
-            padding: 5px 12px;
+        /* CBT Exam Card Mockup */
+        .exam-wrapper {
+            max-width: 920px;
+            margin: 0 auto;
+        }
+
+        .soal-card {
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 28px;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 24px;
+        }
+
+        .question-number-badge {
+            background: #e0f2fe;
+            color: #0369a1;
+            font-weight: 800;
+            font-size: 14px;
+            padding: 6px 14px;
             border-radius: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .question-type-tag {
+            background: #f1f5f9;
+            color: #475569;
+            font-size: 12px;
+            font-weight: 700;
+            padding: 6px 12px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
-        .status-pending {
-            background-color: #fffbebf7;
-            color: #d97706;
-            border: 1px solid #fef3c7;
-        }
-        .status-complete {
-            background-color: #ecfdf5;
-            color: #059669;
-            border: 1px solid #a7f3d0;
+
+        /* Option Items for Single & Multi PG */
+        .option-box {
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            padding: 14px 18px;
+            border: 1.5px solid #e2e8f0;
+            border-radius: var(--radius-md);
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: #ffffff;
         }
 
-        /* Interactive Correction Box */
-        .correction-card {
-            border: 1px solid #e2e8f0;
-            border-radius: 16px;
-            padding: 20px;
-            background: #ffffff;
+        .option-box:hover {
+            border-color: var(--accent-blue-light);
+            background: #f8fafc;
+        }
+
+        .option-box.selected {
+            border-color: var(--accent-blue);
+            background: #f0f9ff;
+            box-shadow: 0 4px 12px rgba(14, 165, 233, 0.12);
+        }
+
+        .option-key {
+            width: 32px;
+            height: 32px;
+            min-width: 32px;
+            border-radius: 8px;
+            background: #f1f5f9;
+            color: #334155;
+            font-weight: 700;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             transition: all 0.2s ease;
         }
 
-        .correction-card:hover {
-            border-color: #93c5fd;
-            box-shadow: 0 8px 16px -4px rgba(59, 130, 246, 0.08);
+        .option-box.selected .option-key {
+            background: var(--accent-blue);
+            color: white;
         }
 
-        .student-answer-box {
-            background-color: #f8fafc;
-            border-left: 4px solid var(--accent-blue);
+        /* True/False Table Styles */
+        .tf-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+
+        .tf-table th {
+            background: #f8fafc;
             padding: 14px 18px;
-            border-radius: 0 12px 12px 0;
-            font-size: 14px;
-            color: #334155;
-        }
-
-        .pg-option-item {
-            padding: 10px 14px;
-            border-radius: 10px;
+            font-weight: 700;
             font-size: 13px;
-            margin-bottom: 6px;
-            border: 1px solid #e2e8f0;
+            color: #334155;
+            border-bottom: 1px solid var(--border-color);
         }
 
-        .pg-option-item.correct-key {
-            background-color: #ecfdf5;
-            border-color: #6ee7b7;
-            color: #065f46;
+        .tf-table td {
+            padding: 16px 18px;
+            border-bottom: 1px solid var(--border-color);
+            background: white;
+            font-size: 14px;
+        }
+
+        .tf-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .tf-radio-btn {
+            width: 22px;
+            height: 22px;
+            cursor: pointer;
+        }
+
+        /* Matching / Menjodohkan Styles */
+        .matching-row {
+            background: #ffffff;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 16px 20px;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+        }
+
+        .matching-left {
             font-weight: 600;
+            font-size: 14px;
+            color: #1e293b;
+            flex: 1;
         }
 
-        .pg-option-item.student-wrong {
-            background-color: #fef2f2;
-            border-color: #fca5a5;
-            color: #991b1b;
+        .matching-select {
+            max-width: 260px;
+            border-radius: 10px;
+            border: 1.5px solid #cbd5e1;
+            font-size: 13.5px;
             font-weight: 600;
+            color: #0f172a;
+            padding: 8px 12px;
         }
 
-        .score-input-group {
-            max-width: 140px;
+        /* Drag & Drop Matching Specific Styles */
+        .drag-pool {
+            background: #f1f5f9;
+            border: 2px dashed #cbd5e1;
+            border-radius: var(--radius-md);
+            padding: 16px;
+            min-height: 70px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .drag-card {
+            background: white;
+            border: 1.5px solid var(--accent-blue-dark);
+            color: #0369a1;
+            font-weight: 700;
+            font-size: 13px;
+            padding: 10px 16px;
+            border-radius: 10px;
+            cursor: grab;
+            user-select: none;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .drag-card:active {
+            cursor: grabbing;
+            transform: scale(1.04);
+            box-shadow: 0 10px 20px rgba(2, 132, 199, 0.2);
+        }
+
+        .drop-zone {
+            background: #fafafa;
+            border: 2px dashed #cbd5e1;
+            border-radius: 10px;
+            min-width: 240px;
+            min-height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .drop-zone.drag-over {
+            background: #e0f2fe;
+            border-color: var(--accent-blue);
+        }
+
+        .drop-zone-placeholder {
+            font-size: 12px;
+            color: #94a3b8;
+            font-weight: 600;
+            font-style: italic;
+        }
+
+        /* Technical Info Sidebar / Footer Card */
+        .tech-notes-card {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border: 1px dashed #cbd5e1;
+            border-radius: var(--radius-lg);
+            padding: 20px 24px;
+            margin-top: 20px;
+        }
+
+        .tech-badge {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            padding: 4px 10px;
+            border-radius: 6px;
+        }
+
+        /* Live DB Payload Preview */
+        .payload-preview {
+            background: #0f172a;
+            color: #38bdf8;
+            font-family: 'Courier New', Courier, monospace;
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-size: 12.5px;
+            margin-top: 10px;
+            white-space: pre-wrap;
         }
     </style>
 </head>
 <body>
 
     <!-- TOP HEADER -->
-    <header class="visualizer-header text-center">
+    <header class="proto-header text-center">
         <div class="container">
             <span class="badge bg-info bg-opacity-25 text-info px-3 py-2 rounded-pill fw-bold text-uppercase mb-2" style="letter-spacing: 1px; font-size: 11px;">
-                <i class="fa-solid fa-compass me-1"></i> Interactive UI Blueprint & Workflow (Updated with PG & Accordion)
+                <i class="fa-solid fa-layer-group me-1"></i> Interactive Exam Prototype
             </span>
-            <h2 class="fw-bold mb-2">Sistem Nilai Siswa & Lembar Peninjauan Lengkap (PG + Essay)</h2>
-            <p class="text-white-50 mb-0 max-w-600 mx-auto" style="font-size: 14px;">
-                Penambahan fitur peninjauan Pilihan Ganda (Otomatik Benar/Salah) &amp; Koreksi Manual Essay dalam satu halaman terpadu.
-            </p>
+            <h2 class="fw-bold mb-1">Simulasi UI 6 Jenis Soal CBT Al-Azhar 26</h2>
+            <p class="text-white-50 fs-6 mb-0">Cobalah mengeklik & memilih jawaban pada tiap jenis soal di bawah ini untuk melihat simulasi tampilan dan format data ke Database.</p>
         </div>
     </header>
 
-    <div class="container">
+    <div class="container exam-wrapper">
 
-        <!-- ALUR PROSES DIAGRAM (WORKFLOW ALUR CORE) -->
-        <div class="mb-5">
-            <div class="d-flex align-items-center justify-content-between mb-4">
-                <h5 class="fw-bold m-0"><i class="fa-solid fa-diagram-project text-primary me-2"></i>1. Diagram Alur Kerja Terbaru</h5>
-                <span class="text-muted small">Integrasi Otomatis (PG) &amp; Manual (Essay)</span>
-            </div>
-
-            <div class="row g-3">
-                <div class="col-md-4">
-                    <div class="flow-step-card">
-                        <div class="flow-step-badge">1</div>
-                        <h6 class="fw-bold mb-2">Halaman Index Ujian</h6>
-                        <span class="badge bg-secondary mb-2" style="font-size: 10px;">Route: /dashboard-guru/nilai-siswa</span>
-                        <p class="text-muted small mb-0">
-                            Guru melihat daftar paket ujian yang dibuatnya. Menampilkan total siswa yang sudah mengumpulkan pekerjaan.
-                        </p>
-                    </div>
-                </div>
-
-                <div class="col-md-4">
-                    <div class="flow-step-card">
-                        <div class="flow-step-badge">2</div>
-                        <h6 class="fw-bold mb-2">Halaman Daftar Peserta</h6>
-                        <span class="badge bg-secondary mb-2" style="font-size: 10px;">Route: /dashboard-guru/nilai-siswa/{ujian}</span>
-                        <p class="text-muted small mb-0">
-                            Menampilkan tabel siswa, status pengerjaan, skor awal PG, serta indikator <strong>"Belum Dikoreksi"</strong> untuk soal Essay.
-                        </p>
-                    </div>
-                </div>
-
-                <div class="col-md-4">
-                    <div class="flow-step-card">
-                        <div class="flow-step-badge bg-success">3</div>
-                        <h6 class="fw-bold mb-2">Lembar Peninjauan Lengkap</h6>
-                        <span class="badge bg-secondary mb-2" style="font-size: 10px;">Route: /.../koreksi/{siswa}</span>
-                        <p class="text-muted small mb-0">
-                            Menampilkan <strong>Section PG (Otomatis)</strong> sebagai referensi transparansi, serta <strong>Section Essay (Manual Input)</strong> yang bisa di-koreksi oleh Guru.
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <hr class="my-5 opacity-25">
-
-        <!-- INTERACTIVE TABBED PROTOTYPE PREVIEW -->
-        <div class="d-flex align-items-center justify-content-between mb-4">
-            <div>
-                <h5 class="fw-bold m-0"><i class="fa-solid fa-desktop text-primary me-2"></i>2. Prototype Visual Tampilan (Live Preview)</h5>
-                <p class="text-muted small mb-0">Klik tab di bawah untuk melihat simulasi tampilan di setiap tahapnya:</p>
-            </div>
-        </div>
-
-        <!-- NAV TABS -->
-        <ul class="nav nav-pills nav-pills-custom gap-2 mb-4" id="pills-tab" role="tablist">
+        <!-- NAV TABS JENIS SOAL -->
+        <ul class="nav nav-pills nav-type-pills mb-4 justify-content-center gap-2" id="questionTabs" role="tablist">
             <li class="nav-item" role="presentation">
-                <button class="nav-link" id="tab-1-btn" data-bs-toggle="pill" data-bs-target="#tab-1" type="button" role="tab">
-                    <i class="fa-solid fa-list-check me-2"></i> Tahap 1: Daftar Ujian (Index)
+                <button class="nav-link active" id="tab-pg" data-bs-toggle="pill" data-bs-target="#type-pg" type="button">
+                    <i class="fa-regular fa-circle-dot"></i> 1. Pilihan Ganda
                 </button>
             </li>
             <li class="nav-item" role="presentation">
-                <button class="nav-link" id="tab-2-btn" data-bs-toggle="pill" data-bs-target="#tab-2" type="button" role="tab">
-                    <i class="fa-solid fa-users me-2"></i> Tahap 2: Detail Peserta & Status
+                <button class="nav-link" id="tab-pg-kompleks" data-bs-toggle="pill" data-bs-target="#type-pg-kompleks" type="button">
+                    <i class="fa-regular fa-square-check"></i> 2. PG Kompleks
                 </button>
             </li>
             <li class="nav-item" role="presentation">
-                <button class="nav-link active" id="tab-3-btn" data-bs-toggle="pill" data-bs-target="#tab-3" type="button" role="tab">
-                    <i class="fa-solid fa-pen-to-square me-2"></i> Tahap 3: Peninjauan PG + Koreksi Essay
+                <button class="nav-link" id="tab-bs" data-bs-toggle="pill" data-bs-target="#type-bs" type="button">
+                    <i class="fa-solid fa-scale-balanced"></i> 3. Benar / Salah
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="tab-matching" data-bs-toggle="pill" data-bs-target="#type-matching" type="button">
+                    <i class="fa-solid fa-diagram-project"></i> 4. Mencocokkan
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="tab-isian" data-bs-toggle="pill" data-bs-target="#type-isian" type="button">
+                    <i class="fa-solid fa-i-cursor"></i> 5. Isian Singkat
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="tab-essay" data-bs-toggle="pill" data-bs-target="#type-essay" type="button">
+                    <i class="fa-solid fa-align-left"></i> 6. Uraian / Essay
                 </button>
             </li>
         </ul>
 
-        <!-- TAB CONTENT CONTAINER -->
-        <div class="tab-content" id="pills-tabContent">
+        <!-- TAB CONTENT -->
+        <div class="tab-content" id="questionTabsContent">
 
-            <!-- TAHAP 1: INDEX UJIAN -->
-            <div class="tab-pane fade" id="tab-1" role="tabpanel">
-                <div class="mockup-window">
-                    <div class="mockup-header">
-                        <span class="window-dot bg-danger"></span>
-                        <span class="window-dot bg-warning"></span>
-                        <span class="window-dot bg-success"></span>
-                        <span class="text-muted ms-2 small fw-semibold">View: <code>resources/views/guru/nilai-siswa/index.blade.php</code></span>
+            <!-- 1. PILIHAN GANDA (SINGLE CHOICE) -->
+            <div class="tab-pane fade show active" id="type-pg" role="tabpanel">
+                <div class="soal-card">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="question-number-badge"><i class="fa-solid fa-hashtag"></i> Soal No. 1</span>
+                        <span class="question-type-tag"><i class="fa-regular fa-circle-dot me-1"></i> Pilihan Ganda (Single Choice)</span>
                     </div>
-                    <div class="mockup-body">
-                        <div class="d-flex align-items-center justify-content-between mb-4">
-                            <div>
-                                <h5 class="fw-bold mb-1">Daftar Nilai Ujian Siswa</h5>
-                                <p class="text-muted small mb-0">Pilih paket ujian untuk melihat dan melakukan koreksi jawaban siswa.</p>
-                            </div>
-                            <input type="text" class="form-control form-control-sm w-auto" placeholder="Cari Ujian...">
-                        </div>
 
-                        <div class="table-responsive">
-                            <table class="table align-middle table-hover border">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>Nama Ujian</th>
-                                        <th>Mata Pelajaran</th>
-                                        <th>Jenis Ujian</th>
-                                        <th class="text-center">Peserta Selesai</th>
-                                        <th class="text-end">Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>
-                                            <strong class="d-block text-dark">Penilaian Tengah Semester (PTS) Genap</strong>
-                                            <small class="text-muted">Tahun Ajaran 2025/2026</small>
-                                        </td>
-                                        <td><span class="badge bg-primary bg-opacity-10 text-primary fw-semibold">Matematika</span></td>
-                                        <td>PTS</td>
-                                        <td class="text-center"><span class="badge bg-secondary">32 Siswa</span></td>
-                                        <td class="text-end">
-                                            <button class="btn btn-sm btn-primary rounded-3">
-                                                <i class="fa-solid fa-eye me-1"></i> Lihat Peserta &amp; Nilai
-                                            </button>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                    <div class="question-text fs-6 fw-medium mb-4">
+                        Siapakah nabi terakhir yang diutus oleh Allah SWT sebagai rahmat bagi seluruh alam (Rahmatan lil 'Alamin)?
+                    </div>
+
+                    <div class="options-container">
+                        <div class="option-box" onclick="selectSingleOption(this, 'pg1', 101)">
+                            <div class="option-key">A</div>
+                            <div class="option-text pt-1">Nabi Ibrahim AS</div>
                         </div>
+                        <div class="option-box" onclick="selectSingleOption(this, 'pg1', 102)">
+                            <div class="option-key">B</div>
+                            <div class="option-text pt-1">Nabi Musa AS</div>
+                        </div>
+                        <div class="option-box selected" onclick="selectSingleOption(this, 'pg1', 103)">
+                            <div class="option-key">C</div>
+                            <div class="option-text pt-1">Nabi Muhammad SAW</div>
+                        </div>
+                        <div class="option-box" onclick="selectSingleOption(this, 'pg1', 104)">
+                            <div class="option-key">D</div>
+                            <div class="option-text pt-1">Nabi Isa AS</div>
+                        </div>
+                    </div>
+
+                    <!-- Technical Info & DB Payload -->
+                    <div class="tech-notes-card mt-4">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="tech-badge bg-primary text-white"><i class="fa-solid fa-code me-1"></i> Format Simpan DB</span>
+                            <span class="text-muted small">Auto-Grading 100% Otomatis</span>
+                        </div>
+                        <p class="small text-muted mb-1">Pilihan ganda biasa menyimpan ID opsi tunggal ke kolom <code>pilihan_jawaban_id</code> di tabel <code>jawaban_siswas</code>.</p>
+                        <div class="payload-preview" id="pg1-payload">{ "pilihan_jawaban_id": 103, "jawaban_json": null, "jawaban_text": null }</div>
                     </div>
                 </div>
             </div>
 
-            <!-- TAHAP 2: DETAIL PESERTA -->
-            <div class="tab-pane fade" id="tab-2" role="tabpanel">
-                <div class="mockup-window">
-                    <div class="mockup-header">
-                        <span class="window-dot bg-danger"></span>
-                        <span class="window-dot bg-warning"></span>
-                        <span class="window-dot bg-success"></span>
-                        <span class="text-muted ms-2 small fw-semibold">View: <code>resources/views/guru/nilai-siswa/show.blade.php</code></span>
+            <!-- 2. PILIHAN GANDA KOMPLEKS (MULTI SELECT) -->
+            <div class="tab-pane fade" id="type-pg-kompleks" role="tabpanel">
+                <div class="soal-card">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="question-number-badge"><i class="fa-solid fa-hashtag"></i> Soal No. 2</span>
+                        <span class="question-type-tag text-primary"><i class="fa-regular fa-square-check me-1"></i> Pilihan Ganda Kompleks</span>
                     </div>
-                    <div class="mockup-body">
-                        <div class="mb-4">
-                            <a href="#" class="text-decoration-none small text-muted"><i class="fa-solid fa-arrow-left me-1"></i> Kembali ke Daftar Ujian</a>
-                            <h5 class="fw-bold mt-2 mb-1">PTS Genap - Matematika</h5>
-                            <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25">Total 32 Siswa Terdaftar</span>
-                        </div>
 
-                        <div class="table-responsive">
-                            <table class="table align-middle border">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>NIS</th>
-                                        <th>Nama Siswa</th>
-                                        <th>Status Ujian</th>
-                                        <th>Status Koreksi Essay</th>
-                                        <th class="text-center">Nilai Akhir</th>
-                                        <th class="text-end">Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td><code>102938</code></td>
-                                        <td><strong>Ahmad Fauzi</strong></td>
-                                        <td><span class="badge bg-success">Selesai</span></td>
-                                        <td>
-                                            <span class="status-badge status-pending">
-                                                <i class="fa-solid fa-clock me-1"></i> 2 Soal Belum Dikoreksi
-                                            </span>
-                                        </td>
-                                        <td class="text-center fw-bold text-muted">70.00</td>
-                                        <td class="text-end">
-                                            <button class="btn btn-sm btn-warning text-dark font-semibold rounded-3">
-                                                <i class="fa-solid fa-pen-to-square me-1"></i> Koreksi / Tinjau
-                                            </button>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                    <div class="alert alert-info py-2 px-3 small border-0 mb-3 rounded-3 d-flex align-items-center gap-2">
+                        <i class="fa-solid fa-circle-info text-info"></i>
+                        <span><strong>Petunjuk:</strong> Pilih <u>lebih dari satu</u> jawaban yang menurut Anda benar di bawah ini!</span>
+                    </div>
+
+                    <div class="question-text fs-6 fw-medium mb-4">
+                        Manakah di antara berikut ini yang termasuk dalam rukun Islam? (Pilih semua yang benar)
+                    </div>
+
+                    <div class="options-container">
+                        <div class="option-box selected" onclick="toggleMultiOption(this, 'pgk1', 201)">
+                            <div class="option-key"><i class="fa-solid fa-check"></i></div>
+                            <div class="option-text pt-1">Mengucapkan Dua Kalimat Syahadat</div>
                         </div>
+                        <div class="option-box" onclick="toggleMultiOption(this, 'pgk1', 202)">
+                            <div class="option-key">B</div>
+                            <div class="option-text pt-1">Membaca Al-Qur'an setiap malam</div>
+                        </div>
+                        <div class="option-box selected" onclick="toggleMultiOption(this, 'pgk1', 203)">
+                            <div class="option-key"><i class="fa-solid fa-check"></i></div>
+                            <div class="option-text pt-1">Mendirikan Sholat 5 Waktu</div>
+                        </div>
+                        <div class="option-box selected" onclick="toggleMultiOption(this, 'pgk1', 204)">
+                            <div class="option-key"><i class="fa-solid fa-check"></i></div>
+                            <div class="option-text pt-1">Menunaikan Zakat</div>
+                        </div>
+                    </div>
+
+                    <!-- Technical Info & DB Payload -->
+                    <div class="tech-notes-card mt-4">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="tech-badge bg-primary text-white"><i class="fa-solid fa-code me-1"></i> Format Simpan DB</span>
+                            <span class="text-muted small">Opsi Skoring: Partial Credit (Proporsional)</span>
+                        </div>
+                        <p class="small text-muted mb-1">PG Kompleks menyimpan array ID pilihan siswa ke kolom <code>jawaban_json</code>.</p>
+                        <div class="payload-preview" id="pgk1-payload">{ "pilihan_jawaban_id": null, "jawaban_json": [201, 203, 204], "jawaban_text": null }</div>
                     </div>
                 </div>
             </div>
 
-            <!-- TAHAP 3: LEMBAR KOREKSI ESSAY & RINCIAN PG -->
-            <div class="tab-pane fade show active" id="tab-3" role="tabpanel">
-                <div class="mockup-window">
-                    <div class="mockup-header">
-                        <span class="window-dot bg-danger"></span>
-                        <span class="window-dot bg-warning"></span>
-                        <span class="window-dot bg-success"></span>
-                        <span class="text-muted ms-2 small fw-semibold">View: <code>resources/views/guru/nilai-siswa/koreksi.blade.php</code></span>
+            <!-- 3. BENAR / SALAH (TRUE / FALSE MATRIX) -->
+            <div class="tab-pane fade" id="type-bs" role="tabpanel">
+                <div class="soal-card">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="question-number-badge"><i class="fa-solid fa-hashtag"></i> Soal No. 3</span>
+                        <span class="question-type-tag text-success"><i class="fa-solid fa-scale-balanced me-1"></i> Benar / Salah</span>
                     </div>
-                    <div class="mockup-body">
-                        
-                        <!-- HEADER SISWA INFO + STATS RINGKAS -->
-                        <div class="card bg-light border-0 p-3 mb-4 rounded-3">
-                            <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
-                                <div>
-                                    <span class="text-muted small d-block">Siswa yang Dikoreksi:</span>
-                                    <h5 class="fw-bold text-dark mb-0">Ahmad Fauzi (NIS: 102938)</h5>
-                                    <small class="text-muted">Ujian: PTS Genap - Matematika Kelas VIII</small>
-                                </div>
-                                <div class="d-flex align-items-center gap-4 text-end">
-                                    <div class="border-end pe-3">
-                                        <span class="text-muted small d-block">Skor Pilihan Ganda (Auto):</span>
-                                        <h5 class="fw-bold text-success mb-0">50 <span class="fs-6 text-muted fw-normal">/ 70 Poin (5/7 Benar)</span></h5>
+
+                    <div class="question-text fs-6 fw-medium mb-4">
+                        Tentukan apakah setiap pernyataan mengenai Hukum Tajwid berikut ini **Benar** atau **Salah**:
+                    </div>
+
+                    <table class="tf-table mb-3">
+                        <thead>
+                            <tr>
+                                <th style="width: 60%;">Pernyataan / Hukum Bacaan</th>
+                                <th class="text-center" style="width: 20%;">Benar</th>
+                                <th class="text-center" style="width: 20%;">Salah</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>1. Idgham Bighunnah terjadi apabila Nun Mati (نْ) bertemu dengan huruf Mim (م).</td>
+                                <td class="text-center">
+                                    <input type="radio" name="bs_row_1" class="tf-radio-btn" checked onclick="updateBsPayload()">
+                                </td>
+                                <td class="text-center">
+                                    <input type="radio" name="bs_row_1" class="tf-radio-btn" onclick="updateBsPayload()">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>2. Izhar Halqi dibaca dengan mendengung panjang 3 harakat.</td>
+                                <td class="text-center">
+                                    <input type="radio" name="bs_row_2" class="tf-radio-btn" onclick="updateBsPayload()">
+                                </td>
+                                <td class="text-center">
+                                    <input type="radio" name="bs_row_2" class="tf-radio-btn" checked onclick="updateBsPayload()">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>3. Huruf Qalqalah terdiri atas 5 huruf yaitu: ق, ط, ب, ج, د.</td>
+                                <td class="text-center">
+                                    <input type="radio" name="bs_row_3" class="tf-radio-btn" checked onclick="updateBsPayload()">
+                                </td>
+                                <td class="text-center">
+                                    <input type="radio" name="bs_row_3" class="tf-radio-btn" onclick="updateBsPayload()">
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <!-- Technical Info & DB Payload -->
+                    <div class="tech-notes-card mt-4">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="tech-badge bg-primary text-white"><i class="fa-solid fa-code me-1"></i> Format Simpan DB</span>
+                            <span class="text-muted small">Auto-Grading berdasarkan kunci per baris</span>
+                        </div>
+                        <p class="small text-muted mb-1">Setiap baris pernyataan dipetakan ke ID pilihan dan disimpan nilai boolean pilihan siswa di <code>jawaban_json</code>.</p>
+                        <div class="payload-preview" id="bs-payload">{ "pilihan_jawaban_id": null, "jawaban_json": { "stmt_1": "benar", "stmt_2": "salah", "stmt_3": "benar" }, "jawaban_text": null }</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. MENCOCOKKAN (MATCHING) - DUAL MODE (DROPDOWN + DRAG & DROP) -->
+            <div class="tab-pane fade" id="type-matching" role="tabpanel">
+                <div class="soal-card">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="question-number-badge"><i class="fa-solid fa-hashtag"></i> Soal No. 4</span>
+                        <span class="question-type-tag text-warning"><i class="fa-solid fa-diagram-project me-1"></i> Mencocokkan / Menjodohkan</span>
+                    </div>
+
+                    <!-- MODE SWITCHER SUB-BAR -->
+                    <div class="d-flex justify-content-between align-items-center bg-light p-2 rounded-3 mb-4 border">
+                        <span class="small fw-bold text-secondary ps-2"><i class="fa-solid fa-sliders me-1"></i> Mode Tampilan Ujian:</span>
+                        <div class="btn-group btn-group-sm" role="group">
+                            <button type="button" class="btn btn-outline-primary active fw-semibold" id="btn-mode-dropdown" onclick="switchMatchingMode('dropdown')">
+                                <i class="fa-solid fa-list-check me-1"></i> Mode A: Dropdown Select
+                            </button>
+                            <button type="button" class="btn btn-outline-primary fw-semibold" id="btn-mode-dragdrop" onclick="switchMatchingMode('dragdrop')">
+                                <i class="fa-solid fa-hand-pointer me-1"></i> Mode B: Drag & Drop
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="question-text fs-6 fw-medium mb-4">
+                        Pasangkanlah Nama Kitab Allah SWT berikut ini dengan Nabi penerimanya yang sesuai!
+                    </div>
+
+                    <!-- MODE A: DROPDOWN SELECT CONTAINER -->
+                    <div id="matching-container-dropdown">
+                        <div class="matching-row">
+                            <div class="matching-left"><i class="fa-solid fa-book-quran text-primary me-2"></i> Kitab Taurat</div>
+                            <select class="form-select matching-select" onchange="updateMatchingPayload()">
+                                <option value="">-- Pilih Pasangan --</option>
+                                <option value="Nabi Musa AS" selected>Nabi Musa AS</option>
+                                <option value="Nabi Daud AS">Nabi Daud AS</option>
+                                <option value="Nabi Isa AS">Nabi Isa AS</option>
+                                <option value="Nabi Muhammad SAW">Nabi Muhammad SAW</option>
+                            </select>
+                        </div>
+
+                        <div class="matching-row">
+                            <div class="matching-left"><i class="fa-solid fa-book-quran text-primary me-2"></i> Kitab Zabur</div>
+                            <select class="form-select matching-select" onchange="updateMatchingPayload()">
+                                <option value="">-- Pilih Pasangan --</option>
+                                <option value="Nabi Musa AS">Nabi Musa AS</option>
+                                <option value="Nabi Daud AS" selected>Nabi Daud AS</option>
+                                <option value="Nabi Isa AS">Nabi Isa AS</option>
+                                <option value="Nabi Muhammad SAW">Nabi Muhammad SAW</option>
+                            </select>
+                        </div>
+
+                        <div class="matching-row">
+                            <div class="matching-left"><i class="fa-solid fa-book-quran text-primary me-2"></i> Kitab Injil</div>
+                            <select class="form-select matching-select" onchange="updateMatchingPayload()">
+                                <option value="">-- Pilih Pasangan --</option>
+                                <option value="Nabi Musa AS">Nabi Musa AS</option>
+                                <option value="Nabi Daud AS">Nabi Daud AS</option>
+                                <option value="Nabi Isa AS" selected>Nabi Isa AS</option>
+                                <option value="Nabi Muhammad SAW">Nabi Muhammad SAW</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- MODE B: DRAG & DROP CONTAINER (HIDDEN BY DEFAULT) -->
+                    <div id="matching-container-dragdrop" class="d-none">
+                        <div class="alert alert-warning py-2 px-3 small border-0 mb-3 rounded-3 d-flex align-items-center gap-2">
+                            <i class="fa-solid fa-hand-pointer text-warning"></i>
+                            <span><strong>Petunjuk Drag & Drop:</strong> Geser (Drag) kartu pilihan nabi dari kotak pilihan bawah ke area target di sebelah kanan kitab!</span>
+                        </div>
+
+                        <!-- LIST SOAL TARGET DROP -->
+                        <div class="d-flex flex-column gap-3 mb-4">
+                            <div class="matching-row mb-0">
+                                <div class="matching-left"><i class="fa-solid fa-book-quran text-primary me-2"></i> Kitab Taurat</div>
+                                <div class="drop-zone" data-item="Taurat" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
+                                    <div class="drag-card" draggable="true" ondragstart="handleDragStart(event)" id="card-musa">
+                                        <i class="fa-solid fa-grip-vertical text-muted"></i> Nabi Musa AS
                                     </div>
-                                    <div>
-                                        <span class="text-muted small d-block">Nilai Akhir Total:</span>
-                                        <h3 class="fw-bold text-primary mb-0">70.00 <span class="fs-6 text-muted fw-normal">/ 100</span></h3>
+                                </div>
+                            </div>
+
+                            <div class="matching-row mb-0">
+                                <div class="matching-left"><i class="fa-solid fa-book-quran text-primary me-2"></i> Kitab Zabur</div>
+                                <div class="drop-zone" data-item="Zabur" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
+                                    <div class="drag-card" draggable="true" ondragstart="handleDragStart(event)" id="card-daud">
+                                        <i class="fa-solid fa-grip-vertical text-muted"></i> Nabi Daud AS
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="matching-row mb-0">
+                                <div class="matching-left"><i class="fa-solid fa-book-quran text-primary me-2"></i> Kitab Injil</div>
+                                <div class="drop-zone" data-item="Injil" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
+                                    <div class="drag-card" draggable="true" ondragstart="handleDragStart(event)" id="card-isa">
+                                        <i class="fa-solid fa-grip-vertical text-muted"></i> Nabi Isa AS
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- ACCORDION SECTION: RINCIAN PILIHAN GANDA -->
-                        <div class="accordion mb-4" id="accordionPG">
-                            <div class="accordion-item border rounded-3 overflow-hidden">
-                                <h2 class="accordion-header" id="headingPG">
-                                    <button class="accordion-button bg-light fw-bold text-dark py-3" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePG" aria-expanded="true" aria-controls="collapsePG">
-                                        <i class="fa-solid fa-list-check text-primary me-2"></i> Rincian Pilihan Ganda (Auto-Scored) &mdash; 7 Soal
-                                        <span class="badge bg-success ms-3 font-normal" style="font-size: 11px;">Skor PG: 50 Poin</span>
-                                    </button>
-                                </h2>
-                                <div id="collapsePG" class="accordion-collapse collapse show" aria-labelledby="headingPG" data-bs-parent="#accordionPG">
-                                    <div class="accordion-body bg-white p-4">
-                                        
-                                        <!-- PG ITEM 1 (SISWA BENAR) -->
-                                        <div class="p-3 mb-3 border rounded-3 bg-light bg-opacity-50">
-                                            <div class="d-flex align-items-center justify-content-between mb-2">
-                                                <span class="badge bg-primary">Soal No. 1 (Pilihan Ganda)</span>
-                                                <span class="badge bg-success-subtle text-success border border-success border-opacity-25 fw-bold">
-                                                    <i class="fa-solid fa-check me-1"></i> Benar (+10 Poin)
-                                                </span>
-                                            </div>
-                                            <p class="fw-medium text-dark mb-2">Berapakah hasil dari $2^3 + 3^2$?</p>
-                                            
-                                            <div class="row g-2 mt-1">
-                                                <div class="col-md-6">
-                                                    <div class="pg-option-item">A. 15</div>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <div class="pg-option-item correct-key">
-                                                        <i class="fa-solid fa-circle-check me-1"></i> B. 17 &nbsp;<span class="badge bg-success text-white">Jawaban Siswa &amp; Kunci Benar</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <!-- PG ITEM 2 (SISWA SALAH) -->
-                                        <div class="p-3 border rounded-3 bg-light bg-opacity-50">
-                                            <div class="d-flex align-items-center justify-content-between mb-2">
-                                                <span class="badge bg-primary">Soal No. 2 (Pilihan Ganda)</span>
-                                                <span class="badge bg-danger-subtle text-danger border border-danger border-opacity-25 fw-bold">
-                                                    <i class="fa-solid fa-xmark me-1"></i> Salah (0 Poin)
-                                                </span>
-                                            </div>
-                                            <p class="fw-medium text-dark mb-2">Bentuk sederhana dari $\sqrt{50}$ adalah...</p>
-                                            
-                                            <div class="row g-2 mt-1">
-                                                <div class="col-md-6">
-                                                    <div class="pg-option-item student-wrong">
-                                                        <i class="fa-solid fa-circle-xmark me-1"></i> A. $2\sqrt{5}$ &nbsp;<span class="badge bg-danger text-white">Jawaban Siswa (Salah)</span>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <div class="pg-option-item correct-key">
-                                                        <i class="fa-solid fa-circle-check me-1"></i> C. $5\sqrt{2}$ &nbsp;<span class="badge bg-success text-white">Kunci Jawaban Benar</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                    </div>
+                        <!-- BANK KARTU OPSI JAWABAN (POOL) -->
+                        <div class="mb-2">
+                            <label class="form-label small fw-bold text-muted mb-2"><i class="fa-solid fa-boxes-stacked me-1"></i> Bank Pilihan Jawaban (Drag dari sini / Kembalikan ke sini):</label>
+                            <div class="drag-pool" id="drag-bank-pool" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDropToPool(event)">
+                                <div class="drag-card" draggable="true" ondragstart="handleDragStart(event)" id="card-muhammad">
+                                    <i class="fa-solid fa-grip-vertical text-muted"></i> Nabi Muhammad SAW
                                 </div>
                             </div>
                         </div>
+                    </div>
 
-                        <!-- SECTION SOAL ESSAY & FORM INPUT KOREKSI GURU -->
-                        <div class="d-flex align-items-center justify-content-between mb-3">
-                            <h6 class="fw-bold text-dark m-0"><i class="fa-solid fa-pen-ruler text-warning me-2"></i>Koreksi Manual Soal Uraian / Essay</h6>
-                            <span class="text-muted small">Guru menginput penilaian &amp; menentukan keabsahan</span>
+                    <!-- Technical Info & DB Payload -->
+                    <div class="tech-notes-card mt-4">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="tech-badge bg-primary text-white"><i class="fa-solid fa-code me-1"></i> Format Simpan DB</span>
+                            <span class="text-muted small" id="matching-mode-label">Mode A / Mode B menghasilkan JSON payload identik</span>
                         </div>
+                        <p class="small text-muted mb-1">Baik menggunakan Mode Dropdown maupun Mode Drag & Drop, hasil pasangan tetap disimpan dalam format objek JSON yang sama di <code>jawaban_json</code>.</p>
+                        <div class="payload-preview" id="matching-payload">{ "pilihan_jawaban_id": null, "jawaban_json": { "Taurat": "Nabi Musa AS", "Zabur": "Nabi Daud AS", "Injil": "Nabi Isa AS" }, "jawaban_text": null }</div>
+                    </div>
+                </div>
+            </div>
 
-                        <!-- FORM KOREKSI -->
-                        <form onsubmit="event.preventDefault(); alert('Koreksi berhasil disimpan!');">
-                            
-                            <!-- ITEM SOAL ESSAY 1 -->
-                            <div class="correction-card mb-4">
-                                <div class="d-flex align-items-center justify-content-between mb-2">
-                                    <span class="badge bg-dark">Soal No. 8 (Essay)</span>
-                                    <span class="text-muted small fw-semibold">Bobot Maksimal: <strong>20 Poin</strong></span>
-                                </div>
-                                
-                                <p class="fw-medium text-dark mb-3">
-                                    Jelaskan langkah-langkah dalam menyelesaiakan persamaan kuadrat $x^2 + 5x + 6 = 0$ menggunakan metode pemfaktoran!
-                                </p>
+            <!-- 5. ISIAN SINGKAT (SHORT ANSWER) -->
+            <div class="tab-pane fade" id="type-isian" role="tabpanel">
+                <div class="soal-card">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="question-number-badge"><i class="fa-solid fa-hashtag"></i> Soal No. 5</span>
+                        <span class="question-type-tag text-purple"><i class="fa-solid fa-i-cursor me-1"></i> Isian Singkat</span>
+                    </div>
 
-                                <div class="mb-3">
-                                    <label class="form-label small text-muted fw-bold">Jawaban Siswa:</label>
-                                    <div class="student-answer-box">
-                                        "Cari dua angka jika dikali menghasilkan 6 dan dijumlahkan 5, yaitu 2 dan 3. Sehingga $(x + 2)(x + 3) = 0$. Maka akar-akarnya adalah $x = -2$ dan $x = -3$."
-                                    </div>
-                                </div>
+                    <div class="question-text fs-6 fw-medium mb-3">
+                        Kota tempat kelahiran Nabi Muhammad SAW adalah ...
+                    </div>
 
-                                <div class="row align-items-center g-3 bg-light p-3 rounded-3 mt-2">
-                                    <div class="col-md-6">
-                                        <label class="form-label small fw-bold mb-1">Status Keabsahan:</label>
-                                        <div class="d-flex gap-3">
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="radio" name="status_1" id="b1" checked>
-                                                <label class="form-check-label text-success fw-bold" for="b1"><i class="fa-solid fa-check-circle me-1"></i> Benar</label>
-                                            </div>
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="radio" name="status_1" id="s1">
-                                                <label class="form-check-label text-danger fw-bold" for="s1"><i class="fa-solid fa-times-circle me-1"></i> Salah</label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6 d-flex align-items-center justify-content-md-end gap-2">
-                                        <label class="form-label small fw-bold mb-0">Input Poin Skor:</label>
-                                        <input type="number" class="form-control score-input-group font-bold text-center border-primary" value="20" max="20" min="0">
-                                        <span class="text-muted small">/ 20</span>
-                                    </div>
-                                </div>
-                            </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-muted">Ketik Jawaban Singkat Anda:</label>
+                        <input type="text" class="form-control form-control-lg fs-6 fw-semibold" id="input-isian" value="Makkah" placeholder="Tuliskan jawaban singkat di sini..." oninput="updateIsianPayload(this.value)">
+                    </div>
 
-                            <!-- ITEM SOAL ESSAY 2 -->
-                            <div class="correction-card mb-4">
-                                <div class="d-flex align-items-center justify-content-between mb-2">
-                                    <span class="badge bg-dark">Soal No. 9 (Isian/Essay)</span>
-                                    <span class="text-muted small fw-semibold">Bobot Maksimal: <strong>10 Poin</strong></span>
-                                </div>
-                                
-                                <p class="fw-medium text-dark mb-3">
-                                    Sebutkan rumus umum untuk menghitung Luas Permukaan Tabung!
-                                </p>
+                    <!-- Technical Info & DB Payload -->
+                    <div class="tech-notes-card mt-4">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="tech-badge bg-primary text-white"><i class="fa-solid fa-code me-1"></i> Format Simpan DB</span>
+                            <span class="text-muted small">Evaluasi Otomatis (Flexibility Key)</span>
+                        </div>
+                        <p class="small text-muted mb-1">Jawaban teks langsung disimpan di <code>jawaban_text</code>. Sistem memeriksa kesesuaian dengan kunci jawaban guru (Case-insensitive & mengabaikan spasi berlebih).</p>
+                        <div class="payload-preview" id="isian-payload">{ "pilihan_jawaban_id": null, "jawaban_json": null, "jawaban_text": "Makkah" }</div>
+                    </div>
+                </div>
+            </div>
 
-                                <div class="mb-3">
-                                    <label class="form-label small text-muted fw-bold">Jawaban Siswa:</label>
-                                    <div class="student-answer-box border-warning" style="border-left-color: #f59e0b;">
-                                        "Rumusnya $2 \times \pi \times r \times t$"
-                                    </div>
-                                </div>
+            <!-- 6. URAIAN / ESSAY -->
+            <div class="tab-pane fade" id="type-essay" role="tabpanel">
+                <div class="soal-card">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="question-number-badge"><i class="fa-solid fa-hashtag"></i> Soal No. 6</span>
+                        <span class="question-type-tag text-danger"><i class="fa-solid fa-align-left me-1"></i> Uraian / Essay</span>
+                    </div>
 
-                                <div class="row align-items-center g-3 bg-light p-3 rounded-3 mt-2">
-                                    <div class="col-md-6">
-                                        <label class="form-label small fw-bold mb-1">Status Keabsahan:</label>
-                                        <div class="d-flex gap-3">
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="radio" name="status_2" id="b2">
-                                                <label class="form-check-label text-success fw-bold" for="b2"><i class="fa-solid fa-check-circle me-1"></i> Benar</label>
-                                            </div>
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="radio" name="status_2" id="s2" checked>
-                                                <label class="form-check-label text-danger fw-bold" for="s2"><i class="fa-solid fa-times-circle me-1"></i> Salah / Kurang Tepat</label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6 d-flex align-items-center justify-content-md-end gap-2">
-                                        <label class="form-label small fw-bold mb-0">Input Poin Skor:</label>
-                                        <input type="number" class="form-control score-input-group font-bold text-center border-amber" value="5" max="10" min="0">
-                                        <span class="text-muted small">/ 10</span>
-                                    </div>
-                                </div>
-                            </div>
+                    <div class="question-text fs-6 fw-medium mb-3">
+                        Jelaskan secara singkat hikmah dan manfaat dari pelaksanaan ibadah sholat berjamaah dalam kehidupan bermasyarakat!
+                    </div>
 
-                            <!-- BOTTOM BUTTON ACTIONS -->
-                            <div class="d-flex align-items-center justify-content-between mt-4 pt-3 border-top">
-                                <a href="#" class="btn btn-outline-secondary rounded-3 px-4">Batal</a>
-                                <button type="submit" class="btn btn-success rounded-3 px-4 fw-bold">
-                                    <i class="fa-solid fa-floppy-disk me-2"></i> Simpan Hasil Koreksi &amp; Hitung Nilai Akhir
-                                </button>
-                            </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-muted">Jawaban Uraian / Essay Anda:</label>
+                        <textarea class="form-control" rows="5" id="input-essay" placeholder="Tuliskan penjelasan lengkap Anda di sini..." oninput="updateEssayPayload(this.value)">Hikmah sholat berjamaah antara lain mempererat tali silaturahmi antar warga masyarakat, melatih kedisiplinan dan kepatuhan kepada pemimpin (imam), serta meningkatkan derajat pahala hingga 27 kali lipat dibanding sholat munfarid (sendiri).</textarea>
+                    </div>
 
-                        </form>
+                    <!-- Technical Info & DB Payload -->
+                    <div class="tech-notes-card mt-4">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="tech-badge bg-primary text-white"><i class="fa-solid fa-code me-1"></i> Format Simpan DB</span>
+                            <span class="text-muted small">Koreksi Manual oleh Guru Mapel</span>
+                        </div>
+                        <p class="small text-muted mb-1">Teks narasi essay disimpan ke <code>jawaban_text</code>. Nilai diinput manual oleh Guru Mapel pada halaman Koreksi Nilai.</p>
+                        <div class="payload-preview" id="essay-payload">{ "pilihan_jawaban_id": null, "jawaban_json": null, "jawaban_text": "Hikmah sholat berjamaah antara lain mempererat..." }</div>
                     </div>
                 </div>
             </div>
@@ -585,7 +706,191 @@
 
     </div>
 
-    <!-- Bootstrap JS -->
+    <!-- Bootstrap 5 JS Bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Interactive functions to simulate real exam AJAX payloads
+        function selectSingleOption(element, qId, optionId) {
+            let container = element.closest('.options-container');
+            container.querySelectorAll('.option-box').forEach(el => el.classList.remove('selected'));
+            element.classList.add('selected');
+            document.getElementById(qId + '-payload').innerText = JSON.stringify({
+                "pilihan_jawaban_id": optionId,
+                "jawaban_json": null,
+                "jawaban_text": null
+            }, null, 2);
+        }
+
+        function toggleMultiOption(element, qId, optionId) {
+            element.classList.toggle('selected');
+            let container = element.closest('.options-container');
+            let selectedIds = [];
+            let boxes = container.querySelectorAll('.option-box');
+            boxes.forEach((box, idx) => {
+                let keyEl = box.querySelector('.option-key');
+                if(box.classList.contains('selected')) {
+                    selectedIds.push(201 + idx);
+                    keyEl.innerHTML = '<i class="fa-solid fa-check"></i>';
+                } else {
+                    let keys = ['A', 'B', 'C', 'D'];
+                    keyEl.innerText = keys[idx];
+                }
+            });
+
+            document.getElementById(qId + '-payload').innerText = JSON.stringify({
+                "pilihan_jawaban_id": null,
+                "jawaban_json": selectedIds,
+                "jawaban_text": null
+            }, null, 2);
+        }
+
+        function updateBsPayload() {
+            let rows = document.querySelectorAll('.tf-table tbody tr');
+            let result = {};
+            rows.forEach((row, idx) => {
+                let radios = row.querySelectorAll('input[type="radio"]');
+                result['stmt_' + (idx + 1)] = radios[0].checked ? 'benar' : 'salah';
+            });
+            document.getElementById('bs-payload').innerText = JSON.stringify({
+                "pilihan_jawaban_id": null,
+                "jawaban_json": result,
+                "jawaban_text": null
+            }, null, 2);
+        }
+
+        /* -------------------------------------------------------------
+         * MATCHING MODE SWITCHER (DROPDOWN vs DRAG & DROP)
+         * ------------------------------------------------------------- */
+        let currentMatchingMode = 'dropdown';
+
+        function switchMatchingMode(mode) {
+            currentMatchingMode = mode;
+            let dropdownBox = document.getElementById('matching-container-dropdown');
+            let dragdropBox = document.getElementById('matching-container-dragdrop');
+            let btnDropdown = document.getElementById('btn-mode-dropdown');
+            let btnDragdrop = document.getElementById('btn-mode-dragdrop');
+
+            if (mode === 'dropdown') {
+                dropdownBox.classList.remove('d-none');
+                dragdropBox.classList.add('d-none');
+                btnDropdown.classList.add('active');
+                btnDragdrop.classList.remove('active');
+                document.getElementById('matching-mode-label').innerText = 'Mode A: Dropdown Select Active';
+                updateMatchingPayload();
+            } else {
+                dropdownBox.classList.add('d-none');
+                dragdropBox.classList.remove('d-none');
+                btnDropdown.classList.remove('active');
+                btnDragdrop.classList.add('active');
+                document.getElementById('matching-mode-label').innerText = 'Mode B: Drag & Drop Active';
+                updateDragDropPayload();
+            }
+        }
+
+        function updateMatchingPayload() {
+            if (currentMatchingMode !== 'dropdown') return;
+            let selects = document.querySelectorAll('.matching-select');
+            let keys = ['Taurat', 'Zabur', 'Injil'];
+            let result = {};
+            selects.forEach((sel, idx) => {
+                result[keys[idx]] = sel.value || null;
+            });
+            document.getElementById('matching-payload').innerText = JSON.stringify({
+                "pilihan_jawaban_id": null,
+                "jawaban_json": result,
+                "jawaban_text": null
+            }, null, 2);
+        }
+
+        /* -------------------------------------------------------------
+         * HTML5 DRAG & DROP HANDLERS
+         * ------------------------------------------------------------- */
+        let draggedCardId = null;
+
+        function handleDragStart(e) {
+            draggedCardId = e.target.id;
+            e.dataTransfer.setData('text/plain', e.target.id);
+            e.dataTransfer.effectAllowed = 'move';
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            let dropZone = e.target.closest('.drop-zone') || e.target.closest('.drag-pool');
+            if (dropZone) dropZone.classList.add('drag-over');
+        }
+
+        function handleDragLeave(e) {
+            let dropZone = e.target.closest('.drop-zone') || e.target.closest('.drag-pool');
+            if (dropZone) dropZone.classList.remove('drag-over');
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            let dropZone = e.target.closest('.drop-zone');
+            if (!dropZone) return;
+            dropZone.classList.remove('drag-over');
+
+            let cardId = e.dataTransfer.getData('text/plain') || draggedCardId;
+            let draggedCard = document.getElementById(cardId);
+            if (!draggedCard) return;
+
+            // If drop zone already has a card, move existing card back to pool
+            let existingCard = dropZone.querySelector('.drag-card');
+            if (existingCard && existingCard !== draggedCard) {
+                document.getElementById('drag-bank-pool').appendChild(existingCard);
+            }
+
+            dropZone.appendChild(draggedCard);
+            updateDragDropPayload();
+        }
+
+        function handleDropToPool(e) {
+            e.preventDefault();
+            let pool = e.target.closest('.drag-pool');
+            if (!pool) return;
+            pool.classList.remove('drag-over');
+
+            let cardId = e.dataTransfer.getData('text/plain') || draggedCardId;
+            let draggedCard = document.getElementById(cardId);
+            if (draggedCard) {
+                pool.appendChild(draggedCard);
+                updateDragDropPayload();
+            }
+        }
+
+        function updateDragDropPayload() {
+            let zones = document.querySelectorAll('#matching-container-dragdrop .drop-zone');
+            let result = {};
+            zones.forEach(zone => {
+                let itemKey = zone.getAttribute('data-item');
+                let card = zone.querySelector('.drag-card');
+                result[itemKey] = card ? card.innerText.trim() : null;
+            });
+
+            document.getElementById('matching-payload').innerText = JSON.stringify({
+                "pilihan_jawaban_id": null,
+                "jawaban_json": result,
+                "jawaban_text": null
+            }, null, 2);
+        }
+
+        function updateIsianPayload(val) {
+            document.getElementById('isian-payload').innerText = JSON.stringify({
+                "pilihan_jawaban_id": null,
+                "jawaban_json": null,
+                "jawaban_text": val
+            }, null, 2);
+        }
+
+        function updateEssayPayload(val) {
+            document.getElementById('essay-payload').innerText = JSON.stringify({
+                "pilihan_jawaban_id": null,
+                "jawaban_json": null,
+                "jawaban_text": val
+            }, null, 2);
+        }
+    </script>
 </body>
 </html>

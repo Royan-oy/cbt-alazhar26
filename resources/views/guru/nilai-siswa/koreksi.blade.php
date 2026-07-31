@@ -349,16 +349,29 @@
     {{-- LEDGER --}}
     <div class="kx-ledger">
         <div class="kx-ledger-item">
-            <div class="kx-ledger-label">Skor Pilihan Ganda</div>
-            <div class="kx-ledger-value">{{ $skor_pg }} <span class="kx-ledger-sub">({{ $benar_pg }}/{{ $total_soal_pg }} benar)</span></div>
+            <div class="kx-ledger-label"><i class="fa-solid fa-calculator me-1" style="color: var(--accent-blue);"></i>Total Skor Otomatis</div>
+            <div class="kx-ledger-value">{{ number_format($skor_pg, 1) }} <span class="kx-ledger-sub">({{ $total_soal_pg }} soal)</span></div>
         </div>
         <div class="kx-ledger-item is-highlight">
             <div class="kx-ledger-label">Nilai Akhir Sementara</div>
             <div class="kx-ledger-value" id="nilai-akhir-display">{{ number_format($nilai_sementara ?? $nilai->nilai_akhir, 2) }} <span class="kx-ledger-sub">/ 100</span></div>
         </div>
         <div class="kx-ledger-item {{ $nilai->violation_count > 0 ? 'is-alert' : '' }}">
-            <div class="kx-ledger-label">Pelanggaran</div>
-            <div class="kx-ledger-value">{{ $nilai->violation_count }} <span class="kx-ledger-sub">kali</span></div>
+            <div class="kx-ledger-label"><i class="fa-solid fa-triangle-exclamation me-1"></i>Pelanggaran Ujian</div>
+            <div class="kx-ledger-value mb-1">{{ $nilai->violation_count }} <span class="kx-ledger-sub">kali</span></div>
+            <form onsubmit="simpanPotonganPelanggaran(event)" class="d-flex align-items-center justify-content-center gap-1 mt-1">
+                <input type="number" min="0" max="100" step="0.5" id="potonganPelanggaranInput" name="potongan_pelanggaran" class="form-control form-control-sm text-center fw-bold" style="max-width: 90px; border-radius: 8px; font-size:12px;" value="{{ old('potongan_pelanggaran', $nilai->potongan_pelanggaran ?? 0) }}" placeholder="Potong Poin">
+                <button type="submit" class="btn btn-sm btn-danger fw-bold rounded-3 py-1 px-2" id="btnSavePotongan" title="Simpan Potongan Nilai">
+                    <i class="fa-solid fa-save"></i>
+                </button>
+            </form>
+            <div class="small text-danger fw-semibold mt-1" id="potonganNotice" style="font-size: 11px;">
+                @if(($nilai->potongan_pelanggaran ?? 0) > 0)
+                    Dipotong -{{ $nilai->potongan_pelanggaran }} poin
+                @else
+                    Belum ada potongan
+                @endif
+            </div>
         </div>
     </div>
 
@@ -366,12 +379,12 @@
     <ul class="kx-tabs" id="koreksiTab" role="tablist" style="list-style:none; margin:0;">
         <li role="presentation" style="display:contents;">
             <button class="kx-tab active" id="essay-tab" data-bs-toggle="pill" data-bs-target="#essay" type="button" role="tab" aria-controls="essay" aria-selected="true">
-                <i class="fa-solid fa-pen-ruler"></i> Uraian <span class="count">{{ $jawabans->count() }}</span>
+                <i class="fa-solid fa-pen-ruler"></i> Koreksi Manual &amp; Upah Nulis <span class="count">{{ $jawabans->count() }}</span>
             </button>
         </li>
         <li role="presentation" style="display:contents;">
             <button class="kx-tab" id="pg-tab" data-bs-toggle="pill" data-bs-target="#pg" type="button" role="tab" aria-controls="pg" aria-selected="false">
-                <i class="fa-solid fa-list-check"></i> Pilihan Ganda <span class="count">{{ $jawabans_pg->count() }}</span>
+                <i class="fa-solid fa-list-check"></i> Rincian Koreksi Otomatis <span class="count">{{ $jawabans_pg->count() }}</span>
             </button>
         </li>
     </ul>
@@ -404,12 +417,19 @@
 
                     <div id="accordionEssay">
                         @foreach($jawabans as $j)
+                        @php
+                            $isIsianBenarOtomatis = ($j->jenis_soal === 'isian' && $j->is_benar === true);
+                        @endphp
                         <div class="kx-card accordion-item">
                             <button class="kx-card-head" type="button" data-bs-toggle="collapse" data-bs-target="#collapseEssay{{ $j->jawaban_id }}" aria-expanded="false" aria-controls="collapseEssay{{ $j->jawaban_id }}" id="headingEssay{{ $j->jawaban_id }}">
                                 <span class="kx-num">{{ $loop->iteration }}</span>
-                                <span class="kx-card-label">Soal {{ ucfirst($j->jenis_soal) }}</span>
+                                <span class="kx-card-label">Soal {{ ucfirst(str_replace('_', ' ', $j->jenis_soal)) }}</span>
                                 <div class="kx-card-badges">
-                                    @if(isset($j->is_benar))
+                                    @if($isIsianBenarOtomatis)
+                                        <span class="kx-stamp ok status-badge" style="background:#dcfce7; color:#15803d; border:1px solid #86efac;"><i class="fa-solid fa-circle-check"></i>Benar Otomatis ({{ $j->nilai_jawaban }} Poin)</span>
+                                    @elseif($j->jenis_soal === 'isian')
+                                        <span class="kx-stamp pending status-badge" style="background:#fef3c7; color:#b45309; border:1px solid #fde68a;"><i class="fa-solid fa-pen-nib"></i>Upah Nulis</span>
+                                    @elseif(isset($j->is_benar))
                                         <span class="kx-stamp ok status-badge"><i class="fa-solid fa-check"></i>Dinilai</span>
                                     @else
                                         <span class="kx-stamp pending status-badge"><i class="fa-solid fa-clock"></i>Belum</span>
@@ -425,42 +445,55 @@
                                         <img src="{{ asset('storage/'.$j->gambar) }}" class="kx-soal-img" alt="Gambar Soal">
                                     @endif
 
-                                    <div class="kx-answer">
+                                    <div class="kx-answer mb-3">
                                         <div class="kx-answer-label"><i class="fa-solid fa-pen-nib me-1"></i>Jawaban Siswa</div>
-                                        <div class="kx-answer-text">{{ $j->jawaban_text ?? '(Siswa tidak memberikan jawaban)' }}</div>
+                                        <div class="kx-answer-text fw-bold text-dark">{{ $j->jawaban_text ?? '(Siswa tidak memberikan jawaban)' }}</div>
                                     </div>
 
-                                    <form class="form-koreksi" onsubmit="simpanKoreksi(event, {{ $j->jawaban_id }})">
-                                        <div class="kx-grading">
-                                            <div>
-                                                <label class="kx-grading-label">Nilai (0 - {{ $j->bobot }})</label>
-                                                <div class="kx-score-wrap">
-                                                    <input type="number" name="koreksi[{{ $j->jawaban_id }}][nilai]"
-                                                           class="kx-score-circle"
-                                                           value="{{ $j->nilai_jawaban ?? 0 }}"
-                                                           min="0" max="{{ $j->bobot }}" step="0.1" required>
-                                                    <span class="kx-score-max">/ {{ $j->bobot }}</span>
-                                                </div>
-                                            </div>
-                                            <div>
-                                                <label class="kx-grading-label">Status Keabsahan</label>
-                                                <div class="kx-status-group">
-                                                    <input type="radio" id="benar-{{ $j->jawaban_id }}" name="koreksi[{{ $j->jawaban_id }}][is_benar]" value="1" class="kx-radio" {{ $j->is_benar === 1 ? 'checked' : '' }} required>
-                                                    <label for="benar-{{ $j->jawaban_id }}" class="kx-radio-label benar"><i class="fa-solid fa-check"></i>Benar</label>
-                                                    <input type="radio" id="salah-{{ $j->jawaban_id }}" name="koreksi[{{ $j->jawaban_id }}][is_benar]" value="0" class="kx-radio" {{ $j->is_benar === 0 ? 'checked' : '' }} required>
-                                                    <label for="salah-{{ $j->jawaban_id }}" class="kx-radio-label salah"><i class="fa-solid fa-xmark"></i>Salah</label>
-                                                </div>
-                                            </div>
-                                            <div class="kx-grading-actions">
-                                                <span class="kx-saved-mark" id="save-indicator-{{ $j->jawaban_id }}">
-                                                    <i class="fa-solid fa-check-circle"></i> Tersimpan
-                                                </span>
-                                                <button type="submit" class="kx-btn-save" id="btn-simpan-{{ $j->jawaban_id }}">
-                                                    <i class="fa-solid fa-save"></i> Simpan Penilaian
-                                                </button>
-                                            </div>
+                                    @if($isIsianBenarOtomatis)
+                                        <div class="alert alert-success border-0 rounded-3 p-3 mb-0 small">
+                                            <i class="fa-solid fa-circle-check text-success me-1"></i>
+                                            Jawaban siswa cocok dengan Kunci Jawaban Otomatis. Siswa mendapatkan nilai maksimal <strong>{{ $j->bobot }} / {{ $j->bobot }}</strong>.
                                         </div>
-                                    </form>
+                                    @else
+                                        @if($j->jenis_soal === 'isian')
+                                            <div class="alert alert-warning border-0 rounded-3 p-2 px-3 mb-3 small">
+                                                <i class="fa-solid fa-hand-holding-dollar text-warning me-1"></i>
+                                                <strong>Fitur Upah Nulis:</strong> Jawaban siswa tidak 100% cocok dengan kunci otomatis. Jika jawaban siswa hampir benar/ada typo, Anda dapat memberikan nilai parsial <strong>"Upah Nulis"</strong> (0 s/d {{ $j->bobot - 1 }}).
+                                            </div>
+                                        @endif
+                                        <form class="form-koreksi" onsubmit="simpanKoreksi(event, {{ $j->jawaban_id }})">
+                                            <div class="kx-grading">
+                                                <div>
+                                                    <label class="kx-grading-label">Nilai (0 - {{ $j->bobot }})</label>
+                                                    <div class="kx-score-wrap">
+                                                        <input type="number" name="koreksi[{{ $j->jawaban_id }}][nilai]"
+                                                               class="kx-score-circle"
+                                                               value="{{ $j->nilai_jawaban ?? 0 }}"
+                                                               min="0" max="{{ $j->bobot }}" step="0.1" required>
+                                                        <span class="kx-score-max">/ {{ $j->bobot }}</span>
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <label class="kx-grading-label">Status Keabsahan</label>
+                                                    <div class="kx-status-group">
+                                                        <input type="radio" id="benar-{{ $j->jawaban_id }}" name="koreksi[{{ $j->jawaban_id }}][is_benar]" value="1" class="kx-radio" {{ $j->is_benar === 1 ? 'checked' : '' }} required>
+                                                        <label for="benar-{{ $j->jawaban_id }}" class="kx-radio-label benar"><i class="fa-solid fa-check"></i>Benar</label>
+                                                        <input type="radio" id="salah-{{ $j->jawaban_id }}" name="koreksi[{{ $j->jawaban_id }}][is_benar]" value="0" class="kx-radio" {{ $j->is_benar === 0 ? 'checked' : '' }} required>
+                                                        <label for="salah-{{ $j->jawaban_id }}" class="kx-radio-label salah"><i class="fa-solid fa-xmark"></i>Salah</label>
+                                                    </div>
+                                                </div>
+                                                <div class="kx-grading-actions">
+                                                    <span class="kx-saved-mark" id="save-indicator-{{ $j->jawaban_id }}">
+                                                        <i class="fa-solid fa-check-circle"></i> Tersimpan
+                                                    </span>
+                                                    <button type="submit" class="kx-btn-save" id="btn-simpan-{{ $j->jawaban_id }}">
+                                                        <i class="fa-solid fa-save"></i> Simpan Penilaian
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    @endif
                                 </div>
                             </div>
                         </div>
@@ -470,19 +503,19 @@
             </div>
         </div>
 
-        {{-- TAB PG (READ ONLY) --}}
+        {{-- TAB 2: RINCIAN KOREKSI OTOMATIS (PG, PGK, BENAR/SALAH, MENCOCOKKAN) --}}
         <div class="tab-pane fade" id="pg" role="tabpanel" aria-labelledby="pg-tab">
             <div class="kx-tab-panel-body">
                 @if($jawabans_pg->isEmpty())
                     <div class="kx-empty">
                         <i class="fa-solid fa-clipboard-check"></i>
-                        <h5>Tidak Ada Pilihan Ganda</h5>
-                        <p>Ujian ini tidak memiliki soal pilihan ganda.</p>
+                        <h5>Tidak Ada Soal Koreksi Otomatis</h5>
+                        <p>Ujian ini tidak memiliki soal Pilihan Ganda, PG Kompleks, Benar/Salah, atau Mencocokkan.</p>
                     </div>
                 @else
                     <div class="kx-list-header">
-                        <h2 class="kx-list-title">Rincian Pilihan Ganda</h2>
-                        <span class="kx-weight" style="color:var(--green-ink); background:var(--green-soft); border-color:#B9D8C7;">Skor PG: {{ $skor_pg }} Poin</span>
+                        <h2 class="kx-list-title">Rincian Koreksi Otomatis (PG, PGK, B/S, Mencocokkan)</h2>
+                        <span class="kx-weight" style="color:var(--green-ink); background:var(--green-soft); border-color:#B9D8C7;">Total Skor Otomatis: {{ $skor_pg }} Poin</span>
                     </div>
 
                     <div class="kx-search">
@@ -499,10 +532,12 @@
                         <div class="kx-card accordion-item">
                             <button class="kx-card-head" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePG{{ $pg->jawaban_id }}" aria-expanded="false" aria-controls="collapsePG{{ $pg->jawaban_id }}" id="headingPG{{ $pg->jawaban_id }}">
                                 <span class="kx-num">{{ $pg->urutan }}</span>
-                                <span class="kx-card-label">Soal Pilihan Ganda</span>
+                                <span class="kx-card-label">Soal {{ ucfirst(str_replace('_', ' ', $pg->jenis_soal)) }}</span>
                                 <div class="kx-card-badges">
                                     @if($pg->is_benar === 1)
                                         <span class="kx-stamp ok status-badge"><i class="fa-solid fa-check"></i>Benar (+{{ $pg->nilai_jawaban }})</span>
+                                    @elseif($pg->nilai_jawaban > 0)
+                                        <span class="kx-stamp ok status-badge" style="background:#e0f2fe; color:#0369a1; border-color:#bae6fd;"><i class="fa-solid fa-star-half-stroke"></i>Parsial (+{{ $pg->nilai_jawaban }})</span>
                                     @elseif($pg->is_benar === 0)
                                         <span class="kx-stamp no status-badge"><i class="fa-solid fa-xmark"></i>Salah (0)</span>
                                     @else
@@ -514,44 +549,165 @@
                             </button>
                             <div id="collapsePG{{ $pg->jawaban_id }}" class="accordion-collapse collapse" aria-labelledby="headingPG{{ $pg->jawaban_id }}">
                                 <div class="kx-card-body">
-                                    <div class="kx-soal-text">
+                                    <div class="kx-soal-text mb-3">
                                         {!! $pg->teks_soal !!}
                                         @if($pg->gambar)
                                             <img src="{{ asset('storage/'.$pg->gambar) }}" class="kx-soal-img d-block mt-2" alt="Gambar Soal">
                                         @endif
                                     </div>
 
-                                    <div class="row g-2">
-                                        @if(isset($opsi_pg[$pg->soal_id]))
-                                            @foreach($opsi_pg[$pg->soal_id] as $opsi)
-                                                @php
-                                                    $isSiswaJawaban = ($pg->pilihan_jawaban_id == $opsi->id);
-                                                    $isKunciBenar = ($opsi->is_benar == 1);
-                                                    $optClass = 'kx-opt';
-                                                    $optIcon = '';
-                                                    $optTag = '';
-                                                    if ($isKunciBenar && $isSiswaJawaban) {
-                                                        $optClass .= ' correct-key';
-                                                        $optIcon = '<i class="fa-solid fa-circle-check me-1"></i>';
-                                                        $optTag = '<span class="kx-opt-tag">Jawaban Siswa &amp; Kunci</span>';
-                                                    } elseif ($isKunciBenar && !$isSiswaJawaban) {
-                                                        $optClass .= ' correct-key';
-                                                        $optIcon = '<i class="fa-solid fa-circle-check me-1"></i>';
-                                                        $optTag = '<span class="kx-opt-tag">Kunci Jawaban</span>';
-                                                    } elseif (!$isKunciBenar && $isSiswaJawaban) {
-                                                        $optClass .= ' student-wrong';
-                                                        $optIcon = '<i class="fa-solid fa-circle-xmark me-1"></i>';
-                                                        $optTag = '<span class="kx-opt-tag">Jawaban Siswa</span>';
-                                                    }
-                                                @endphp
-                                                <div class="col-md-6">
-                                                    <div class="{!! $optClass !!}">
-                                                        {!! $optIcon !!} {!! $opsi->teks_pilihan !!} {!! $optTag !!}
+                                    {{-- 1. PILIHAN GANDA --}}
+                                    @if($pg->jenis_soal == 'pilihan_ganda')
+                                        <div class="row g-2">
+                                            @if(isset($opsi_pg[$pg->soal_id]))
+                                                @foreach($opsi_pg[$pg->soal_id] as $opsi)
+                                                    @php
+                                                        $isSiswaJawaban = ($pg->pilihan_jawaban_id == $opsi->id);
+                                                        $isKunciBenar = ($opsi->is_benar == 1);
+                                                        $optClass = 'kx-opt';
+                                                        $optIcon = '';
+                                                        $optTag = '';
+                                                        if ($isKunciBenar && $isSiswaJawaban) {
+                                                            $optClass .= ' correct-key';
+                                                            $optIcon = '<i class="fa-solid fa-circle-check me-1"></i>';
+                                                            $optTag = '<span class="kx-opt-tag">Jawaban Siswa &amp; Kunci</span>';
+                                                        } elseif ($isKunciBenar && !$isSiswaJawaban) {
+                                                            $optClass .= ' correct-key';
+                                                            $optIcon = '<i class="fa-solid fa-circle-check me-1"></i>';
+                                                            $optTag = '<span class="kx-opt-tag">Kunci Jawaban</span>';
+                                                        } elseif (!$isKunciBenar && $isSiswaJawaban) {
+                                                            $optClass .= ' student-wrong';
+                                                            $optIcon = '<i class="fa-solid fa-circle-xmark me-1"></i>';
+                                                            $optTag = '<span class="kx-opt-tag">Jawaban Siswa</span>';
+                                                        }
+                                                    @endphp
+                                                    <div class="col-md-6">
+                                                        <div class="{!! $optClass !!}">
+                                                            {!! $optIcon !!} {!! $opsi->teks_pilihan !!} {!! $optTag !!}
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            @endforeach
-                                        @endif
-                                    </div>
+                                                @endforeach
+                                            @endif
+                                        </div>
+
+                                    {{-- 2. PILIHAN GANDA KOMPLEKS --}}
+                                    @elseif($pg->jenis_soal == 'pilihan_ganda_kompleks')
+                                        @php
+                                            $siswaChoices = is_array($pg->jawaban_json) ? array_map('intval', $pg->jawaban_json) : [];
+                                        @endphp
+                                        <div class="row g-2">
+                                            @if(isset($opsi_pg[$pg->soal_id]))
+                                                @foreach($opsi_pg[$pg->soal_id] as $opsi)
+                                                    @php
+                                                        $isPilih = in_array((int)$opsi->id, $siswaChoices, true);
+                                                        $isKunci = ($opsi->is_benar == 1);
+                                                        $optClass = 'kx-opt';
+                                                        $optTag = '';
+                                                        if ($isKunci && $isPilih) {
+                                                            $optClass .= ' correct-key';
+                                                            $optTag = '<span class="kx-opt-tag"><i class="fa-solid fa-check me-1"></i>Dipilih &amp; Kunci Benar</span>';
+                                                        } elseif ($isKunci && !$isPilih) {
+                                                            $optClass .= ' correct-key';
+                                                            $optTag = '<span class="kx-opt-tag">Kunci Benar (Tidak Dipilih)</span>';
+                                                        } elseif (!$isKunci && $isPilih) {
+                                                            $optClass .= ' student-wrong';
+                                                            $optTag = '<span class="kx-opt-tag"><i class="fa-solid fa-xmark me-1"></i>Dipilih (Salah)</span>';
+                                                        }
+                                                    @endphp
+                                                    <div class="col-md-6">
+                                                        <div class="{!! $optClass !!}">
+                                                            {!! $opsi->teks_pilihan !!} {!! $optTag !!}
+                                                        </div>
+                                                    </div>
+                                                @endforeach
+                                            @endif
+                                        </div>
+
+                                    {{-- 3. BENAR / SALAH --}}
+                                    @elseif($pg->jenis_soal == 'benar_salah')
+                                        @php
+                                            $siswaChoicesBS = is_array($pg->jawaban_json) ? $pg->jawaban_json : [];
+                                        @endphp
+                                        <div class="table-responsive">
+                                            <table class="table table-sm table-bordered align-middle small bg-white mb-0">
+                                                <thead class="bg-light">
+                                                    <tr>
+                                                        <th>Pernyataan</th>
+                                                        <th class="text-center">Kunci Benar</th>
+                                                        <th class="text-center">Jawaban Siswa</th>
+                                                        <th class="text-center">Status</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @if(isset($opsi_pg[$pg->soal_id]))
+                                                        @foreach($opsi_pg[$pg->soal_id] as $pj)
+                                                            @php
+                                                                $keyBS = 'stmt_' . $pj->urutan;
+                                                                $ansSiswa = strtolower(trim((string) ($siswaChoicesBS[$keyBS] ?? $siswaChoicesBS[$pj->id] ?? '')));
+                                                                $kunciStr = $pj->is_benar ? 'benar' : 'salah';
+                                                                $isMatch = ($ansSiswa === $kunciStr);
+                                                            @endphp
+                                                            <tr>
+                                                                <td>{!! $pj->teks_pilihan !!}</td>
+                                                                <td class="text-center fw-bold text-success">{{ ucfirst($kunciStr) }}</td>
+                                                                <td class="text-center fw-bold {{ $isMatch ? 'text-success' : 'text-danger' }}">{{ $ansSiswa ? ucfirst($ansSiswa) : '(Kosong)' }}</td>
+                                                                <td class="text-center">
+                                                                    @if($isMatch)
+                                                                        <span class="badge bg-success"><i class="fa-solid fa-check"></i></span>
+                                                                    @else
+                                                                        <span class="badge bg-danger"><i class="fa-solid fa-xmark"></i></span>
+                                                                    @endif
+                                                                </td>
+                                                            </tr>
+                                                        @endforeach
+                                                    @endif
+                                                </tbody>
+                                            </table>
+                                        </div>
+
+                                    {{-- 4. MENCOCOKKAN --}}
+                                    @elseif($pg->jenis_soal == 'mencocokkan')
+                                        @php
+                                            $siswaChoicesM = is_array($pg->jawaban_json) ? $pg->jawaban_json : [];
+                                        @endphp
+                                        <div class="table-responsive">
+                                            <table class="table table-sm table-bordered align-middle small bg-white mb-0">
+                                                <thead class="bg-light">
+                                                    <tr>
+                                                        <th>Item Kiri (Soal)</th>
+                                                        <th>Pasangan Kunci Benar</th>
+                                                        <th>Pasangan Jawaban Siswa</th>
+                                                        <th class="text-center">Status</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @if(isset($opsi_pg[$pg->soal_id]))
+                                                        @foreach($opsi_pg[$pg->soal_id] as $pj)
+                                                            @php
+                                                                $itemKiri = $pj->teks_pilihan;
+                                                                $pasanganKunci = $pj->pasangan;
+                                                                $pasanganSiswa = $siswaChoicesM[$itemKiri] ?? $siswaChoicesM[$pj->id] ?? '';
+                                                                $isMatch = (strtolower(trim($pasanganSiswa)) === strtolower(trim($pasanganKunci)));
+                                                            @endphp
+                                                            <tr>
+                                                                <td class="fw-semibold">{!! $itemKiri !!}</td>
+                                                                <td class="fw-bold text-success">{{ $pasanganKunci }}</td>
+                                                                <td class="fw-bold {{ $isMatch ? 'text-success' : 'text-danger' }}">{{ $pasanganSiswa ? $pasanganSiswa : '(Belum Dijodohkan)' }}</td>
+                                                                <td class="text-center">
+                                                                    @if($isMatch)
+                                                                        <span class="badge bg-success"><i class="fa-solid fa-check"></i></span>
+                                                                    @else
+                                                                        <span class="badge bg-danger"><i class="fa-solid fa-xmark"></i></span>
+                                                                    @endif
+                                                                </td>
+                                                            </tr>
+                                                        @endforeach
+                                                    @endif
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    @endif
+
                                 </div>
                             </div>
                         </div>
@@ -686,5 +842,50 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 });
+
+function simpanPotonganPelanggaran(event) {
+    event.preventDefault();
+    const btn = document.getElementById('btnSavePotongan');
+    const input = document.getElementById('potonganPelanggaranInput');
+    const notice = document.getElementById('potonganNotice');
+    const origHtml = btn.innerHTML;
+
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+    btn.disabled = true;
+
+    const formData = new FormData();
+    formData.append('potongan_pelanggaran', input.value);
+
+    fetch("{{ route('dashboard-guru.nilai-siswa.store-koreksi', ['ujian' => $ujian->id, 'siswa' => $siswa->id]) }}", {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+            'Accept': 'application/json'
+        },
+        body: formData
+    })
+    .then(r => r.json())
+    .then(data => {
+        btn.innerHTML = origHtml;
+        btn.disabled = false;
+        if (data.success) {
+            if (data.nilai_akhir !== undefined) {
+                const scoreDisplay = document.getElementById('nilai-akhir-display');
+                if (scoreDisplay) {
+                    scoreDisplay.innerHTML = parseFloat(data.nilai_akhir).toFixed(2) + ' <span class="kx-ledger-sub">/ 100</span>';
+                }
+            }
+            let pot = parseFloat(input.value);
+            notice.textContent = pot > 0 ? `Dipotong -${pot} poin` : 'Belum ada potongan';
+        } else {
+            alert('Gagal menyimpan potongan: ' + data.message);
+        }
+    })
+    .catch(err => {
+        btn.innerHTML = origHtml;
+        btn.disabled = false;
+        console.error(err);
+    });
+}
 </script>
 @endsection

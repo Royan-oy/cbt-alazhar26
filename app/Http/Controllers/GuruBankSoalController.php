@@ -137,8 +137,12 @@ class GuruBankSoalController extends Controller
         $guru = Auth::user()->guru;
         $this->authorizeOwnership($guru, $bank_soal);
 
-        // Sesuai keputusan: bank soal yang sudah publish tidak boleh langsung
-        // dihapus, harus di-unpublish dulu lewat togglePublish().
+        if ($bank_soal->isLocked()) {
+            return redirect()
+                ->route('dashboard-guru.bank-soal.index')
+                ->with('error', 'Bank soal "' . $bank_soal->nama_bank_soal . '" terkunci karena sedang atau telah digunakan dalam Ujian. Silakan duplikat jika ingin membuat versi revisi.');
+        }
+
         if ($bank_soal->is_publish) {
             return redirect()
                 ->route('dashboard-guru.bank-soal.index')
@@ -172,5 +176,40 @@ class GuruBankSoalController extends Controller
             ->with('success', $bank_soal->is_publish
                 ? 'Bank Soal berhasil dipublish.'
                 : 'Bank Soal berhasil di-unpublish.');
+    }
+
+    public function duplicate(BankSoal $bank_soal)
+    {
+        $guru = Auth::user()->guru;
+        $this->authorizeOwnership($guru, $bank_soal);
+
+        \Illuminate\Support\Facades\DB::beginTransaction();
+        try {
+            $newBankSoal = $bank_soal->replicate();
+            $newBankSoal->nama_bank_soal = 'Salinan - ' . $bank_soal->nama_bank_soal;
+            $newBankSoal->is_publish = false;
+            $newBankSoal->save();
+
+            foreach ($bank_soal->soals as $oldSoal) {
+                $newSoal = $oldSoal->replicate();
+                $newSoal->bank_soal_id = $newBankSoal->id;
+                $newSoal->save();
+
+                foreach ($oldSoal->pilihanJawabans as $oldPilihan) {
+                    $newPilihan = $oldPilihan->replicate();
+                    $newPilihan->soal_id = $newSoal->id;
+                    $newPilihan->save();
+                }
+            }
+
+            \Illuminate\Support\Facades\DB::commit();
+
+            return redirect()
+                ->route('dashboard-guru.bank-soal.soal.index', $newBankSoal->id)
+                ->with('success', 'Bank Soal berhasil diduplikasi. Anda dapat mengedit soal pada versi baru ini.');
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\DB::rollBack();
+            return redirect()->back()->with('error', 'Gagal menduplikasi Bank Soal: ' . $e->getMessage());
+        }
     }
 }

@@ -21,7 +21,8 @@ class Nilai extends Model
         'status_penilaian',
         'current_question',
         'last_autosave',
-        'violation_count'
+        'violation_count',
+        'potongan_pelanggaran'
     ];
 
 
