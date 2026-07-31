@@ -11,8 +11,7 @@ use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 class SoalTemplateExport implements FromArray, WithHeadings, WithStyles, WithColumnWidths
 {
     /**
-     * Baris contoh supaya guru langsung paham formatnya,
-     * bukan cuma header kosong.
+     * Baris contoh serbaguna (Unified) untuk 6 jenis soal
      */
     public function array(): array
     {
@@ -20,28 +19,64 @@ class SoalTemplateExport implements FromArray, WithHeadings, WithStyles, WithCol
             [
                 'pilihan_ganda',
                 10,
-                'Ibu kota Indonesia adalah...',
-                'Jakarta',
-                'Bandung',
-                'Surabaya',
-                'Medan',
+                'Siapakah Nabi terakhir yang diutus Allah SWT?',
+                'Nabi Ibrahim AS',
+                'Nabi Musa AS',
+                'Nabi Muhammad SAW',
+                'Nabi Isa AS',
                 '',
                 '',
-                1,
+                '3', // atau 'C'
+            ],
+            [
+                'pilihan_ganda_kompleks',
+                15,
+                'Manakah yang termasuk Rukun Islam? (Pilih lebih dari satu)',
+                'Syahadat',
+                'Membaca Al-Qur\'an tiap malam',
+                'Sholat 5 Waktu',
+                'Zakat',
+                '',
+                '',
+                '1, 3, 4', // atau 'A, C, D'
+            ],
+            [
+                'benar_salah',
+                15,
+                'Tentukan hukum bacaan Tajwid berikut Benar atau Salah:',
+                'Idgham Bighunnah apabila Nun Mati bertemu Mim',
+                'Izhar Halqi dibaca mendengung 3 harakat',
+                'Huruf Qalqalah ada 5 huruf (ق ط ب ج د)',
+                '',
+                '',
+                '',
+                'Benar, Salah, Benar', // atau 'B, S, B'
+            ],
+            [
+                'mencocokkan',
+                15,
+                'Pasangkan Kitab Allah dengan Nabi penerimanya:',
+                'Kitab Taurat',
+                'Kitab Zabur',
+                'Kitab Injil',
+                '',
+                '',
+                '',
+                'Nabi Musa AS | Nabi Daud AS | Nabi Isa AS', // dipisah tanda | sesuai urutan opsi
+            ],
+            [
+                'isian',
+                10,
+                'Kota tempat kelahiran Nabi Muhammad SAW adalah ____.',
+                '', '', '', '', '', '',
+                'Makkah; Mekkah; Kota Makkah', // Kunci alternatif dipisah semikolon ;
             ],
             [
                 'essay',
                 20,
-                'Jelaskan proses terjadinya hujan!',
+                'Jelaskan hikmah sholat berjamaah dalam kehidupan masyarakat!',
                 '', '', '', '', '', '',
-                '',
-            ],
-            [
-                'isian',
-                5,
-                'Planet terbesar di tata surya adalah ____.',
-                '', '', '', '', '', '',
-                '',
+                '', // Kosong untuk essay
             ],
         ];
     }
@@ -49,16 +84,16 @@ class SoalTemplateExport implements FromArray, WithHeadings, WithStyles, WithCol
     public function headings(): array
     {
         return [
-            'Jenis Soal (pilihan_ganda/essay/isian)',
+            'Jenis Soal (pilihan_ganda / pilihan_ganda_kompleks / benar_salah / mencocokkan / isian / essay)',
             'Bobot',
             'Teks Soal',
-            'Opsi 1',
-            'Opsi 2',
-            'Opsi 3',
-            'Opsi 4',
-            'Opsi 5',
-            'Opsi 6',
-            'Jawaban Benar (nomor opsi, khusus pilihan_ganda)',
+            'Opsi 1 / Item 1',
+            'Opsi 2 / Item 2',
+            'Opsi 3 / Item 3',
+            'Opsi 4 / Item 4',
+            'Opsi 5 / Item 5',
+            'Opsi 6 / Item 6',
+            'Kunci Jawaban (Sesuai Petunjuk Jenis Soal)',
         ];
     }
 
@@ -72,16 +107,16 @@ class SoalTemplateExport implements FromArray, WithHeadings, WithStyles, WithCol
     public function columnWidths(): array
     {
         return [
-            'A' => 32,
+            'A' => 38,
             'B' => 10,
             'C' => 45,
-            'D' => 20,
-            'E' => 20,
-            'F' => 20,
-            'G' => 20,
+            'D' => 24,
+            'E' => 24,
+            'F' => 24,
+            'G' => 24,
             'H' => 20,
             'I' => 20,
-            'J' => 28,
+            'J' => 40,
         ];
     }
 }

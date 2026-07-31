@@ -49,4 +49,12 @@ class BankSoal extends Model
     {
         return $this->hasMany(Ujian::class);
     }
+
+    /**
+     * Mengecek apakah Bank Soal ini terkunci (sedang/telah dipakai dalam Ujian)
+     */
+    public function isLocked(): bool
+    {
+        return $this->ujians()->exists();
+    }
 }

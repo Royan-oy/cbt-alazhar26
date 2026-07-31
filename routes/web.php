@@ -154,11 +154,15 @@ Route::middleware(['auth'])->group(function () {
         Route::get('jadwal-ujian', [GuruJadwalUjianController::class, 'index'])->name('jadwal-ujian.index');
         Route::get('jadwal-ujian/{id}', [GuruJadwalUjianController::class, 'show'])->name('jadwal-ujian.show');
 
-        // Guru butuh cara sendiri untuk unpublish bank soal miliknya
         Route::patch(
             'bank-soal/{bank_soal}/toggle-publish',
             [GuruBankSoalController::class, 'togglePublish']
         )->name('bank-soal.toggle-publish');
+
+        Route::post(
+            'bank-soal/{bank_soal}/duplicate',
+            [GuruBankSoalController::class, 'duplicate']
+        )->name('bank-soal.duplicate');
 
         Route::prefix('bank-soal/{bank_soal}')->name('bank-soal.')->group(function () {
             Route::get('soal', [SoalController::class, 'index'])->name('soal.index');

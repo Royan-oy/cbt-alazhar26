@@ -430,14 +430,24 @@
                 </p>
             </div>
             <div class="d-flex gap-2">
-                <button type="button" class="header-btn-outline" data-bs-toggle="modal" data-bs-target="#importModal">
-                    <i class="fa-solid fa-file-excel"></i>
-                    Import Excel
-                </button>
-                <a href="{{ route('dashboard-guru.bank-soal.soal.create', $bank_soal->id) }}" class="header-btn">
-                    <i class="fa-solid fa-plus"></i>
-                    Tambah Soal
-                </a>
+                @if(!$bank_soal->isLocked())
+                    <button type="button" class="header-btn-outline" data-bs-toggle="modal" data-bs-target="#importModal">
+                        <i class="fa-solid fa-file-excel"></i>
+                        Import Excel
+                    </button>
+                    <a href="{{ route('dashboard-guru.bank-soal.soal.create', $bank_soal->id) }}" class="header-btn">
+                        <i class="fa-solid fa-plus"></i>
+                        Tambah Soal
+                    </a>
+                @else
+                    <form action="{{ route('dashboard-guru.bank-soal.duplicate', $bank_soal->id) }}" method="POST">
+                        @csrf
+                        <button type="submit" class="header-btn">
+                            <i class="fa-solid fa-copy"></i>
+                            Duplikat Bank Soal
+                        </button>
+                    </form>
+                @endif
             </div>
         </div>
     </div>
@@ -499,6 +509,25 @@
     </div>
     @endif
 
+    {{-- Warning Banner Jika Terkunci --}}
+    @if($bank_soal->isLocked())
+    <div class="alert alert-warning border-0 shadow-sm rounded-4 p-3 mb-4 d-flex align-items-center justify-content-between flex-wrap gap-3" style="background:#fffbeb; border:1px solid #fde68a;">
+        <div class="d-flex align-items-center gap-3">
+            <i class="fa-solid fa-lock text-warning fs-3 me-1"></i>
+            <div>
+                <h6 class="fw-bold mb-1 text-dark">Bank Soal Terkunci (Read-Only)</h6>
+                <p class="mb-0 small text-muted">Bank Soal ini sedang atau telah digunakan dalam Ujian. Untuk menjaga integritas data &amp; nilai siswa, soal tidak dapat diubah/dihapus.</p>
+            </div>
+        </div>
+        <form action="{{ route('dashboard-guru.bank-soal.duplicate', $bank_soal->id) }}" method="POST">
+            @csrf
+            <button type="submit" class="btn btn-warning text-dark rounded-3 fw-bold px-3 py-2">
+                <i class="fa-solid fa-copy me-1"></i> Duplikat Bank Soal Ini
+            </button>
+        </form>
+    </div>
+    @endif
+
     {{-- Filter & Pencarian --}}
     @if($soals->isNotEmpty())
     <div class="filter-bar">
@@ -542,6 +571,7 @@
                     </div>
                 </div>
 
+                @if(!$bank_soal->isLocked())
                 <div class="soal-actions">
                     <a href="{{ route('dashboard-guru.bank-soal.soal.edit', [$bank_soal->id, $soal->id]) }}"
                        class="action-icon-btn btn-icon-edit" title="Edit">
@@ -556,6 +586,11 @@
                         </button>
                     </form>
                 </div>
+                @else
+                <div class="soal-actions">
+                    <span class="badge bg-secondary opacity-75 py-2 px-3 rounded-pill" title="Bank Soal Terkunci"><i class="fa-solid fa-lock me-1"></i>Terkunci</span>
+                </div>
+                @endif
             </div>
 
             <p class="soal-text">{{ strip_tags($soal->teks_soal) }}</p>

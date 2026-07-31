@@ -526,7 +526,12 @@
 
                             {{-- Status --}}
                             <td class="text-center">
-                                @if($bs->is_publish)
+                                @if($bs->isLocked())
+                                    <span class="status-badge" style="background: #f3e8ff; color: #7e22ce; border: 1px solid #d8b4fe;" title="Terkunci karena sedang/telah digunakan Ujian">
+                                        <i class="fa-solid fa-lock" style="font-size: 10px;"></i>
+                                        Terkunci
+                                    </span>
+                                @elseif($bs->is_publish)
                                     <span class="status-badge published">
                                         <span class="dot"></span>
                                         Publik
@@ -553,40 +558,54 @@
                                                 Lihat Detail
                                             </a>
                                         </li>
+
+                                        {{-- Duplikat Bank Soal --}}
+                                        <li>
+                                            <form action="{{ route('dashboard-guru.bank-soal.duplicate', $bs->id) }}" method="POST" class="d-inline w-100">
+                                                @csrf
+                                                <button type="submit" class="dropdown-item d-flex align-items-center gap-2 w-100 text-start border-0 bg-transparent text-primary fw-semibold">
+                                                    <i class="fa-solid fa-copy text-primary" style="width: 16px;"></i> 
+                                                    Duplikat Bank Soal
+                                                </button>
+                                            </form>
+                                        </li>
                                         
                                         {{-- Edit --}}
+                                        @if(!$bs->isLocked())
                                         <li>
                                             <a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('dashboard-guru.bank-soal.edit', $bs->id) }}">
                                                 <i class="fa-solid fa-pen text-primary" style="width: 16px;"></i> 
                                                 Edit
                                             </a>
                                         </li>
+                                        @endif
 
                                         {{-- Tambah / Kelola Soal --}}
                                         <li>
-                                            {{-- Catatan: Sesuaikan nama route di bawah ini jika di file web.php Anda namanya berbeda --}}
                                             <a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('dashboard-guru.bank-soal.soal.index', $bs->id) }}">
                                                 <i class="fa-solid fa-file-circle-plus text-info" style="width: 16px;"></i> 
-                                                Tambah Soal
+                                                {{ $bs->isLocked() ? 'Lihat Soal' : 'Tambah / Kelola Soal' }}
                                             </a>
                                         </li>
                                         
                                         {{-- Publish/Unpublish --}}
+                                        @if(!$bs->isLocked())
                                         <li>
                                             <form action="{{ route('dashboard-guru.bank-soal.toggle-publish', $bs->id) }}" method="POST" class="d-inline w-100">
                                                 @csrf
                                                 @method('PATCH')
                                                 <button type="submit" class="dropdown-item d-flex align-items-center gap-2 w-100 text-start border-0 bg-transparent">
-                                                    {{-- Ikon diganti: fa-paper-plane untuk publish, fa-box-archive untuk unpublish --}}
                                                     <i class="fa-solid {{ $bs->is_publish ? 'fa-box-archive text-secondary' : 'fa-paper-plane text-success' }}" style="width: 16px;"></i>
                                                     {{ $bs->is_publish ? 'Unpublish' : 'Publish' }}
                                                 </button>
                                             </form>
                                         </li>
+                                        @endif
                                         
                                         <li><hr class="dropdown-divider my-1"></li>
                                         
                                         {{-- Hapus --}}
+                                        @if(!$bs->isLocked())
                                         <li>
                                             <form action="{{ route('dashboard-guru.bank-soal.destroy', $bs->id) }}" method="POST" class="form-delete d-inline w-100">
                                                 @csrf
@@ -597,6 +616,7 @@
                                                 </button>
                                             </form>
                                         </li>
+                                        @endif
                                     </ul>
                                 </div>
                             </td>

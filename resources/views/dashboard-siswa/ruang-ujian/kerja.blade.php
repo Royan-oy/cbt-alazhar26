@@ -990,68 +990,140 @@
                     <div class="soal-gambar-container">
                         <div class="soal-gambar-wrap" onclick="openImageModal('{{ asset('storage/' . $soal->gambar) }}', 'Soal {{ $index + 1 }}')">
                             <img src="{{ asset('storage/' . $soal->gambar) }}" alt="Gambar Soal {{ $index + 1 }}">
-                            <span class="soal-gambar-badge">
-                                <i class="fa-solid fa-magnifying-glass-plus"></i> Perbesar
-                            </span>
-                        </div>
-                    </div>
                 @endif
+                @php
+                    $jawabanSoal = $jawaban[$soal->id] ?? null;
+                    $jsonSaved = is_array(optional($jawabanSoal)->jawaban_json) ? optional($jawabanSoal)->jawaban_json : [];
+                @endphp
 
-                {{-- Input Opsi Jawaban --}}
                 @if($soal->jenis_soal == 'pilihan_ganda')
                     <div class="options-container">
-                        @php
-                            $jawabanSoal = $jawaban[$soal->id] ?? null;
-                        @endphp
                         @foreach($soal->pilihanJawabans as $pilihan)
                             <div class="option-wrapper">
-
-                            <input
-                                type="radio"
-                                name="jawaban[{{ $soal->id }}]"
-                                id="opt-{{ $pilihan->id }}"
-                                value="{{ $pilihan->id }}"
-                                class="option-input"
-
-                                {{ optional($jawabanSoal)->pilihan_jawaban_id == $pilihan->id ? 'checked' : '' }}
-
-                                onchange="
-                                    markAsAnswered({{ $index }});
-
-                                    saveAnswer(
-                                        {{ $ujian->id }},
-                                        {{ $soal->id }},
-                                        {{ $pilihan->id }},
-                                        'pilihan_ganda'
-                                    );
-                                "
-                            >
-
-                            <label
-                                for="opt-{{ $pilihan->id }}"
-                                class="btn-option">
-
-                                <span class="option-badge">
-                                    {{ chr(65 + $loop->index) }}
-                                </span>
-
-                                <span class="option-text">
-                                    {!! $pilihan->teks_pilihan !!}
-                                </span>
-
-                            </label>
-
-                        </div>
+                                <input
+                                    type="radio"
+                                    name="jawaban[{{ $soal->id }}]"
+                                    id="opt-{{ $pilihan->id }}"
+                                    value="{{ $pilihan->id }}"
+                                    class="option-input"
+                                    {{ optional($jawabanSoal)->pilihan_jawaban_id == $pilihan->id ? 'checked' : '' }}
+                                    onchange="
+                                        markAsAnswered({{ $index }});
+                                        saveAnswer({{ $ujian->id }}, {{ $soal->id }}, {{ $pilihan->id }}, 'pilihan_ganda');
+                                    "
+                                >
+                                <label for="opt-{{ $pilihan->id }}" class="btn-option">
+                                    <span class="option-badge">{{ chr(65 + $loop->index) }}</span>
+                                    <span class="option-text">{!! $pilihan->teks_pilihan !!}</span>
+                                </label>
+                            </div>
                         @endforeach
                     </div>
-                @else
-                    {{-- Jika Essay / Isian --}}
-                    <div class="form-group">
-                        <label class="essay-label">Jawaban Anda</label>
-                        @php
-                            $jawabanSoal = $jawaban[$soal->id] ?? null;
-                        @endphp
 
+                @elseif($soal->jenis_soal == 'pilihan_ganda_kompleks')
+                    @php
+                        $maxKunciBenar = $soal->pilihanJawabans->where('is_benar', true)->count();
+                        if ($maxKunciBenar < 1) $maxKunciBenar = 1;
+                        $countCurrentSelected = is_array($jsonSaved) ? count($jsonSaved) : 0;
+                    @endphp
+                    <div class="alert alert-info py-2 px-3 small border-0 mb-3 rounded-3 d-flex align-items-center justify-content-between">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="fa-solid fa-circle-info text-info"></i>
+                            <span><strong>Petunjuk:</strong> Pilihlah maksimal <strong>{{ $maxKunciBenar }}</strong> jawaban di bawah ini.</span>
+                        </div>
+                        <span class="badge bg-primary rounded-pill px-3 py-1.5 fs-7" id="pgk-counter-{{ $soal->id }}">
+                            Terpilih: {{ $countCurrentSelected }}/{{ $maxKunciBenar }}
+                        </span>
+                    </div>
+                    <div class="options-container" id="pgk-box-{{ $soal->id }}" data-max="{{ $maxKunciBenar }}">
+                        @foreach($soal->pilihanJawabans as $pilihan)
+                            <div class="option-wrapper">
+                                <input
+                                    type="checkbox"
+                                    name="jawaban_pgk[{{ $soal->id }}][]"
+                                    id="opt-pgk-{{ $pilihan->id }}"
+                                    value="{{ $pilihan->id }}"
+                                    class="option-input pgk-item-{{ $soal->id }}"
+                                    {{ in_array($pilihan->id, $jsonSaved) ? 'checked' : '' }}
+                                    onchange="
+                                        handlePgkClick(this, {{ $ujian->id }}, {{ $soal->id }}, {{ $index }}, {{ $maxKunciBenar }});
+                                    "
+                                >
+                                <label for="opt-pgk-{{ $pilihan->id }}" class="btn-option">
+                                    <span class="option-badge"><i class="fa-solid fa-check"></i></span>
+                                    <span class="option-text">{!! $pilihan->teks_pilihan !!}</span>
+                                </label>
+                            </div>
+                        @endforeach
+                    </div>
+
+                @elseif($soal->jenis_soal == 'benar_salah')
+                    <div class="table-responsive">
+                        <table class="table table-bordered align-middle rounded-3 overflow-hidden bg-white">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th>Pernyataan</th>
+                                    <th class="text-center" style="width: 120px;">Benar</th>
+                                    <th class="text-center" style="width: 120px;">Salah</th>
+                                </tr>
+                            </thead>
+                            <tbody id="bs-box-{{ $soal->id }}">
+                                @foreach($soal->pilihanJawabans as $pj)
+                                    @php
+                                        $savedVal = strtolower(trim((string) ($jsonSaved['stmt_' . $pj->urutan] ?? $jsonSaved[$pj->id] ?? '')));
+                                    @endphp
+                                    <tr>
+                                        <td>{!! $pj->teks_pilihan !!}</td>
+                                        <td class="text-center">
+                                            <input type="radio" name="bs[{{ $soal->id }}][{{ $pj->urutan }}]" value="benar" class="form-check-input bs-item-{{ $soal->id }}" data-urutan="{{ $pj->urutan }}" {{ $savedVal === 'benar' ? 'checked' : '' }} onchange="saveBsAnswers({{ $ujian->id }}, {{ $soal->id }}, {{ $index }})">
+                                        </td>
+                                        <td class="text-center">
+                                            <input type="radio" name="bs[{{ $soal->id }}][{{ $pj->urutan }}]" value="salah" class="form-check-input bs-item-{{ $soal->id }}" data-urutan="{{ $pj->urutan }}" {{ $savedVal === 'salah' ? 'checked' : '' }} onchange="saveBsAnswers({{ $ujian->id }}, {{ $soal->id }}, {{ $index }})">
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+
+                @elseif($soal->jenis_soal == 'mencocokkan')
+                    <div class="d-flex flex-column gap-3" id="matching-box-{{ $soal->id }}">
+                        @foreach($soal->pilihanJawabans as $pj)
+                            @php
+                                $savedPair = $jsonSaved[$pj->teks_pilihan] ?? $jsonSaved[$pj->id] ?? '';
+                            @endphp
+                            <div class="d-flex align-items-center justify-content-between p-3 border rounded-3 bg-white">
+                                <div class="fw-semibold text-dark me-3"><i class="fa-solid fa-bookmark text-primary me-2"></i>{!! $pj->teks_pilihan !!}</div>
+                                <select class="form-select matching-item-{{ $soal->id }}" style="max-width: 280px;" data-kiri="{{ $pj->teks_pilihan }}" onchange="saveMatchingAnswers({{ $ujian->id }}, {{ $soal->id }}, {{ $index }})">
+                                    <option value="">-- Pilih Pasangan --</option>
+                                    @foreach($soal->pilihanJawabans as $pairOpt)
+                                        <option value="{{ $pairOpt->pasangan }}" {{ $savedPair === $pairOpt->pasangan ? 'selected' : '' }}>{{ $pairOpt->pasangan }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        @endforeach
+                    </div>
+
+                @elseif($soal->jenis_soal == 'isian')
+                    <div class="form-group">
+                        <label class="essay-label">Jawaban Singkat Anda</label>
+                        <input
+                            type="text"
+                            name="jawaban[{{ $soal->id }}]"
+                            class="form-control form-control-lg fw-semibold"
+                            placeholder="Tuliskan jawaban singkat..."
+                            value="{{ old('jawaban.'.$soal->id, optional($jawabanSoal)->jawaban_text) }}"
+                            oninput="
+                                checkEssayAnswer(this, {{ $index }});
+                                saveEssay({{ $ujian->id }}, {{ $soal->id }}, this.value);
+                            "
+                        >
+                    </div>
+
+                @else
+                    {{-- Uraian / Essay --}}
+                    <div class="form-group">
+                        <label class="essay-label">Jawaban Uraian Anda</label>
                         <textarea
                             name="jawaban[{{ $soal->id }}]"
                             class="form-control"
@@ -1059,19 +1131,14 @@
                             placeholder="Ketik jawaban lengkap Anda di sini..."
                             oninput="
                                 checkEssayAnswer(this, {{ $index }});
-                                saveEssay(
-                                    {{ $ujian->id }},
-                                    {{ $soal->id }},
-                                    this.value
-                                );
-                        ">{{ old('jawaban.'.$soal->id, optional($jawabanSoal)->jawaban_text) }}</textarea>
+                                saveEssay({{ $ujian->id }}, {{ $soal->id }}, this.value);
+                            "
+                        >{{ old('jawaban.'.$soal->id, optional($jawabanSoal)->jawaban_text) }}</textarea>
                     </div>
                 @endif
             </div>
         @endforeach
     </form>
-</div>
-
 {{-- BOTTOM ACTION BAR — fixed, selalu terjangkau tanpa scroll --}}
 <div class="exam-bottom-nav">
     <div class="exam-bottom-nav-inner">
@@ -1542,6 +1609,106 @@
                 jawaban_text: jawaban
             })
         });
+    }
+
+    let pgkSelectionHistory = {};
+
+    function handlePgkClick(checkbox, ujianId, soalId, index, maxAllowed) {
+        if (!pgkSelectionHistory[soalId]) {
+            pgkSelectionHistory[soalId] = [];
+            let container = document.getElementById(`pgk-box-${soalId}`);
+            if (container) {
+                let checked = container.querySelectorAll('.pgk-item-' + soalId + ':checked');
+                checked.forEach(cb => pgkSelectionHistory[soalId].push(parseInt(cb.value)));
+            }
+        }
+
+        let val = parseInt(checkbox.value);
+
+        if (checkbox.checked) {
+            if (!pgkSelectionHistory[soalId].includes(val)) {
+                pgkSelectionHistory[soalId].push(val);
+            }
+            if (pgkSelectionHistory[soalId].length > maxAllowed) {
+                let oldestVal = pgkSelectionHistory[soalId].shift();
+                let oldestCheckbox = document.getElementById(`opt-pgk-${oldestVal}`);
+                if (oldestCheckbox) {
+                    oldestCheckbox.checked = false;
+                }
+            }
+        } else {
+            pgkSelectionHistory[soalId] = pgkSelectionHistory[soalId].filter(v => v !== val);
+        }
+
+        let counterBadge = document.getElementById(`pgk-counter-${soalId}`);
+        if (counterBadge) {
+            counterBadge.textContent = `Terpilih: ${pgkSelectionHistory[soalId].length}/${maxAllowed}`;
+        }
+
+        if (pgkSelectionHistory[soalId].length > 0) {
+            markAsAnswered(index);
+        } else {
+            const navBox = document.getElementById(`nav-box-${index}`);
+            if (navBox) navBox.classList.remove('answered');
+            updateFinishButtonState();
+        }
+
+        saveJsonPayload(ujianId, soalId, pgkSelectionHistory[soalId]);
+    }
+
+    function saveBsAnswers(ujianId, soalId, index) {
+        let container = document.getElementById(`bs-box-${soalId}`);
+        let radios = container.querySelectorAll('.bs-item-' + soalId + ':checked');
+        let result = {};
+        radios.forEach(r => {
+            let urutan = r.getAttribute('data-urutan');
+            result['stmt_' + urutan] = r.value;
+        });
+
+        if (Object.keys(result).length > 0) {
+            markAsAnswered(index);
+        }
+
+        saveJsonPayload(ujianId, soalId, result);
+    }
+
+    function saveMatchingAnswers(ujianId, soalId, index) {
+        let container = document.getElementById(`matching-box-${soalId}`);
+        let selects = container.querySelectorAll('.matching-item-' + soalId);
+        let result = {};
+        let countFilled = 0;
+        selects.forEach(sel => {
+            let kiri = sel.getAttribute('data-kiri');
+            if (sel.value) {
+                result[kiri] = sel.value;
+                countFilled++;
+            }
+        });
+
+        if (countFilled > 0) {
+            markAsAnswered(index);
+        }
+
+        saveJsonPayload(ujianId, soalId, result);
+    }
+
+    function saveJsonPayload(ujianId, soalId, jsonPayload) {
+        fetch("{{ route('dashboard-siswa.ujian.autosave') }}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json",
+                "X-CSRF-TOKEN": "{{ csrf_token() }}"
+            },
+            body: JSON.stringify({
+                ujian_id: ujianId,
+                soal_id: soalId,
+                jawaban_json: jsonPayload
+            })
+        })
+        .then(r => r.json())
+        .then(data => { if (!data.success) console.log(data.message); })
+        .catch(err => console.error("AutoSave JSON Error :", err));
     }
 
     function saveRaguStatus(index, status) {

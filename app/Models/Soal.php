@@ -36,13 +36,12 @@ class Soal extends Model
     public static function jenisLabel($jenis)
     {
         $labels = [
-            'pilihan_ganda' => 'Pilihan Ganda',
-            // 'pilihan_ganda_kompleks' => 'Pilihan Ganda Kompleks',
-            // 'benar_salah'            => 'Benar/Salah',
-            'essay'                  => 'Essay',
+            'pilihan_ganda'          => 'Pilihan Ganda',
+            'pilihan_ganda_kompleks' => 'Pilihan Ganda Kompleks',
+            'benar_salah'            => 'Benar / Salah',
+            'mencocokkan'            => 'Mencocokkan',
             'isian'                  => 'Isian Singkat',
-            // 'menjodohkan'            => 'Menjodohkan',
-            // 'mengurutkan'            => 'Mengurutkan',
+            'essay'                  => 'Uraian / Essay',
         ];
 
         return $labels[$jenis] ?? ucfirst(str_replace('_', ' ', $jenis));

@@ -2,322 +2,401 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login CBT Online - Modern Split</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Login CBT Online - Modern Minimalist</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 
     <style>
         :root {
-            --primary-color: #4f46e5;
-            --primary-hover: #4338ca;
-            --dark-slate: #0f172a;
+            --ink: #14142b;
+            --muted: #6b7280;
+            --line: #e7e5ef;
+            --surface: #ffffff;
+            --canvas: #f6f5fb;
+            --brand: #4f46e5;
+            --brand-2: #8b5cf6;
+            --brand-soft: #eef0ff;
+            --danger: #dc2626;
+            --radius: 18px;
+        }
+
+        * { box-sizing: border-box; }
+
+        html, body {
+            height: 100%;
         }
 
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: #f8fafc;
+            background: var(--canvas);
+            color: var(--ink);
             min-height: 100vh;
+            overflow-x: hidden;
         }
 
-        .login-wrapper {
-            min-height: 100vh;
+        /* ---------- Ambient backdrop: two soft blurred fields, not a stock gradient card ---------- */
+        .ambient {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            overflow: hidden;
         }
 
-        /* Sisi Kiri: Gambar Latar Belakang Gedung */
-        .bg-brand-side {
-            background: linear-gradient(135deg, rgba(15, 23, 42, 0.85) 0%, rgba(30, 27, 75, 0.8) 100%), 
-                        url('/img/gedung.jpeg');
-            background-size: cover;
-            background-position: center;
+        .ambient span {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(90px);
+            opacity: 0.35;
+        }
+
+        .ambient .b1 {
+            width: 480px; height: 480px;
+            background: var(--brand);
+            top: -160px; left: -140px;
+        }
+
+        .ambient .b2 {
+            width: 420px; height: 420px;
+            background: var(--brand-2);
+            bottom: -180px; right: -120px;
+            opacity: 0.25;
+        }
+
+        .ambient .grid-overlay {
+            position: absolute;
+            inset: 0;
+            background-image:
+                linear-gradient(to right, rgba(20,20,43,0.035) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(20,20,43,0.035) 1px, transparent 1px);
+            background-size: 42px 42px;
+            mask-image: radial-gradient(circle at 50% 30%, black 0%, transparent 70%);
+        }
+
+        /* ---------- Page shell ---------- */
+        .shell {
             position: relative;
+            z-index: 1;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2.5rem 1.25rem;
         }
 
-        /* Sisi Kanan: Form Area yang Lebih Lebar */
-        .form-side {
-            background-color: #ffffff;
+        /* ---------- Lockup above the card ---------- */
+        .lockup {
             display: flex;
             align-items: center;
             justify-content: center;
+            gap: 0.85rem;
+            margin-bottom: 1.75rem;
         }
 
-        /* Pengaturan Lebar Card Form Baru (Lebih Proposional & Lebar) */
-        .login-card {
-            width: 100%;
-            max-width: 520px; /* Diubah menjadi lebih lebar agar tidak lonjong ke bawah */
-            padding: 2.5rem !important;
-        }
-
-        /* Form Controls Styling */
-        .form-control, .form-select {
-            border: 1.5px solid #e2e8f0;
-            padding: 0.75rem 1rem;
-            border-radius: 12px;
-            font-size: 0.95rem;
-            transition: all 0.2s ease;
-            background-color: #f8fafc;
-        }
-
-        .form-control:focus, .form-select:focus {
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.15);
-            background-color: #fff;
-        }
-
-        .input-group-text {
-            background-color: #f8fafc;
-            border: 1.5px solid #e2e8f0;
-            border-radius: 12px;
-            color: #64748b;
-        }
-
-        /* Tombol Modern */
-        .btn-primary {
-            background: linear-gradient(135deg, var(--primary-color), #6366f1);
-            border: none;
-            padding: 0.8rem;
-            border-radius: 12px;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-            transition: all 0.3s ease;
-        }
-
-        .btn-primary:hover {
-            background: linear-gradient(135deg, var(--primary-hover), var(--primary-color));
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(79, 70, 229, 0.3);
-        }
-
-        /* Branding Logo Box */
-        .logo-box {
-            background: linear-gradient(135deg, var(--primary-color), #818cf8);
-            width: 55px;
-            height: 55px;
-            font-size: 20px;
-            letter-spacing: 1px;
-        }
-
-        .form-label {
-            font-size: 0.825rem;
-            letter-spacing: 0.5px;
-            color: #475569 !important;
-        }
-
-        /* Media Query untuk Tampilan HP dan Tablet (Layar < 992px) */
-        @media (max-width: 991.98px) {
-            .login-wrapper {
-                min-height: auto;
-            }
-
-            /* Mengubah sisi kiri (gambar gedung) menjadi banner atas di HP */
-            .bg-brand-side {
-                display: flex !important; /* Memunculkan kembali gambar di HP */
-                min-height: 220px;
-                padding: 2rem !important;
-                text-align: center;
-                align-items: center;
-                justify-content: center;
-            }
-
-            .bg-brand-side .position-relative {
-                max-width: 100% !important;
-            }
-
-            .bg-brand-side h1 {
-                font-size: 1.75rem !important; /* Mengecilkan ukuran teks judul di HP */
-                margin-bottom: 0.5rem !important;
-            }
-
-            .bg-brand-side p {
-                font-size: 0.9rem !important; /* Mengecilkan teks deskripsi */
-                margin-bottom: 0 !important;
-            }
-
-            /* Mengatur area form di HP */
-            .form-side {
-                padding: 1.5rem !important;
-                background-color: #f8fafc; /* Menyamakan background dengan body */
-            }
-
-            /* Membuat card form melengkung manis di HP */
-            .login-card {
-                max-width: 100%;
-                padding: 2rem 1.5rem !important;
-                border-radius: 20px;
-                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
-                border: 1px solid #e2e8f0;
-            }
-
-            /* Menyembunyikan logo box ganda di form karena sudah ada banner di atas */
-            .form-side .logo-box {
-                display: none !important;
-            }
-            
-            /* Menyelaraskan teks form ke tengah agar rapi di HP */
-            .form-side .text-lg-start {
-                text-align: center !important;
-            }
-        }
-
-        /* Media Query Khusus Optimasi Font & Komponen di Layar HP (< 576px) */
-        @media (max-width: 575.98px) {
-            /* Ukuran teks pada banner gedung (bagian atas) */
-            .bg-brand-side h1 {
-                font-size: 1.5rem !important;
-                font-weight: 700 !important;
-            }
-            
-            .bg-brand-side p {
-                font-size: 0.85rem !important;
-            }
-
-            /* Ukuran teks judul form login */
-            .form-side h3 {
-                font-size: 1.35rem !important;
-                font-weight: 700 !important;
-            }
-
-            .form-side p.text-muted {
-                font-size: 0.8rem !important;
-                margin-bottom: 1.5rem !important;
-            }
-
-            /* Menyesuaikan ukuran label input (NIS, Password, dll) */
-            .form-label {
-                font-size: 0.75rem !important;
-                margin-bottom: 0.4rem !important;
-            }
-
-            /* Mengecilkan teks di dalam kotak input & dropdown select agar pas */
-            .form-control, .form-select, .input-group-text {
-                font-size: 0.875rem !important;
-                padding: 0.65rem 0.85rem !important;
-                border-radius: 10px !important; /* Sedikit lebih kotak agar rapi di layar kecil */
-            }
-
-            /* Menyesuaikan ukuran tombol masuk */
-            .btn-primary {
-                font-size: 0.9rem !important;
-                padding: 0.7rem !important;
-                border-radius: 10px !important;
-            }
-
-            /* Mengurangi jarak antar komponen biar tidak terlalu panjang ke bawah */
-            .mb-3 {
-                margin-bottom: 0.85rem !important;
-            }
-            .mb-4 {
-                margin-bottom: 1.25rem !important;
-            }
-        }
-
-        /* Taruh di bagian CSS utama (di luar media query) */
-        .logo-responsive {
-            height: 50px; /* Tinggi logo standar di layar laptop/komputer */
+        .lockup img {
+            height: 34px;
             width: auto;
             object-fit: contain;
         }
 
-        /* Taruh di dalam @media (max-width: 575.98px) yang sudah kita buat sebelumnya */
-        @media (max-width: 575.98px) {
-            .logo-responsive {
-                height: 40px; /* Otomatis mengecil jadi 40px saat dibuka di HP */
-            }
-            .gap-3 {
-                gap: 0.5rem !important; /* Jarak antar logo sedikit merapat di HP */
-            }
+        .lockup .divider {
+            width: 1px;
+            height: 24px;
+            background: var(--line);
         }
-        
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--brand);
+            background: var(--brand-soft);
+            padding: 0.4rem 0.85rem;
+            border-radius: 999px;
+            margin-bottom: 0.9rem;
+        }
+
+        .eyebrow i { font-size: 0.85rem; }
+
+        /* ---------- Card ---------- */
+        .card-auth {
+            width: 100%;
+            max-width: 420px;
+            background: var(--surface);
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            padding: 2.25rem 2rem;
+            box-shadow: 0 1px 2px rgba(20,20,43,0.04), 0 20px 45px -20px rgba(20,20,43,0.18);
+        }
+
+        .card-auth h1 {
+            font-size: 1.5rem;
+            font-weight: 800;
+            letter-spacing: -0.01em;
+            margin-bottom: 0.35rem;
+        }
+
+        .card-auth .subtitle {
+            font-size: 0.9rem;
+            color: var(--muted);
+            margin-bottom: 1.75rem;
+        }
+
+        /* ---------- Role segmented control (replaces plain <select> look) ---------- */
+        .role-field { margin-bottom: 1.15rem; }
+
+        .field-label {
+            display: block;
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 0.5rem;
+        }
+
+        .role-select-wrap {
+            position: relative;
+        }
+
+        .role-select-wrap select {
+            width: 100%;
+            appearance: none;
+            -webkit-appearance: none;
+            border: 1.5px solid var(--line);
+            border-radius: 12px;
+            background: var(--canvas);
+            color: var(--ink);
+            font-weight: 600;
+            font-size: 0.9rem;
+            padding: 0.8rem 2.6rem 0.8rem 2.75rem;
+            transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+        }
+
+        .role-select-wrap select:focus {
+            outline: none;
+            border-color: var(--brand);
+            background: var(--surface);
+            box-shadow: 0 0 0 4px var(--brand-soft);
+        }
+
+        .role-select-wrap i.role-icon {
+            position: absolute;
+            left: 0.9rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--brand);
+            font-size: 1rem;
+            pointer-events: none;
+        }
+
+        .role-select-wrap i.chevron {
+            position: absolute;
+            right: 0.95rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--muted);
+            font-size: 0.85rem;
+            pointer-events: none;
+        }
+
+        /* ---------- Inputs ---------- */
+        .field { margin-bottom: 1.15rem; }
+
+        .input-shell {
+            position: relative;
+            display: flex;
+            align-items: center;
+            border: 1.5px solid var(--line);
+            border-radius: 12px;
+            background: var(--canvas);
+            transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+        }
+
+        .input-shell:focus-within {
+            border-color: var(--brand);
+            background: var(--surface);
+            box-shadow: 0 0 0 4px var(--brand-soft);
+        }
+
+        .input-shell i.leading-icon {
+            padding-left: 0.9rem;
+            color: var(--muted);
+            font-size: 0.95rem;
+        }
+
+        .input-shell input {
+            flex: 1;
+            border: none;
+            background: transparent;
+            padding: 0.8rem 0.85rem;
+            font-size: 0.92rem;
+            color: var(--ink);
+            min-width: 0;
+        }
+
+        .input-shell input:focus {
+            outline: none;
+            box-shadow: none;
+        }
+
+        .input-shell .toggle-btn {
+            border: none;
+            background: transparent;
+            color: var(--muted);
+            padding: 0 0.9rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-shell .toggle-btn:hover { color: var(--brand); }
+
+        /* ---------- Button ---------- */
+        .btn-submit {
+            width: 100%;
+            border: none;
+            border-radius: 12px;
+            background: var(--brand);
+            color: #fff;
+            font-weight: 700;
+            font-size: 0.92rem;
+            letter-spacing: 0.01em;
+            padding: 0.85rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 0.4rem;
+            transition: background 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+        }
+
+        .btn-submit:hover {
+            background: #4338ca;
+            transform: translateY(-1px);
+            box-shadow: 0 10px 24px -8px rgba(79,70,229,0.55);
+        }
+
+        .btn-submit:active { transform: translateY(0); }
+
+        /* ---------- Alert ---------- */
+        .alert-modern {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.6rem;
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: var(--danger);
+            border-radius: 12px;
+            font-size: 0.85rem;
+            padding: 0.75rem 0.9rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .alert-modern i { margin-top: 0.15rem; }
+
+        /* ---------- Footer note ---------- */
+        .footnote {
+            text-align: center;
+            font-size: 0.72rem;
+            color: #9ca3af;
+            margin-top: 1.75rem;
+        }
+
+        /* ---------- Mobile refinements ---------- */
+        @media (max-width: 400px) {
+            .card-auth { padding: 1.85rem 1.35rem; }
+            .lockup img { height: 28px; }
+            .card-auth h1 { font-size: 1.3rem; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .btn-submit, .input-shell, .role-select-wrap select { transition: none; }
+        }
     </style>
 </head>
 <body>
 
-    <div class="container-fluid p-0">
-        <div class="row g-0 login-wrapper">
-            
-            <div class="col-lg-6 d-none d-lg-flex bg-brand-side align-items-center justify-content-center p-5 text-white">
-                <div class="position-relative z-1 text-center text-lg-start" style="max-width: 500px;">
-                    <span class="badge bg-primary px-3 py-2 rounded-pill mb-3 fw-semibold tracking-wider">Sistem CBT Modern</span>
-                    <h1 class="display-5 fw-bold mb-3">Selamat Datang Kembali</h1>
-                    <p class="lead text-white-50">Silakan masuk untuk mengakses ujian, memantau hasil, dan mengelola aktivitas akademik Anda secara real-time.</p>
-                </div>
-            </div>
-
-            <div class="col-lg-6 form-side p-4 p-sm-5">
-                <div class="login-card">
-                    
-                    <div class="text-center text-lg-start mb-4">
-                        <div class="d-flex align-items-center justify-content-center justify-content-lg-start gap-3 mb-3">
-                            <img src="{{ asset('img/alazhar.png') }}" alt="Logo Sekolah" class="img-fluid logo-responsive">
-                            
-                            <div class="vr bg-secondary opacity-25 d-none d-sm-block" style="height: 40px; width: 1.5px;"></div>
-                            
-                            <img src="{{ asset('img/sigma.png') }}" alt="Logo CBT" class="img-fluid logo-responsive">
-                        </div>
-                        <h3 class="fw-bold text-dark mb-1">Portal Ujian Sekolah</h3>
-                        <p class="text-muted small">Silakan masuk menggunakan akun resmi Anda</p>
-                    </div>
-
-                    @if ($errors->any())
-                        <div class="alert alert-danger border-0 small py-2.5 rounded-3 d-flex align-items-center gap-2 mb-4" role="alert">
-                            <i class="bi bi-exclamation-triangle-fill"></i>
-                            <div>{{ $errors->first() }}</div>
-                        </div>
-                    @endif
-
-                    <form action="{{ url('/login') }}" method="POST">
-                        @csrf
-
-                        <div class="mb-3">
-                            <label for="role" class="form-label fw-bold text-uppercase">Masuk Sebagai</label>
-                            <div class="input-group">
-                                <span class="input-group-text border-end-0"><i class="bi bi-person-badge"></i></span>
-                                <select id="role" name="role" onchange="switchInputLabel()" class="form-select border-start-0 text-dark fw-medium" required>
-                                    <option value="siswa" {{ old('role') == 'siswa' ? 'selected' : '' }}>Siswa (Gunakan NIS)</option>
-                                    <option value="guru" {{ old('role') == 'guru' ? 'selected' : '' }}>Guru</option>
-                                    <option value="admin_jenjang" {{ old('role') == 'admin_jenjang' ? 'selected' : '' }}>Admin Per Jenjang</option>
-                                    <option value="super_admin" {{ old('role') == 'super_admin' ? 'selected' : '' }}>Super Admin</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label id="identity_label" for="login_identity" class="form-label fw-bold text-uppercase">Nomor Induk Siswa (NIS)</label>
-                            <div class="input-group">
-                                <span id="identity_icon" class="input-group-text border-end-0"><i class="bi bi-card-text"></i></span>
-                                <input type="text" id="login_identity" name="login_identity" value="{{ old('login_identity') }}" class="form-control border-start-0 text-dark" placeholder="Contoh: 212210043" required autofocus>
-                            </div>
-                        </div>
-
-                        <div class="mb-4">
-                            <label Republic for="password" class="form-label fw-bold text-uppercase">Kata Sandi</label>
-                            <div class="input-group">
-                                <span class="input-group-text border-end-0"><i class="bi bi-lock"></i></span>
-                                <input type="password" id="password" name="password" class="form-control border-start-0 border-end-0 text-dark" placeholder="••••••••" required>
-                                <button class="input-group-text bg-transparent border-start-0 text-muted" type="button" id="togglePassword">
-                                    <i class="bi bi-eye" id="eyeIcon"></i>
-                                </button>
-                            </div>
-                        </div>
-
-                        <button type="submit" class="btn btn-primary w-100 d-flex align-items-center justify-content-center gap-2 shadow-sm py-2.5">
-                            <span>Masuk Sekarang</span>
-                            <i class="bi bi-arrow-right-short fs-5"></i>
-                        </button>
-                    </form>
-
-                    <div class="text-center text-lg-start mt-5 pt-3 border-top small text-muted" style="font-size: 11px; border-color: rgba(0,0,0,0.06) !important;">
-                        &copy; 2026 CBT Hub Multi-Jenjang Sekolah
-                    </div>
-
-                </div>
-            </div>
-
-        </div>
+    <div class="ambient">
+        <span class="b1"></span>
+        <span class="b2"></span>
+        <div class="grid-overlay"></div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <div class="shell">
+
+        <div class="lockup">
+            <img src="{{ asset('img/alazhar.png') }}" alt="Logo Sekolah">
+            <div class="divider"></div>
+            <img src="{{ asset('img/sigma.png') }}" alt="Logo CBT">
+        </div>
+
+        <div class="card-auth">
+
+            <span class="eyebrow"><i class="bi bi-shield-check"></i> Sistem CBT Modern</span>
+            <h1>Portal Ujian Sekolah</h1>
+            <p class="subtitle">Masuk menggunakan akun resmi Anda untuk melanjutkan.</p>
+
+            @if ($errors->any())
+                <div class="alert-modern" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                    <div>{{ $errors->first() }}</div>
+                </div>
+            @endif
+
+            <form action="{{ url('/login') }}" method="POST">
+                @csrf
+
+                <div class="role-field">
+                    <label for="role" class="field-label">Masuk Sebagai</label>
+                    <div class="role-select-wrap">
+                        <i class="bi bi-person-badge role-icon"></i>
+                        <select id="role" name="role" onchange="switchInputLabel()" required>
+                            <option value="siswa" {{ old('role') == 'siswa' ? 'selected' : '' }}>Siswa (Gunakan NIS)</option>
+                            <option value="guru" {{ old('role') == 'guru' ? 'selected' : '' }}>Guru</option>
+                            <option value="admin_jenjang" {{ old('role') == 'admin_jenjang' ? 'selected' : '' }}>Admin Per Jenjang</option>
+                            <option value="super_admin" {{ old('role') == 'super_admin' ? 'selected' : '' }}>Super Admin</option>
+                        </select>
+                        <i class="bi bi-chevron-down chevron"></i>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label id="identity_label" for="login_identity" class="field-label">Nomor Induk Siswa (NIS)</label>
+                    <div class="input-shell">
+                        <i id="identity_icon" class="bi bi-card-text leading-icon"></i>
+                        <input type="text" id="login_identity" name="login_identity" value="{{ old('login_identity') }}" placeholder="Contoh: 212210043" required autofocus>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label for="password" class="field-label">Kata Sandi</label>
+                    <div class="input-shell">
+                        <i class="bi bi-lock leading-icon"></i>
+                        <input type="password" id="password" name="password" placeholder="••••••••" required>
+                        <button class="toggle-btn" type="button" id="togglePassword">
+                            <i class="bi bi-eye" id="eyeIcon"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-submit">
+                    <span>Masuk Sekarang</span>
+                    <i class="bi bi-arrow-right-short fs-5"></i>
+                </button>
+            </form>
+
+            <div class="footnote">&copy; 2026 CBT Hub Multi-Jenjang Sekolah</div>
+
+        </div>
+
+    </div>
 
     <script>
         function switchInputLabel() {
@@ -330,16 +409,15 @@
                 label.innerText = "Nomor Induk Siswa (NIS)";
                 input.placeholder = "Contoh: 212210043";
                 input.type = "text";
-                icon.innerHTML = '<i class="bi bi-card-text"></i>';
+                icon.className = "bi bi-card-text leading-icon";
             } else {
                 label.innerText = "Alamat Email Resmi";
                 input.placeholder = "nama@sekolah.sch.id";
                 input.type = "email";
-                icon.innerHTML = '<i class="bi bi-envelope"></i>';
+                icon.className = "bi bi-envelope leading-icon";
             }
         }
-        
-        // Fitur: Show/Hide Password
+
         const togglePassword = document.getElementById('togglePassword');
         const passwordInput = document.getElementById('password');
         const eyeIcon = document.getElementById('eyeIcon');
@@ -351,7 +429,6 @@
             eyeIcon.classList.toggle('bi-eye-slash');
         });
 
-        // Jalankan fungsi saat halaman di-load
         window.onload = switchInputLabel;
     </script>
 </body>

@@ -331,108 +331,123 @@ class RuangUjianController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | Variabel nilai
+        | Variabel nilai & Koreksi otomatis 6 Jenis Soal
         |--------------------------------------------------------------------------
         */
 
         $nilaiPG = 0;
-
-        $adaEssay = false;
-
-        /*
-        |--------------------------------------------------------------------------
-        | Koreksi jawaban
-        |--------------------------------------------------------------------------
-        */
+        $adaKoreksiManual = false;
 
         foreach($soals as $soal){
 
             $jawaban = $jawabanSiswas->get($soal->id);
 
-            // Jika siswa sama sekali tidak menjawab (tidak ada di request maupun autosave)
-            // Buat record kosong agar soal tetap muncul di halaman koreksi guru
             if (!$jawaban) {
                 $jawaban = \App\Models\JawabanSiswa::create([
                     'nilai_id' => $nilai->id,
                     'soal_id'  => $soal->id,
                     'pilihan_jawaban_id' => null,
                     'jawaban_text' => null,
+                    'jawaban_json' => null,
                     'is_benar' => false,
                     'nilai' => 0,
                 ]);
             }
-            /*
-            |--------------------------------------------------------------------------
-            | PILIHAN GANDA
-            |--------------------------------------------------------------------------
-            */
 
-            if($soal->jenis_soal == 'pilihan_ganda'){
-
-                $pilihanBenar = $soal->pilihanJawabans
-                    ->where('is_benar',true)
-                    ->first();
-
-                if(
-                    $jawaban &&
-                    $pilihanBenar &&
-                    $jawaban->pilihan_jawaban_id == $pilihanBenar->id
-                ){
-
-                    /*
-                    Jawaban benar
-                    Nilai sesuai bobot soal
-                    */
-
-                    $jawaban->update([
-                        'is_benar'=>true,
-                        'nilai'=>$soal->bobot
-                    ]);
-
+            if ($soal->jenis_soal == 'pilihan_ganda') {
+                $pilihanBenar = $soal->pilihanJawabans->where('is_benar', true)->first();
+                if ($jawaban && $pilihanBenar && $jawaban->pilihan_jawaban_id == $pilihanBenar->id) {
+                    $jawaban->update(['is_benar' => true, 'nilai' => $soal->bobot]);
                     $nilaiPG += $soal->bobot;
-
-                }else{
-
-                    if($jawaban){
-                        $jawaban->update([
-                            'is_benar'=>false,
-                            'nilai'=>0
-                        ]);
+                } else {
+                    if ($jawaban) {
+                        $jawaban->update(['is_benar' => false, 'nilai' => 0]);
                     }
+                }
+            } elseif ($soal->jenis_soal == 'pilihan_ganda_kompleks') {
+                $kunciBenarIds = $soal->pilihanJawabans->where('is_benar', true)->pluck('id')->toArray();
+                $siswaChoiceIds = is_array($jawaban->jawaban_json) ? array_map('intval', $jawaban->jawaban_json) : [];
 
+                $maxAllowed = count($kunciBenarIds);
+                if ($maxAllowed > 0 && count($siswaChoiceIds) > $maxAllowed) {
+                    $siswaChoiceIds = array_slice($siswaChoiceIds, 0, $maxAllowed);
                 }
 
-            }
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | ESSAY / ISIAN
-            |--------------------------------------------------------------------------
-            */
-
-            if(
-                $soal->jenis_soal == 'essay'
-                ||
-                $soal->jenis_soal == 'isian'
-            ){
-
-                $adaEssay = true;
-
-                /*
-                Essay menunggu guru
-                */
-                if($jawaban){
-                    $jawaban->update([
-                        'is_benar'=>null,
-                        'nilai'=>0
-                    ]);
+                if (count($kunciBenarIds) > 0 && count($siswaChoiceIds) > 0) {
+                    $benarHit = count(array_intersect($siswaChoiceIds, $kunciBenarIds));
+                    $salahHit = count(array_diff($siswaChoiceIds, $kunciBenarIds));
+                    $netRatio = max(0, ($benarHit - $salahHit) / count($kunciBenarIds));
+                    $skorDapat = round($netRatio * $soal->bobot, 2);
+                    $jawaban->update(['is_benar' => ($netRatio >= 1.0), 'nilai' => $skorDapat]);
+                    $nilaiPG += $skorDapat;
+                } else {
+                    $jawaban->update(['is_benar' => false, 'nilai' => 0]);
                 }
+            } elseif ($soal->jenis_soal == 'benar_salah') {
+                $pilihanJawabans = $soal->pilihanJawabans;
+                $siswaChoices = is_array($jawaban->jawaban_json) ? $jawaban->jawaban_json : [];
+                $totalPernyataan = $pilihanJawabans->count();
+                $benarHit = 0;
 
+                if ($totalPernyataan > 0 && !empty($siswaChoices)) {
+                    foreach ($pilihanJawabans as $pj) {
+                        $key = 'stmt_' . $pj->urutan;
+                        $ans = strtolower(trim((string) ($siswaChoices[$key] ?? $siswaChoices[$pj->id] ?? $siswaChoices[$pj->urutan] ?? '')));
+                        $isPjBenar = $pj->is_benar;
+                        $siswaPilihBenar = ($ans === 'benar' || $ans === 'b' || $ans === 'true' || $ans === '1');
+                        if (($isPjBenar && $siswaPilihBenar) || (!$isPjBenar && !$siswaPilihBenar && $ans !== '')) {
+                            $benarHit++;
+                        }
+                    }
+                    $ratio = $benarHit / $totalPernyataan;
+                    $skorDapat = round($ratio * $soal->bobot, 2);
+                    $jawaban->update(['is_benar' => ($ratio >= 1.0), 'nilai' => $skorDapat]);
+                    $nilaiPG += $skorDapat;
+                } else {
+                    $jawaban->update(['is_benar' => false, 'nilai' => 0]);
+                }
+            } elseif ($soal->jenis_soal == 'mencocokkan') {
+                $pilihanJawabans = $soal->pilihanJawabans;
+                $siswaChoices = is_array($jawaban->jawaban_json) ? $jawaban->jawaban_json : [];
+                $totalPasangan = $pilihanJawabans->count();
+                $benarHit = 0;
+
+                if ($totalPasangan > 0 && !empty($siswaChoices)) {
+                    foreach ($pilihanJawabans as $pj) {
+                        $itemKiri = $pj->teks_pilihan;
+                        $pasanganKunci = strtolower(trim((string) $pj->pasangan));
+                        $pasanganSiswa = strtolower(trim((string) ($siswaChoices[$itemKiri] ?? $siswaChoices[$pj->id] ?? '')));
+
+                        if ($pasanganSiswa !== '' && $pasanganSiswa === $pasanganKunci) {
+                            $benarHit++;
+                        }
+                    }
+                    $ratio = $benarHit / $totalPasangan;
+                    $skorDapat = round($ratio * $soal->bobot, 2);
+                    $jawaban->update(['is_benar' => ($ratio >= 1.0), 'nilai' => $skorDapat]);
+                    $nilaiPG += $skorDapat;
+                } else {
+                    $jawaban->update(['is_benar' => false, 'nilai' => 0]);
+                }
+            } elseif ($soal->jenis_soal == 'isian') {
+                $adaKoreksiManual = true;
+                $pilihanKunci = $soal->pilihanJawabans->first();
+                $kunciRaw = $pilihanKunci ? $pilihanKunci->teks_pilihan : '';
+                $kunciList = array_map(function ($k) { return strtolower(trim($k)); }, explode(';', $kunciRaw));
+                $jawabanSiswaTeks = strtolower(trim((string) $jawaban->jawaban_text));
+
+                if ($jawabanSiswaTeks !== '' && in_array($jawabanSiswaTeks, $kunciList, true)) {
+                    $jawaban->update(['is_benar' => true, 'nilai' => $soal->bobot]);
+                    $nilaiPG += $soal->bobot;
+                } else {
+                    $jawaban->update(['is_benar' => false, 'nilai' => 0]);
+                }
+            } elseif ($soal->jenis_soal == 'essay') {
+                $adaKoreksiManual = true;
+                $jawaban->update(['is_benar' => null, 'nilai' => 0]);
             }
 
         }
-
 
         /*
         |--------------------------------------------------------------------------
@@ -440,14 +455,7 @@ class RuangUjianController extends Controller
         |--------------------------------------------------------------------------
         */
 
-
-        if($adaEssay){
-
-            /*
-            Ada essay
-            Hitung nilai sementara dari Pilihan Ganda (PG) agar nilai_akhir tidak 0
-            Tunggu koreksi essay lengkap dari guru
-            */
+        if ($adaKoreksiManual) {
             $totalBobot = $soals->sum('bobot');
             $nilaiSementara = 0;
             if ($totalBobot > 0) {
@@ -455,68 +463,38 @@ class RuangUjianController extends Controller
             }
 
             $nilai->update([
-
-                'nilai_pg'=> $nilaiPG,
-
-                'nilai_akhir'=> round($nilaiSementara, 2),
-
-                'status'=>'selesai',
-
-                'status_penilaian'=>'menunggu',
-
-                'waktu_kumpul'=>now(),
-
+                'nilai_pg' => $nilaiPG,
+                'nilai_akhir' => round($nilaiSementara, 2),
+                'status' => 'selesai',
+                'status_penilaian' => 'menunggu',
+                'waktu_kumpul' => now(),
             ]);
-
-        }else{
-
-
-
-            /*
-            Semua pilihan ganda
-            Nilai langsung selesai
-            */
-
+        } else {
+            $totalBobot = $soals->sum('bobot');
+            $nilaiSelesai = 0;
+            if ($totalBobot > 0) {
+                $nilaiSelesai = ($nilaiPG / $totalBobot) * 100;
+            }
 
             $nilai->update([
-
-                'nilai_pg'=>$nilaiPG,
-
-                'nilai_akhir'=>$nilaiPG,
-
-                'status'=>'selesai',
-
-                'status_penilaian'=>'selesai',
-
-                'waktu_kumpul'=>now(),
-
-        ]);
-
-
+                'nilai_pg' => $nilaiPG,
+                'nilai_akhir' => round($nilaiSelesai, 2),
+                'status' => 'selesai',
+                'status_penilaian' => 'selesai',
+                'waktu_kumpul' => now(),
+            ]);
         }
 
+        session()->forget('ujian_terverifikasi_' . $ujian->id);
 
+        $message = $request->get('auto_submit')
+            ? 'Ujian dikumpulkan otomatis karena Anda melakukan pelanggaran.'
+            : 'Ujian berhasil dikumpulkan.';
 
-
-        /*
-        |--------------------------------------------------------------------------
-        | Hapus session token
-        |--------------------------------------------------------------------------
-        */
-
-            session()->forget(
-                'ujian_terverifikasi_'.$ujian->id
-            );
-
-            $message = $request->get('auto_submit')
-                ? 'Ujian dikumpulkan otomatis karena Anda melakukan pelanggaran sebanyak 2 kali.'
-                : 'Ujian berhasil dikumpulkan.';
-
-            return redirect()
-                ->route('dashboard-siswa.ujian-hari-ini')
-                ->with('success', $message)
-                ->with('auto_submit', $request->boolean('auto_submit'));
-
+        return redirect()
+            ->route('dashboard-siswa.ujian-hari-ini')
+            ->with('success', $message)
+            ->with('auto_submit', $request->boolean('auto_submit'));
     }
 
     public function autoSave(Request $request)
@@ -526,6 +504,7 @@ class RuangUjianController extends Controller
             'soal_id'            => 'required|exists:soals,id',
             'pilihan_jawaban_id' => 'nullable|exists:pilihan_jawabans,id',
             'jawaban_text'       => 'nullable|string',
+            'jawaban_json'       => 'nullable',
             'is_ragu_ragu'       => 'nullable|boolean',
         ]);
 
@@ -549,20 +528,29 @@ class RuangUjianController extends Controller
             ], 404);
         }
 
-        // Ambil record lama dulu (kalau ada), supaya field yang tidak
-        // dikirim di request ini TIDAK ikut tertimpa null.
         $jawaban = JawabanSiswa::firstOrNew([
             'nilai_id' => $nilai->id,
             'soal_id'  => $request->soal_id,
         ]);
 
-        // Hanya update kolom yang memang dikirim oleh request ini
         if ($request->has('pilihan_jawaban_id')) {
             $jawaban->pilihan_jawaban_id = $request->pilihan_jawaban_id;
         }
 
         if ($request->has('jawaban_text')) {
             $jawaban->jawaban_text = $request->jawaban_text;
+        }
+
+        if ($request->has('jawaban_json')) {
+            $jsonInput = $request->input('jawaban_json');
+            $soal = \App\Models\Soal::find($request->soal_id);
+            if ($soal && $soal->jenis_soal == 'pilihan_ganda_kompleks' && is_array($jsonInput)) {
+                $maxAllowed = $soal->pilihanJawabans->where('is_benar', true)->count();
+                if ($maxAllowed > 0 && count($jsonInput) > $maxAllowed) {
+                    $jsonInput = array_slice($jsonInput, 0, $maxAllowed);
+                }
+            }
+            $jawaban->jawaban_json = $jsonInput;
         }
 
         if ($request->has('is_ragu_ragu')) {
