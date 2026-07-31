@@ -83,6 +83,8 @@
         display: flex;
         align-items: center;
         justify-content: space-between;
+        gap: 12px;
+        height: 100%;
     }
 
     .section-label {
@@ -99,6 +101,54 @@
         background-color: var(--accent-blue);
         border-color: var(--accent-blue);
     }
+
+    /* ============================================
+       RESPONSIVE: TABLET & MOBILE (<= 768px)
+       ============================================ */
+    @media (max-width: 768px) {
+        .container-fluid.py-2 { padding-left: 12px; padding-right: 12px; }
+
+        /* Header */
+        .page-header { padding: 22px 18px; border-radius: 20px; }
+        .page-header .d-flex.justify-content-between {
+            flex-direction: column;
+            align-items: stretch !important;
+            gap: 16px;
+        }
+        .page-header h3 { font-size: 19px; margin-bottom: 4px; }
+        .page-header p.small { font-size: 12.5px; }
+        .btn-back { width: 100%; justify-content: center; height: 46px; }
+
+        /* Card & form */
+        .content-card { padding: 4px; border-radius: 20px; }
+        .content-card .card-body.p-4 { padding: 16px !important; }
+        .row.g-3 { row-gap: 14px !important; }
+
+        .section-label { margin-top: 4px; }
+
+        /* Grid kelas: 2 kolom di mobile */
+        #kelasContainer .kelas-item { flex: 0 0 50% !important; max-width: 50% !important; }
+        .kelas-chip { padding: 10px 10px; }
+        .kelas-chip .form-check-label { font-size: 12.5px; line-height: 1.3; }
+        .kelas-chip .form-check { display: flex; align-items: flex-start; gap: 6px; }
+        .kelas-chip .form-check-input { margin-top: 3px; flex-shrink: 0; }
+
+        /* Pengaturan ujian: stack full width */
+        .toggle-option { flex-direction: row; padding: 12px 14px; }
+        .toggle-option .fw-semibold { font-size: 13.5px; }
+        .toggle-option small { font-size: 11px; }
+
+        /* Tombol aksi bawah */
+        .d-flex.gap-2.mt-4 {
+            flex-direction: column;
+        }
+        .btn-submit, .btn-cancel {
+            width: 100%;
+            justify-content: center;
+        }
+        .btn-submit { order: 1; }
+        .btn-cancel { order: 2; text-align: center; }
+    }
 </style>
 
 <div class="container-fluid py-2">
@@ -113,7 +163,7 @@
                 <p class="text-light opacity-75 mb-0 small">Token akan dibuat otomatis setelah jadwal disimpan.</p>
             </div>
 
-            <a href="{{ route('ujian.index') }}" class="btn-back d-inline-flex align-items-center">
+            <a href="{{ route('ujian.index') }}" class="btn-back d-inline-flex align-items-center justify-content-center">
                 <i class="fa-solid fa-arrow-left me-2"></i>
                 Kembali
             </a>
@@ -264,7 +314,7 @@
                         <input
                             type="number"
                             name="durasi_minimal"
-                            class="form-control"
+                            class="form-control form-control-custom"
                             min="1"
                             value="{{ old('durasi_minimal', $ujian->durasi_minimal ?? 30) }}"
                         >
@@ -284,7 +334,7 @@
                         <div class="row g-2" id="kelasContainer">
                             @forelse($kelasList as $kelas)
                                 <div
-                                    class="col-md-3 kelas-item"
+                                    class="col-6 col-md-3 kelas-item"
                                     data-jenjang="{{ optional($kelas->tingkat)->jenjang_id }}"
                                     data-kelas-id="{{ $kelas->id }}">
                     

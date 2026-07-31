@@ -53,6 +53,7 @@ body {
     font-size: 14px;
     transition: all 0.25s ease;
     box-shadow: 0 4px 12px rgba(79, 70, 229, 0.15);
+    white-space: nowrap;
 }
 
 .btn-premium:hover, .btn-premium:focus {
@@ -87,6 +88,7 @@ body {
     font-size: 20px;
     background: rgba(79, 70, 229, 0.08);
     color: var(--primary-color);
+    flex-shrink: 0;
 }
 
 .stat-value {
@@ -133,6 +135,7 @@ body {
     font-size: 14px;
     background-color: #f8fafc;
     transition: all 0.2s;
+    height: 46px;
 }
 
 .search-box input:focus {
@@ -154,6 +157,7 @@ body {
     letter-spacing: 0.5px;
     padding: 16px 24px;
     border-bottom: 1px solid var(--border-color);
+    white-space: nowrap;
 }
 
 .table tbody td {
@@ -181,6 +185,7 @@ body {
     font-weight: 600;
     display: inline-block;
     border: 1px solid #dcfce7;
+    white-space: nowrap;
 }
 
 .action-btn {
@@ -230,48 +235,119 @@ body {
     box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
 }
 
+/* ============================================
+   TABEL: tetap berbentuk tabel di mobile,
+   digeser horizontal, dengan kolom No & Aksi
+   yang menempel (sticky) di kiri/kanan.
+   ============================================ */
+.table-scroll-wrap {
+    position: relative;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    overflow: hidden;
+}
+
+.table-scroll-wrap .table-responsive {
+    border-radius: 0;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    margin-bottom: 0;
+}
+
+.table-scroll-wrap .table { margin-bottom: 0; }
+
+.table-scroll-wrap::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 28px;
+    background: linear-gradient(to right, transparent, rgba(15, 23, 42, 0.06));
+    pointer-events: none;
+    border-radius: 0 12px 12px 0;
+}
+
 /* =======================================================
    MEDIA QUERIES (RESPONSIVE VIEW UNTUK HP & TABLET)
    ======================================================= */
 @media (max-width: 767.98px) {
+    .container-fluid.px-md-4.py-4 { padding-left: 12px; padding-right: 12px; }
+
     .page-header {
         flex-direction: column;
-        align-items: flex-start;
+        align-items: stretch;
         gap: 16px;
         margin-bottom: 20px;
     }
-    
+
+    .page-title h3 { font-size: 20px; }
+    .page-title p { font-size: 13px; }
+
     .btn-premium {
         width: 100%;
         text-align: center;
         padding: 14px;
     }
-    
+
     .stat-card {
         padding: 16px !important;
     }
-    
+
+    .stat-icon { width: 46px; height: 46px; font-size: 17px; }
+
     .stat-value {
-        font-size: 26px;
+        font-size: 24px;
     }
 
-    .custom-card .card-body {
-        padding: 16px;
+    .custom-card .card-body { padding: 16px !important; }
+
+    .search-box input { font-size: 14px; }
+
+    /* Tabel: sesuaikan ukuran & sticky column */
+    .table-scroll-wrap .table {
+        min-width: 620px;
     }
-    
+
     .table thead th {
         padding: 12px 16px;
+        font-size: 10.5px;
     }
-    
+
     .table tbody td {
         padding: 14px 16px;
+        font-size: 13.5px;
     }
-    
-    /* Membuat scroll table horizontal terasa lebih natural di HP */
-    .table-responsive {
-        border-radius: 12px;
-        border: 1px solid var(--border-color);
+
+    .table-scroll-wrap .table th:first-child,
+    .table-scroll-wrap .table td:first-child {
+        position: sticky;
+        left: 0;
+        z-index: 2;
+        background: #fff;
+        box-shadow: 2px 0 6px rgba(15, 23, 42, 0.04);
     }
+    .table-scroll-wrap .table thead th:first-child { background: #f8fafc; }
+
+    .table-scroll-wrap .table th:last-child,
+    .table-scroll-wrap .table td:last-child {
+        position: sticky;
+        right: 0;
+        z-index: 2;
+        background: #fff;
+        box-shadow: -2px 0 6px rgba(15, 23, 42, 0.04);
+    }
+    .table-scroll-wrap .table thead th:last-child { background: #f8fafc; }
+
+    .table-scroll-wrap .table tbody tr:hover td:first-child,
+    .table-scroll-wrap .table tbody tr:hover td:last-child {
+        background: #f8fafc;
+    }
+
+    .action-btn { width: 36px; height: 36px; margin: 0 1px; }
+
+    #modalTambahJenjang .modal-dialog { margin: 14px; }
 }
 </style>
 
@@ -331,6 +407,7 @@ body {
 
             </div>
 
+            <div class="table-scroll-wrap">
             <div class="table-responsive">
                 <table class="table align-middle">
                     <thead>
@@ -401,6 +478,7 @@ body {
                         @endforelse
                     </tbody>
                 </table>
+            </div>
             </div>
 
             @if($jenjangs->count())

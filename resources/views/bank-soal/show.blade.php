@@ -25,6 +25,20 @@
         border: 1px solid rgba(255, 255, 255, 0.05);
     }
 
+    .page-header::after {
+        content: '';
+        position: absolute;
+        width: 300px;
+        height: 300px;
+        border-radius: 50%;
+        right: -50px;
+        top: -80px;
+        background: radial-gradient(circle, rgba(14, 165, 233, 0.15) 0%, rgba(14, 165, 233, 0) 70%);
+        pointer-events: none;
+    }
+
+    .page-header-content { position: relative; z-index: 1; }
+
     .btn-back {
         background: rgba(255,255,255,0.1);
         color: #fff;
@@ -32,6 +46,7 @@
         border-radius: 14px;
         padding: 10px 18px;
         font-weight: 600;
+        white-space: nowrap;
     }
 
     .btn-back:hover { background: rgba(255,255,255,0.2); color: #fff; }
@@ -41,6 +56,7 @@
         padding: 10px 20px;
         font-weight: 600;
         border: none;
+        white-space: nowrap;
     }
 
     .content-card {
@@ -51,12 +67,35 @@
         padding: 24px;
     }
 
+    /* Sidebar info sticky di desktop supaya tetap terlihat saat scroll daftar soal */
+    .info-sidebar {
+        position: sticky;
+        top: 20px;
+    }
+
     .info-item {
         padding: 14px 0;
         border-bottom: 1px dashed var(--border-color);
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
     }
 
     .info-item:last-child { border-bottom: none; }
+
+    .info-item-icon {
+        width: 34px;
+        height: 34px;
+        border-radius: 10px;
+        background: #f8fafc;
+        color: var(--accent-blue);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 13px;
+        flex-shrink: 0;
+        margin-top: 1px;
+    }
 
     .info-label {
         font-size: 11px;
@@ -68,9 +107,11 @@
     }
 
     .info-value {
-        font-size: 15px;
+        font-size: 14.5px;
         font-weight: 600;
         color: var(--secondary-dark);
+        line-height: 1.4;
+        word-break: break-word;
     }
 
     .status-publish {
@@ -109,6 +150,17 @@
         gap: 8px;
     }
 
+    .section-title .count-badge {
+        margin-left: auto;
+        background: #f8fafc;
+        color: var(--text-muted);
+        border: 1px solid var(--border-color);
+        font-size: 11px;
+        font-weight: 700;
+        padding: 4px 10px;
+        border-radius: 8px;
+    }
+
     .jenis-badge {
         background: #f0f9ff;
         color: #0284c7;
@@ -123,16 +175,23 @@
     .soal-item {
         border: 1px solid var(--border-color);
         border-radius: 16px;
-        padding: 16px;
-        margin-bottom: 12px;
+        padding: 18px;
+        margin-bottom: 14px;
+        background: #fff;
+        transition: box-shadow 0.2s, border-color 0.2s;
+    }
+
+    .soal-item:hover {
+        box-shadow: 0 8px 22px rgba(15, 23, 42, 0.05);
+        border-color: #dbeafe;
     }
 
     .soal-number {
-        width: 32px;
-        height: 32px;
+        width: 34px;
+        height: 34px;
         border-radius: 10px;
-        background: #f8fafc;
-        color: var(--text-muted);
+        background: var(--primary-dark);
+        color: #fff;
         font-weight: 700;
         font-size: 13px;
         display: flex;
@@ -141,17 +200,122 @@
         flex-shrink: 0;
     }
 
+    .soal-teks {
+        font-size: 14.5px;
+        line-height: 1.6;
+        color: var(--secondary-dark);
+    }
+
+    .jawaban-list {
+        margin-top: 10px;
+        border: 1px solid #f1f5f9;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    .jawaban-list li {
+        padding: 9px 14px;
+        font-size: 13.5px;
+        border-bottom: 1px solid #f1f5f9;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .jawaban-list li:last-child { border-bottom: none; }
+
+    .jawaban-list li.is-correct {
+        background: #ecfdf5;
+        color: #059669;
+        font-weight: 600;
+    }
+
+    .jawaban-list li.is-wrong { color: var(--text-muted); }
+
+    .soal-img {
+        margin-top: 10px;
+        max-width: 220px;
+        width: 100%;
+        height: auto;
+        border-radius: 12px;
+        border: 1px solid var(--border-color);
+        display: block;
+    }
+
     .rekap-jenis-item {
         background: #f8fafc;
         border-radius: 12px;
-        padding: 10px 14px;
+        padding: 12px 10px;
         text-align: center;
+        border: 1px solid transparent;
+        transition: all 0.2s;
     }
 
+    .rekap-jenis-item:hover {
+        border-color: #bae6fd;
+        background: #f0f9ff;
+    }
+
+    .soal-empty-state {
+        text-align: center;
+        padding: 56px 16px;
+    }
+
+    /* ============================================
+       RESPONSIVE: TABLET & MOBILE (<= 768px)
+       ============================================ */
     @media (max-width: 768px) {
-        .page-header { padding: 24px; border-radius: 18px; text-align: center; }
-        .page-header .d-flex { flex-direction: column; gap: 16px; }
-        .content-card { padding: 16px; }
+        .container-fluid.py-2 { padding-left: 12px; padding-right: 12px; }
+
+        /* Header */
+        .page-header { padding: 22px 18px; border-radius: 20px; }
+        .page-header-content.d-flex.justify-content-between {
+            flex-direction: column;
+            align-items: stretch !important;
+            gap: 16px;
+        }
+        .page-header h3 { font-size: 18px; margin-bottom: 4px; }
+        .page-header p.small { font-size: 12.5px; }
+
+        .page-header-content .d-flex.gap-2 {
+            flex-direction: column;
+            width: 100%;
+        }
+        .btn-publish-action, .btn-back {
+            width: 100%;
+            justify-content: center;
+            display: flex;
+            align-items: center;
+        }
+        .btn-publish-action { order: 1; }
+        .btn-back { order: 2; }
+
+        /* Layout kolom info & soal */
+        .row.g-4 { row-gap: 16px !important; }
+
+        .content-card { padding: 16px; border-radius: 20px; }
+
+        .info-sidebar { position: static; }
+
+        .info-item { padding: 12px 0; gap: 10px; }
+        .info-item-icon { width: 30px; height: 30px; font-size: 12px; border-radius: 9px; }
+        .info-label { font-size: 10px; }
+        .info-value { font-size: 13.5px; }
+
+        .section-title { font-size: 14px; margin-bottom: 12px; }
+
+        .soal-item { padding: 14px; border-radius: 14px; margin-bottom: 12px; }
+        .soal-teks { font-size: 13.5px; }
+        .soal-number { width: 30px; height: 30px; font-size: 12px; }
+
+        .jawaban-list li { font-size: 12.5px; padding: 8px 12px; }
+
+        .soal-img { max-width: 100%; }
+
+        .rekap-jenis-item { padding: 10px 8px; }
+
+        .pagination-container { justify-content: center !important; }
+        .pagination { justify-content: center !important; flex-wrap: wrap; }
     }
 </style>
 
@@ -159,7 +323,7 @@
 
     {{-- Header --}}
     <div class="page-header mb-4">
-        <div class="d-flex justify-content-between align-items-center flex-wrap">
+        <div class="page-header-content d-flex justify-content-between align-items-center flex-wrap gap-3">
             <div>
                 <span class="badge bg-info bg-opacity-25 text-info px-3 py-2 rounded-pill mb-2 fw-semibold" style="font-size: 11px; letter-spacing: 0.5px;">
                     DETAIL BANK SOAL
@@ -207,7 +371,7 @@
 
         {{-- Kolom Kiri: Info --}}
         <div class="col-lg-4">
-            <div class="content-card h-100">
+            <div class="content-card h-100 info-sidebar">
 
                 <div class="mb-3">
                     @if($bankSoal->is_publish)
@@ -218,52 +382,71 @@
                 </div>
 
                 <div class="info-item">
-                    <div class="info-label">Guru Pengampu</div>
-                    <div class="info-value">{{ optional(optional($bankSoal->guruMapel)->guru)->nama ?? '-' }}</div>
-                </div>
-
-                <div class="info-item">
-                    <div class="info-label">Mata Pelajaran</div>
-                    <div class="info-value">{{ optional($bankSoal->mataPelajaran)->nama_mapel ?? '-' }}</div>
-                </div>
-
-                <div class="info-item">
-                    <div class="info-label">Jenjang</div>
-                    <div class="info-value">{{ optional($bankSoal->jenjang)->nama_jenjang ?? '-' }}</div>
-                </div>
-
-                <div class="info-item">
-                    <div class="info-label">Nilai KKM</div>
-                    <div class="info-value">
-                        <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2.5 py-1.5 rounded-pill fw-bold" style="font-size: 13px;">
-                            {{ $bankSoal->kkm ?? 75 }}
-                        </span>
+                    <div class="info-item-icon"><i class="fa-solid fa-user-tie"></i></div>
+                    <div>
+                        <div class="info-label">Guru Pengampu</div>
+                        <div class="info-value">{{ optional(optional($bankSoal->guruMapel)->guru)->nama ?? '-' }}</div>
                     </div>
                 </div>
 
                 <div class="info-item">
-                    <div class="info-label">Deskripsi</div>
-                    <div class="info-value fw-normal">{{ $bankSoal->deskripsi ?? '-' }}</div>
+                    <div class="info-item-icon"><i class="fa-solid fa-book"></i></div>
+                    <div>
+                        <div class="info-label">Mata Pelajaran</div>
+                        <div class="info-value">{{ optional($bankSoal->mataPelajaran)->nama_mapel ?? '-' }}</div>
+                    </div>
                 </div>
 
+                <div class="info-item">
+                    <div class="info-item-icon"><i class="fa-solid fa-school"></i></div>
+                    <div>
+                        <div class="info-label">Jenjang</div>
+                        <div class="info-value">{{ optional($bankSoal->jenjang)->nama_jenjang ?? '-' }}</div>
+                    </div>
+                </div>
 
                 <div class="info-item">
-                    <div class="info-label">Total Soal</div>
-                    <div class="info-value">{{ $bankSoal->soals->count() ?? $soals->total() }} soal</div>
+                    <div class="info-item-icon"><i class="fa-solid fa-bullseye"></i></div>
+                    <div>
+                        <div class="info-label">Nilai KKM</div>
+                        <div class="info-value">
+                            <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2.5 py-1.5 rounded-pill fw-bold" style="font-size: 13px;">
+                                {{ $bankSoal->kkm ?? 75 }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="info-item">
+                    <div class="info-item-icon"><i class="fa-solid fa-align-left"></i></div>
+                    <div>
+                        <div class="info-label">Deskripsi</div>
+                        <div class="info-value fw-normal">{{ $bankSoal->deskripsi ?? '-' }}</div>
+                    </div>
+                </div>
+
+                <div class="info-item">
+                    <div class="info-item-icon"><i class="fa-solid fa-list-ol"></i></div>
+                    <div>
+                        <div class="info-label">Total Soal</div>
+                        <div class="info-value">{{ $bankSoal->soals->count() ?? $soals->total() }} soal</div>
+                    </div>
                 </div>
 
                 @if(count($rekapJenis) > 0)
-                <div class="info-item">
-                    <div class="info-label mb-2">Rekap per Jenis Soal</div>
-                    <div class="row g-2">
-                        @foreach($rekapJenis as $jenis => $jumlah)
-                        <div class="col-6">
-                            <div class="rekap-jenis-item">
-                                <div class="fw-bold text-dark">{{ $jumlah }}</div>
-                                <small class="text-muted">{{ \App\Models\Soal::jenisLabel($jenis) }}</small>
+                <div class="info-item" style="border-bottom: none;">
+                    <div class="w-100">
+                        <div class="info-label mb-2">Rekap per Jenis Soal</div>
+                        <div class="row g-2">
+                            @foreach($rekapJenis as $jenis => $jumlah)
+                            <div class="col-6">
+                                <div class="rekap-jenis-item">
+                                    <div class="fw-bold text-dark">{{ $jumlah }}</div>
+                                    <small class="text-muted">{{ \App\Models\Soal::jenisLabel($jenis) }}</small>
+                                </div>
                             </div>
+                            @endforeach
                         </div>
-                        @endforeach
                     </div>
                 </div>
                 @endif
@@ -277,23 +460,24 @@
                 <div class="section-title">
                     <i class="fa-solid fa-list-ol text-primary"></i>
                     Daftar Soal
+                    <span class="count-badge">{{ $soals->total() ?? $soals->count() }} soal</span>
                 </div>
 
                 @forelse($soals as $soal)
                     <div class="soal-item">
                         <div class="d-flex align-items-start gap-3">
                             <div class="soal-number">{{ $soal->urutan }}</div>
-                            <div class="flex-grow-1">
+                            <div class="flex-grow-1" style="min-width: 0;">
                                 <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
                                     <span class="jenis-badge">{{ \App\Models\Soal::jenisLabel($soal->jenis_soal) }}</span>
                                     <span class="text-muted small">Bobot: {{ $soal->bobot }}</span>
                                 </div>
-                                <div class="text-dark mb-2">{{ \Illuminate\Support\Str::limit(strip_tags($soal->teks_soal), 200) }}</div>
+                                <div class="soal-teks mb-1">{{ \Illuminate\Support\Str::limit(strip_tags($soal->teks_soal), 200) }}</div>
 
                                 @if(in_array($soal->jenis_soal, ['pilihan_ganda', 'pilihan_ganda_kompleks', 'benar_salah']))
-                                    <ul class="list-unstyled mt-2 mb-0">
+                                    <ul class="list-unstyled jawaban-list mb-0">
                                         @foreach($soal->pilihanJawabans as $pilihan)
-                                        <li class="d-flex align-items-center gap-2 py-1 {{ $pilihan->is_benar ? 'text-success fw-semibold' : 'text-muted' }}">
+                                        <li class="{{ $pilihan->is_benar ? 'is-correct' : 'is-wrong' }}">
                                             @if($pilihan->is_benar)
                                                 <i class="fa-solid fa-circle-check"></i>
                                             @else
@@ -305,9 +489,9 @@
                                     </ul>
 
                                 @elseif($soal->jenis_soal == 'menjodohkan')
-                                    <ul class="list-unstyled mt-2 mb-0">
+                                    <ul class="list-unstyled jawaban-list mb-0">
                                         @foreach($soal->pilihanJawabans as $pilihan)
-                                        <li class="py-1">
+                                        <li>
                                             <span class="fw-semibold">{{ $pilihan->teks_pilihan }}</span>
                                             <i class="fa-solid fa-arrow-right-long mx-2 text-muted"></i>
                                             <span>{{ $pilihan->pasangan }}</span>
@@ -316,9 +500,9 @@
                                     </ul>
 
                                 @elseif($soal->jenis_soal == 'mengurutkan')
-                                    <ol class="mt-2 mb-0">
+                                    <ol class="mt-2 mb-0 ps-3" style="font-size: 13.5px;">
                                         @foreach($soal->pilihanJawabans->sortBy('urutan') as $pilihan)
-                                        <li>{{ $pilihan->teks_pilihan }}</li>
+                                        <li class="mb-1">{{ $pilihan->teks_pilihan }}</li>
                                         @endforeach
                                     </ol>
 
@@ -330,13 +514,13 @@
                                 @endif
 
                                 @if($soal->gambar)
-                                    <img src="{{ asset('storage/' . $soal->gambar) }}" alt="Gambar soal" class="mt-2 rounded-3" style="max-width: 200px;">
+                                    <img src="{{ asset('storage/' . $soal->gambar) }}" alt="Gambar soal" class="soal-img">
                                 @endif
                             </div>
                         </div>
                     </div>
                 @empty
-                <div class="text-center py-5">
+                <div class="soal-empty-state">
                     <i class="fa-solid fa-circle-question fa-3x text-muted mb-3 opacity-50"></i>
                     <h6 class="fw-bold text-secondary">Bank soal ini belum berisi soal apapun</h6>
                     <small class="text-muted">Guru pengampu perlu menambahkan soal sebelum bank soal ini bisa dipublikasikan.</small>
@@ -344,7 +528,7 @@
                 @endforelse
 
                 @if($soals->hasPages())
-                <div class="d-flex justify-content-end mt-3">
+                <div class="d-flex justify-content-end mt-3 pagination-container">
                     {{ $soals->links('vendor.pagination.bootstrap-4') }}
                 </div>
                 @endif

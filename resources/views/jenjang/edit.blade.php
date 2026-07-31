@@ -82,6 +82,7 @@ body {
     font-size: 14px;
     transition: all 0.25s ease;
     box-shadow: 0 4px 12px rgba(79, 70, 229, 0.15);
+    white-space: nowrap;
 }
 
 .btn-premium-save:hover {
@@ -100,6 +101,7 @@ body {
     font-weight: 600;
     font-size: 14px;
     transition: all 0.2s;
+    white-space: nowrap;
 }
 
 .btn-light-custom:hover {
@@ -107,26 +109,54 @@ body {
     color: #1e293b;
 }
 
+.slug-preview-badge {
+    background: #f0fdf4;
+    color: #16a34a;
+    padding: 3px 10px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    display: inline-block;
+    border: 1px solid #dcfce7;
+}
+
 /* =======================================================
-   MEDIA QUERIES (RESPONSIVE VIEW UNTUK HP)
+   MEDIA QUERIES (RESPONSIVE VIEW UNTUK HP & TABLET)
    ======================================================= */
-@media (max-width: 575.98px) {
+@media (max-width: 767.98px) {
+    .container-fluid.px-md-4.py-4 { padding-left: 12px; padding-right: 12px; }
+
+    .custom-card { border-radius: 20px; }
+
     .card-header-modern {
-        padding: 24px 20px 16px 20px;
+        padding: 22px 18px 14px 18px;
     }
-    
+
+    .card-header-modern h4 { font-size: 18px; }
+    .card-header-modern p.small { font-size: 12.5px; }
+
     .card-body-custom {
-        padding: 20px !important;
+        padding: 18px !important;
     }
-    
+
+    .form-label-custom { font-size: 11.5px; }
+
+    .form-control-custom {
+        padding: 12px 14px;
+        font-size: 14px;
+    }
+
     .action-group-btn {
         flex-direction: column-reverse;
-        gap: 12px;
+        gap: 10px;
     }
-    
+
     .action-group-btn .btn {
         width: 100%;
         text-align: center;
+        justify-content: center;
+        display: flex;
+        align-items: center;
         padding: 14px;
     }
 }
@@ -144,6 +174,17 @@ body {
                 </div>
 
                 <div class="card-body card-body-custom p-5">
+
+                    @if($errors->any())
+                    <div class="alert alert-danger rounded-4 border-0 mb-4">
+                        <ul class="mb-0 ps-3">
+                            @foreach($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                    @endif
+
                     <form action="{{ route('jenjang.update', $jenjang->slug) }}" method="POST">
                         @csrf
                         @method('PUT')

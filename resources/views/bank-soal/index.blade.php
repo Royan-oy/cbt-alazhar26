@@ -47,6 +47,12 @@
         align-items: center;
         gap: 16px;
         height: 100%;
+        transition: transform .2s, box-shadow .2s;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 28px rgba(15, 23, 42, 0.06);
     }
 
     .stat-icon {
@@ -90,8 +96,6 @@
         font-weight: 600;
     }
 
-    .table-responsive { border-radius: 16px; overflow: hidden; }
-
     .table thead th {
         font-size: 11px;
         text-transform: uppercase;
@@ -123,6 +127,7 @@
         display: inline-flex;
         align-items: center;
         gap: 5px;
+        white-space: nowrap;
     }
 
     .status-draft {
@@ -136,6 +141,7 @@
         display: inline-flex;
         align-items: center;
         gap: 5px;
+        white-space: nowrap;
     }
 
     .action-icon-btn {
@@ -146,24 +152,74 @@
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        margin-left: 4px;
         text-decoration: none;
         transition: all 0.2s ease;
     }
 
     .action-icon-btn:hover { transform: translateY(-2px); }
 
-    .btn-icon-info { background: #eff6ff; color: #2563eb; }
-    .btn-icon-info:hover { background: #2563eb; color: white; }
+    .btn-icon-more {
+        background: #f1f5f9;
+        color: var(--text-muted);
+    }
+    .btn-icon-more:hover,
+    .btn-icon-more.is-active {
+        background: var(--secondary-dark);
+        color: #fff;
+    }
 
-    .btn-icon-publish { background: #ecfdf5; color: #059669; }
-    .btn-icon-publish:hover { background: #059669; color: white; }
+    /* ============================================
+       DROPDOWN AKSI PER BARIS (titik tiga)
+       Posisi "fixed" via JS supaya tidak kepotong
+       oleh area tabel yang bisa digeser horizontal.
+       ============================================ */
+    .dropdown-action-wrap {
+        position: relative;
+        display: inline-block;
+    }
 
-    .btn-icon-unpublish { background: #fffbeb; color: #d97706; }
-    .btn-icon-unpublish:hover { background: #d97706; color: white; }
+    .dropdown-action-menu {
+        display: none;
+        position: fixed;
+        background: #fff;
+        border-radius: 14px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        padding: 8px;
+        min-width: 200px;
+        z-index: 3000;
+    }
 
-    .btn-icon-delete { background: #fff5f5; color: #e11d48; }
-    .btn-icon-delete:hover { background: #e11d48; color: white; }
+    .dropdown-action-menu.show { display: block; }
+
+    .dropdown-action-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        width: 100%;
+        padding: 9px 12px;
+        border-radius: 10px;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--secondary-dark);
+        text-decoration: none;
+        border: none;
+        background: transparent;
+        text-align: left;
+        transition: background-color 0.15s;
+    }
+
+    .dropdown-action-item i { width: 16px; text-align: center; flex-shrink: 0; }
+
+    .dropdown-action-item:hover { background-color: #f8fafc; color: var(--secondary-dark); }
+
+    .dropdown-action-item.text-danger { color: #e11d48; }
+    .dropdown-action-item.text-danger:hover { background-color: #fff1f2; color: #e11d48; }
+
+    .dropdown-action-divider {
+        height: 1px;
+        background: #f1f5f9;
+        margin: 6px 4px;
+    }
 
     .pagination { gap: 6px; margin-bottom: 0; }
 
@@ -181,56 +237,115 @@
         color: white !important;
     }
 
+    /* ============================================
+       TABEL: tetap berbentuk tabel di mobile,
+       digeser horizontal, dengan kolom No & Aksi
+       yang menempel (sticky) di kiri/kanan.
+       ============================================ */
+    .table-scroll-wrap {
+        position: relative;
+        border-radius: 16px;
+        border: 1px solid var(--border-color);
+        overflow: hidden;
+    }
+
+    .table-scroll-wrap .table-responsive {
+        border-radius: 0;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: thin;
+        margin-bottom: 0;
+    }
+
+    .table-scroll-wrap .table { margin-bottom: 0; }
+
+    /* Indikator visual bahwa tabel bisa digeser (gradient tipis di kanan) */
+    .table-scroll-wrap::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        width: 28px;
+        background: linear-gradient(to right, transparent, rgba(15, 23, 42, 0.06));
+        pointer-events: none;
+        border-radius: 0 16px 16px 0;
+    }
+
+    /* ============================================
+       RESPONSIVE: TABLET & MOBILE (<= 768px)
+       ============================================ */
     @media (max-width: 768px) {
-        .page-header { padding: 24px; border-radius: 18px; text-align: center; }
+        .container-fluid.py-2 { padding-left: 12px; padding-right: 12px; }
+
+        .page-header { padding: 22px 18px; border-radius: 20px; }
+        .page-header h3 { font-size: 19px; margin-bottom: 4px; }
+        .page-header p.small { font-size: 12.5px; }
+
+        .row.g-3.mb-4 { row-gap: 12px !important; }
+        .stat-card { padding: 16px; border-radius: 16px; gap: 12px; }
+        .stat-icon { width: 40px; height: 40px; font-size: 17px; border-radius: 12px; }
+        .stat-card h4 { font-size: 17px; margin-top: 2px !important; }
+        .stat-card small { font-size: 9.5px; letter-spacing: 0.3px !important; }
+
         .content-card { padding: 4px; border-radius: 18px; }
-        .form-control-custom, .btn-action-trigger { width: 100%; margin-bottom: 8px; }
+        .content-card .card-body { padding: 14px !important; }
 
-        .table-responsive table, .table-responsive thead, .table-responsive tbody,
-        .table-responsive th, .table-responsive td, .table-responsive tr { display: block; }
+        /* Filter form */
+        .row.g-3.mb-4.align-items-center { row-gap: 10px !important; }
+        .col-lg-3, .col-lg-2, .col-lg-auto { width: 100%; }
+        .col-lg-auto .d-flex { width: 100%; }
+        .col-lg-auto .d-flex .btn-action-trigger:first-child { flex: 1; }
 
-        .table-responsive thead tr { position: absolute; top: -9999px; left: -9999px; }
-
-        .table-responsive tr {
-            border: 1px solid var(--border-color);
-            border-radius: 16px;
-            margin-bottom: 16px;
-            padding: 12px;
-            background: #fff;
+        /* Tabel: sesuaikan ukuran & sticky column */
+        .table-scroll-wrap .table {
+            min-width: 760px;
         }
 
-        .table-responsive td {
-            border: none;
-            border-bottom: 1px dashed #f1f5f9;
-            position: relative;
-            padding-left: 45% !important;
-            text-align: right !important;
-            min-height: 48px;
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-        }
-
-        .table-responsive td:before {
-            position: absolute;
-            left: 12px;
-            width: 40%;
+        .table-scroll-wrap .table thead th {
             white-space: nowrap;
-            text-align: left;
-            font-weight: 700;
-            color: var(--text-muted);
-            font-size: 11px;
-            text-transform: uppercase;
+            padding: 12px 14px;
+            font-size: 10.5px;
         }
 
-        .table-responsive td:nth-of-type(1):before { content: "No"; }
-        .table-responsive td:nth-of-type(2):before { content: "Bank Soal"; }
-        .table-responsive td:nth-of-type(3):before { content: "Guru"; }
-        .table-responsive td:nth-of-type(4):before { content: "Jml Soal"; }
-        .table-responsive td:nth-of-type(5):before { content: "Status"; }
-        .table-responsive td:nth-of-type(6):before { content: "Aksi"; }
+        .table-scroll-wrap .table tbody td {
+            padding: 14px;
+            font-size: 13.5px;
+        }
 
-        .pagination { justify-content: center !important; }
+        .table-scroll-wrap .table tbody td .fs-6 { font-size: 13.5px !important; }
+        .table-scroll-wrap .table tbody td small { font-size: 11px; }
+
+        /* Kolom "No" menempel di kiri */
+        .table-scroll-wrap .table th:first-child,
+        .table-scroll-wrap .table td:first-child {
+            position: sticky;
+            left: 0;
+            z-index: 2;
+            background: #fff;
+            box-shadow: 2px 0 6px rgba(15, 23, 42, 0.04);
+        }
+        .table-scroll-wrap .table thead th:first-child { background: #f8fafc; }
+
+        /* Kolom "Aksi" menempel di kanan */
+        .table-scroll-wrap .table th:last-child,
+        .table-scroll-wrap .table td:last-child {
+            position: sticky;
+            right: 0;
+            z-index: 2;
+            background: #fff;
+            box-shadow: -2px 0 6px rgba(15, 23, 42, 0.04);
+        }
+        .table-scroll-wrap .table thead th:last-child { background: #f8fafc; }
+
+        .table-scroll-wrap .table tbody tr:hover td:first-child,
+        .table-scroll-wrap .table tbody tr:hover td:last-child {
+            background: #f8fafc;
+        }
+
+        .action-icon-btn { width: 36px; height: 36px; }
+
+        .pagination { justify-content: center !important; flex-wrap: wrap; }
     }
 </style>
 
@@ -383,6 +498,7 @@
             </form>
 
             {{-- Table --}}
+            <div class="table-scroll-wrap">
             <div class="table-responsive">
                 <table class="table align-middle">
                     <thead>
@@ -393,7 +509,7 @@
                             <th width="100" class="text-center">Jml Soal</th>
                             <th width="80" class="text-center">KKM</th>
                             <th width="130">Status</th>
-                            <th width="150" class="text-end">Aksi</th>
+                            <th width="70" class="text-end">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -433,38 +549,43 @@
                             </td>
 
                             <td class="text-end">
-                                <div class="d-inline-flex">
+                                <div class="dropdown-action-wrap">
+                                    <button type="button" class="action-icon-btn btn-icon-more dropdown-action-toggle" title="Menu Aksi">
+                                        <i class="fa-solid fa-ellipsis-vertical"></i>
+                                    </button>
 
-                                    <a href="{{ route('bank-soal.show', $item->id) }}"
-                                        class="action-icon-btn btn-icon-info"
-                                        title="Lihat Detail">
-                                        <i class="fa-solid fa-eye"></i>
-                                    </a>
+                                    <div class="dropdown-action-menu">
+                                        <a href="{{ route('bank-soal.show', $item->id) }}" class="dropdown-action-item">
+                                            <i class="fa-solid fa-eye text-primary"></i>
+                                            Lihat Detail
+                                        </a>
 
-                                    <form action="{{ route('bank-soal.toggle-publish', $item->id) }}" method="POST" class="d-inline">
-                                        @csrf
-                                        @method('PATCH')
-                                        <button type="submit"
-                                            class="action-icon-btn {{ $item->is_publish ? 'btn-icon-unpublish' : 'btn-icon-publish' }}"
-                                            title="{{ $item->is_publish ? 'Tarik ke Draft' : 'Publikasikan' }}">
-                                            <i class="fa-solid {{ $item->is_publish ? 'fa-eye-slash' : 'fa-circle-check' }}"></i>
-                                        </button>
-                                    </form>
+                                        <form action="{{ route('bank-soal.toggle-publish', $item->id) }}" method="POST" class="w-100 m-0">
+                                            @csrf
+                                            @method('PATCH')
+                                            <button type="submit" class="dropdown-action-item">
+                                                <i class="fa-solid {{ $item->is_publish ? 'fa-eye-slash text-warning' : 'fa-circle-check text-success' }}"></i>
+                                                {{ $item->is_publish ? 'Tarik ke Draft' : 'Publikasikan' }}
+                                            </button>
+                                        </form>
 
-                                    <form action="{{ route('bank-soal.destroy', $item->id) }}" method="POST" class="form-delete d-inline">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="action-icon-btn btn-icon-delete" title="Hapus">
-                                            <i class="fa-solid fa-trash"></i>
-                                        </button>
-                                    </form>
+                                        <div class="dropdown-action-divider"></div>
 
+                                        <form action="{{ route('bank-soal.destroy', $item->id) }}" method="POST" class="form-delete w-100 m-0">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="dropdown-action-item text-danger">
+                                                <i class="fa-solid fa-trash"></i>
+                                                Hapus Bank Soal
+                                            </button>
+                                        </form>
+                                    </div>
                                 </div>
                             </td>
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="6">
+                            <td colspan="7">
                                 <div class="text-center py-5">
                                     <i class="fa-solid fa-folder-open fa-3x text-muted mb-3 opacity-50"></i>
                                     <h6 class="fw-bold text-secondary">Belum ada bank soal</h6>
@@ -475,6 +596,7 @@
                         @endforelse
                     </tbody>
                 </table>
+            </div>
             </div>
 
             {{-- Pagination --}}
@@ -509,6 +631,89 @@ document.querySelectorAll('.form-delete').forEach(function(form){
         });
     });
 });
+</script>
+
+<script>
+/* =========================================================
+   Dropdown Aksi (titik tiga) per baris tabel.
+   Menggunakan position:fixed yang dihitung manual via JS
+   supaya menu tidak kepotong oleh area tabel yang bisa
+   digeser horizontal (overflow-x: auto pada wrapper tabel).
+========================================================= */
+(function () {
+    function closeAllActionMenus(except) {
+        document.querySelectorAll('.dropdown-action-menu.show').forEach(function (menu) {
+            if (menu !== except) {
+                menu.classList.remove('show');
+                const toggle = menu.closest('.dropdown-action-wrap').querySelector('.dropdown-action-toggle');
+                if (toggle) toggle.classList.remove('is-active');
+            }
+        });
+    }
+
+    function positionMenu(btn, menu) {
+        const rect = btn.getBoundingClientRect();
+        const menuWidth = menu.offsetWidth || 200;
+
+        // Buka ke kiri kalau kepepet di tepi kanan layar
+        let left = rect.right - menuWidth;
+        if (left < 8) left = 8;
+
+        let top = rect.bottom + 6;
+        // Kalau menu bakal keluar dari layar bawah, buka ke atas tombol
+        const menuHeight = menu.offsetHeight || 160;
+        if (top + menuHeight > window.innerHeight - 8) {
+            top = rect.top - menuHeight - 6;
+        }
+
+        menu.style.top = top + 'px';
+        menu.style.left = left + 'px';
+    }
+
+    document.querySelectorAll('.dropdown-action-toggle').forEach(function (btn) {
+        btn.addEventListener('click', function (e) {
+            e.stopPropagation();
+
+            const wrap = btn.closest('.dropdown-action-wrap');
+            const menu = wrap.querySelector('.dropdown-action-menu');
+            const isOpen = menu.classList.contains('show');
+
+            closeAllActionMenus();
+
+            if (!isOpen) {
+                menu.classList.add('show');
+                positionMenu(btn, menu);
+                btn.classList.add('is-active');
+            }
+        });
+    });
+
+    // Tutup menu saat klik di luar, saat scroll, atau saat resize
+    document.addEventListener('click', function () {
+        closeAllActionMenus();
+    });
+
+    document.querySelectorAll('.table-responsive').forEach(function (el) {
+        el.addEventListener('scroll', function () {
+            closeAllActionMenus();
+        }, { passive: true });
+    });
+
+    window.addEventListener('scroll', function () {
+        closeAllActionMenus();
+    }, true);
+
+    window.addEventListener('resize', function () {
+        closeAllActionMenus();
+    });
+
+    // Klik di dalam menu tidak boleh langsung menutup sebelum aksi (link/submit) berjalan
+    document.querySelectorAll('.dropdown-action-menu').forEach(function (menu) {
+        menu.addEventListener('click', function (e) {
+            e.stopPropagation();
+        });
+    });
+})();
 </script>
 
 @if(session('success'))

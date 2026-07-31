@@ -37,6 +37,8 @@
         pointer-events: none;
     }
 
+    .page-header-content { position: relative; z-index: 1; }
+
     .stat-card {
         background: var(--surface-white);
         border: 1px solid var(--border-color);
@@ -47,6 +49,12 @@
         align-items: center;
         gap: 16px;
         height: 100%;
+        transition: transform .2s, box-shadow .2s;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 28px rgba(15, 23, 42, 0.06);
     }
 
     .stat-icon {
@@ -88,6 +96,7 @@
         padding: 12px 24px;
         font-weight: 600;
         box-shadow: 0 4px 12px rgba(14, 165, 233, 0.2);
+        white-space: nowrap;
     }
 
     .btn-action-trigger {
@@ -96,8 +105,6 @@
         padding: 0 20px;
         font-weight: 600;
     }
-
-    .table-responsive { border-radius: 16px; overflow: hidden; }
 
     .table thead th {
         font-size: 11px;
@@ -127,6 +134,7 @@
         display: inline-flex;
         align-items: center;
         gap: 5px;
+        white-space: nowrap;
     }
 
     .status-akan-datang { background: #eff6ff; color: #2563eb; border: 1px solid rgba(37, 99, 235, 0.15); }
@@ -143,6 +151,7 @@
         padding: 4px 10px;
         display: inline-block;
         font-size: 13px;
+        white-space: nowrap;
     }
 
     .action-icon-btn {
@@ -153,21 +162,21 @@
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        margin-left: 4px;
         text-decoration: none;
         transition: all 0.2s ease;
     }
 
     .action-icon-btn:hover { transform: translateY(-2px); }
 
-    .btn-icon-info { background: #eff6ff; color: #2563eb; }
-    .btn-icon-info:hover { background: #2563eb; color: white; }
-
-    .btn-icon-edit { background: #f0fdfa; color: #0d9488; }
-    .btn-icon-edit:hover { background: #0d9488; color: white; }
-
-    .btn-icon-delete { background: #fff5f5; color: #e11d48; }
-    .btn-icon-delete:hover { background: #e11d48; color: white; }
+    .btn-icon-more {
+        background: #f1f5f9;
+        color: var(--text-muted);
+    }
+    .btn-icon-more:hover,
+    .btn-icon-more.is-active {
+        background: var(--secondary-dark);
+        color: #fff;
+    }
 
     .pagination { gap: 6px; margin-bottom: 0; }
 
@@ -185,57 +194,176 @@
         color: white !important;
     }
 
+    /* ============================================
+       DROPDOWN AKSI PER BARIS (titik tiga)
+       Posisi "fixed" via JS supaya tidak kepotong
+       oleh area tabel yang bisa digeser horizontal.
+       ============================================ */
+    .dropdown-action-wrap {
+        position: relative;
+        display: inline-block;
+    }
+
+    .dropdown-action-menu {
+        display: none;
+        position: fixed;
+        background: #fff;
+        border-radius: 14px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        padding: 8px;
+        min-width: 210px;
+        z-index: 3000;
+    }
+
+    .dropdown-action-menu.show { display: block; }
+
+    .dropdown-action-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        width: 100%;
+        padding: 9px 12px;
+        border-radius: 10px;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--secondary-dark);
+        text-decoration: none;
+        border: none;
+        background: transparent;
+        text-align: left;
+        transition: background-color 0.15s;
+    }
+
+    .dropdown-action-item i { width: 16px; text-align: center; flex-shrink: 0; }
+
+    .dropdown-action-item:hover { background-color: #f8fafc; color: var(--secondary-dark); }
+
+    .dropdown-action-item.text-danger { color: #e11d48; }
+    .dropdown-action-item.text-danger:hover { background-color: #fff1f2; color: #e11d48; }
+
+    .dropdown-action-item.is-disabled {
+        opacity: .45;
+        pointer-events: none;
+    }
+
+    .dropdown-action-divider {
+        height: 1px;
+        background: #f1f5f9;
+        margin: 6px 4px;
+    }
+
+    /* ============================================
+       TABEL: tetap berbentuk tabel di mobile,
+       digeser horizontal, dengan kolom No & Aksi
+       yang menempel (sticky) di kiri/kanan.
+       ============================================ */
+    .table-scroll-wrap {
+        position: relative;
+        border-radius: 16px;
+        border: 1px solid var(--border-color);
+        overflow: hidden;
+    }
+
+    .table-scroll-wrap .table-responsive {
+        border-radius: 0;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: thin;
+        margin-bottom: 0;
+    }
+
+    .table-scroll-wrap .table { margin-bottom: 0; }
+
+    .table-scroll-wrap::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        width: 28px;
+        background: linear-gradient(to right, transparent, rgba(15, 23, 42, 0.06));
+        pointer-events: none;
+        border-radius: 0 16px 16px 0;
+    }
+
+    /* ============================================
+       RESPONSIVE: TABLET & MOBILE (<= 768px)
+       ============================================ */
     @media (max-width: 768px) {
-        .page-header { padding: 24px; border-radius: 18px; text-align: center; }
-        .page-header .d-flex { flex-direction: column; gap: 20px; }
-        .btn-add { width: 100%; justify-content: center; }
-        .form-control-custom, .btn-action-trigger { width: 100%; margin-bottom: 8px; }
+        .container-fluid.py-2 { padding-left: 12px; padding-right: 12px; }
+
+        .page-header { padding: 22px 18px; border-radius: 20px; }
+        .page-header-content.d-flex.justify-content-between {
+            flex-direction: column;
+            align-items: stretch !important;
+            gap: 16px !important;
+        }
+        .page-header h3 { font-size: 19px; margin-bottom: 4px; }
+        .page-header p.small { font-size: 12.5px; }
+        .btn-add { width: 100%; justify-content: center; height: 46px; }
+
+        .row.g-3.mb-4 { row-gap: 12px !important; }
+        .stat-card { padding: 16px; border-radius: 16px; gap: 12px; }
+        .stat-icon { width: 40px; height: 40px; font-size: 17px; border-radius: 12px; }
+        .stat-card h4 { font-size: 17px; margin-top: 2px !important; }
+        .stat-card small { font-size: 9.5px; letter-spacing: 0.3px !important; }
+
         .content-card { padding: 4px; border-radius: 18px; }
+        .content-card .card-body { padding: 14px !important; }
 
-        .table-responsive table, .table-responsive thead, .table-responsive tbody,
-        .table-responsive th, .table-responsive td, .table-responsive tr { display: block; }
+        /* Filter form */
+        .row.g-3.mb-4.align-items-center { row-gap: 10px !important; }
+        .col-lg-3, .col-lg-2, .col-lg-auto { width: 100%; }
+        .col-lg-auto .d-flex { width: 100%; }
+        .col-lg-auto .d-flex .btn-action-trigger:first-child { flex: 1; }
 
-        .table-responsive thead tr { position: absolute; top: -9999px; left: -9999px; }
-
-        .table-responsive tr {
-            border: 1px solid var(--border-color);
-            border-radius: 16px;
-            margin-bottom: 16px;
-            padding: 12px;
-            background: #fff;
+        /* Tabel: sesuaikan ukuran & sticky column */
+        .table-scroll-wrap .table {
+            min-width: 780px;
         }
 
-        .table-responsive td {
-            border: none;
-            border-bottom: 1px dashed #f1f5f9;
-            position: relative;
-            padding-left: 45% !important;
-            text-align: right !important;
-            min-height: 48px;
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-        }
-
-        .table-responsive td:before {
-            position: absolute;
-            left: 12px;
-            width: 40%;
+        .table-scroll-wrap .table thead th {
             white-space: nowrap;
-            text-align: left;
-            font-weight: 700;
-            color: var(--text-muted);
-            font-size: 11px;
-            text-transform: uppercase;
+            padding: 12px 14px;
+            font-size: 10.5px;
         }
 
-        .table-responsive td:nth-of-type(1):before { content: "No"; }
-        .table-responsive td:nth-of-type(2):before { content: "Ujian"; }
-        .table-responsive td:nth-of-type(3):before { content: "Waktu"; }
-        .table-responsive td:nth-of-type(4):before { content: "Status"; }
-        .table-responsive td:nth-of-type(5):before { content: "Aksi"; }
+        .table-scroll-wrap .table tbody td {
+            padding: 14px;
+            font-size: 13.5px;
+        }
 
-        .pagination { justify-content: center !important; }
+        .table-scroll-wrap .table tbody td .fs-6 { font-size: 13.5px !important; }
+        .table-scroll-wrap .table tbody td small { font-size: 11px; }
+
+        .table-scroll-wrap .table th:first-child,
+        .table-scroll-wrap .table td:first-child {
+            position: sticky;
+            left: 0;
+            z-index: 2;
+            background: #fff;
+            box-shadow: 2px 0 6px rgba(15, 23, 42, 0.04);
+        }
+        .table-scroll-wrap .table thead th:first-child { background: #f8fafc; }
+
+        .table-scroll-wrap .table th:last-child,
+        .table-scroll-wrap .table td:last-child {
+            position: sticky;
+            right: 0;
+            z-index: 2;
+            background: #fff;
+            box-shadow: -2px 0 6px rgba(15, 23, 42, 0.04);
+        }
+        .table-scroll-wrap .table thead th:last-child { background: #f8fafc; }
+
+        .table-scroll-wrap .table tbody tr:hover td:first-child,
+        .table-scroll-wrap .table tbody tr:hover td:last-child {
+            background: #f8fafc;
+        }
+
+        .action-icon-btn { width: 36px; height: 36px; }
+
+        .pagination { justify-content: center !important; flex-wrap: wrap; }
     }
 </style>
 
@@ -243,7 +371,7 @@
 
     {{-- Header --}}
     <div class="page-header mb-4">
-        <div class="d-flex justify-content-between align-items-center flex-wrap">
+        <div class="page-header-content d-flex justify-content-between align-items-center flex-wrap gap-3">
             <div>
                 <span class="badge bg-info bg-opacity-25 text-info px-3 py-2 rounded-pill mb-2 fw-semibold" style="font-size: 11px; letter-spacing: 0.5px;">
                     UJIAN
@@ -265,7 +393,7 @@
 
     {{-- Widget Statistik --}}
     <div class="row g-3 mb-4">
-        <div class="col-6 col-md-3">
+        <div class="col-6 col-md-4">
             <div class="stat-card">
                 <div class="stat-icon bg-primary bg-opacity-10 text-primary">
                     <i class="fa-solid fa-calendar-check"></i>
@@ -276,7 +404,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-6 col-md-3">
+        <div class="col-6 col-md-4">
             <div class="stat-card">
                 <div class="stat-icon bg-success bg-opacity-10 text-success">
                     <i class="fa-solid fa-circle-play"></i>
@@ -287,7 +415,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-6 col-md-3">
+        <div class="col-12 col-md-4">
             <div class="stat-card">
                 <div class="stat-icon bg-info bg-opacity-10 text-info">
                     <i class="fa-solid fa-clock"></i>
@@ -397,6 +525,7 @@
             </form>
 
             {{-- Table --}}
+            <div class="table-scroll-wrap">
             <div class="table-responsive">
                 <table class="table align-middle">
                     <thead>
@@ -406,7 +535,7 @@
                             <th>Waktu Pelaksanaan</th>
                             <th>Token</th>
                             <th width="130">Status</th>
-                            <th width="150" class="text-end">Aksi</th>
+                            <th width="70" class="text-end">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -443,28 +572,34 @@
                                 @endif
                             </td>
                             <td class="text-end">
-                                <div class="d-inline-flex">
+                                <div class="dropdown-action-wrap">
+                                    <button type="button" class="action-icon-btn btn-icon-more dropdown-action-toggle" title="Menu Aksi">
+                                        <i class="fa-solid fa-ellipsis-vertical"></i>
+                                    </button>
 
-                                    <a href="{{ route('ujian.show', $item->id) }}"
-                                        class="action-icon-btn btn-icon-info"
-                                        title="Kontrol Token & Detail">
-                                        <i class="fa-solid fa-eye"></i>
-                                    </a>
+                                    <div class="dropdown-action-menu">
+                                        <a href="{{ route('ujian.show', $item->id) }}" class="dropdown-action-item">
+                                            <i class="fa-solid fa-eye text-primary"></i>
+                                            Kontrol Token &amp; Detail
+                                        </a>
 
-                                    <a href="{{ route('ujian.edit', $item->id) }}"
-                                        class="action-icon-btn btn-icon-edit"
-                                        title="Edit">
-                                        <i class="fa-solid fa-pen"></i>
-                                    </a>
+                                        <a href="{{ route('ujian.edit', $item->id) }}"
+                                           class="dropdown-action-item {{ $item->token_aktif ? 'is-disabled' : '' }}">
+                                            <i class="fa-solid fa-pen text-info"></i>
+                                            Edit Jadwal
+                                        </a>
 
-                                    <form action="{{ route('ujian.destroy', $item->id) }}" method="POST" class="form-delete d-inline">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="action-icon-btn btn-icon-delete" title="Hapus">
-                                            <i class="fa-solid fa-trash"></i>
-                                        </button>
-                                    </form>
+                                        <div class="dropdown-action-divider"></div>
 
+                                        <form action="{{ route('ujian.destroy', $item->id) }}" method="POST" class="form-delete w-100 m-0">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="dropdown-action-item text-danger">
+                                                <i class="fa-solid fa-trash"></i>
+                                                Hapus Jadwal
+                                            </button>
+                                        </form>
+                                    </div>
                                 </div>
                             </td>
                         </tr>
@@ -481,6 +616,7 @@
                         @endforelse
                     </tbody>
                 </table>
+            </div>
             </div>
 
             {{-- Pagination --}}
@@ -527,5 +663,84 @@ Swal.fire({
 });
 </script>
 @endif
+
+<script>
+/* =========================================================
+   Dropdown Aksi (titik tiga) per baris tabel.
+   Menggunakan position:fixed yang dihitung manual via JS
+   supaya menu tidak kepotong oleh area tabel yang bisa
+   digeser horizontal (overflow-x: auto pada wrapper tabel).
+========================================================= */
+(function () {
+    function closeAllActionMenus(except) {
+        document.querySelectorAll('.dropdown-action-menu.show').forEach(function (menu) {
+            if (menu !== except) {
+                menu.classList.remove('show');
+                const toggle = menu.closest('.dropdown-action-wrap').querySelector('.dropdown-action-toggle');
+                if (toggle) toggle.classList.remove('is-active');
+            }
+        });
+    }
+
+    function positionMenu(btn, menu) {
+        const rect = btn.getBoundingClientRect();
+        const menuWidth = menu.offsetWidth || 210;
+
+        let left = rect.right - menuWidth;
+        if (left < 8) left = 8;
+
+        let top = rect.bottom + 6;
+        const menuHeight = menu.offsetHeight || 160;
+        if (top + menuHeight > window.innerHeight - 8) {
+            top = rect.top - menuHeight - 6;
+        }
+
+        menu.style.top = top + 'px';
+        menu.style.left = left + 'px';
+    }
+
+    document.querySelectorAll('.dropdown-action-toggle').forEach(function (btn) {
+        btn.addEventListener('click', function (e) {
+            e.stopPropagation();
+
+            const wrap = btn.closest('.dropdown-action-wrap');
+            const menu = wrap.querySelector('.dropdown-action-menu');
+            const isOpen = menu.classList.contains('show');
+
+            closeAllActionMenus();
+
+            if (!isOpen) {
+                menu.classList.add('show');
+                positionMenu(btn, menu);
+                btn.classList.add('is-active');
+            }
+        });
+    });
+
+    document.addEventListener('click', function () {
+        closeAllActionMenus();
+    });
+
+    document.querySelectorAll('.table-responsive').forEach(function (el) {
+        el.addEventListener('scroll', function () {
+            closeAllActionMenus();
+        }, { passive: true });
+    });
+
+    window.addEventListener('scroll', function () {
+        closeAllActionMenus();
+    }, true);
+
+    window.addEventListener('resize', function () {
+        closeAllActionMenus();
+    });
+
+    document.querySelectorAll('.dropdown-action-menu').forEach(function (menu) {
+        menu.addEventListener('click', function (e) {
+            e.stopPropagation();
+        });
+    });
+})();
+</script>
 
 @endsection

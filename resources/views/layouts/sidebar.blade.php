@@ -526,3 +526,26 @@
         </div>
     </div>
 </aside>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    const sidebarScroll = document.querySelector('.sidebar-menu-scroll');
+    const activeMenu = document.querySelector('.sidebar-menu-scroll .nav-link.active');
+
+    if (sidebarScroll && activeMenu) {
+
+        const scrollTop =
+            activeMenu.offsetTop -
+            sidebarScroll.offsetTop -
+            (sidebarScroll.clientHeight / 2) +
+            (activeMenu.clientHeight / 2);
+
+        sidebarScroll.scrollTo({
+            top: scrollTop,
+            behavior: 'smooth'
+        });
+    }
+
+});
+</script>

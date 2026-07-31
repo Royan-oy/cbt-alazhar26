@@ -20,12 +20,23 @@
         padding: 32px;
         color: white;
         position: relative;
-        overflow: hidden;
         box-shadow: 0 20px 40px rgba(15, 23, 42, 0.08);
         border: 1px solid rgba(255, 255, 255, 0.05);
+        z-index: 10;
     }
 
-    .page-header::after {
+    /* Wrapper khusus untuk clip lingkaran dekorasi, terpisah dari overflow header
+       supaya dropdown "Aksi Lainnya" tidak ikut kepotong */
+    .page-header-glow {
+        position: absolute;
+        inset: 0;
+        border-radius: 24px;
+        overflow: hidden;
+        z-index: 0;
+        pointer-events: none;
+    }
+
+    .page-header-glow::after {
         content: '';
         position: absolute;
         width: 300px;
@@ -34,8 +45,9 @@
         right: -50px;
         top: -80px;
         background: radial-gradient(circle, rgba(14, 165, 233, 0.15) 0%, rgba(14, 165, 233, 0) 70%);
-        pointer-events: none;
     }
+
+    .page-header-content { position: relative; z-index: 1; }
 
     .stat-card {
         background: var(--surface-white);
@@ -86,6 +98,7 @@
         padding: 12px 24px;
         font-weight: 600;
         box-shadow: 0 4px 12px rgba(14, 165, 233, 0.2);
+        white-space: nowrap;
     }
 
     .btn-action-trigger {
@@ -94,6 +107,41 @@
         padding: 0 20px;
         font-weight: 600;
     }
+
+    /* Dropdown "Aksi Lainnya" di header */
+    .dropdown-action-btn {
+        width: 46px;
+        height: 46px;
+        border-radius: 14px;
+        border: 1px solid rgba(255,255,255,0.2);
+        background-color: rgba(255,255,255,0.1);
+        color: #fff;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+    }
+    .dropdown-action-btn:hover, .dropdown-action-btn:focus {
+        background-color: rgba(255,255,255,0.2);
+        color: #fff;
+    }
+    .dropdown-menu-custom {
+        border: none;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        border-radius: 14px;
+        padding: 8px;
+        min-width: 210px;
+        z-index: 1050;
+    }
+    .dropdown-menu-custom .dropdown-item {
+        border-radius: 10px;
+        padding: 8px 12px;
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--secondary-dark);
+        transition: all 0.2s;
+    }
+    .dropdown-menu-custom .dropdown-item:hover { background-color: #f8fafc; }
 
     .table-responsive { border-radius: 16px; overflow: hidden; }
 
@@ -167,56 +215,119 @@
     }
 
     @media (max-width: 768px) {
-        .page-header { padding: 24px; border-radius: 18px; text-align: center; }
-        .page-header .d-flex { flex-direction: column; gap: 20px; }
-        .btn-add { width: 100%; justify-content: center; }
-        .form-control-custom, .btn-action-trigger { width: 100%; margin-bottom: 8px; }
+        .container-fluid.py-2 { padding-left: 12px; padding-right: 12px; }
+
+        /* Header */
+        .page-header { padding: 22px 18px; border-radius: 20px; text-align: left; }
+        .page-header-content.d-flex.justify-content-between {
+            flex-direction: column;
+            align-items: stretch !important;
+            gap: 18px !important;
+        }
+        .page-header h3 { font-size: 19px; margin-bottom: 4px; }
+        .page-header p.small { font-size: 12.5px; }
+
+        .header-actions { width: 100%; display: flex; gap: 8px; }
+        .header-actions .dropdown-action-btn { flex: 0 0 auto; }
+        .header-actions a.btn-add { flex: 1; width: auto; justify-content: center; height: 46px; }
+
         .content-card { padding: 4px; border-radius: 18px; }
 
-        .table-responsive table, .table-responsive thead, .table-responsive tbody,
-        .table-responsive th, .table-responsive td, .table-responsive tr { display: block; }
+        /* Filter form */
+        .row.g-3.mb-4.align-items-center { row-gap: 10px !important; }
+        .col-lg-4, .col-lg-3, .col-lg-auto { width: 100%; }
+        .col-lg-auto .d-flex { width: 100%; }
+        .col-lg-auto .d-flex .btn-action-trigger:first-child { flex: 1; }
 
-        .table-responsive thead tr { position: absolute; top: -9999px; left: -9999px; }
+        .pagination { justify-content: center !important; flex-wrap: wrap; }
 
-        .table-responsive tr {
-            border: 1px solid var(--border-color);
-            border-radius: 16px;
-            margin-bottom: 16px;
-            padding: 12px;
-            background: #fff;
+        #importModal .modal-dialog { margin: 14px; }
+    }
+
+    /* ============================================
+       TABEL: tetap berbentuk tabel di mobile,
+       digeser horizontal, dengan kolom No & Aksi
+       yang menempel (sticky) di kiri/kanan.
+       ============================================ */
+    .table-scroll-wrap {
+        position: relative;
+        border-radius: 16px;
+        border: 1px solid var(--border-color);
+        overflow: hidden;
+    }
+
+    .table-scroll-wrap .table-responsive {
+        border-radius: 0;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: thin;
+    }
+
+    /* Indikator visual bahwa tabel bisa digeser (gradient tipis di kanan) */
+    .table-scroll-wrap::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        width: 28px;
+        background: linear-gradient(to right, transparent, rgba(15, 23, 42, 0.06));
+        pointer-events: none;
+        border-radius: 0 16px 16px 0;
+    }
+
+    @media (max-width: 768px) {
+        .table-scroll-wrap .table {
+            min-width: 640px;
+            margin-bottom: 0;
         }
 
-        .table-responsive td {
-            border: none;
-            border-bottom: 1px dashed #f1f5f9;
-            position: relative;
-            padding-left: 45% !important;
-            text-align: right !important;
-            min-height: 48px;
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-        }
-
-        .table-responsive td:before {
-            position: absolute;
-            left: 12px;
-            width: 40%;
+        .table-scroll-wrap .table thead th {
             white-space: nowrap;
-            text-align: left;
-            font-weight: 700;
-            color: var(--text-muted);
-            font-size: 11px;
-            text-transform: uppercase;
+            padding: 12px 14px;
+            font-size: 10.5px;
         }
 
-        .table-responsive td:nth-of-type(1):before { content: "No"; }
-        .table-responsive td:nth-of-type(2):before { content: "Guru"; }
-        .table-responsive td:nth-of-type(3):before { content: "Kelas"; }
-        .table-responsive td:nth-of-type(4):before { content: "Tahun Ajaran"; }
-        .table-responsive td:nth-of-type(5):before { content: "Aksi"; }
+        .table-scroll-wrap .table tbody td {
+            padding: 14px;
+            font-size: 13.5px;
+        }
 
-        .pagination { justify-content: center !important; }
+        .table-scroll-wrap .table tbody td .fs-6 { font-size: 13.5px !important; }
+        .table-scroll-wrap .table tbody td small { font-size: 11px; }
+
+        .avatar-guru { width: 32px; height: 32px; font-size: 12px; }
+
+        /* Kolom "No" menempel di kiri */
+        .table-scroll-wrap .table th:first-child,
+        .table-scroll-wrap .table td:first-child {
+            position: sticky;
+            left: 0;
+            z-index: 2;
+            background: #fff;
+            box-shadow: 2px 0 6px rgba(15, 23, 42, 0.04);
+        }
+
+        .table-scroll-wrap .table thead th:first-child { background: #f8fafc; }
+
+        /* Kolom "Aksi" menempel di kanan */
+        .table-scroll-wrap .table th:last-child,
+        .table-scroll-wrap .table td:last-child {
+            position: sticky;
+            right: 0;
+            z-index: 2;
+            background: #fff;
+            box-shadow: -2px 0 6px rgba(15, 23, 42, 0.04);
+        }
+
+        .table-scroll-wrap .table thead th:last-child { background: #f8fafc; }
+
+        .table-scroll-wrap .table tbody tr:hover td:first-child,
+        .table-scroll-wrap .table tbody tr:hover td:last-child {
+            background: #f8fafc;
+        }
+
+        .action-icon-btn { width: 36px; height: 36px; margin-left: 2px; }
     }
 </style>
 
@@ -224,7 +335,9 @@
 
     {{-- Header --}}
     <div class="page-header mb-4">
-        <div class="d-flex justify-content-between align-items-center flex-wrap">
+        <div class="page-header-glow"></div>
+
+        <div class="page-header-content d-flex justify-content-between align-items-center flex-wrap gap-3">
             <div>
                 <span class="badge bg-info bg-opacity-25 text-info px-3 py-2 rounded-pill mb-2 fw-semibold" style="font-size: 11px; letter-spacing: 0.5px;">
                     PENGGUNA
@@ -237,43 +350,42 @@
                 </p>
             </div>
 
-            <div class="d-flex flex-wrap gap-2">
+            {{-- Toolbar aksi: dropdown untuk aksi sekunder + 1 tombol utama --}}
+            <div class="d-flex gap-2 header-actions">
+                <div class="dropdown">
+                    <button class="dropdown-action-btn dropdown-toggle" type="button"
+                            data-bs-toggle="dropdown" aria-expanded="false" title="Aksi Lainnya">
+                        <i class="fa-solid fa-ellipsis-vertical"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end dropdown-menu-custom">
+                        <li>
+                            <a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('wali-kelas.template') }}">
+                                <i class="fa-solid fa-file-arrow-down text-secondary" style="width: 16px;"></i>
+                                Download Template
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item d-flex align-items-center gap-2"
+                               href="{{ route('wali-kelas.export', request()->only(['search', 'jenjang', 'tahun_ajaran'])) }}">
+                                <i class="fa-solid fa-file-excel text-success" style="width: 16px;"></i>
+                                Export Excel
+                            </a>
+                        </li>
+                        <li>
+                            <button type="button"
+                                    class="dropdown-item d-flex align-items-center gap-2 w-100 border-0 bg-transparent"
+                                    data-bs-toggle="modal" data-bs-target="#importModal">
+                                <i class="fa-solid fa-file-import text-warning" style="width: 16px;"></i>
+                                Import Excel
+                            </button>
+                        </li>
+                    </ul>
+                </div>
 
-                {{-- Download Template --}}
-                <a href="{{ route('wali-kelas.template') }}"
-                    class="btn btn-light btn-add border d-inline-flex align-items-center">
-                    <i class="fa-solid fa-file-arrow-down me-2 text-primary"></i>
-                    Template
-                </a>
-
-                {{-- Export --}}
-                <a href="{{ route('wali-kelas.export', request()->only([
-                    'search',
-                    'jenjang',
-                    'tahun_ajaran'
-                ])) }}"
-                    class="btn btn-success btn-add d-inline-flex align-items-center">
-                    <i class="fa-solid fa-file-excel me-2"></i>
-                    Export Excel
-                </a>
-
-                {{-- Import --}}
-                <button
-                    type="button"
-                    class="btn btn-warning text-dark btn-add d-inline-flex align-items-center"
-                    data-bs-toggle="modal"
-                    data-bs-target="#importModal">
-                    <i class="fa-solid fa-file-import me-2"></i>
-                    Import Excel
-                </button>
-
-                {{-- Tambah --}}
-                <a href="{{ route('wali-kelas.create') }}"
-                    class="btn btn-info text-white btn-add d-inline-flex align-items-center">
+                <a href="{{ route('wali-kelas.create') }}" class="btn btn-info text-white btn-add d-inline-flex align-items-center fw-semibold">
                     <i class="fa-solid fa-plus me-2"></i>
                     Tambah Wali Kelas
                 </a>
-
             </div>
         </div>
     </div>
@@ -433,6 +545,7 @@
             </form>
 
             {{-- Table --}}
+            <div class="table-scroll-wrap">
             <div class="table-responsive">
                 <table class="table align-middle">
                     <thead>
@@ -512,6 +625,7 @@
                         @endforelse
                     </tbody>
                 </table>
+            </div>
             </div>
 
             {{-- Pagination --}}

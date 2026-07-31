@@ -20,10 +20,35 @@
         padding: 32px;
         color: white;
         position: relative;
-        overflow: hidden;
+        /* overflow: hidden;  <-- dihapus, ini biang keroknya */
         box-shadow: 0 20px 40px rgba(15, 23, 42, 0.08);
         border: 1px solid rgba(255, 255, 255, 0.05);
+        z-index: 10;
     }
+
+    /* Wrapper khusus untuk clip lingkaran dekorasi, terpisah dari overflow header */
+    .page-header-glow {
+        position: absolute;
+        inset: 0;
+        border-radius: 24px;
+        overflow: hidden;
+        z-index: 0;
+        pointer-events: none;
+    }
+
+    .page-header-glow::after {
+        content: '';
+        position: absolute;
+        width: 300px;
+        height: 300px;
+        border-radius: 50%;
+        right: -50px;
+        top: -80px;
+        background: radial-gradient(circle, rgba(14, 165, 233, 0.15) 0%, rgba(14, 165, 233, 0) 70%);
+    }
+
+    /* .page-header::after yang lama boleh dihapus, sudah digantikan .page-header-glow::after */
+
 
     .page-header::after {
         content: '';
@@ -36,6 +61,8 @@
         background: radial-gradient(circle, rgba(14, 165, 233, 0.15) 0%, rgba(14, 165, 233, 0) 70%);
         pointer-events: none;
     }
+
+    .page-header-content { position: relative; z-index: 1; }
 
     .stat-card {
         background: var(--surface-white);
@@ -50,10 +77,7 @@
         transition: transform .2s, box-shadow .2s;
     }
 
-    .stat-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 12px 28px rgba(15, 23, 42, 0.06);
-    }
+    .stat-card:hover { transform: translateY(-3px); box-shadow: 0 12px 28px rgba(15, 23, 42, 0.06); }
 
     .stat-icon {
         width: 48px;
@@ -73,10 +97,6 @@
         box-shadow: 0 12px 34px rgba(15, 23, 42, 0.03);
         padding: 12px;
     }
-
-    /* ===============================
-    Filter Bar
-    ==================================*/
 
     .filter-bar {
         background: #f8fafc;
@@ -115,8 +135,10 @@
         border-radius: 14px;
         padding: 12px 24px;
         font-weight: 600;
-        box-shadow: 0 4px 12px rgba(14, 165, 233, 0.2);
+        white-space: nowrap;
     }
+
+    .btn-add.btn-info { box-shadow: 0 4px 12px rgba(14, 165, 233, 0.25); }
 
     .btn-action-trigger {
         border-radius: 14px;
@@ -141,7 +163,7 @@
     .active-filter-chip a { color: inherit; text-decoration: none; opacity: .7; }
     .active-filter-chip a:hover { opacity: 1; }
 
-    .table-responsive { border-radius: 16px; overflow: hidden; }
+    .table-responsive { border-radius: 16px; overflow: visible; }
 
     .table thead th {
         font-size: 11px;
@@ -188,151 +210,46 @@
         gap: 4px;
     }
 
-    .kelas-badge {
-        background: #f0f9ff;
-        color: #0284c7;
-        border: 1px solid rgba(2, 132, 199, 0.15);
-        font-size: 11px;
-        font-weight: 600;
-        padding: 4px 10px;
-        border-radius: 8px;
-        display: inline-block;
-    }
-
-    /* ===============================
-    Action Button Group
-    ================================ */
-
-    .action-group {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        justify-content: flex-end;
-    }
-
-
-    /* Base Button */
-
-    .action-btn {
-
-        width: 38px;
-        height: 38px;
-
-        border-radius: 12px;
-
+    /* Dropdown aksi (header maupun per baris/kartu) */
+    .dropdown-action-btn {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        border: 1px solid var(--border-color);
+        background-color: #fff;
+        color: var(--text-muted);
         display: inline-flex;
         align-items: center;
         justify-content: center;
-
+        transition: all 0.2s;
+    }
+    .dropdown-action-btn:hover, .dropdown-action-btn:focus {
+        background-color: #f8fafc;
+        border-color: var(--border-color);
+        color: var(--primary-dark);
+    }
+    .dropdown-menu-custom {
         border: none;
-
-        font-size: 14px;
-
-        text-decoration: none;
-
-        transition: all .25s ease;
-
-        cursor: pointer;
-
+        box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        border-radius: 14px;
+        padding: 8px;
+        min-width: 210px;
+        z-index: 1050;
     }
-
-
-    /* Hover */
-
-    .action-btn:hover {
-
-        transform: translateY(-3px);
-
+    .dropdown-menu-custom .dropdown-item {
+        border-radius: 10px;
+        padding: 8px 12px;
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--secondary-dark);
+        transition: all 0.2s;
     }
-
-
-
-    /* Detail */
-
-    .action-detail {
-
-        background: rgba(14,165,233,.12);
-
-        color:#0284c7;
-
+    .dropdown-menu-custom .dropdown-item:hover { background-color: #f8fafc; }
+    .dropdown-menu-custom .dropdown-item.text-danger:hover {
+        background-color: #fff1f2;
+        color: #e11d48 !important;
     }
-
-
-    .action-detail:hover {
-
-        background:#0ea5e9;
-
-        color:white;
-
-        box-shadow:0 8px 18px rgba(14,165,233,.25);
-
-    }
-
-
-
-    /* Edit */
-
-    .action-edit {
-
-        background:rgba(13,148,136,.12);
-
-        color:#0d9488;
-
-    }
-
-
-    .action-edit:hover {
-
-        background:#0d9488;
-
-        color:white;
-
-        box-shadow:0 8px 18px rgba(13,148,136,.25);
-
-    }
-
-
-
-    /* Delete */
-
-    .action-delete {
-
-        background:rgba(225,29,72,.1);
-
-        color:#e11d48;
-
-    }
-
-
-    .action-delete:hover {
-
-        background:#e11d48;
-
-        color:white;
-
-        box-shadow:0 8px 18px rgba(225,29,72,.25);
-
-    }
-
-
-    /* form jangan merusak flex */
-
-    .form-delete {
-
-        display:inline-flex;
-
-        margin:0;
-
-    }
-
-    .btn-icon-view { background: rgba(14, 165, 233, 0.1); color: var(--accent-blue); }
-    .btn-icon-view:hover { background: var(--accent-blue); color: white; }
-
-    .btn-icon-edit { background: #f0fdfa; color: #0d9488; }
-    .btn-icon-edit:hover { background: #0d9488; color: white; }
-
-    .btn-icon-delete { background: #fff5f5; color: #e11d48; }
-    .btn-icon-delete:hover { background: #e11d48; color: white; }
+    .form-delete { display: inline; margin: 0; }
 
     .pagination { gap: 6px; margin-bottom: 0; }
 
@@ -350,72 +267,76 @@
         color: white !important;
     }
 
-    /* ===============================
-    Modal Detail Penugasan
-    ==================================*/
-
-    .detail-mapel-block {
+    /* ============================================
+       KARTU PENUGASAN UNTUK TAMPILAN MOBILE
+       ============================================ */
+    .gm-card-mobile {
+        background: #fff;
         border: 1px solid var(--border-color);
-        border-radius: 16px;
-        padding: 16px;
-        background: #f8fafc;
+        border-radius: 18px;
+        padding: 14px;
+        margin-bottom: 12px;
+    }
+    .gm-card-mobile .gm-card-name {
+        font-size: 14.5px;
+        line-height: 1.3;
+    }
+    .gm-card-mobile .gm-card-meta { font-size: 12px; }
+    .gm-card-mobile hr { margin: 12px 0; opacity: 1; border-color: #f1f5f9; }
+    .gm-card-empty-mobile {
+        text-align: center;
+        padding: 48px 16px;
+        background: #fff;
+        border: 1px dashed var(--border-color);
+        border-radius: 18px;
     }
 
-    .detail-mapel-block + .detail-mapel-block { margin-top: 12px; }
-
+    /* ============================================
+       RESPONSIVE: TABLET & MOBILE (<= 768px)
+       ============================================ */
     @media (max-width: 768px) {
-        .page-header { padding: 24px; border-radius: 18px; text-align: center; }
-        .page-header .d-flex { flex-direction: column; gap: 20px; }
-        .btn-add { width: 100%; justify-content: center; }
-        .form-control-custom, .btn-action-trigger { width: 100%; margin-bottom: 8px; }
-        .content-card { padding: 4px; border-radius: 18px; }
-        .filter-bar { border-radius: 16px; }
+        .container-fluid.py-2 { padding-left: 12px; padding-right: 12px; }
 
-        .table-responsive table, .table-responsive thead, .table-responsive tbody,
-        .table-responsive th, .table-responsive td, .table-responsive tr { display: block; }
-
-        .table-responsive thead tr { position: absolute; top: -9999px; left: -9999px; }
-
-        .table-responsive tr {
-            border: 1px solid var(--border-color);
-            border-radius: 16px;
-            margin-bottom: 16px;
-            padding: 12px;
-            background: #fff;
+        .page-header { padding: 22px 18px; border-radius: 20px; text-align: left; }
+        .page-header-content.d-flex,
+        .page-header .d-flex.justify-content-between {
+            flex-direction: column;
+            align-items: stretch !important;
+            gap: 18px !important;
         }
+        .page-header h3 { font-size: 19px; margin-bottom: 4px; }
+        .page-header p.small { font-size: 12.5px; }
+        .page-header .badge { font-size: 10px !important; padding: 6px 12px !important; }
 
-        .table-responsive td {
-            border: none;
-            border-bottom: 1px dashed #f1f5f9;
-            position: relative;
-            padding-left: 45% !important;
-            text-align: right !important;
-            min-height: 48px;
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
+        .header-actions { width: 100%; display: flex; gap: 8px; }
+        .header-actions .dropdown { flex: 0 0 auto; }
+        .header-actions .dropdown .btn-add {
+            width: 48px; height: 48px; padding: 0;
+            display: flex; align-items: center; justify-content: center;
         }
+        .header-actions .dropdown .btn-add i { margin: 0 !important; font-size: 15px; }
+        .header-actions .dropdown .btn-add-label { display: none; }
+        .header-actions a.btn-add { flex: 1; width: auto; justify-content: center; height: 48px; }
 
-        .table-responsive td:before {
-            position: absolute;
-            left: 12px;
-            width: 40%;
-            white-space: nowrap;
-            text-align: left;
-            font-weight: 700;
-            color: var(--text-muted);
-            font-size: 11px;
-            text-transform: uppercase;
-        }
+        .row.g-3.mb-4 { margin-bottom: 18px !important; row-gap: 12px !important; }
+        .stat-card { flex-direction: column; align-items: flex-start; padding: 14px; border-radius: 16px; gap: 8px; }
+        .stat-icon { width: 36px; height: 36px; font-size: 15px; border-radius: 11px; }
+        .stat-card h4, .stat-card h6 { font-size: 15px; margin-top: 4px !important; }
+        .stat-card small { font-size: 9.5px; letter-spacing: 0.3px !important; }
 
-        .table-responsive td:nth-of-type(1):before { content: "No"; }
-        .table-responsive td:nth-of-type(2):before { content: "Guru"; }
-        .table-responsive td:nth-of-type(3):before { content: "Mapel"; }
-        .table-responsive td:nth-of-type(4):before { content: "Kelas"; }
-        .table-responsive td:nth-of-type(5):before { content: "Tahun Ajaran"; }
-        .table-responsive td:nth-of-type(6):before { content: "Aksi"; }
+        .content-card { padding: 14px; border-radius: 20px; }
+        .filter-bar { padding: 14px; border-radius: 16px; }
+        .filter-bar .row.g-3 { row-gap: 10px; }
+        .filter-bar .col-lg-2.col-md-12 .d-flex { width: 100%; }
 
-        .pagination { justify-content: center !important; }
+        .dropdown-menu-custom .dropdown-item { padding: 10px 12px; font-size: 13.5px; }
+        .dropdown-action-btn { width: 38px; height: 38px; }
+
+        .pagination-container { justify-content: center !important; text-align: center; }
+        .pagination { justify-content: center !important; flex-wrap: wrap; gap: 5px; }
+        .pagination .page-item .page-link { padding: 8px 13px; font-size: 13px; border-radius: 10px !important; }
+
+        #importModal .modal-dialog { margin: 14px; }
     }
 </style>
 
@@ -423,7 +344,9 @@
 
     {{-- Header --}}
     <div class="page-header mb-4">
-        <div class="d-flex justify-content-between align-items-center flex-wrap">
+        <div class="page-header-glow"></div>
+
+        <div class="page-header-content d-flex justify-content-between align-items-center flex-wrap gap-3">
             <div>
                 <span class="badge bg-info bg-opacity-25 text-info px-3 py-2 rounded-pill mb-2 fw-semibold" style="font-size: 11px; letter-spacing: 0.5px;">
                     PENGGUNA
@@ -436,39 +359,43 @@
                 </p>
             </div>
 
-            <div class="d-flex flex-wrap gap-2">
+            {{-- Toolbar aksi: 1 tombol utama (Tambah Penugasan) + 1 dropdown untuk aksi sekunder --}}
+            <div class="d-flex gap-2 header-actions">
+                <div class="dropdown">
+                    <button class="btn btn-light border btn-add dropdown-toggle d-inline-flex align-items-center"
+                            type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Aksi Lainnya">
+                        <i class="fa-solid fa-ellipsis-vertical me-2"></i>
+                        <span class="btn-add-label">Aksi Lainnya</span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end dropdown-menu-custom">
+                        <li>
+                            <a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('guru-mapel.template') }}">
+                                <i class="fa-solid fa-download text-secondary" style="width: 16px;"></i>
+                                Download Template
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item d-flex align-items-center gap-2"
+                            href="{{ route('guru-mapel.export', request()->only(['search', 'jenjang', 'guru', 'tahun_ajaran'])) }}">
+                                <i class="fa-solid fa-file-export text-success" style="width: 16px;"></i>
+                                Export Excel
+                            </a>
+                        </li>
+                        <li>
+                            <button type="button"
+                                    class="dropdown-item d-flex align-items-center gap-2 w-100 border-0 bg-transparent"
+                                    data-bs-toggle="modal" data-bs-target="#importModal">
+                                <i class="fa-solid fa-file-excel text-warning" style="width: 16px;"></i>
+                                Import Excel
+                            </button>
+                        </li>
+                    </ul>
+                </div>
 
-                <a href="{{ route('guru-mapel.template') }}"
-                    class="btn btn-light border btn-add">
-                    <i class="fa fa-download me-2"></i>
-                    Template
-                </a>
-
-                <a href="{{ route('guru-mapel.export', request()->only([
-                    'search',
-                    'jenjang',
-                    'guru',
-                    'tahun_ajaran'
-                ])) }}"
-                class="btn btn-success btn-add">
-                    <i class="fa fa-file-excel me-2"></i>
-                    Export Excel
-                </a>
-
-                <button
-                    class="btn btn-warning btn-add"
-                    data-bs-toggle="modal"
-                    data-bs-target="#importModal">
-                    <i class="fa fa-upload me-2"></i>
-                    Import Excel
-                </button>
-
-                <a href="{{ route('guru-mapel.create') }}"
-                    class="btn btn-info text-white btn-add">
-                    <i class="fa fa-plus me-2"></i>
+                <a href="{{ route('guru-mapel.create') }}" class="btn btn-info text-white btn-add d-inline-flex align-items-center fw-semibold">
+                    <i class="fa-solid fa-plus me-2"></i>
                     Tambah Penugasan
                 </a>
-
             </div>
         </div>
     </div>
@@ -481,7 +408,7 @@
                     <i class="fa-solid fa-list-check"></i>
                 </div>
                 <div>
-                    <small class="text-muted d-block uppercase fw-semibold" style="font-size: 11px; letter-spacing: 0.5px;">TOTAL PENUGASAN</small>
+                    <small class="text-muted d-block fw-semibold" style="font-size: 11px; letter-spacing: 0.5px;">TOTAL PENUGASAN</small>
                     <h4 class="fw-bold text-dark mb-0 mt-1">{{ $totalGuruMapel }}</h4>
                 </div>
             </div>
@@ -492,7 +419,7 @@
                     <i class="fa-solid fa-user-tie"></i>
                 </div>
                 <div>
-                    <small class="text-muted d-block uppercase fw-semibold" style="font-size: 11px; letter-spacing: 0.5px;">TOTAL GURU</small>
+                    <small class="text-muted d-block fw-semibold" style="font-size: 11px; letter-spacing: 0.5px;">TOTAL GURU</small>
                     <h4 class="fw-bold text-dark mb-0 mt-1">{{ $totalGuru }}</h4>
                 </div>
             </div>
@@ -503,7 +430,7 @@
                     <i class="fa-solid fa-book"></i>
                 </div>
                 <div>
-                    <small class="text-muted d-block uppercase fw-semibold" style="font-size: 11px; letter-spacing: 0.5px;">TOTAL MAPEL</small>
+                    <small class="text-muted d-block fw-semibold" style="font-size: 11px; letter-spacing: 0.5px;">TOTAL MAPEL</small>
                     <h4 class="fw-bold text-dark mb-0 mt-1">{{ $totalMapel }}</h4>
                 </div>
             </div>
@@ -514,7 +441,7 @@
                     <i class="fa-solid fa-calendar-days"></i>
                 </div>
                 <div>
-                    <small class="text-muted d-block uppercase fw-semibold" style="font-size: 11px; letter-spacing: 0.5px;">TAHUN AKTIF</small>
+                    <small class="text-muted d-block fw-semibold" style="font-size: 11px; letter-spacing: 0.5px;">TAHUN AKTIF</small>
                     @if($tahunAktif)
                         <h6 class="fw-bold text-dark mb-0 mt-1">
                             {{ $tahunAktif->nama_tahun }}
@@ -672,8 +599,8 @@
                 @endif
             </div>
 
-            {{-- Table --}}
-            <div class="table-responsive">
+            {{-- Table (Desktop & Tablet ke atas) --}}
+            <div class="table-responsive d-none d-md-block">
                 <table class="table align-middle">
                     <thead>
                         <tr>
@@ -723,53 +650,38 @@
                                 <small class="text-muted">{{ ucfirst(optional($row->tahunAjaran)->semester) }}</small>
                             </td>
                             <td class="text-end">
-
-                                <div class="action-group">
-
-                                    {{-- Detail --}}
-                                    <a href="{{ route('guru-mapel.show', $row->guru->id) }}"
-                                        class="action-btn action-detail"
-                                        title="Lihat Detail">
-
-                                        <i class="fa-solid fa-eye"></i>
-
-                                    </a>
-
-
-                                    {{-- Edit --}}
-                                    @if($row->items->first())
-
-                                    <a href="{{ route('guru-mapel.edit', $row->items->first()->id) }}"
-                                        class="action-btn action-edit"
-                                        title="Edit">
-
-                                        <i class="fa-solid fa-pen"></i>
-
-                                    </a>
-
-                                    @endif
-
-
-
-                                    <form action="{{ route('guru-mapel.destroy', $row->guru->id) }}"
-                                        method="POST"
-                                        class="form-delete">
-
-                                        @csrf
-                                        @method('DELETE')
-
-                                        <button type="submit"
-                                            class="action-btn action-delete"
-                                            title="Hapus Semua Penugasan">
-
-                                            <i class="fa-solid fa-trash"></i>
-
-                                        </button>
-
-                                    </form>
-
+                                <div class="dropdown">
+                                    <button class="dropdown-action-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Menu Aksi">
+                                        <i class="fa-solid fa-ellipsis-vertical"></i>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end dropdown-menu-custom">
+                                        <li>
+                                            <a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('guru-mapel.show', $row->guru->id) }}">
+                                                <i class="fa-solid fa-eye text-info" style="width: 16px;"></i>
+                                                Lihat Detail
+                                            </a>
+                                        </li>
+                                        @if($row->items->first())
+                                        <li>
+                                            <a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('guru-mapel.edit', $row->items->first()->id) }}">
+                                                <i class="fa-solid fa-pen text-primary" style="width: 16px;"></i>
+                                                Edit Penugasan
+                                            </a>
+                                        </li>
+                                        @endif
+                                        <li><hr class="dropdown-divider my-1"></li>
+                                        <li>
+                                            <form action="{{ route('guru-mapel.destroy', $row->guru->id) }}" method="POST" class="form-delete w-100">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="dropdown-item text-danger d-flex align-items-center gap-2 w-100 border-0 bg-transparent">
+                                                    <i class="fa-solid fa-trash text-danger" style="width: 16px;"></i>
+                                                    Hapus Semua Penugasan
+                                                </button>
+                                            </form>
+                                        </li>
+                                    </ul>
                                 </div>
-
                             </td>
                         </tr>
                         @empty
@@ -785,6 +697,90 @@
                         @endforelse
                     </tbody>
                 </table>
+            </div>
+
+            {{-- Kartu Penugasan (Mobile) --}}
+            <div class="d-md-none">
+                @forelse($guruMapels as $row)
+                <div class="gm-card-mobile">
+                    <div class="d-flex align-items-start justify-content-between gap-2">
+                        <div class="d-flex align-items-center gap-2" style="min-width: 0;">
+                            <div class="avatar-guru bg-primary bg-opacity-10 text-primary">
+                                {{ strtoupper(substr($row->guru->nama, 0, 1)) }}
+                            </div>
+                            <div style="min-width: 0;">
+                                <div class="fw-bold text-dark gm-card-name">{{ $row->guru->nama }}</div>
+                                <div class="text-muted gm-card-meta">
+                                    {{ optional($row->guru->jenjang)->nama_jenjang ?? '-' }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="dropdown flex-shrink-0">
+                            <button class="dropdown-action-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Menu Aksi">
+                                <i class="fa-solid fa-ellipsis-vertical"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end dropdown-menu-custom">
+                                <li>
+                                    <a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('guru-mapel.show', $row->guru->id) }}">
+                                        <i class="fa-solid fa-eye text-info" style="width: 16px;"></i>
+                                        Lihat Detail
+                                    </a>
+                                </li>
+                                @if($row->items->first())
+                                <li>
+                                    <a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('guru-mapel.edit', $row->items->first()->id) }}">
+                                        <i class="fa-solid fa-pen text-primary" style="width: 16px;"></i>
+                                        Edit Penugasan
+                                    </a>
+                                </li>
+                                @endif
+                                <li><hr class="dropdown-divider my-1"></li>
+                                <li>
+                                    <form action="{{ route('guru-mapel.destroy', $row->guru->id) }}" method="POST" class="form-delete w-100">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="dropdown-item text-danger d-flex align-items-center gap-2 w-100 border-0 bg-transparent">
+                                            <i class="fa-solid fa-trash text-danger" style="width: 16px;"></i>
+                                            Hapus Semua Penugasan
+                                        </button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <div class="mb-2">
+                        <div class="text-muted gm-card-meta mb-1 fw-semibold">MATA PELAJARAN</div>
+                        <div class="d-flex flex-wrap gap-1">
+                            @foreach($row->items as $assignment)
+                                <span class="mapel-badge">
+                                    <i class="fa-solid fa-book"></i>
+                                    {{ $assignment->mataPelajaran->nama_mapel }}
+                                </span>
+                            @endforeach
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <div class="fw-bold text-dark gm-card-meta">{{ $row->total_kelas }} Kelas &middot; {{ $row->total_mapel }} Mapel</div>
+                        </div>
+                        <div class="text-end">
+                            <div class="fw-semibold text-dark gm-card-meta">{{ optional($row->tahunAjaran)->nama_tahun }}</div>
+                            <div class="text-muted" style="font-size: 11px;">{{ ucfirst(optional($row->tahunAjaran)->semester) }}</div>
+                        </div>
+                    </div>
+                </div>
+                @empty
+                <div class="gm-card-empty-mobile">
+                    <i class="fa-solid fa-folder-open fa-2x text-muted mb-3 opacity-50"></i>
+                    <h6 class="fw-bold text-secondary mb-1">Belum ada penugasan guru mapel</h6>
+                    <small class="text-muted">Silakan sesuaikan filter Anda atau tambahkan penugasan baru.</small>
+                </div>
+                @endforelse
             </div>
 
             {{-- Pagination --}}
@@ -838,32 +834,17 @@ Swal.fire({
 @endif
 
 <div class="modal fade" id="importModal">
-
-    <div class="modal-dialog">
-
+    <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content rounded-4">
-
-            <form
-                action="{{ route('guru-mapel.import') }}"
-                method="POST"
-                enctype="multipart/form-data">
-
+            <form action="{{ route('guru-mapel.import') }}" method="POST" enctype="multipart/form-data">
                 @csrf
 
                 <div class="modal-header">
-
-                    <h5>Import Guru Mapel</h5>
-
-                    <button
-                        type="button"
-                        class="btn-close"
-                        data-bs-dismiss="modal">
-                    </button>
-
+                    <h5 class="mb-0">Import Guru Mapel</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
 
                 <div class="modal-body">
-
                     <p class="text-muted small">
                         Format kolom: <code>nip_guru, nama_guru, jenjang, mata_pelajaran, kelas, tahun_ajaran, semester</code>.
                         Kolom <code>kelas</code> boleh diisi lebih dari satu, dipisah koma, contoh:
@@ -872,45 +853,17 @@ Swal.fire({
                         atau klik <strong>Export Excel</strong> untuk mengunduh data yang sudah ada (lalu edit dan upload ulang).
                     </p>
 
-                    <label class="form-label">
-                        File Excel
-                    </label>
-
-                    <input
-                        type="file"
-                        name="file"
-                        class="form-control"
-                        accept=".xlsx,.xls,.csv"
-                        required>
-
-                    <small class="text-muted">
-                        Format: xlsx, xls, atau csv. Maksimal 5MB.
-                    </small>
-
+                    <label class="form-label">File Excel</label>
+                    <input type="file" name="file" class="form-control form-control-custom" accept=".xlsx,.xls,.csv" required>
+                    <small class="text-muted">Format: xlsx, xls, atau csv. Maksimal 5MB.</small>
                 </div>
 
                 <div class="modal-footer">
-
-                    <button
-                        type="button"
-                        class="btn btn-secondary"
-                        data-bs-dismiss="modal">
-                        Batal
-                    </button>
-
-                    <button
-                        type="submit"
-                        class="btn btn-primary">
-                        Import
-                    </button>
-
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary">Import</button>
                 </div>
-
             </form>
-
         </div>
-
     </div>
-
 </div>
 @endsection

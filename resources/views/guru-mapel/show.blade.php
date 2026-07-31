@@ -97,6 +97,7 @@
         color: white;
         border: 1px solid rgba(255, 255, 255, 0.2);
         box-shadow: var(--shadow-sm);
+        flex-shrink: 0;
     }
 
     /* =========================
@@ -112,6 +113,7 @@
         gap: 16px;
         box-shadow: var(--shadow-sm);
         transition: all 0.3s ease;
+        height: 100%;
     }
 
     .stat-mini:hover {
@@ -130,6 +132,7 @@
         background: rgba(14, 165, 233, 0.1);
         color: var(--accent-blue);
         font-size: 20px;
+        flex-shrink: 0;
     }
 
     .stat-mini h5 {
@@ -181,6 +184,7 @@
         font-size: 12px;
         font-weight: 600;
         border: 1px solid var(--border-color);
+        display: inline-block;
     }
 
     /* =========================
@@ -195,6 +199,7 @@
         font-size: 13px;
         font-weight: 600;
         transition: all 0.2s ease;
+        display: inline-block;
     }
 
     .badge-kelas:hover {
@@ -209,76 +214,30 @@
         align-items: center;
         justify-content: center;
         transition: all 0.2s;
+        flex-shrink: 0;
     }
 
     /* =========================
        MEDIA QUERIES (RESPONSIVE)
     ========================= */
     @media (max-width: 768px) {
-        .profile-header {
-            padding: 30px 20px;
-            text-align: center;
-        }
+        .container-fluid.py-4 { padding-left: 12px; padding-right: 12px; }
 
-        .profile-content {
-            flex-direction: column;
-            justify-content: center;
-            gap: 16px !important;
-        }
-
-        .avatar-detail {
-            margin: 0 auto;
-        }
-
-        .detail-card {
-            padding: 20px;
-        }
-
-        .mapel-card {
-            padding: 16px;
-        }
-
-        .mapel-card .d-flex.justify-content-between.align-items-start {
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .btn-edit-detail {
-            width: 100%;
-            margin-top: 10px;
-        }
-
-        .page-header-title {
-            flex-direction: column;
-            align-items: flex-start !important;
-            gap: 16px;
-        }
-        
-        .page-header-title a {
-            width: 100%;
-            text-align: center;
-        }
-    }
-
-    /* =========================
-    MEDIA QUERIES (RESPONSIVE & TYPOGRAPHY)
-    ========================= */
-    @media (max-width: 768px) {
         /* Header Halaman */
         .page-header-title {
             flex-direction: column;
             align-items: flex-start !important;
-            gap: 16px;
+            gap: 14px;
         }
-        
+
         .page-header-title h3 {
-            font-size: 1.25rem; /* Font judul mengecil */
+            font-size: 1.15rem;
         }
 
         .page-header-title p {
-            font-size: 0.875rem; /* Teks deskripsi mengecil */
+            font-size: 0.85rem;
         }
-        
+
         .page-header-title a {
             width: 100%;
             text-align: center;
@@ -287,7 +246,8 @@
 
         /* Kartu Profil Utama */
         .profile-header {
-            padding: 30px 20px;
+            padding: 26px 18px;
+            border-radius: 20px;
             text-align: center;
         }
 
@@ -298,64 +258,73 @@
         }
 
         .profile-content h2 {
-            font-size: 1.5rem; /* Nama guru mengecil */
+            font-size: 1.35rem;
         }
 
         .avatar-detail {
             margin: 0 auto;
-            width: 70px; /* Kotak inisial mengecil */
-            height: 70px;
-            font-size: 28px; /* Huruf inisial mengecil */
+            width: 68px;
+            height: 68px;
+            font-size: 26px;
+            border-radius: 14px;
         }
 
         /* Kartu Statistik */
+        .row.g-3.mb-4 { row-gap: 12px !important; }
+
         .stat-mini {
-            padding: 16px;
-            gap: 12px;
+            padding: 14px;
+            gap: 10px;
+            border-radius: 14px;
         }
 
         .stat-mini i {
-            width: 40px; /* Ikon mengecil */
-            height: 40px;
-            font-size: 16px;
+            width: 38px;
+            height: 38px;
+            font-size: 15px;
+            border-radius: 10px;
         }
 
         .stat-mini h5 {
-            font-size: 1.1rem; /* Angka statistik mengecil */
+            font-size: 1.05rem;
         }
 
         .stat-mini .text-muted {
-            font-size: 0.7rem; /* Label statistik mengecil */
+            font-size: 0.68rem;
         }
 
         /* Kartu Mata Pelajaran */
         .detail-card {
-            padding: 20px;
+            padding: 16px;
+            border-radius: 20px;
         }
 
         .mapel-card {
-            padding: 16px;
+            padding: 14px;
+            border-radius: 14px;
         }
 
         .mapel-card .d-flex.justify-content-between.align-items-start {
             flex-direction: column;
-            gap: 16px;
+            gap: 12px;
         }
 
         .mapel-title {
-            font-size: 1rem; /* Judul mapel mengecil */
+            font-size: 1rem;
         }
 
         /* Badges / Label */
-        .year-badge, 
+        .year-badge,
         .badge-kelas {
-            font-size: 11px; /* Teks badge mengecil */
-            padding: 5px 10px; /* Padding badge menyesuaikan */
+            font-size: 11px;
+            padding: 5px 10px;
         }
 
         .btn-edit-detail {
             width: 100%;
-            margin-top: 5px;
+            height: 40px;
+            margin-top: 4px;
+            border-radius: 10px;
         }
     }
 </style>
@@ -396,7 +365,7 @@
 
     {{-- Statistik --}}
     <div class="row g-3 mb-4">
-        <div class="col-12 col-md-4">
+        <div class="col-6 col-md-4">
             <div class="stat-mini">
                 <i class="fa-solid fa-book"></i>
                 <div>
@@ -406,7 +375,7 @@
             </div>
         </div>
 
-        <div class="col-12 col-md-4">
+        <div class="col-6 col-md-4">
             <div class="stat-mini">
                 <i class="fa-solid fa-users"></i>
                 <div>
@@ -421,7 +390,7 @@
                 <i class="fa-solid fa-calendar"></i>
                 <div>
                     <span class="text-muted">Tahun Ajaran</span>
-                    <div class="d-flex align-items-center gap-2">
+                    <div class="d-flex align-items-center gap-2 flex-wrap">
                         <h5 class="mb-0">{{ optional($guruMapels->first()->tahunAjaran)->nama_tahun ?? '-' }}</h5>
                         <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill border border-primary-subtle">
                             {{ optional($guruMapels->first()->tahunAjaran)->semester_label ?? '-' }}

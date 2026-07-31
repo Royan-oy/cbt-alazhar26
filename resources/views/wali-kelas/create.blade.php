@@ -60,6 +60,40 @@
     }
 
     .btn-back:hover { background: rgba(255,255,255,0.2); color: #fff; }
+
+    /* ============================================
+       RESPONSIVE: TABLET & MOBILE (<= 768px)
+       ============================================ */
+    @media (max-width: 768px) {
+        .container-fluid.py-2 { padding-left: 12px; padding-right: 12px; }
+
+        /* Header */
+        .page-header { padding: 22px 18px; border-radius: 20px; }
+        .page-header .d-flex.justify-content-between {
+            flex-direction: column;
+            align-items: stretch !important;
+            gap: 16px;
+        }
+        .page-header h3 { font-size: 19px; margin-bottom: 4px; }
+        .page-header p.small { font-size: 12.5px; }
+        .btn-back { width: 100%; justify-content: center; height: 46px; }
+
+        /* Card & form */
+        .content-card { padding: 4px; border-radius: 20px; }
+        .content-card .card-body.p-4 { padding: 16px !important; }
+        .row.g-3 { row-gap: 14px !important; }
+
+        /* Tombol aksi bawah */
+        .d-flex.gap-2.mt-4 {
+            flex-direction: column;
+        }
+        .btn-submit, .btn-cancel {
+            width: 100%;
+            justify-content: center;
+        }
+        .btn-submit { order: 1; }
+        .btn-cancel { order: 2; text-align: center; }
+    }
 </style>
 
 <div class="container-fluid py-2">
@@ -74,7 +108,7 @@
                 <p class="text-light opacity-75 mb-0 small">Tetapkan guru sebagai wali dari kelas tertentu.</p>
             </div>
 
-            <a href="{{ route('wali-kelas.index') }}" class="btn-back d-inline-flex align-items-center">
+            <a href="{{ route('wali-kelas.index') }}" class="btn-back d-inline-flex align-items-center justify-content-center">
                 <i class="fa-solid fa-arrow-left me-2"></i>
                 Kembali
             </a>
@@ -113,7 +147,7 @@
                         </select>
                         <small class="text-muted">Pilih jenjang dulu untuk menyaring pilihan guru dan kelas.</small>
                     </div>
-                    <div class="col-md-6"></div>
+                    <div class="col-md-6 d-none d-md-block"></div>
                     @endif
 
                     {{-- Guru --}}

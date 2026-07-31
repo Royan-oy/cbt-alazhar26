@@ -122,6 +122,7 @@
         align-items: center;
         justify-content: center;
         font-size: 12px;
+        flex-shrink: 0;
     }
 
     .btn-remove-penugasan {
@@ -132,6 +133,8 @@
         font-size: 13px;
         border-radius: 10px;
         padding: 6px 12px;
+        white-space: nowrap;
+        flex-shrink: 0;
     }
 
     .btn-remove-penugasan:hover {
@@ -155,6 +158,69 @@
     .kelas-item.d-none-jenjang {
         display: none !important;
     }
+
+    /* ============================================
+       RESPONSIVE: TABLET & MOBILE (<= 768px)
+       ============================================ */
+    @media (max-width: 768px) {
+        .container-fluid.py-2 { padding-left: 12px; padding-right: 12px; }
+
+        /* Header */
+        .page-header { padding: 22px 18px; border-radius: 20px; }
+        .page-header .d-flex.justify-content-between {
+            flex-direction: column;
+            align-items: stretch !important;
+            gap: 16px;
+        }
+        .page-header h3 { font-size: 19px; margin-bottom: 4px; }
+        .page-header p.small { font-size: 12.5px; }
+        .btn-back { width: 100%; justify-content: center; height: 46px; }
+
+        /* Card & form */
+        .content-card { padding: 4px; border-radius: 20px; }
+        .content-card .card-body.p-4 { padding: 16px !important; }
+        .row.g-3.mb-2 { row-gap: 14px !important; }
+
+        hr.my-4 { margin-top: 24px !important; margin-bottom: 24px !important; }
+
+        .d-flex.justify-content-between.align-items-center.mb-3 label.form-label {
+            font-size: 14.5px;
+        }
+
+        /* Penugasan block */
+        .penugasan-block { padding: 16px; border-radius: 16px; margin-bottom: 14px; }
+        .penugasan-block .d-flex.justify-content-between.align-items-center.mb-3 {
+            flex-direction: column;
+            align-items: stretch !important;
+            gap: 10px;
+        }
+        .penugasan-title { font-size: 14px; }
+        .btn-remove-penugasan {
+            width: 100%;
+            text-align: center;
+            padding: 9px 12px;
+        }
+
+        /* Grid kelas: 2 kolom di mobile biar tidak boros scroll */
+        .kelas-item { flex: 0 0 50% !important; max-width: 50% !important; }
+        .kelas-chip { padding: 10px 10px; }
+        .kelas-chip .form-check-label { font-size: 12.5px; line-height: 1.3; }
+        .kelas-chip .form-check { display: flex; align-items: flex-start; gap: 6px; }
+        .kelas-chip .form-check-input { margin-top: 3px; flex-shrink: 0; }
+
+        .btn-tambah-penugasan { padding: 13px; font-size: 14px; }
+
+        /* Tombol aksi bawah */
+        .d-flex.gap-2:has(.btn-submit) {
+            flex-direction: column;
+        }
+        .btn-submit, .btn-cancel {
+            width: 100%;
+            justify-content: center;
+        }
+        .btn-submit { order: 1; }
+        .btn-cancel { order: 2; text-align: center; }
+    }
 </style>
 
 <div class="container-fluid py-2">
@@ -169,7 +235,7 @@
                 <p class="text-light opacity-75 mb-0 small">Tetapkan guru untuk mengajar satu atau lebih mata pelajaran di kelas tertentu.</p>
             </div>
 
-            <a href="{{ route('guru-mapel.index') }}" class="btn-back d-inline-flex align-items-center">
+            <a href="{{ route('guru-mapel.index') }}" class="btn-back d-inline-flex align-items-center justify-content-center">
                 <i class="fa-solid fa-arrow-left me-2"></i>
                 Kembali
             </a>
@@ -208,7 +274,7 @@
                         </select>
                         <small class="text-muted">Pilih jenjang dulu untuk menyaring pilihan guru, mapel, dan kelas.</small>
                     </div>
-                    <div class="col-md-6"></div>
+                    <div class="col-md-6 d-none d-md-block"></div>
                     @endif
 
                     {{-- Guru --}}
@@ -316,7 +382,7 @@
                                 <div class="row g-2">
                                     @foreach($kelasList as $kelas)
                                         <div
-                                            class="col-md-4 kelas-item"
+                                            class="col-6 col-md-4 kelas-item"
                                             data-jenjang="{{ $kelas->tingkat->jenjang_id }}">
                                             <div class="kelas-chip">
                                                 <div class="form-check">
@@ -398,7 +464,7 @@
             <label class="form-label fw-semibold small">Kelas yang Diajar</label>
             <div class="row g-2">
                 @foreach($kelasList as $kelas)
-                    <div class="col-md-4 kelas-item" data-jenjang="{{ $kelas->tingkat->jenjang_id }}">
+                    <div class="col-6 col-md-4 kelas-item" data-jenjang="{{ $kelas->tingkat->jenjang_id }}">
                         <div class="kelas-chip">
                             <div class="form-check">
                                 <input
@@ -553,6 +619,9 @@ document.addEventListener('DOMContentLoaded', function () {
         renumber();
 
         index++;
+
+        // Scroll ke blok baru supaya user langsung melihatnya (berguna di mobile)
+        block.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
     }
 

@@ -25,6 +25,8 @@
         border: 1px solid rgba(255, 255, 255, 0.05);
     }
 
+    .page-header-content { position: relative; z-index: 1; }
+
     .btn-back {
         background: rgba(255,255,255,0.1);
         color: #fff;
@@ -32,6 +34,7 @@
         border-radius: 14px;
         padding: 10px 18px;
         font-weight: 600;
+        white-space: nowrap;
     }
 
     .btn-back:hover { background: rgba(255,255,255,0.2); color: #fff; }
@@ -43,6 +46,8 @@
         box-shadow: 0 12px 34px rgba(15, 23, 42, 0.03);
         padding: 24px;
     }
+
+    .info-sidebar { position: sticky; top: 20px; }
 
     .token-display {
         background: linear-gradient(135deg, #0f172a, #1e293b);
@@ -60,6 +65,7 @@
         font-weight: 800;
         letter-spacing: 10px;
         margin: 12px 0;
+        word-break: break-all;
     }
 
     .token-status-on {
@@ -96,9 +102,22 @@
         padding: 8px 16px;
         font-weight: 600;
         font-size: 13px;
+        transition: background-color .2s, color .2s;
     }
 
     .btn-copy-token:hover { background: rgba(255,255,255,0.2); color: #fff; }
+
+    .btn-copy-token.is-copied {
+        background: #059669;
+        color: #fff;
+        border-color: #059669;
+    }
+
+    .btn-copy-token:disabled {
+        opacity: .4;
+        cursor: not-allowed;
+    }
+    .btn-copy-token:disabled:hover { background: rgba(255,255,255,0.12); }
 
     .btn-toggle-token {
         border-radius: 14px;
@@ -109,7 +128,7 @@
     }
 
     .countdown-box {
-        background: #f8fafc;
+        background: rgba(255,255,255,0.06);
         border-radius: 16px;
         padding: 16px;
         text-align: center;
@@ -119,16 +138,33 @@
     .countdown-value {
         font-size: 24px;
         font-weight: 800;
-        color: var(--secondary-dark);
+        color: #fff;
         font-family: 'Courier New', monospace;
     }
 
     .info-item {
         padding: 14px 0;
         border-bottom: 1px dashed var(--border-color);
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
     }
 
     .info-item:last-child { border-bottom: none; }
+
+    .info-item-icon {
+        width: 34px;
+        height: 34px;
+        border-radius: 10px;
+        background: #f8fafc;
+        color: var(--accent-blue);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 13px;
+        flex-shrink: 0;
+        margin-top: 1px;
+    }
 
     .info-label {
         font-size: 11px;
@@ -140,9 +176,11 @@
     }
 
     .info-value {
-        font-size: 15px;
+        font-size: 14.5px;
         font-weight: 600;
         color: var(--secondary-dark);
+        line-height: 1.4;
+        word-break: break-word;
     }
 
     .section-title {
@@ -175,6 +213,7 @@
         gap: 10px;
         font-size: 13px;
         font-weight: 600;
+        height: 100%;
     }
 
     /* --- Guru Pengampu card --- */
@@ -239,12 +278,53 @@
         display: inline-block;
     }
 
+    /* ============================================
+       RESPONSIVE: TABLET & MOBILE (<= 768px)
+       ============================================ */
     @media (max-width: 768px) {
-        .page-header { padding: 24px; border-radius: 18px; text-align: center; }
-        .page-header .d-flex { flex-direction: column; gap: 16px; }
-        .content-card { padding: 16px; }
-        .token-value { font-size: 30px; letter-spacing: 6px; }
-        .guru-card { flex-direction: column; text-align: center; }
+        .container-fluid.py-2 { padding-left: 12px; padding-right: 12px; }
+
+        /* Header */
+        .page-header { padding: 22px 18px; border-radius: 20px; }
+        .page-header-content.d-flex.justify-content-between {
+            flex-direction: column;
+            align-items: stretch !important;
+            gap: 16px;
+        }
+        .page-header h3 { font-size: 18px; margin-bottom: 4px; }
+        .page-header p.small { font-size: 12.5px; }
+
+        .page-header-content .d-flex.gap-2 {
+            flex-direction: column;
+            width: 100%;
+        }
+        .page-header-content .d-flex.gap-2 > * {
+            width: 100%;
+            justify-content: center;
+            display: flex;
+            align-items: center;
+        }
+
+        .row.g-4 { row-gap: 16px !important; }
+
+        .content-card { padding: 16px; border-radius: 20px; }
+
+        .info-sidebar { position: static; }
+
+        .token-display { padding: 26px 18px; border-radius: 18px; }
+        .token-value { font-size: 28px; letter-spacing: 5px; }
+
+        .info-item { padding: 12px 0; gap: 10px; }
+        .info-item-icon { width: 30px; height: 30px; font-size: 12px; border-radius: 9px; }
+        .info-label { font-size: 10px; }
+        .info-value { font-size: 13.5px; }
+
+        .section-title { font-size: 14px; margin-bottom: 12px; }
+
+        .guru-card { flex-direction: column; text-align: center; padding: 16px; }
+        .guru-meta { justify-content: center; }
+
+        .setting-badge { font-size: 12.5px; padding: 10px 12px; }
     }
 </style>
 
@@ -252,7 +332,7 @@
 
     {{-- Header --}}
     <div class="page-header mb-4">
-        <div class="d-flex justify-content-between align-items-center flex-wrap">
+        <div class="page-header-content d-flex justify-content-between align-items-center flex-wrap gap-3">
             <div>
                 <span class="badge bg-info bg-opacity-25 text-info px-3 py-2 rounded-pill mb-2 fw-semibold" style="font-size: 11px; letter-spacing: 0.5px;">
                     DETAIL & KONTROL UJIAN
@@ -313,6 +393,7 @@
 
         {{-- Kolom Kiri: Token & Kontrol --}}
         <div class="col-lg-4">
+        <div class="info-sidebar">
 
             <div class="token-display mb-3">
                 <div class="mb-2">
@@ -342,12 +423,12 @@
 
                 <div class="token-value" id="tokenValue">{{ $ujian->token ?? '------' }}</div>
 
-                <button type="button" class="btn-copy-token" id="btnCopyToken" data-token="{{ $ujian->token }}">
+                <button type="button" class="btn-copy-token" id="btnCopyToken" data-token="{{ $ujian->token }}" {{ $ujian->token ? '' : 'disabled' }}>
                     <i class="fa-solid fa-copy me-1"></i> Salin Token
                 </button>
 
                 <div class="countdown-box">
-                    <div class="info-label mb-1">
+                    <div class="info-label mb-1" style="color: rgba(255,255,255,0.6);">
                         @if(now()->lt($ujian->waktu_mulai))
                             Ujian Dimulai Dalam
                         @elseif(now()->lte($ujian->waktu_selesai))
@@ -412,23 +493,36 @@
 
             <div class="content-card">
                 <div class="info-item">
-                    <div class="info-label">Waktu Mulai</div>
-                    <div class="info-value">{{ $ujian->waktu_mulai->translatedFormat('l, d F Y - H:i') }}</div>
+                    <div class="info-item-icon"><i class="fa-solid fa-calendar-day"></i></div>
+                    <div>
+                        <div class="info-label">Waktu Mulai</div>
+                        <div class="info-value">{{ $ujian->waktu_mulai->translatedFormat('l, d F Y - H:i') }}</div>
+                    </div>
                 </div>
                 <div class="info-item">
-                    <div class="info-label">Waktu Selesai</div>
-                    <div class="info-value">{{ $ujian->waktu_selesai->translatedFormat('l, d F Y - H:i') }}</div>
+                    <div class="info-item-icon"><i class="fa-solid fa-calendar-check"></i></div>
+                    <div>
+                        <div class="info-label">Waktu Selesai</div>
+                        <div class="info-value">{{ $ujian->waktu_selesai->translatedFormat('l, d F Y - H:i') }}</div>
+                    </div>
                 </div>
                 <div class="info-item">
-                    <div class="info-label">Durasi Minimal Pengerjaan</div>
-                    <div class="info-value">{{ $ujian->durasi_minimal }} menit</div>
+                    <div class="info-item-icon"><i class="fa-solid fa-hourglass-half"></i></div>
+                    <div>
+                        <div class="info-label">Durasi Minimal Pengerjaan</div>
+                        <div class="info-value">{{ $ujian->durasi_minimal }} menit</div>
+                    </div>
                 </div>
                 <div class="info-item">
-                    <div class="info-label">Tahun Ajaran</div>
-                    <div class="info-value">{{ optional($ujian->tahunAjaran)->nama_tahun ?? '-' }}</div>
+                    <div class="info-item-icon"><i class="fa-solid fa-graduation-cap"></i></div>
+                    <div>
+                        <div class="info-label">Tahun Ajaran</div>
+                        <div class="info-value">{{ optional($ujian->tahunAjaran)->nama_tahun ?? '-' }}</div>
+                    </div>
                 </div>
             </div>
 
+        </div>
         </div>
 
         {{-- Kolom Kanan --}}
@@ -541,16 +635,25 @@
                 </div>
 
                 <div class="info-item">
-                    <div class="info-label">Nama Bank Soal</div>
-                    <div class="info-value">{{ optional($ujian->bankSoal)->nama_bank_soal ?? '-' }}</div>
+                    <div class="info-item-icon"><i class="fa-solid fa-book-open"></i></div>
+                    <div>
+                        <div class="info-label">Nama Bank Soal</div>
+                        <div class="info-value">{{ optional($ujian->bankSoal)->nama_bank_soal ?? '-' }}</div>
+                    </div>
                 </div>
                 <div class="info-item">
-                    <div class="info-label">Mata Pelajaran</div>
-                    <div class="info-value">{{ optional(optional($ujian->bankSoal)->mataPelajaran)->nama_mapel ?? '-' }}</div>
+                    <div class="info-item-icon"><i class="fa-solid fa-book"></i></div>
+                    <div>
+                        <div class="info-label">Mata Pelajaran</div>
+                        <div class="info-value">{{ optional(optional($ujian->bankSoal)->mataPelajaran)->nama_mapel ?? '-' }}</div>
+                    </div>
                 </div>
                 <div class="info-item">
-                    <div class="info-label">Guru Pembuat</div>
-                    <div class="info-value">{{ $guru->nama ?? '-' }}</div>
+                    <div class="info-item-icon"><i class="fa-solid fa-user-tie"></i></div>
+                    <div>
+                        <div class="info-label">Guru Pembuat</div>
+                        <div class="info-value">{{ $guru->nama ?? '-' }}</div>
+                    </div>
                 </div>
             </div>
 
@@ -561,19 +664,73 @@
 </div>
 
 <script>
-document.getElementById('btnCopyToken').addEventListener('click', function () {
-    const token = this.getAttribute('data-token');
+(function () {
+    const btn = document.getElementById('btnCopyToken');
+    if (!btn) return;
 
-    if (!token) return;
-
-    navigator.clipboard.writeText(token).then(() => {
-        const original = this.innerHTML;
-        this.innerHTML = '<i class="fa-solid fa-check me-1"></i> Tersalin!';
+    function showCopied() {
+        const original = btn.innerHTML;
+        btn.innerHTML = '<i class="fa-solid fa-check me-1"></i> Tersalin!';
+        btn.classList.add('is-copied');
         setTimeout(() => {
-            this.innerHTML = original;
+            btn.innerHTML = original;
+            btn.classList.remove('is-copied');
         }, 1500);
+    }
+
+    function showFailed() {
+        const original = btn.innerHTML;
+        btn.innerHTML = '<i class="fa-solid fa-triangle-exclamation me-1"></i> Gagal, salin manual';
+        setTimeout(() => {
+            btn.innerHTML = original;
+        }, 2000);
+    }
+
+    // Fallback untuk browser lama / koneksi non-HTTPS yang tidak mendukung navigator.clipboard
+    function fallbackCopy(text) {
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.setAttribute('readonly', '');
+        textarea.style.position = 'fixed';
+        textarea.style.top = '0';
+        textarea.style.left = '0';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+
+        textarea.focus();
+        textarea.select();
+        textarea.setSelectionRange(0, textarea.value.length);
+
+        let success = false;
+        try {
+            success = document.execCommand('copy');
+        } catch (err) {
+            success = false;
+        }
+
+        document.body.removeChild(textarea);
+
+        if (success) {
+            showCopied();
+        } else {
+            showFailed();
+        }
+    }
+
+    btn.addEventListener('click', function () {
+        const token = btn.getAttribute('data-token');
+
+        if (!token) return;
+
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(token).then(showCopied).catch(function () {
+                fallbackCopy(token);
+            });
+        } else {
+            fallbackCopy(token);
+        }
     });
-});
+})();
 
 // Countdown timer
 (function () {
