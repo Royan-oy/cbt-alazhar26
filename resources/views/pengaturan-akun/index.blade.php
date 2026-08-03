@@ -588,7 +588,7 @@
                                             {{ optional($gm->mataPelajaran)->nama_mapel ?? '-' }}
                                         </div>
                                         <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25" style="font-size: 11px;">
-                                            TA {{ optional($gm->tahunAjaran)->nama_tahun ?? '-' }}
+                                            TA {{ optional($gm->tahunAjaran)->nama_tahun ?? '-' }} - {{ \Illuminate\Support\Str::ucfirst(optional($gm->tahunAjaran)->semester ?? '-') }}
                                         </span>
                                     </div>
                                     <div class="text-muted small mt-2">

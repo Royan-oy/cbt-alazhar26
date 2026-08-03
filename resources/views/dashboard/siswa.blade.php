@@ -100,15 +100,46 @@ $ujianBerjalan = collect($ujian_hari_ini ?? [])
                             @foreach($ujian_hari_ini as $ujian)
                                 <tr>
                                     <td data-label="Nama Ujian">
-                                        <div>
-                                            <div class="fw-bold text-dark" style="font-size: 13.5px;">{{ $ujian->nama_ujian }}</div>
-                                            <small class="text-muted"><i class="fa-regular fa-clock me-1"></i>Durasi: {{ $ujian->durasi_menit }} Menit</small>
+                                        <div class="exam-info">
+                                            <div class="exam-icon">
+                                                <i class="fa-solid fa-file-lines"></i>
+                                            </div>
+
+                                            <div class="exam-content">
+
+                                                <h6 class="exam-title mb-1">
+                                                    {{ $ujian->nama_ujian }}
+                                                </h6>
+
+                                                <div class="exam-meta">
+
+                                                    <span class="exam-badge duration">
+                                                        <i class="fa-regular fa-clock"></i>
+                                                        {{ $ujian->durasi_menit }} Menit
+                                                    </span>
+
+                                                </div>
+
+                                            </div>
                                         </div>
                                     </td>
                                     <td data-label="Batas Waktu">
-                                        <span class="small text-secondary fw-semibold">
-                                            <i class="fa-regular fa-calendar me-1"></i>{{ $ujian->display_tanggal }}
-                                        </span>
+                                        <div class="exam-time-info">
+                                            <div class="exam-time-start">
+                                                <i class="fa-regular fa-calendar-check"></i>
+                                                <span>{{ \Carbon\Carbon::parse($ujian->waktu_mulai)->format('d M Y') }}</span>
+                                            </div>
+
+                                            <div class="exam-time-hour">
+                                                <i class="fa-regular fa-clock"></i>
+                                                <span>
+                                                    {{ \Carbon\Carbon::parse($ujian->waktu_mulai)->format('H:i') }}
+                                                    -
+                                                    {{ \Carbon\Carbon::parse($ujian->waktu_selesai)->format('H:i') }}
+                                                    WIB
+                                                </span>
+                                            </div>
+                                        </div>
                                     </td>
                                     <td class="text-center" data-label="Status">
                                         @if($ujian->status_waktu == 'belum_mulai')
@@ -139,31 +170,55 @@ $ujianBerjalan = collect($ujian_hari_ini ?? [])
                                         @endif
                                     </td>
                                     <td class="text-end" data-label="Aksi">
-                                        @if($ujian->status_waktu == 'belum_mulai')
+
+                                        @php
+                                            $belumMulai = now()->lt($ujian->waktu_mulai);
+                                            $sudahBerakhir = now()->gt($ujian->waktu_selesai);
+                                        @endphp
+
+                                        @if($belumMulai)
+
                                             <button class="btn-exam-modern btn-exam-wait" disabled>
-                                                <i class="fa-regular fa-clock"></i> Belum Mulai
+                                                <i class="fa-regular fa-clock"></i>
+                                                Belum Mulai
                                             </button>
-                                        @elseif($ujian->status_waktu == 'berakhir')
+
+                                        @elseif($sudahBerakhir)
+
                                             <button class="btn-exam-modern btn-exam-end" disabled>
-                                                <i class="fa-solid fa-hourglass-end"></i> Berakhir
+                                                <i class="fa-solid fa-hourglass-end"></i>
+                                                Berakhir
                                             </button>
+
                                         @else
+
                                             @if($ujian->status_siswa == 'belum')
+
                                                 <a href="{{ route('dashboard-siswa.ujian.mulai',$ujian->id) }}"
-                                                   class="btn-exam-modern btn-exam-start">
-                                                    <i class="fa-solid fa-play"></i> Mulai
+                                                class="btn-exam-modern btn-exam-start">
+                                                    <i class="fa-solid fa-play"></i>
+                                                    Mulai
                                                 </a>
+
                                             @elseif($ujian->status_siswa == 'mengerjakan')
+
                                                 <a href="{{ route('dashboard-siswa.ujian.mulai',$ujian->id) }}"
-                                                   class="btn-exam-modern btn-exam-continue">
-                                                    <i class="fa-solid fa-arrow-rotate-right"></i> Lanjutkan
+                                                class="btn-exam-modern btn-exam-continue">
+                                                    <i class="fa-solid fa-arrow-rotate-right"></i>
+                                                    Lanjutkan
                                                 </a>
+
                                             @else
+
                                                 <button class="btn-exam-modern btn-exam-done" disabled>
-                                                    <i class="fa-solid fa-circle-check"></i> Selesai
+                                                    <i class="fa-solid fa-circle-check"></i>
+                                                    Selesai
                                                 </button>
+
                                             @endif
+
                                         @endif
+
                                     </td>
                                 </tr>
                             @endforeach
