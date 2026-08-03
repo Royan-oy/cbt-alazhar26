@@ -278,16 +278,35 @@
         if (anchor.classList.contains('no-loader')) return;
         if (e.ctrlKey || e.metaKey || e.shiftKey) return;
 
-        showLoader();
+        // Cek apakah aksi klik diinterupsi oleh script lain (misal: SweetAlert)
+        setTimeout(function() {
+            if (!e.defaultPrevented) {
+                showLoader();
+            }
+        }, 10);
     });
 
-    // Pemicu 3: Intercept form submit
+    // Override form.submit() agar memicu loader (saat SweetAlert mengeksekusi form.submit())
+    var originalSubmit = HTMLFormElement.prototype.submit;
+    HTMLFormElement.prototype.submit = function() {
+        if (!this.classList.contains('no-loader') && this.getAttribute('target') !== '_blank') {
+            showLoader();
+        }
+        originalSubmit.apply(this, arguments);
+    };
+
+    // Pemicu 3: Intercept form submit biasa
     document.addEventListener('submit', function (e) {
         var form = e.target;
         if (!form || form.classList.contains('no-loader')) return;
         if (form.getAttribute('target') === '_blank') return;
 
-        showLoader();
+        // Cek apakah submit diinterupsi oleh script lain (misal: SweetAlert e.preventDefault())
+        setTimeout(function() {
+            if (!e.defaultPrevented) {
+                showLoader();
+            }
+        }, 10);
     });
 
     // Sembunyikan loader saat halaman selesai dimuat penuh
