@@ -12,10 +12,7 @@ class GuruDashboardController extends Controller
     {
         $user = Auth::user();
         
-        // Proteksi ganda: Pastikan hanya guru yang bisa mengakses halaman ini
-        if ($user->role !== 'guru') {
-            return redirect()->route('dashboard');
-        }
+
 
         $data = [];
         $isWaliKelas = false;

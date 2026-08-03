@@ -12,16 +12,8 @@ use Illuminate\Support\Facades\Hash;
 
 class AdminJenjangController extends Controller
 {
-    public function __construct()
-    {
-        // Hanya super_admin yang boleh mengakses menu ini
-        $this->middleware(function ($request, $next) {
-            if (Auth::user()->role != 'super_admin') {
-                abort(403, 'Anda tidak memiliki akses ke halaman ini.');
-            }
-            return $next($request);
-        });
-    }
+    // Constructor telah dihapus karena role dihandle di web.php
+
 
     public function index(Request $request)
     {
