@@ -27,4 +27,9 @@ class Kelas extends Model
     {
         return $this->belongsToMany(GuruMapel::class, 'guru_mapel_kelas', 'kelas_id', 'guru_mapel_id');
     }
+
+    public function ujians()
+    {
+        return $this->belongsToMany(Ujian::class, 'ujian_kelas')->withTimestamps();
+    }
 }

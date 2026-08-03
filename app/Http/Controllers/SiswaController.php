@@ -382,7 +382,12 @@ class SiswaController extends Controller
 
         $tahunAktif = TahunAjaran::where('is_aktif', true)->first();
 
-        $query = Siswa::with(['user', 'kelasAktif.kelas.tingkat.jenjang']);
+        $query = Siswa::with(['user', 'kelasAktif.kelas.tingkat.jenjang', 'kelasAktif.kelas.ujians' => function($q) use ($tahunAktif) {
+            if ($tahunAktif) {
+                $q->where('tahun_ajaran_id', $tahunAktif->id);
+            }
+            $q->with('bankSoal.mataPelajaran')->orderBy('waktu_mulai', 'asc');
+        }]);
 
         if ($tahunAktif) {
             $query->whereHas('siswaKelas', function ($q) use ($tahunAktif) {
@@ -435,8 +440,13 @@ class SiswaController extends Controller
     {
         $this->authorizeJenjang($siswa);
 
-        $siswa->load(['user', 'kelasAktif.kelas.tingkat.jenjang']);
         $tahunAktif = TahunAjaran::where('is_aktif', true)->first();
+        $siswa->load(['user', 'kelasAktif.kelas.tingkat.jenjang', 'kelasAktif.kelas.ujians' => function($q) use ($tahunAktif) {
+            if ($tahunAktif) {
+                $q->where('tahun_ajaran_id', $tahunAktif->id);
+            }
+            $q->with('bankSoal.mataPelajaran')->orderBy('waktu_mulai', 'asc');
+        }]);
         $siswas = collect([$siswa]);
 
         $pdf = PDF::loadView('siswa.kartu_pdf', compact('siswas', 'tahunAktif'))->setPaper('a4', 'portrait');

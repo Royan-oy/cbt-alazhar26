@@ -22,16 +22,10 @@
         }
 
         .card-wrapper {
-            width: 48.5%;
-            float: left;
-            margin-right: 3%;
-            margin-bottom: 12px;
+            width: 100%;
+            margin-bottom: 24px;
             box-sizing: border-box;
             page-break-inside: avoid;
-        }
-
-        .card-wrapper:nth-child(2n) {
-            margin-right: 0;
         }
 
         .card-box {
@@ -44,8 +38,9 @@
         .card-header {
             background: #1f2430;
             color: #ffffff;
-            padding: 6px 8px;
-            border-bottom: 2px solid #b08d57;
+            padding: 8px 12px;
+            border-bottom: 3px solid #0284c7;
+            border-image: linear-gradient(135deg, #0284c7, #0369a1) 1;
         }
 
         .card-header-table {
@@ -58,50 +53,50 @@
         }
 
         .card-header-logo {
-            width: 22px;
+            width: 32px;
             height: auto;
         }
 
         .card-header .school-name {
-            font-size: 7.5px;
+            font-size: 8.5px;
             font-weight: 700;
             letter-spacing: 0.5px;
-            color: #c9ad7f;
+            color: #38bdf8;
             text-transform: uppercase;
-            margin: 0;
+            margin: 0 0 2px 0;
             text-align: center;
         }
 
         .card-header .card-title {
-            font-size: 9.5px;
+            font-size: 11px;
             font-weight: 800;
-            margin: 1px 0 0 0;
-            letter-spacing: 0.3px;
+            margin: 0;
+            letter-spacing: 0.5px;
             text-align: center;
         }
 
         .card-body {
-            padding: 8px 10px;
+            padding: 12px 14px;
         }
 
-        .card-table {
+        .top-section-table {
             width: 100%;
             border-collapse: collapse;
+            margin-bottom: 12px;
         }
 
-        .card-table td {
+        .top-section-table td {
             vertical-align: top;
-            padding: 2px 0;
         }
 
         .photo-cell {
-            width: 50px;
-            padding-right: 8px !important;
+            width: 70px;
+            padding-right: 12px !important;
         }
 
         .photo-box {
-            width: 48px;
-            height: 58px;
+            width: 65px;
+            height: 80px;
             border: 1px solid #e0ded9;
             border-radius: 5px;
             overflow: hidden;
@@ -115,31 +110,24 @@
             object-fit: cover;
         }
 
-        .photo-placeholder {
-            font-size: 7px;
-            color: #a8a29e;
-            margin-top: 22px;
-            font-weight: 700;
-        }
-
         .info-table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 9.5px;
+            font-size: 10.5px;
         }
 
         .info-table td {
-            padding: 1.5px 0;
+            padding: 2.5px 0;
         }
 
         .info-label {
             color: #78716c;
-            width: 62px;
+            width: 75px;
             font-weight: 600;
         }
 
         .info-sep {
-            width: 8px;
+            width: 10px;
             color: #a8a29e;
         }
 
@@ -149,43 +137,77 @@
         }
 
         .cred-box {
-            background: #faf8f4;
-            border: 1px solid #e2d9c3;
+            background: #f0f9ff;
+            border: 1px solid #bae6fd;
             border-radius: 5px;
-            padding: 4px 6px;
-            margin-top: 4px;
+            padding: 6px 10px;
+            width: 200px;
         }
 
         .cred-table {
             width: 100%;
-            font-size: 9.5px;
+            font-size: 10.5px;
         }
 
         .cred-label {
-            color: #8a6d3b;
+            color: #0369a1;
             font-weight: 700;
-            width: 62px;
+            width: 70px;
         }
 
         .cred-val {
             font-weight: 800;
             color: #1f2430;
             font-family: monospace;
-            font-size: 11px;
+            font-size: 12px;
             letter-spacing: 0.5px;
+        }
+
+        /* Schedule Table */
+        .schedule-title {
+            margin: 0 0 6px 0;
+            font-size: 10.5px;
+            font-weight: 800;
+            color: #1f2430;
+            border-bottom: 1px solid #e0ded9;
+            padding-bottom: 4px;
+        }
+
+        .schedule-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 9.5px;
+            margin-bottom: 4px;
+        }
+
+        .schedule-table th, .schedule-table td {
+            border: 1px solid #d6d3d1;
+            padding: 5px 6px;
+            text-align: left;
+            vertical-align: middle;
+        }
+
+        .schedule-table th {
+            background-color: #f8f9fa;
+            color: #334155;
+            font-weight: 700;
+        }
+
+        .text-center {
+            text-align: center !important;
         }
 
         .card-footer {
             background: #faf9f7;
             border-top: 1px solid #ece9e4;
-            padding: 4px 8px;
-            font-size: 7.5px;
+            padding: 6px 10px;
+            font-size: 8.5px;
             color: #78716c;
             text-align: center;
         }
 
-        .clear {
-            clear: both;
+        .page-break {
+            page-break-after: always;
         }
     </style>
 </head>
@@ -198,7 +220,7 @@
                 <div class="card-header">
                     <table class="card-header-table">
                         <tr>
-                            <td style="width: 26px; text-align: left;">
+                            <td style="width: 40px; text-align: left;">
                                 @if(file_exists(public_path('img/logo-alazhar.png')))
                                     <img src="{{ public_path('img/logo-alazhar.png') }}" class="card-header-logo" alt="Logo">
                                 @endif
@@ -207,7 +229,7 @@
                                 <p class="school-name">SEKOLAH ISLAM AL AZHAR PEKALONGAN</p>
                                 <h4 class="card-title">KARTU PESERTA UJIAN CBT</h4>
                             </td>
-                            <td style="width: 26px; text-align: right;">
+                            <td style="width: 40px; text-align: right;">
                                 @if(file_exists(public_path('img/sigma.png')))
                                     <img src="{{ public_path('img/sigma.png') }}" class="card-header-logo" alt="Sigma">
                                 @endif
@@ -217,7 +239,8 @@
                 </div>
 
                 <div class="card-body">
-                    <table class="card-table">
+                    <!-- Bagian Atas: Foto & Info -->
+                    <table class="top-section-table">
                         <tr>
                             <td class="photo-cell">
                                 <div class="photo-box">
@@ -233,7 +256,7 @@
                                     <tr>
                                         <td class="info-label">Nama Siswa</td>
                                         <td class="info-sep">:</td>
-                                        <td class="info-val">{{ Str::limit($siswa->nama, 22) }}</td>
+                                        <td class="info-val">{{ $siswa->nama }}</td>
                                     </tr>
                                     <tr>
                                         <td class="info-label">NIS / NISN</td>
@@ -253,33 +276,64 @@
                                     </tr>
                                 </table>
                             </td>
+                            <td style="text-align: right; vertical-align: top;">
+                                <div class="cred-box" style="display: inline-block; text-align: left; margin-top: 0;">
+                                    <table class="cred-table">
+                                        <tr>
+                                            <td class="cred-label">Username</td>
+                                            <td style="width: 8px; color: #0369a1;">:</td>
+                                            <td class="cred-val">{{ $siswa->nis }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="cred-label">Password</td>
+                                            <td style="width: 8px; color: #0369a1;">:</td>
+                                            <td class="cred-val">{{ optional($siswa->user)->password_plain ?? '-' }}</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </td>
                         </tr>
                     </table>
 
-                    <div class="cred-box">
-                        <table class="cred-table">
+                    <!-- Bagian Bawah: Jadwal Ujian -->
+                    <h5 class="schedule-title">Jadwal Ujian</h5>
+                    <table class="schedule-table">
+                        <thead>
                             <tr>
-                                <td class="cred-label">Username</td>
-                                <td style="width: 8px; color: #8a6d3b;">:</td>
-                                <td class="cred-val">{{ $siswa->nis }}</td>
+                                <th style="width: 25%">Hari, Tanggal</th>
+                                <th style="width: 20%">Waktu</th>
+                                <th style="width: 40%">Mata Pelajaran</th>
+                                <th style="width: 15%" class="text-center">Paraf Pengawas</th>
                             </tr>
-                            <tr>
-                                <td class="cred-label">Password</td>
-                                <td style="width: 8px; color: #8a6d3b;">:</td>
-                                <td class="cred-val">{{ optional($siswa->user)->password_plain ?? '-' }}</td>
-                            </tr>
-                        </table>
-                    </div>
+                        </thead>
+                        <tbody>
+                            @if($siswa->kelasAktif && $siswa->kelasAktif->kelas && $siswa->kelasAktif->kelas->ujians->count() > 0)
+                                @foreach($siswa->kelasAktif->kelas->ujians as $ujian)
+                                    <tr>
+                                        <td>{{ \Carbon\Carbon::parse($ujian->waktu_mulai)->translatedFormat('l, d F Y') }}</td>
+                                        <td>{{ \Carbon\Carbon::parse($ujian->waktu_mulai)->format('H:i') }} - {{ \Carbon\Carbon::parse($ujian->waktu_selesai)->format('H:i') }}</td>
+                                        <td>{{ optional(optional($ujian->bankSoal)->mataPelajaran)->nama_mapel ?? '-' }}</td>
+                                        <td></td>
+                                    </tr>
+                                @endforeach
+                            @else
+                                <tr>
+                                    <td colspan="4" class="text-center" style="color: #78716c; font-style: italic;">Belum ada jadwal ujian yang ditugaskan untuk kelas ini.</td>
+                                </tr>
+                            @endif
+                        </tbody>
+                    </table>
+
                 </div>
 
                 <div class="card-footer">
-                    Simpan kartu ini dengan baik. Rahasiakan username & password Anda.
+                    Simpan kartu ini dengan baik. Rahasiakan username & password Anda selama ujian berlangsung.
                 </div>
             </div>
         </div>
 
-        @if(($loop->iteration % 2) == 0)
-            <div class="clear"></div>
+        @if(($loop->iteration % 2) == 0 && !$loop->last)
+            <div class="page-break"></div>
         @endif
 
         @endforeach
