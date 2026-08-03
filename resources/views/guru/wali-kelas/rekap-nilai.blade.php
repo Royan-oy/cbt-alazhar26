@@ -286,7 +286,7 @@
     }
     .score-none {
         background: #f8fafc;
-        color: #cbd5e1;
+        color: #3b3b3b;
         border: 1px dashed #e2e8f0;
         font-size: 1rem;
     }
@@ -651,13 +651,9 @@
                         <!-- Rata-rata -->
                         <td>
                             @if($avg !== null)
-                                @if($avg >= 75)
-                                    <span class="score-chip score-high">{{ $avg }}</span>
-                                @else
-                                    <span class="score-chip score-low">{{ $avg }}</span>
-                                @endif
+                                <span class="score-chip score-none">{{ $avg }}</span>
                             @else
-                                <span class="score-chip score-none">—</span>
+                                <span class="text-muted">—</span>
                             @endif
                         </td>
 
@@ -677,7 +673,7 @@
         <!-- LEGEND FOOTER -->
         <div class="legend-footer">
             <div class="d-flex flex-column flex-md-row align-items-md-center gap-3">
-                <div class="d-flex flex-wrap gap-3 align-items-center">
+                {{-- <div class="d-flex flex-wrap gap-3 align-items-center">
                     <span class="legend-item">
                         <span class="legend-dot legend-dot-high"></span> ≥ KKM (Tuntas)
                     </span>
@@ -687,7 +683,7 @@
                     <span class="legend-item">
                         <span class="legend-dot legend-dot-none"></span> Belum Ujian
                     </span>
-                </div>
+                </div> --}}
                 <span style="color: #e2e8f0; font-size: 14px;" class="d-none d-md-inline">|</span>
                 <span class="legend-item">
                     🥇🥈🥉 Peringkat 3 besar berdasarkan rata-rata

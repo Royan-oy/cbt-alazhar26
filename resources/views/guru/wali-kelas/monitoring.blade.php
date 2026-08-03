@@ -357,9 +357,10 @@
                 <td class="text-center" style="font-size: 0.85rem; color: #475569;">
                     ${waktuKumpul !== '—' ? `<i class="fa-solid fa-flag-checkered me-1 text-muted"></i> ${waktuKumpul}` : '—'}
                 </td>
+                {{--  
                 <td class="text-center">
                     ${formForceSubmit}
-                </td>
+                </td> --}}
             </tr>
         `;
     }

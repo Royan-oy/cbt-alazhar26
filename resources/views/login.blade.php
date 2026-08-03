@@ -323,6 +323,8 @@
 </head>
 <body>
 
+    @include('layouts.loading')
+
     <div class="ambient">
         <span class="b1"></span>
         <span class="b2"></span>

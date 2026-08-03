@@ -418,7 +418,7 @@
                     <div id="accordionEssay">
                         @foreach($jawabans as $j)
                         @php
-                            $isIsianBenarOtomatis = ($j->jenis_soal === 'isian' && $j->is_benar === true);
+                            $isIsianBenarOtomatis = ($j->jenis_soal === 'isian' && ($j->is_benar == 1 || $j->is_benar === true));
                         @endphp
                         <div class="kx-card accordion-item">
                             <button class="kx-card-head" type="button" data-bs-toggle="collapse" data-bs-target="#collapseEssay{{ $j->jawaban_id }}" aria-expanded="false" aria-controls="collapseEssay{{ $j->jawaban_id }}" id="headingEssay{{ $j->jawaban_id }}">
@@ -427,12 +427,16 @@
                                 <div class="kx-card-badges">
                                     @if($isIsianBenarOtomatis)
                                         <span class="kx-stamp ok status-badge" style="background:#dcfce7; color:#15803d; border:1px solid #86efac;"><i class="fa-solid fa-circle-check"></i>Benar Otomatis ({{ $j->nilai_jawaban }} Poin)</span>
+                                    @elseif($j->is_benar === null)
+                                        <span class="kx-stamp pending status-badge"><i class="fa-solid fa-clock"></i>Belum Dinilai</span>
                                     @elseif($j->jenis_soal === 'isian')
-                                        <span class="kx-stamp pending status-badge" style="background:#fef3c7; color:#b45309; border:1px solid #fde68a;"><i class="fa-solid fa-pen-nib"></i>Upah Nulis</span>
-                                    @elseif(isset($j->is_benar))
-                                        <span class="kx-stamp ok status-badge"><i class="fa-solid fa-check"></i>Dinilai</span>
+                                        @if($j->nilai_jawaban > 0)
+                                            <span class="kx-stamp ok status-badge" style="background:#e0f2fe; color:#0369a1; border:1px solid #bae6fd;"><i class="fa-solid fa-hand-holding-dollar"></i>Upah Nulis ({{ $j->nilai_jawaban }} Poin)</span>
+                                        @else
+                                            <span class="kx-stamp pending status-badge" style="background:#fef3c7; color:#b45309; border:1px solid #fde68a;"><i class="fa-solid fa-pen-nib"></i>Tinjau Upah Nulis</span>
+                                        @endif
                                     @else
-                                        <span class="kx-stamp pending status-badge"><i class="fa-solid fa-clock"></i>Belum</span>
+                                        <span class="kx-stamp ok status-badge"><i class="fa-solid fa-check"></i>Dinilai ({{ $j->nilai_jawaban }} Poin)</span>
                                     @endif
                                     <span class="kx-weight">Bobot {{ $j->bobot }}</span>
                                 </div>
@@ -451,49 +455,50 @@
                                     </div>
 
                                     @if($isIsianBenarOtomatis)
-                                        <div class="alert alert-success border-0 rounded-3 p-3 mb-0 small">
+                                        <div class="alert alert-success border-0 rounded-3 p-3 mb-3 small">
                                             <i class="fa-solid fa-circle-check text-success me-1"></i>
-                                            Jawaban siswa cocok dengan Kunci Jawaban Otomatis. Siswa mendapatkan nilai maksimal <strong>{{ $j->bobot }} / {{ $j->bobot }}</strong>.
+                                            Jawaban siswa cocok dengan Kunci Jawaban Otomatis. Siswa mendapatkan nilai maksimal <strong>{{ $j->bobot }} / {{ $j->bobot }}</strong>. Namun, Anda tetap dapat mengubah nilainya jika diperlukan.
                                         </div>
-                                    @else
-                                        @if($j->jenis_soal === 'isian')
-                                            <div class="alert alert-warning border-0 rounded-3 p-2 px-3 mb-3 small">
-                                                <i class="fa-solid fa-hand-holding-dollar text-warning me-1"></i>
-                                                <strong>Fitur Upah Nulis:</strong> Jawaban siswa tidak 100% cocok dengan kunci otomatis. Jika jawaban siswa hampir benar/ada typo, Anda dapat memberikan nilai parsial <strong>"Upah Nulis"</strong> (0 s/d {{ $j->bobot - 1 }}).
-                                            </div>
-                                        @endif
-                                        <form class="form-koreksi" onsubmit="simpanKoreksi(event, {{ $j->jawaban_id }})">
-                                            <div class="kx-grading">
-                                                <div>
-                                                    <label class="kx-grading-label">Nilai (0 - {{ $j->bobot }})</label>
-                                                    <div class="kx-score-wrap">
-                                                        <input type="number" name="koreksi[{{ $j->jawaban_id }}][nilai]"
-                                                               class="kx-score-circle"
-                                                               value="{{ $j->nilai_jawaban ?? 0 }}"
-                                                               min="0" max="{{ $j->bobot }}" step="0.1" required>
-                                                        <span class="kx-score-max">/ {{ $j->bobot }}</span>
-                                                    </div>
-                                                </div>
-                                                <div>
-                                                    <label class="kx-grading-label">Status Keabsahan</label>
-                                                    <div class="kx-status-group">
-                                                        <input type="radio" id="benar-{{ $j->jawaban_id }}" name="koreksi[{{ $j->jawaban_id }}][is_benar]" value="1" class="kx-radio" {{ $j->is_benar === 1 ? 'checked' : '' }} required>
-                                                        <label for="benar-{{ $j->jawaban_id }}" class="kx-radio-label benar"><i class="fa-solid fa-check"></i>Benar</label>
-                                                        <input type="radio" id="salah-{{ $j->jawaban_id }}" name="koreksi[{{ $j->jawaban_id }}][is_benar]" value="0" class="kx-radio" {{ $j->is_benar === 0 ? 'checked' : '' }} required>
-                                                        <label for="salah-{{ $j->jawaban_id }}" class="kx-radio-label salah"><i class="fa-solid fa-xmark"></i>Salah</label>
-                                                    </div>
-                                                </div>
-                                                <div class="kx-grading-actions">
-                                                    <span class="kx-saved-mark" id="save-indicator-{{ $j->jawaban_id }}">
-                                                        <i class="fa-solid fa-check-circle"></i> Tersimpan
-                                                    </span>
-                                                    <button type="submit" class="kx-btn-save" id="btn-simpan-{{ $j->jawaban_id }}">
-                                                        <i class="fa-solid fa-save"></i> Simpan Penilaian
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </form>
                                     @endif
+
+                                    @if($j->jenis_soal === 'isian' && !$isIsianBenarOtomatis)
+                                        <div class="alert alert-warning border-0 rounded-3 p-2 px-3 mb-3 small">
+                                            <i class="fa-solid fa-hand-holding-dollar text-warning me-1"></i>
+                                            <strong>Fitur Upah Nulis:</strong> Jawaban siswa tidak 100% cocok dengan kunci otomatis. Jika jawaban siswa hampir benar/ada typo, Anda dapat memberikan nilai parsial <strong>"Upah Nulis"</strong> (0 s/d {{ $j->bobot - 1 }}).
+                                        </div>
+                                    @endif
+
+                                    <form class="form-koreksi" onsubmit="simpanKoreksi(event, {{ $j->jawaban_id }})">
+                                        <div class="kx-grading">
+                                            <div>
+                                                <label class="kx-grading-label">Nilai (0 - {{ $j->bobot }})</label>
+                                                <div class="kx-score-wrap">
+                                                    <input type="number" name="koreksi[{{ $j->jawaban_id }}][nilai]"
+                                                           class="kx-score-circle"
+                                                           value="{{ $j->nilai_jawaban ?? 0 }}"
+                                                           min="0" max="{{ $j->bobot }}" step="0.1" required>
+                                                    <span class="kx-score-max">/ {{ $j->bobot }}</span>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <label class="kx-grading-label">Status Keabsahan</label>
+                                                <div class="kx-status-group">
+                                                    <input type="radio" id="benar-{{ $j->jawaban_id }}" name="koreksi[{{ $j->jawaban_id }}][is_benar]" value="1" class="kx-radio" {{ $j->is_benar == 1 ? 'checked' : '' }} required>
+                                                    <label for="benar-{{ $j->jawaban_id }}" class="kx-radio-label benar"><i class="fa-solid fa-check"></i>Benar</label>
+                                                    <input type="radio" id="salah-{{ $j->jawaban_id }}" name="koreksi[{{ $j->jawaban_id }}][is_benar]" value="0" class="kx-radio" {{ ($j->is_benar == 0 && $j->is_benar !== null) ? 'checked' : '' }} required>
+                                                    <label for="salah-{{ $j->jawaban_id }}" class="kx-radio-label salah"><i class="fa-solid fa-xmark"></i>Salah</label>
+                                                </div>
+                                            </div>
+                                            <div class="kx-grading-actions">
+                                                <span class="kx-saved-mark" id="save-indicator-{{ $j->jawaban_id }}">
+                                                    <i class="fa-solid fa-check-circle"></i> Tersimpan
+                                                </span>
+                                                <button type="submit" class="kx-btn-save" id="btn-simpan-{{ $j->jawaban_id }}">
+                                                    <i class="fa-solid fa-save"></i> Simpan Penilaian
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </form>
                                 </div>
                             </div>
                         </div>
@@ -534,11 +539,11 @@
                                 <span class="kx-num">{{ $pg->urutan }}</span>
                                 <span class="kx-card-label">Soal {{ ucfirst(str_replace('_', ' ', $pg->jenis_soal)) }}</span>
                                 <div class="kx-card-badges">
-                                    @if($pg->is_benar === 1)
+                                    @if($pg->is_benar == 1 && $pg->is_benar !== null)
                                         <span class="kx-stamp ok status-badge"><i class="fa-solid fa-check"></i>Benar (+{{ $pg->nilai_jawaban }})</span>
                                     @elseif($pg->nilai_jawaban > 0)
                                         <span class="kx-stamp ok status-badge" style="background:#e0f2fe; color:#0369a1; border-color:#bae6fd;"><i class="fa-solid fa-star-half-stroke"></i>Parsial (+{{ $pg->nilai_jawaban }})</span>
-                                    @elseif($pg->is_benar === 0)
+                                    @elseif($pg->is_benar !== null)
                                         <span class="kx-stamp no status-badge"><i class="fa-solid fa-xmark"></i>Salah (0)</span>
                                     @else
                                         <span class="kx-stamp pending status-badge"><i class="fa-solid fa-clock"></i>Belum</span>
@@ -773,8 +778,35 @@ function simpanKoreksi(event, jawabanId) {
             }
 
             if (statusBadge) {
-                statusBadge.className = 'kx-stamp ok status-badge';
-                statusBadge.innerHTML = '<i class="fa-solid fa-check"></i>Dinilai';
+                const inputNilai = parseFloat(form.querySelector('input[type="number"]').value);
+                const isBenarRadio = form.querySelector('input[type="radio"]:checked');
+                const isBenarVal = isBenarRadio ? isBenarRadio.value : null;
+                const isIsian = heading ? heading.querySelector('.kx-card-label').textContent.includes('Isian') : false;
+
+                // Reset inline styles if any
+                statusBadge.style.background = '';
+                statusBadge.style.color = '';
+                statusBadge.style.borderColor = '';
+
+                if (isBenarVal == "1") {
+                    statusBadge.className = 'kx-stamp ok status-badge';
+                    statusBadge.innerHTML = '<i class="fa-solid fa-check"></i>Dinilai (' + inputNilai + ' Poin)';
+                } else if (isIsian && inputNilai > 0) {
+                    statusBadge.className = 'kx-stamp ok status-badge';
+                    statusBadge.style.background = '#e0f2fe';
+                    statusBadge.style.color = '#0369a1';
+                    statusBadge.style.borderColor = '#bae6fd';
+                    statusBadge.innerHTML = '<i class="fa-solid fa-hand-holding-dollar"></i>Upah Nulis (' + inputNilai + ' Poin)';
+                } else if (isIsian) {
+                    statusBadge.className = 'kx-stamp pending status-badge';
+                    statusBadge.style.background = '#fef3c7';
+                    statusBadge.style.color = '#b45309';
+                    statusBadge.style.borderColor = '#fde68a';
+                    statusBadge.innerHTML = '<i class="fa-solid fa-pen-nib"></i>Tinjau Upah Nulis';
+                } else {
+                    statusBadge.className = 'kx-stamp ok status-badge';
+                    statusBadge.innerHTML = '<i class="fa-solid fa-check"></i>Dinilai (' + inputNilai + ' Poin)';
+                }
             }
 
             setTimeout(() => {

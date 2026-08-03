@@ -288,34 +288,19 @@
             </div>
         </div>
 
-        <!-- Ketuntasan -->
+        <!-- Peringkat Kelas -->
         <div class="col-6 col-md-4">
             <div class="summary-stat-card d-flex align-items-center gap-3">
-                @if($statusGlobal === 'tuntas')
-                    <div class="stat-icon-shape bg-success bg-opacity-10 text-success">
-                        <i class="fa-solid fa-circle-check"></i>
-                    </div>
-                    <div>
-                        <span class="text-muted small fw-medium d-block mb-0.5" style="font-size: 12px;">Status Ketuntasan</span>
-                        <span class="badge-status badge-tuntas">TUNTAS</span>
-                    </div>
-                @elseif($statusGlobal === 'kurang')
-                    <div class="stat-icon-shape bg-danger bg-opacity-10 text-danger">
-                        <i class="fa-solid fa-circle-xmark"></i>
-                    </div>
-                    <div>
-                        <span class="text-muted small fw-medium d-block mb-0.5" style="font-size: 12px;">Status Ketuntasan</span>
-                        <span class="badge-status badge-kurang">BELUM TUNTAS</span>
-                    </div>
-                @else
-                    <div class="stat-icon-shape bg-secondary bg-opacity-10 text-secondary">
-                        <i class="fa-solid fa-clock"></i>
-                    </div>
-                    <div>
-                        <span class="text-muted small fw-medium d-block mb-0.5" style="font-size: 12px;">Status Ketuntasan</span>
-                        <span class="badge-status badge-belum">BELUM UJIAN</span>
-                    </div>
-                @endif
+                <div class="stat-icon-shape bg-warning bg-opacity-10 text-warning">
+                    <i class="fa-solid fa-trophy"></i>
+                </div>
+                <div>
+                    <span class="text-muted small fw-medium d-block mb-0.5" style="font-size: 12px;">Peringkat Kelas</span>
+                    <h3 class="mb-0 fw-bold text-dark lh-1">
+                        {{ $rankSiswa ? '#' . $rankSiswa : '—' }}
+                        <span class="fs-6 text-muted fw-normal">dari {{ $totalSiswa }} Siswa</span>
+                    </h3>
+                </div>
             </div>
         </div>
 
@@ -357,7 +342,7 @@
                                         (Guru: {{ $data['nama_guru'] ?? '—' }})
                                     </span>
                                 </h6>
-                                <small class="text-muted" style="font-size: 11px;">KKM Mapel: {{ $data['kkm'] }}</small>
+                                {{-- <small class="text-muted" style="font-size: 11px;">KKM Mapel: {{ $data['kkm'] }}</small> --}}
                             </div>
                         </div>
 
@@ -405,10 +390,15 @@
                                         </td>
                                         <td class="text-center">
                                             @if($detail['nilai'] !== null)
+                                                @php
+                                                    $valDisplay = (floor($detail['nilai']) == $detail['nilai']) 
+                                                        ? number_format($detail['nilai'], 0) 
+                                                        : number_format($detail['nilai'], 1);
+                                                @endphp
                                                 @if($detail['nilai'] >= $detail['kkm'])
-                                                    <span class="nilai-badge nilai-high">{{ number_format($detail['nilai'], 0) }}</span>
+                                                    <span class="nilai-badge nilai-high">{{ $valDisplay }}</span>
                                                 @else
-                                                    <span class="nilai-badge nilai-low">{{ number_format($detail['nilai'], 0) }}</span>
+                                                    <span class="nilai-badge nilai-low">{{ $valDisplay }}</span>
                                                 @endif
                                             @else
                                                 <span class="text-muted">—</span>

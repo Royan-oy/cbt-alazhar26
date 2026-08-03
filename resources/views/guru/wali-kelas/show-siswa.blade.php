@@ -263,7 +263,7 @@
                                 <th>Mata Pelajaran</th>
                                 <th>Waktu Pengerjaan</th>
                                 <th>Status</th>
-                                <th class="text-center">Nilai</th>
+                                {{-- <th class="text-center">Nilai</th> --}}
                             </tr>
                         </thead>
                         <tbody>
@@ -289,7 +289,7 @@
                                         </span>
                                     @endif
                                 </td>
-                                <td class="text-center">
+                                {{-- <td class="text-center">
                                     @if($ujian->status === 'selesai')
                                         @php $nilai = (float) $ujian->nilai_akhir; @endphp
                                         @if($nilai >= 80)
@@ -302,7 +302,7 @@
                                     @else
                                         <span class="text-muted">—</span>
                                     @endif
-                                </td>
+                                </td> --}}
                             </tr>
                             @empty
                             <tr>

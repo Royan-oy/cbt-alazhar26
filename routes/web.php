@@ -36,133 +36,84 @@ Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
 // Rute Dashboard Utama (Hanya bisa diakses jika sudah login)
 Route::middleware(['auth'])->group(function () {
+    
+    // =========================================================================
+    // 1. RUTE UMUM (BISA DIAKSES OLEH SEMUA ROLE)
+    // =========================================================================
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/pengaturan-akun', [PengaturanAkunController::class, 'index'])->name('pengaturan-akun.index');
     Route::post('/pengaturan-akun/password', [PengaturanAkunController::class, 'updatePassword'])->name('pengaturan-akun.update-password');
     Route::post('/pengaturan-akun/foto', [PengaturanAkunController::class, 'updateFoto'])->name('pengaturan-akun.update-foto');
     Route::delete('/pengaturan-akun/foto', [PengaturanAkunController::class, 'destroyFoto'])->name('pengaturan-akun.destroy-foto');
-    Route::resource('jenjang', JenjangController::class);
-    Route::resource('tahun-ajaran', TahunAjaranController::class);
 
-    Route::patch(
-        'tahun-ajaran/{tahunAjaran}/aktifkan',
-        [TahunAjaranController::class, 'aktifkan']
-    )->name('tahun-ajaran.aktifkan');
-
-    Route::patch(
-        'tahun-ajaran/{tahunAjaran}/nonaktifkan',
-        [TahunAjaranController::class, 'nonaktifkan']
-    )->name('tahun-ajaran.nonaktifkan');
-
-    Route::resource('jenis-ujian', JenisUjianController::class);
-
-    Route::patch(
-        'jenis-ujian/{jenisUjian}/aktifkan',
-        [JenisUjianController::class, 'aktifkan']
-    )->name('jenis-ujian.aktifkan');
-
-    Route::patch(
-        'jenis-ujian/{jenisUjian}/nonaktifkan',
-        [JenisUjianController::class, 'nonaktifkan']
-    )->name('jenis-ujian.nonaktifkan');
-
-    Route::resource('tingkat', TingkatController::class);
-
-    Route::resource('kelas', KelasController::class)
-    ->parameters([
-        'kelas' => 'kelas',
-    ]);
-
-    Route::resource('mata-pelajaran', MataPelajaranController::class)
-    ->except('show');
-
-    Route::resource('admin-jenjang', AdminJenjangController::class)
-    ->parameters(['admin-jenjang' => 'admin'])
-    ->except('show');
-
-    Route::get('guru-template-download', [GuruController::class, 'downloadTemplate'])->name('guru.template');
-    Route::post('guru-import', [GuruController::class, 'import'])->name('guru.import');
-
-
-    Route::resource('guru', GuruController::class);
-
-    Route::get(
-        'guru-mapel/template',
-        [GuruMapelController::class, 'downloadTemplate']
-    )->name('guru-mapel.template');
-
-
-    Route::get(
-        'guru-mapel/export',
-        [GuruMapelController::class,'export']
-    )->name('guru-mapel.export');
-
-    Route::post(
-        'guru-mapel/import',
-        [GuruMapelController::class,'import']
-    )->name('guru-mapel.import');
-
-    Route::resource('guru-mapel', GuruMapelController::class)
-    ->parameters(['guru-mapel' => 'guru_mapel']);
-
-    Route::resource('wali-kelas', WaliKelasController::class)
-    ->parameters(['wali-kelas' => 'wali_kelas'])
-    ->except('show');
-
-    Route::get(
-        'wali-kelas/template',
-        [WaliKelasController::class, 'downloadTemplate']
-    )->name('wali-kelas.template');
-
-    Route::get(
-        'wali-kelas/export',
-        [WaliKelasController::class, 'export']
-    )->name('wali-kelas.export');
-
-    Route::post(
-        'wali-kelas/import',
-        [WaliKelasController::class, 'import']
-    )->name('wali-kelas.import');
-
-    Route::get('siswa-export', [SiswaController::class, 'export'])->name('siswa.export');
-    Route::get('siswa-template-download', [SiswaController::class, 'downloadTemplate'])->name('siswa.template');
-    Route::post('siswa-import', [SiswaController::class, 'import'])->name('siswa.import');
-    Route::get('siswa-export-kartu-pdf', [SiswaController::class, 'exportKartuPdf'])->name('siswa.export-kartu-pdf');
-    Route::get('siswa/{siswa}/kartu-pdf', [SiswaController::class, 'cetakKartuSinglePdf'])->name('siswa.kartu-pdf');
-
-    Route::patch('siswa/{siswa}/reset-password', [SiswaController::class, 'resetPassword'])->name('siswa.reset-password');
-    Route::resource('siswa', SiswaController::class);
-
-    Route::patch('ujian/{ujian}/regenerate-token', [UjianController::class, 'regenerateToken'])->name('ujian.regenerate-token');
-
-    Route::resource('ujian', UjianController::class);
-   
-    Route::get('bank-soal', [BankSoalController::class, 'index'])->name('bank-soal.index');
-    Route::get('bank-soal/{bankSoal}', [BankSoalController::class, 'show'])->name('bank-soal.show');
-    Route::patch('bank-soal/{bankSoal}/toggle-publish', [BankSoalController::class, 'togglePublish'])->name('bank-soal.toggle-publish');
-    Route::delete('bank-soal/{bankSoal}', [BankSoalController::class, 'destroy'])->name('bank-soal.destroy');
-
-
-    Route::prefix('dashboard-guru')->name('dashboard-guru.')->group(function () {
+    // =========================================================================
+    // 2. RUTE KHUSUS ADMIN (SUPER ADMIN & ADMIN JENJANG)
+    // =========================================================================
+    Route::middleware(['role:super_admin,admin_jenjang'])->group(function () {
+        Route::resource('jenjang', JenjangController::class);
         
-        // Rute dashboard utama guru
+        Route::resource('tahun-ajaran', TahunAjaranController::class);
+        Route::patch('tahun-ajaran/{tahunAjaran}/aktifkan', [TahunAjaranController::class, 'aktifkan'])->name('tahun-ajaran.aktifkan');
+        Route::patch('tahun-ajaran/{tahunAjaran}/nonaktifkan', [TahunAjaranController::class, 'nonaktifkan'])->name('tahun-ajaran.nonaktifkan');
+        
+        Route::resource('jenis-ujian', JenisUjianController::class);
+        Route::patch('jenis-ujian/{jenisUjian}/aktifkan', [JenisUjianController::class, 'aktifkan'])->name('jenis-ujian.aktifkan');
+        Route::patch('jenis-ujian/{jenisUjian}/nonaktifkan', [JenisUjianController::class, 'nonaktifkan'])->name('jenis-ujian.nonaktifkan');
+        
+        Route::resource('tingkat', TingkatController::class);
+        Route::resource('kelas', KelasController::class)->parameters(['kelas' => 'kelas']);
+        Route::resource('mata-pelajaran', MataPelajaranController::class)->except('show');
+        
+        // Hanya Super Admin yang bisa mengelola Admin Jenjang
+        Route::middleware(['role:super_admin'])->group(function() {
+            Route::resource('admin-jenjang', AdminJenjangController::class)
+                ->parameters(['admin-jenjang' => 'admin'])
+                ->except('show');
+        });
+
+        Route::get('guru-template-download', [GuruController::class, 'downloadTemplate'])->name('guru.template');
+        Route::post('guru-import', [GuruController::class, 'import'])->name('guru.import');
+        Route::resource('guru', GuruController::class);
+        
+        Route::get('guru-mapel/template', [GuruMapelController::class, 'downloadTemplate'])->name('guru-mapel.template');
+        Route::get('guru-mapel/export', [GuruMapelController::class,'export'])->name('guru-mapel.export');
+        Route::post('guru-mapel/import', [GuruMapelController::class,'import'])->name('guru-mapel.import');
+        Route::resource('guru-mapel', GuruMapelController::class)->parameters(['guru-mapel' => 'guru_mapel']);
+        
+        Route::get('wali-kelas/template', [WaliKelasController::class, 'downloadTemplate'])->name('wali-kelas.template');
+        Route::get('wali-kelas/export', [WaliKelasController::class, 'export'])->name('wali-kelas.export');
+        Route::post('wali-kelas/import', [WaliKelasController::class, 'import'])->name('wali-kelas.import');
+        Route::resource('wali-kelas', WaliKelasController::class)->parameters(['wali-kelas' => 'wali_kelas'])->except('show');
+        
+        Route::get('siswa-export', [SiswaController::class, 'export'])->name('siswa.export');
+        Route::get('siswa-template-download', [SiswaController::class, 'downloadTemplate'])->name('siswa.template');
+        Route::post('siswa-import', [SiswaController::class, 'import'])->name('siswa.import');
+        Route::get('siswa-export-kartu-pdf', [SiswaController::class, 'exportKartuPdf'])->name('siswa.export-kartu-pdf');
+        Route::get('siswa/{siswa}/kartu-pdf', [SiswaController::class, 'cetakKartuSinglePdf'])->name('siswa.kartu-pdf');
+        Route::patch('siswa/{siswa}/reset-password', [SiswaController::class, 'resetPassword'])->name('siswa.reset-password');
+        Route::resource('siswa', SiswaController::class);
+        
+        Route::patch('ujian/{ujian}/regenerate-token', [UjianController::class, 'regenerateToken'])->name('ujian.regenerate-token');
+        Route::resource('ujian', UjianController::class);
+        
+        Route::get('bank-soal', [BankSoalController::class, 'index'])->name('bank-soal.index');
+        Route::get('bank-soal/{bankSoal}', [BankSoalController::class, 'show'])->name('bank-soal.show');
+        Route::patch('bank-soal/{bankSoal}/toggle-publish', [BankSoalController::class, 'togglePublish'])->name('bank-soal.toggle-publish');
+        Route::delete('bank-soal/{bankSoal}', [BankSoalController::class, 'destroy'])->name('bank-soal.destroy');
+    });
+
+    // =========================================================================
+    // 3. RUTE KHUSUS GURU
+    // =========================================================================
+    Route::middleware(['role:guru'])->prefix('dashboard-guru')->name('dashboard-guru.')->group(function () {
         Route::get('/', [GuruDashboardController::class, 'index'])->name('index');
-        
-        // Kita gunakan nama rute yang berbeda agar tidak bentrok dengan rute bank-soal milik Admin
         Route::resource('bank-soal', GuruBankSoalController::class);
 
         Route::get('jadwal-ujian', [GuruJadwalUjianController::class, 'index'])->name('jadwal-ujian.index');
         Route::get('jadwal-ujian/{id}', [GuruJadwalUjianController::class, 'show'])->name('jadwal-ujian.show');
 
-        Route::patch(
-            'bank-soal/{bank_soal}/toggle-publish',
-            [GuruBankSoalController::class, 'togglePublish']
-        )->name('bank-soal.toggle-publish');
-
-        Route::post(
-            'bank-soal/{bank_soal}/duplicate',
-            [GuruBankSoalController::class, 'duplicate']
-        )->name('bank-soal.duplicate');
+        Route::patch('bank-soal/{bank_soal}/toggle-publish', [GuruBankSoalController::class, 'togglePublish'])->name('bank-soal.toggle-publish');
+        Route::post('bank-soal/{bank_soal}/duplicate', [GuruBankSoalController::class, 'duplicate'])->name('bank-soal.duplicate');
 
         Route::prefix('bank-soal/{bank_soal}')->name('bank-soal.')->group(function () {
             Route::get('soal', [SoalController::class, 'index'])->name('soal.index');
@@ -175,7 +126,6 @@ Route::middleware(['auth'])->group(function () {
             Route::get('soal/template', [SoalController::class, 'downloadTemplate'])->name('soal.template');
         });
 
-        // Wali Kelas sub-menus
         Route::prefix('wali-kelas')->name('wali-kelas.')->group(function () {
             Route::get('data-kelas', [GuruWaliKelasController::class, 'dataKelas'])->name('data-kelas');
             Route::get('data-kelas/{id}', [GuruWaliKelasController::class, 'showSiswa'])->name('data-kelas.show-siswa');
@@ -188,7 +138,7 @@ Route::middleware(['auth'])->group(function () {
             Route::get('rekap-nilai/siswa/{siswa}/export-pdf', [GuruWaliKelasController::class, 'exportPdfSiswa'])->name('rekap-nilai.export-pdf-siswa');
             Route::get('rekap-nilai', [GuruWaliKelasController::class, 'rekapNilai'])->name('rekap-nilai');
         });
-        // Nilai Siswa & Koreksi Jawaban (Guru Mapel)
+
         Route::prefix('nilai-siswa')->name('nilai-siswa.')->group(function () {
             Route::get('/', [GuruNilaiSiswaController::class, 'index'])->name('index');
             Route::get('/{ujian}', [GuruNilaiSiswaController::class, 'show'])->name('show');
@@ -200,52 +150,22 @@ Route::middleware(['auth'])->group(function () {
         });
     });
 
-    /*
-    |--------------------------------------------------------------------------
-    | Dashboard Siswa
-    |--------------------------------------------------------------------------
-    */
-
-    Route::prefix('dashboard-siswa')
-    ->name('dashboard-siswa.')
-    ->group(function () {
-
+    // =========================================================================
+    // 4. RUTE KHUSUS SISWA
+    // =========================================================================
+    Route::middleware(['role:siswa'])->prefix('dashboard-siswa')->name('dashboard-siswa.')->group(function () {
         Route::get('scan-token', [\App\Http\Controllers\Siswa\ScanTokenController::class, 'index'])->name('scan-token.index');
         Route::post('scan-token', [\App\Http\Controllers\Siswa\ScanTokenController::class, 'cariUjian'])->name('scan-token.proses');
         Route::post('scan-token/{ujian}/konfirmasi', [\App\Http\Controllers\Siswa\ScanTokenController::class, 'konfirmasi'])->name('scan-token.konfirmasi');
 
         Route::get('ujian-hari-ini', [UjianHariIniController::class, 'index'])->name('ujian-hari-ini');
 
-        /*
-        |--------------------------------------------------------------------------
-        | Ruang Ujian
-        |--------------------------------------------------------------------------
-        */
         Route::get('ujian/{ujian}/mulai', [RuangUjianController::class, 'mulai'])->name('ujian.mulai');
-        
-        // Tambahkan Route POST untuk verifikasi token / masuk ke lembar soal
         Route::post('ujian/{ujian}/proses-masuk', [RuangUjianController::class, 'prosesMasuk'])->name('ujian.proses-masuk');
-        
-        // Route untuk Lembar Kerja Ujian (Halaman Soal)
         Route::get('ujian/{ujian}/kerja', [RuangUjianController::class, 'kerja'])->name('ujian.kerja');
-
-        Route::post(
-            'ujian/{ujian}/submit',
-            [RuangUjianController::class, 'submit']
-        )->name('ujian.submit');
-
-        Route::post('ujian/autosave', [RuangUjianController::class, 'autoSave'])
-        ->name('ujian.autosave');
-
-        Route::post('ujian/current-question',
-            [RuangUjianController::class, 'saveCurrentQuestion']
-        )->name('ujian.current-question');
-
-       Route::post(
-            'ujian/violation',
-            [RuangUjianController::class, 'violation']
-        )->name('ujian.violation');
-        
+        Route::post('ujian/{ujian}/submit', [RuangUjianController::class, 'submit'])->name('ujian.submit');
+        Route::post('ujian/autosave', [RuangUjianController::class, 'autoSave'])->name('ujian.autosave');
+        Route::post('ujian/current-question', [RuangUjianController::class, 'saveCurrentQuestion'])->name('ujian.current-question');
+        Route::post('ujian/violation', [RuangUjianController::class, 'violation'])->name('ujian.violation');
     });
-    
 });

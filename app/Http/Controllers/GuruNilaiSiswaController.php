@@ -224,6 +224,52 @@ class GuruNilaiSiswaController extends Controller
             ->get()
             ->groupBy('soal_id');
 
+        // --- REKALKULASI SKOR PG KOMPLEKS (Proporsional Tanpa Penalti) ---
+        // Memastikan data lama yang dihitung dengan formula sebelumnya akan otomatis diperbarui.
+        $adaPerubahanSkor = false;
+        foreach ($jawabans_pg as $jp) {
+            if ($jp->jenis_soal === 'pilihan_ganda_kompleks') {
+                $siswaChoiceIds = is_array($jp->jawaban_json) ? array_map('intval', $jp->jawaban_json) : [];
+                $kunciBenarIds = [];
+
+                if (isset($opsi_pg[$jp->soal_id])) {
+                    foreach ($opsi_pg[$jp->soal_id] as $opsi) {
+                        if ($opsi->is_benar) {
+                            $kunciBenarIds[] = (int) $opsi->id;
+                        }
+                    }
+                }
+
+                // Batasi pilihan siswa tidak boleh melebihi jumlah kunci benar
+                $maxAllowed = count($kunciBenarIds);
+                if ($maxAllowed > 0 && count($siswaChoiceIds) > $maxAllowed) {
+                    $siswaChoiceIds = array_slice($siswaChoiceIds, 0, $maxAllowed);
+                }
+
+                // Hitung skor proporsional tanpa penalti
+                if (count($kunciBenarIds) > 0 && count($siswaChoiceIds) > 0) {
+                    $benarHit = count(array_intersect($siswaChoiceIds, $kunciBenarIds));
+                    $netRatio = $benarHit / count($kunciBenarIds);
+                    $skorBaru = round($netRatio * $jp->bobot, 2);
+                    $isBenarBaru = ($netRatio >= 1.0);
+                } else {
+                    $skorBaru = 0;
+                    $isBenarBaru = false;
+                }
+
+                // Update DB dan in-memory jika skor berubah
+                if ((float) $jp->nilai_jawaban !== (float) $skorBaru || (bool) $jp->is_benar !== $isBenarBaru) {
+                    DB::table('jawaban_siswas')
+                        ->where('id', $jp->jawaban_id)
+                        ->update(['nilai' => $skorBaru, 'is_benar' => $isBenarBaru]);
+
+                    $jp->nilai_jawaban = $skorBaru;
+                    $jp->is_benar = $isBenarBaru ? 1 : 0;
+                    $adaPerubahanSkor = true;
+                }
+            }
+        }
+
         // Hitung total skor otomatis dan jumlah benar PG/Otomatis
         $skor_pg = $jawabans_pg->sum('nilai_jawaban');
         $benar_pg = $jawabans_pg->where('is_benar', true)->count();
@@ -245,8 +291,8 @@ class GuruNilaiSiswaController extends Controller
             $nilai_sementara = max(0, round($nilaiKotor - $potongan, 2));
         }
 
-        // Jika di DB nilai_akhir masih 0 tetapi siswa sudah memiliki nilai sementara, update nilai_akhir
-        if ($nilai->nilai_akhir == 0 && ($nilai_sementara > 0 || $potongan > 0)) {
+        // Sinkronkan nilai_akhir di database jika ada perubahan skor
+        if ($adaPerubahanSkor || ($nilai->nilai_akhir == 0 && ($nilai_sementara > 0 || $potongan > 0))) {
             DB::table('nilais')->where('id', $nilai->id)->update(['nilai_akhir' => $nilai_sementara]);
             $nilai->nilai_akhir = $nilai_sementara;
         }
@@ -320,7 +366,14 @@ class GuruNilaiSiswaController extends Controller
                 ->where('nilai_id', $nilai->id)
                 ->sum('nilai');
 
-            // 3. Hitung akumulasi nilai essay saja untuk mengisi kolom 'nilai_essay'
+            // 3. Dapatkan total nilai pilihan ganda / otomatis saja untuk kolom 'nilai_pg'
+            $totalSkorPG = DB::table('jawaban_siswas')
+                ->join('soals', 'jawaban_siswas.soal_id', '=', 'soals.id')
+                ->where('jawaban_siswas.nilai_id', $nilai->id)
+                ->whereIn('soals.jenis_soal', ['pilihan_ganda', 'pilihan_ganda_kompleks', 'benar_salah', 'mencocokkan'])
+                ->sum('jawaban_siswas.nilai');
+
+            // 4. Hitung akumulasi nilai essay & isian untuk mengisi kolom 'nilai_essay'
             $totalSkorEssay = DB::table('jawaban_siswas')
                 ->join('soals', 'jawaban_siswas.soal_id', '=', 'soals.id')
                 ->where('jawaban_siswas.nilai_id', $nilai->id)
@@ -344,8 +397,9 @@ class GuruNilaiSiswaController extends Controller
 
             $statusPenilaian = $masihAdaUnscored ? 'menunggu' : 'selesai';
 
-            // Update nilai akhir, nilai essay, dan status penilaian
+            // Update nilai akhir, nilai pg, nilai essay, dan status penilaian
             $nilai->update([
+                'nilai_pg'         => round($totalSkorPG, 2),
                 'nilai_essay'      => round($totalSkorEssay, 2),
                 'nilai_akhir'      => round($nilaiAkhir, 2),
                 'status_penilaian' => $statusPenilaian

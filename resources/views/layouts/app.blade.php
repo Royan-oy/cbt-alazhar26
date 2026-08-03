@@ -78,6 +78,8 @@
 </head>
 <body>
 
+    @include('layouts.loading')
+
     <div class="d-flex">
         @include('layouts.sidebar')
 

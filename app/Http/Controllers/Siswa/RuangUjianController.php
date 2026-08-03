@@ -336,6 +336,7 @@ class RuangUjianController extends Controller
         */
 
         $nilaiPG = 0;
+        $nilaiEssay = 0;
         $adaKoreksiManual = false;
 
         foreach($soals as $soal){
@@ -375,8 +376,7 @@ class RuangUjianController extends Controller
 
                 if (count($kunciBenarIds) > 0 && count($siswaChoiceIds) > 0) {
                     $benarHit = count(array_intersect($siswaChoiceIds, $kunciBenarIds));
-                    $salahHit = count(array_diff($siswaChoiceIds, $kunciBenarIds));
-                    $netRatio = max(0, ($benarHit - $salahHit) / count($kunciBenarIds));
+                    $netRatio = $benarHit / count($kunciBenarIds);
                     $skorDapat = round($netRatio * $soal->bobot, 2);
                     $jawaban->update(['is_benar' => ($netRatio >= 1.0), 'nilai' => $skorDapat]);
                     $nilaiPG += $skorDapat;
@@ -438,7 +438,7 @@ class RuangUjianController extends Controller
 
                 if ($jawabanSiswaTeks !== '' && in_array($jawabanSiswaTeks, $kunciList, true)) {
                     $jawaban->update(['is_benar' => true, 'nilai' => $soal->bobot]);
-                    $nilaiPG += $soal->bobot;
+                    $nilaiEssay += $soal->bobot;
                 } else {
                     $jawaban->update(['is_benar' => false, 'nilai' => 0]);
                 }
@@ -459,11 +459,12 @@ class RuangUjianController extends Controller
             $totalBobot = $soals->sum('bobot');
             $nilaiSementara = 0;
             if ($totalBobot > 0) {
-                $nilaiSementara = ($nilaiPG / $totalBobot) * 100;
+                $nilaiSementara = (($nilaiPG + $nilaiEssay) / $totalBobot) * 100;
             }
 
             $nilai->update([
                 'nilai_pg' => $nilaiPG,
+                'nilai_essay' => $nilaiEssay,
                 'nilai_akhir' => round($nilaiSementara, 2),
                 'status' => 'selesai',
                 'status_penilaian' => 'menunggu',
@@ -473,11 +474,12 @@ class RuangUjianController extends Controller
             $totalBobot = $soals->sum('bobot');
             $nilaiSelesai = 0;
             if ($totalBobot > 0) {
-                $nilaiSelesai = ($nilaiPG / $totalBobot) * 100;
+                $nilaiSelesai = (($nilaiPG + $nilaiEssay) / $totalBobot) * 100;
             }
 
             $nilai->update([
                 'nilai_pg' => $nilaiPG,
+                'nilai_essay' => $nilaiEssay,
                 'nilai_akhir' => round($nilaiSelesai, 2),
                 'status' => 'selesai',
                 'status_penilaian' => 'selesai',
