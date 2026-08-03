@@ -94,13 +94,25 @@ class GuruDashboardController extends Controller
 
                 $siswaIds = $siswaKelasQuery->pluck('siswa_id');
 
+                // Ambil ujian yang dijadwalkan hari ini untuk kelas binaan
+                $ujianHariIniIds = DB::table('ujians')
+                    ->join('ujian_kelas', 'ujians.id', '=', 'ujian_kelas.ujian_id')
+                    ->where('ujian_kelas.kelas_id', $kelasWali->id)
+                    ->whereDate('ujians.waktu_mulai', now()->toDateString())
+                    ->pluck('ujians.id');
+
+                $totalUjianHariIni = $ujianHariIniIds->count();
+                $totalTargetNilai = $siswaIds->count() * $totalUjianHariIni;
+
                 $siswaUjian = DB::table('nilais')
                     ->whereIn('siswa_id', $siswaIds)
+                    ->whereIn('ujian_id', $ujianHariIniIds)
                     ->where('status', 'mengerjakan')
                     ->count();
 
                 $siswaSelesai = DB::table('nilais')
                     ->whereIn('siswa_id', $siswaIds)
+                    ->whereIn('ujian_id', $ujianHariIniIds)
                     ->where('status', 'selesai')
                     ->count();
 
@@ -110,7 +122,8 @@ class GuruDashboardController extends Controller
                 ];
                 $data['siswa_ujian']   = $siswaUjian;
                 $data['siswa_selesai'] = $siswaSelesai;
-                $data['siswa_belum']   = max(0, $siswaIds->count() - ($siswaUjian + $siswaSelesai));
+                // Hitung dari total target nilai (jumlah siswa x jumlah ujian hari ini)
+                $data['siswa_belum']   = max(0, $totalTargetNilai - ($siswaUjian + $siswaSelesai));
             }
         }
 
