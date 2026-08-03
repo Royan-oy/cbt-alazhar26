@@ -318,6 +318,8 @@
 </head>
 <body>
 
+    @include('layouts.loading')
+
     {{-- ================================================= --}}
     {{-- GERBANG: WAJIB FULLSCREEN DULU SEBELUM LIHAT SOAL --}}
     {{-- ================================================= --}}
