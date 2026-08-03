@@ -808,7 +808,7 @@ class GuruWaliKelasController extends Controller
                 $details[] = [
                     'nama_ujian'       => $ujian->nama_ujian,
                     'jenis_ujian'      => $ujian->nama_jenis_ujian,
-                    'kkm'              => $kkm,
+                    'kkm'              => $ujian->kkm ?? 0,
                     'nilai'            => $nilai,
                     'status_penilaian' => $rec ? $rec->status_penilaian : 'belum',
                 ];
@@ -837,10 +837,68 @@ class GuruWaliKelasController extends Controller
         $rataRataKeseluruhan = $totalMapelCount > 0 ? round($totalMapelAvg / $totalMapelCount, 1) : null;
         $statusGlobal = $rataRataKeseluruhan === null ? 'belum' : ($rataRataKeseluruhan >= 75 ? 'tuntas' : 'kurang');
 
+        // Hitung ranking siswa dalam kelas
+        $allSiswasInKelas = DB::table('siswa_kelas')
+            ->join('siswas', 'siswa_kelas.siswa_id', '=', 'siswas.id')
+            ->where('siswa_kelas.kelas_id', $waliKelas->kelas_id)
+            ->where('siswa_kelas.tahun_ajaran_id', $waliKelas->tahun_ajaran_id)
+            ->select('siswas.id')
+            ->get();
+
+        $totalSiswa = $allSiswasInKelas->count();
+
+        $allNilaiData = DB::table('nilais')
+            ->whereIn('ujian_id', $ujians->pluck('id'))
+            ->where('status', 'selesai')
+            ->select('siswa_id', 'ujian_id', 'nilai_akhir')
+            ->get()
+            ->groupBy('siswa_id');
+
+        $studentAvgs = collect();
+        foreach ($allSiswasInKelas as $sItem) {
+            $nSiswa = $allNilaiData->get($sItem->id, collect());
+            $totalAvgSum = 0;
+            $totalAvgCnt = 0;
+
+            foreach ($groupedUjiansByMapel as $mNama => $mUjians) {
+                $sumM = 0;
+                $cntM = 0;
+                $recs = $nSiswa->whereIn('ujian_id', $mUjians->pluck('id'));
+                foreach ($mUjians as $u) {
+                    $r = $recs->firstWhere('ujian_id', $u->id);
+                    $val = $r ? (float)$r->nilai_akhir : null;
+                    if ($val !== null) {
+                        $sumM += $val;
+                        $cntM++;
+                    }
+                }
+                $avgM = $cntM > 0 ? round($sumM / $cntM, 1) : null;
+                if ($avgM !== null) {
+                    $totalAvgSum += $avgM;
+                    $totalAvgCnt++;
+                }
+            }
+
+            $avgFinal = $totalAvgCnt > 0 ? round($totalAvgSum / $totalAvgCnt, 1) : null;
+            $studentAvgs->put($sItem->id, $avgFinal);
+        }
+
+        $sortedAvgs = $studentAvgs->filter(function($v) { return $v !== null; })->sortDesc();
+        $rankSiswa = null;
+        $currRank = 0;
+        foreach ($sortedAvgs as $sIdKey => $sAvgVal) {
+            $currRank++;
+            if ((int)$sIdKey === (int)$siswaId) {
+                $rankSiswa = $currRank;
+                break;
+            }
+        }
+
         return view('guru.wali-kelas.detail-nilai-siswa', compact(
             'waliKelas', 'kelas', 'siswa',
             'mapelDetails', 'rataRataKeseluruhan',
-            'statusGlobal', 'mapelTuntas'
+            'statusGlobal', 'mapelTuntas',
+            'rankSiswa', 'totalSiswa'
         ));
     }
 
