@@ -425,7 +425,7 @@
                         @for ($i = 0; $i < 3; $i++)
                             <div class="opsi-row bs-row">
                                 <span class="opsi-kode-badge bs-kode">{{ $i + 1 }}</span>
-                                <input type="text" name="teks_pernyataan[]" placeholder="Pernyataan {{ $i + 1 }}...">
+                                <input type="text" name="teks_pernyataan[]" placeholder="Pernyataan {{ $i + 1 }}..." value="{{ old('teks_pernyataan.'.$i) }}">
                                 <select name="kunci_bs[]" class="form-select form-select-sm" style="max-width: 140px; border-radius: 8px;">
                                     <option value="benar">Benar</option>
                                     <option value="salah">Salah</option>
@@ -493,14 +493,23 @@
     const MAX_OPSI_MATCHING = 10;
 
     function toggleJenisSoal() {
-        const jenis = document.getElementById('jenisSoal').value;
-        const sections = document.querySelectorAll('.dynamic-section');
-        sections.forEach(sec => sec.style.display = 'none');
 
-        if (jenis) {
-            const targetSec = document.getElementById('sec-' + jenis);
-            if (targetSec) targetSec.style.display = 'block';
-        }
+        const jenis = document.getElementById('jenisSoal').value;
+
+        document.querySelectorAll('.dynamic-section').forEach(section => {
+
+            const aktif = section.id === 'sec-' + jenis;
+
+            section.style.display = aktif ? 'block' : 'none';
+
+            section.querySelectorAll('input, textarea, select').forEach(el => {
+
+                el.disabled = !aktif;
+
+            });
+
+        });
+
     }
 
     /* --- 1. DYNAMIC PG --- */

@@ -317,6 +317,50 @@
         .pagination-container { justify-content: center !important; }
         .pagination { justify-content: center !important; flex-wrap: wrap; }
     }
+
+    /* Tabel Benar/Salah */
+    .bs-table-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 9px 14px;
+        font-size: 13.5px;
+        border-bottom: 1px solid #f1f5f9;
+    }
+    .bs-table-row:last-child { border-bottom: none; }
+    .bs-table-row .bs-pernyataan { flex: 1; color: var(--secondary-dark); }
+    .bs-kunci-pill {
+        display: inline-flex; align-items: center; gap: 4px;
+        padding: 3px 10px; border-radius: 50px;
+        font-size: 11px; font-weight: 700; flex-shrink: 0;
+    }
+    .bs-kunci-pill.benar { background: #ecfdf5; color: #059669; border: 1px solid rgba(5,150,105,0.15); }
+    .bs-kunci-pill.salah { background: #fef2f2; color: #dc2626; border: 1px solid rgba(220,38,38,0.15); }
+
+    /* Mencocokkan */
+    .matching-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 9px 14px;
+        font-size: 13.5px;
+        border-bottom: 1px solid #f1f5f9;
+    }
+    .matching-row:last-child { border-bottom: none; }
+    .matching-row .m-kiri { flex: 1; color: var(--secondary-dark); font-weight: 500; }
+    .matching-row .m-kanan { flex: 1; color: #059669; font-weight: 600; }
+
+    /* Isian */
+    .isian-kunci-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 14px;
+        font-size: 13.5px;
+        background: #ecfdf5;
+        color: #059669;
+        font-weight: 600;
+    }
 </style>
 
 <div class="container-fluid py-2">
@@ -474,7 +518,7 @@
                                 </div>
                                 <div class="soal-teks mb-1">{{ \Illuminate\Support\Str::limit(strip_tags($soal->teks_soal), 200) }}</div>
 
-                                @if(in_array($soal->jenis_soal, ['pilihan_ganda', 'pilihan_ganda_kompleks', 'benar_salah']))
+                                @if(in_array($soal->jenis_soal, ['pilihan_ganda', 'pilihan_ganda_kompleks']))
                                     <ul class="list-unstyled jawaban-list mb-0">
                                         @foreach($soal->pilihanJawabans as $pilihan)
                                         <li class="{{ $pilihan->is_benar ? 'is-correct' : 'is-wrong' }}">
@@ -488,28 +532,42 @@
                                         @endforeach
                                     </ul>
 
-                                @elseif($soal->jenis_soal == 'menjodohkan')
-                                    <ul class="list-unstyled jawaban-list mb-0">
+                                @elseif($soal->jenis_soal == 'benar_salah')
+                                    <div class="jawaban-list mb-0">
                                         @foreach($soal->pilihanJawabans as $pilihan)
-                                        <li>
-                                            <span class="fw-semibold">{{ $pilihan->teks_pilihan }}</span>
-                                            <i class="fa-solid fa-arrow-right-long mx-2 text-muted"></i>
-                                            <span>{{ $pilihan->pasangan }}</span>
-                                        </li>
+                                        <div class="bs-table-row">
+                                            <span class="bs-pernyataan">{{ $pilihan->kode ? $pilihan->kode.'. ' : '' }}{{ $pilihan->teks_pilihan }}</span>
+                                            <span class="bs-kunci-pill {{ $pilihan->is_benar ? 'benar' : 'salah' }}">
+                                                <i class="fa-solid {{ $pilihan->is_benar ? 'fa-check' : 'fa-xmark' }}"></i>
+                                                {{ $pilihan->is_benar ? 'Benar' : 'Salah' }}
+                                            </span>
+                                        </div>
                                         @endforeach
-                                    </ul>
+                                    </div>
 
-                                @elseif($soal->jenis_soal == 'mengurutkan')
-                                    <ol class="mt-2 mb-0 ps-3" style="font-size: 13.5px;">
-                                        @foreach($soal->pilihanJawabans->sortBy('urutan') as $pilihan)
-                                        <li class="mb-1">{{ $pilihan->teks_pilihan }}</li>
+                                @elseif($soal->jenis_soal == 'mencocokkan')
+                                    <div class="jawaban-list mb-0">
+                                        @foreach($soal->pilihanJawabans as $pilihan)
+                                        <div class="matching-row">
+                                            <span class="m-kiri">{{ $pilihan->teks_pilihan }}</span>
+                                            <i class="fa-solid fa-arrow-right-long text-muted"></i>
+                                            <span class="m-kanan">{{ $pilihan->pasangan }}</span>
+                                        </div>
                                         @endforeach
-                                    </ol>
+                                    </div>
 
-                                @elseif(in_array($soal->jenis_soal, ['essay', 'isian']))
+                                @elseif($soal->jenis_soal == 'isian')
+                                    <div class="jawaban-list mb-0">
+                                        <div class="isian-kunci-row">
+                                            <i class="fa-solid fa-key"></i>
+                                            Kunci: {{ optional($soal->pilihanJawabans->first())->teks_pilihan ?? '-' }}
+                                        </div>
+                                    </div>
+
+                                @elseif($soal->jenis_soal == 'essay')
                                     <div class="text-muted small fst-italic mt-2">
                                         <i class="fa-solid fa-circle-info me-1"></i>
-                                        Soal tipe {{ \App\Models\Soal::jenisLabel($soal->jenis_soal) }} — dinilai manual oleh guru
+                                        Soal tipe Essay — dinilai manual oleh guru
                                     </div>
                                 @endif
 
