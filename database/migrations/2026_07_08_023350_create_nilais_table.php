@@ -20,7 +20,7 @@ class CreateNilaisTable extends Migration
                     ->constrained('siswas')
                     ->cascadeOnDelete();
 
-            $table->dateTime('waktu_mulai_kerja');
+            $table->dateTime('waktu_mulai_kerja')->nullable();
 
             $table->dateTime('waktu_kumpul')->nullable();
 
