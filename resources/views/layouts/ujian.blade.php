@@ -158,6 +158,29 @@
             box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25);
         }
 
+        .btn-refresh-emergency {
+            background-color: #f0f9ff;
+            color: #0284c7;
+            border: 1px solid #bae6fd;
+            padding: 8px 14px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-shrink: 0;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .btn-refresh-emergency:hover {
+            background-color: #0ea5e9;
+            color: #ffffff;
+            border-color: #0ea5e9;
+            box-shadow: 0 4px 12px rgba(14, 165, 233, 0.25);
+        }
+
         /* =========================================================
         RESPONSIVE HEADER — TABLET (<= 767.98px)
         ========================================================= */
@@ -189,7 +212,7 @@
                 font-size: 8.5px;
             }
 
-            .btn-logout-emergency {
+            .btn-logout-emergency, .btn-refresh-emergency {
                 padding: 7px 12px;
                 font-size: 11.5px;
             }
@@ -226,12 +249,12 @@
                 font-size: 11.5px;
             }
 
-            /* Sembunyikan teks "Keluar Darurat", sisakan ikon saja supaya muat */
+            /* Sembunyikan teks tombol header, sisakan ikon saja */
             .btn-logout-text {
                 display: none;
             }
 
-            .btn-logout-emergency {
+            .btn-logout-emergency, .btn-refresh-emergency {
                 padding: 7px 9px;
             }
         }
@@ -288,7 +311,7 @@
         #fullscreenGate p {
             color: #94a3b8;
             font-size: 14px;
-            max-width: 420px;
+            max-width: 450px;
             margin-bottom: 30px;
             line-height: 1.6;
         }
@@ -321,6 +344,10 @@
 
     @include('layouts.loading')
 
+    @php
+        $isReentry = isset($nilai) && $nilai->waktu_mulai_kerja ? true : false;
+    @endphp
+
     {{-- ================================================= --}}
     {{-- GERBANG: WAJIB FULLSCREEN DULU SEBELUM LIHAT SOAL --}}
     {{-- ================================================= --}}
@@ -329,14 +356,25 @@
         <div class="gate-icon">
             <i class="fa-solid fa-expand"></i>
         </div>
-        <h4>Ujian Akan Dimulai dalam Mode Layar Penuh</h4>
-        <p>
-            Untuk menjaga fokus dan mencegah kecurangan, ujian hanya bisa dikerjakan dalam
-            mode layar penuh (fullscreen). Klik tombol di bawah untuk memulai.
-        </p>
-        <button type="button" id="btnStartExam">
-            <i class="fa-solid fa-expand me-2"></i> Mulai Ujian (Fullscreen)
-        </button>
+        @if($isReentry)
+            <h4>Ujian Sedang Berlangsung (Halaman Direfresh)</h4>
+            <p>
+                Halaman ujian telah dimuat ulang. Klik tombol di bawah untuk kembali ke mode layar penuh.<br>
+                <strong style="color: #f59e0b;">Perhatian:</strong> Berpindah tab atau membuka aplikasi lain saat berada di layar ini <u>tetap dicatat sebagai pelanggaran</u>!
+            </p>
+            <button type="button" id="btnStartExam">
+                <i class="fa-solid fa-expand me-2"></i> Lanjutkan Ujian (Fullscreen)
+            </button>
+        @else
+            <h4>Ujian Akan Dimulai dalam Mode Layar Penuh</h4>
+            <p>
+                Untuk menjaga fokus dan mencegah kecurangan, ujian hanya bisa dikerjakan dalam
+                mode layar penuh (fullscreen). Klik tombol di bawah untuk memulai.
+            </p>
+            <button type="button" id="btnStartExam">
+                <i class="fa-solid fa-expand me-2"></i> Mulai Ujian (Fullscreen)
+            </button>
+        @endif
     </div>
 
     {{-- ================================================= --}}
@@ -368,13 +406,20 @@
                 </div>
             </div>
 
-            <form action="{{ route('logout') }}" method="POST" class="m-0" id="formLogoutDarurat">
-                @csrf
-                <button type="submit" class="btn-logout-emergency" onclick="return confirmEmergencyLogout(event)">
-                    <i class="fa-solid fa-right-from-bracket"></i>
-                    <span class="btn-logout-text">Keluar Darurat</span>
+            <div class="d-flex align-items-center gap-2">
+                <button type="button" class="btn-refresh-emergency" onclick="manualRefreshExam()" title="Muat Ulang Halaman jika Server Slow / Lag">
+                    <i class="fa-solid fa-rotate"></i>
+                    <span class="btn-logout-text">Refresh Ujian</span>
                 </button>
-            </form>
+
+                <form action="{{ route('logout') }}" method="POST" class="m-0" id="formLogoutDarurat">
+                    @csrf
+                    <button type="submit" class="btn-logout-emergency" onclick="return confirmEmergencyLogout(event)">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                        <span class="btn-logout-text">Keluar Darurat</span>
+                    </button>
+                </form>
+            </div>
         </header>
 
         <main class="w-100">
@@ -389,8 +434,24 @@
         const gate = document.getElementById('fullscreenGate');
         const contentWrapper = document.getElementById('examContentWrapper');
         const btnStart = document.getElementById('btnStartExam');
-        let examStarted = false;
-        let intentionalExit = false; // true saat logout darurat / submit selesai
+        const isReentry = @json($isReentry);
+
+        // Jika re-entry (reload), Anti-Cheat LANGSUNG AKTIF sejak awal agar tidak ada zona aman pindah tab!
+        let examStarted = isReentry; 
+        let intentionalExit = false; // true saat logout darurat / submit selesai / manual refresh
+
+        // Grace period singkat (500ms) saat halaman baru di-load agar tidak salah hitung violation saat render
+        let isInitialLoadingGrace = isReentry;
+        if (isReentry) {
+            setTimeout(function() {
+                isInitialLoadingGrace = false;
+            }, 500);
+        }
+
+        function manualRefreshExam() {
+            intentionalExit = true;
+            window.location.reload();
+        }
 
         /* =========================================================
         MASUK FULLSCREEN SAAT TOMBOL "MULAI UJIAN" DIKLIK
@@ -436,15 +497,8 @@
 
         /* =========================================================
         LAPISAN CADANGAN: deteksi window kehilangan fokus
-        (recent-apps / app-switcher / alih aplikasi lain)
-        Sengaja pakai fungsi reportViolation() yang SAMA supaya
-        tetap dijaga cooldown-nya — tidak dobel hitung dengan
-        visibilitychange yang mungkin terpicu bersamaan.
         ========================================================= */
         window.addEventListener('blur', function () {
-            // Beri jeda sepersekian detik sebelum lapor, supaya tidak
-            // salah tangkap saat dialog SweetAlert sendiri sempat
-            // memindahkan fokus browser secara internal.
             setTimeout(function () {
                 if (document.hidden || !document.hasFocus()) {
                     reportViolation();
@@ -459,15 +513,12 @@
 
         /* =========================================================
         SATU-SATUNYA PINTU PELAPORAN PELANGGARAN
-        Dipanggil oleh: fullscreenchange (file ini) DAN
-        visibilitychange (kerja.blade.php) — supaya Alt+Tab yang
-        memicu keduanya sekaligus tetap hanya dihitung 1x.
         ========================================================= */
         let violationInFlight = false;
         let violationCooldownUntil = 0;
 
         window.reportViolation = function () {
-            if (!examStarted || intentionalExit) return;
+            if (!examStarted || intentionalExit || isInitialLoadingGrace) return;
             if (typeof isReloading !== 'undefined' && isReloading) return;
             if (typeof isFinishing !== 'undefined' && isFinishing) return;
 
@@ -625,9 +676,6 @@
     <script>
         /* =========================================================
         SINKRONISASI TINGGI HEADER FIXED → padding-top konten
-        Dijalankan setiap kali ukuran header berubah (resize,
-        rotate, teks wrap beda, dsb) supaya konten TIDAK PERNAH
-        ketutupan walau tinggi header tidak bisa ditebak pasti.
         ========================================================= */
         (function () {
             const header = document.querySelector('.exam-emergency-header');
@@ -640,43 +688,9 @@
                 main.style.paddingTop = h + 'px';
             }
 
-            // Jalankan saat load & setiap header berubah ukuran
             if (window.ResizeObserver) {
                 new ResizeObserver(syncHeaderHeight).observe(header);
             } else {
-                // fallback browser lama
-                window.addEventListener('resize', syncHeaderHeight);
-            }
-
-            window.addEventListener('load', syncHeaderHeight);
-            document.addEventListener('DOMContentLoaded', syncHeaderHeight);
-            syncHeaderHeight();
-        })();
-    </script>
-
-    <script>
-        /* =========================================================
-        SINKRONISASI TINGGI HEADER FIXED → padding-top konten
-        Dijalankan setiap kali ukuran header berubah (resize,
-        rotate, teks wrap beda, dsb) supaya konten TIDAK PERNAH
-        ketutupan walau tinggi header tidak bisa ditebak pasti.
-        ========================================================= */
-        (function () {
-            const header = document.querySelector('.exam-emergency-header');
-            const main = document.querySelector('.exam-content-wrapper main');
-
-            if (!header || !main) return;
-
-            function syncHeaderHeight() {
-                const h = header.offsetHeight;
-                main.style.paddingTop = h + 'px';
-            }
-
-            // Jalankan saat load & setiap header berubah ukuran
-            if (window.ResizeObserver) {
-                new ResizeObserver(syncHeaderHeight).observe(header);
-            } else {
-                // fallback browser lama
                 window.addEventListener('resize', syncHeaderHeight);
             }
 
