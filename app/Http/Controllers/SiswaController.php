@@ -10,6 +10,7 @@ use App\Models\Jenjang;
 use App\Models\TahunAjaran;
 use App\Imports\SiswaImport;
 use App\Exports\SiswaExport;
+use App\Exports\SiswaTemplateExport;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -303,7 +304,11 @@ class SiswaController extends Controller
     {
         $path = storage_path('app/templates/template_import_siswa.xlsx');
 
-        return response()->download($path, 'template_import_siswa.xlsx');
+        if (file_exists($path)) {
+            return response()->download($path, 'template_import_siswa.xlsx');
+        }
+
+        return Excel::download(new SiswaTemplateExport, 'template_import_siswa.xlsx');
     }
 
     /**

@@ -208,6 +208,30 @@
     var loader = document.getElementById('pageTransitionLoader');
     var SPLASH_KEY = 'splashShown';
     var isSplashActive = false;
+    var isDownloadAction = false;
+    var downloadTimer = null;
+    var loaderSafetyTimeout = null;
+
+    function isDownloadUrl(url) {
+        if (!url) return false;
+        var u = url.toLowerCase();
+        return u.includes('download') || 
+               u.includes('template') || 
+               u.includes('export') || 
+               u.includes('pdf') || 
+               u.includes('excel') || 
+               u.includes('kartu-pdf') || 
+               u.includes('cetak');
+    }
+
+    function markDownloadAction() {
+        isDownloadAction = true;
+        hideLoader();
+        if (downloadTimer) clearTimeout(downloadTimer);
+        downloadTimer = setTimeout(function() {
+            isDownloadAction = false;
+        }, 4000);
+    }
 
     /* ----------------------------------------------------------
        A. SPLASH SCREEN — hanya muncul saat pertama kali membuka website
@@ -241,7 +265,7 @@
        B. PAGE TRANSITION LOADER (Circle running — Perpindahan Halaman & Refresh)
        ---------------------------------------------------------- */
     function showLoader() {
-        if (!loader || isSplashActive) return;
+        if (!loader || isSplashActive || isDownloadAction) return;
 
         var bar = loader.querySelector('.transition-progress-bar');
         if (bar) {
@@ -250,16 +274,26 @@
             bar.style.animation = '';
         }
         loader.classList.add('active');
+
+        // Safety fallback: Jika halaman tidak jadi berpindah (misal download file atau navigasi dibatalkan)
+        if (loaderSafetyTimeout) clearTimeout(loaderSafetyTimeout);
+        loaderSafetyTimeout = setTimeout(function() {
+            hideLoader();
+        }, 4000);
     }
 
     function hideLoader() {
         if (!loader) return;
         loader.classList.remove('active');
+        if (loaderSafetyTimeout) {
+            clearTimeout(loaderSafetyTimeout);
+            loaderSafetyTimeout = null;
+        }
     }
 
     // Pemicu 1: Sebelum halaman di-refresh (F5 / Ctrl+R / Tombol reload) atau ditinggalkan
     window.addEventListener('beforeunload', function () {
-        if (!isSplashActive) {
+        if (!isSplashActive && !isDownloadAction) {
             showLoader();
         }
     });
@@ -274,19 +308,25 @@
         if (!href) return;
         if (href === '#' || href.startsWith('#') || href.startsWith('javascript:')) return;
         if (anchor.getAttribute('target') === '_blank') return;
-        if (anchor.getAttribute('download') !== null) return;
-        if (anchor.classList.contains('no-loader')) return;
+        if (anchor.getAttribute('download') !== null) {
+            markDownloadAction();
+            return;
+        }
+        if (anchor.classList.contains('no-loader') || anchor.classList.contains('download')) {
+            markDownloadAction();
+            return;
+        }
         if (e.ctrlKey || e.metaKey || e.shiftKey) return;
         
         // Pengecualian otomatis untuk rute pengunduhan file
-        var hrefLower = href.toLowerCase();
-        if (hrefLower.includes('template') || hrefLower.includes('export') || hrefLower.includes('download')) {
+        if (isDownloadUrl(href)) {
+            markDownloadAction();
             return;
         }
 
         // Cek apakah aksi klik diinterupsi oleh script lain (misal: SweetAlert)
         setTimeout(function() {
-            if (!e.defaultPrevented) {
+            if (!e.defaultPrevented && !isDownloadAction) {
                 showLoader();
             }
         }, 10);
@@ -295,7 +335,10 @@
     // Override form.submit() agar memicu loader (saat SweetAlert mengeksekusi form.submit())
     var originalSubmit = HTMLFormElement.prototype.submit;
     HTMLFormElement.prototype.submit = function() {
-        if (!this.classList.contains('no-loader') && this.getAttribute('target') !== '_blank') {
+        var action = this.getAttribute('action') || '';
+        if (this.classList.contains('no-loader') || this.getAttribute('target') !== '_blank' || isDownloadUrl(action)) {
+            markDownloadAction();
+        } else {
             showLoader();
         }
         originalSubmit.apply(this, arguments);
@@ -304,12 +347,17 @@
     // Pemicu 3: Intercept form submit biasa
     document.addEventListener('submit', function (e) {
         var form = e.target;
-        if (!form || form.classList.contains('no-loader')) return;
-        if (form.getAttribute('target') === '_blank') return;
+        if (!form) return;
+
+        var action = form.getAttribute('action') || '';
+        if (form.classList.contains('no-loader') || form.getAttribute('target') === '_blank' || isDownloadUrl(action)) {
+            markDownloadAction();
+            return;
+        }
 
         // Cek apakah submit diinterupsi oleh script lain (misal: SweetAlert e.preventDefault())
         setTimeout(function() {
-            if (!e.defaultPrevented) {
+            if (!e.defaultPrevented && !isDownloadAction) {
                 showLoader();
             }
         }, 10);
@@ -317,23 +365,30 @@
 
     // Sembunyikan loader saat halaman selesai dimuat penuh
     window.addEventListener('load', function () {
-        setTimeout(hideLoader, 200);
+        setTimeout(hideLoader, 100);
     });
 
     window.addEventListener('pageshow', function (e) {
-        setTimeout(hideLoader, 200);
+        setTimeout(hideLoader, 100);
         if (e.persisted) {
             if (splash) splash.style.display = 'none';
             isSplashActive = false;
         }
     });
 
+    window.addEventListener('focus', function() {
+        hideLoader();
+    });
+
     /* ----------------------------------------------------------
        INISIALISASI
        ---------------------------------------------------------- */
-    // Cek jika ini adalah refresh atau navigasi sekunder (splash sudah tampil)
-    if (sessionStorage.getItem(SPLASH_KEY)) {
-        showLoader();
+    if (document.readyState === 'complete') {
+        hideLoader();
+    } else {
+        window.addEventListener('DOMContentLoaded', function() {
+            setTimeout(hideLoader, 100);
+        });
     }
 
     if (document.readyState === 'loading') {

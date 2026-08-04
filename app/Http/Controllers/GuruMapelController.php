@@ -14,6 +14,7 @@ use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\GuruMapelExport;
+use App\Exports\GuruMapelTemplateExport;
 use App\Imports\GuruMapelImport;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Pagination\Paginator;
@@ -949,15 +950,15 @@ class GuruMapelController extends Controller
 
     public function downloadTemplate()
     {
-        $path = public_path('storage/app/templates/template_import_guru_mapel.xlsx');
+        $path = storage_path('app/templates/template_import_guru_mapel.xlsx');
 
-        if (!file_exists($path)) {
-            abort(404, 'Template tidak ditemukan.');
+        if (file_exists($path)) {
+            return response()->download(
+                $path,
+                'template_import_guru_mapel.xlsx'
+            );
         }
 
-        return response()->download(
-            $path,
-            'template_import_guru_mapel.xlsx'
-        );
+        return Excel::download(new GuruMapelTemplateExport, 'template_import_guru_mapel.xlsx');
     }
 }
