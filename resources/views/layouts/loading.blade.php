@@ -277,6 +277,12 @@
         if (anchor.getAttribute('download') !== null) return;
         if (anchor.classList.contains('no-loader')) return;
         if (e.ctrlKey || e.metaKey || e.shiftKey) return;
+        
+        // Pengecualian otomatis untuk rute pengunduhan file
+        var hrefLower = href.toLowerCase();
+        if (hrefLower.includes('template') || hrefLower.includes('export') || hrefLower.includes('download')) {
+            return;
+        }
 
         // Cek apakah aksi klik diinterupsi oleh script lain (misal: SweetAlert)
         setTimeout(function() {

@@ -572,7 +572,7 @@
                 <div>
                     <div class="info-label">Guru Pengajar</div>
                     <div class="info-value">
-                        {{ optional(optional(optional($ujian->bankSoal)->guruMapel)->guru)->nama ?? '-' }}
+                        {{ $ujian->guru_pengajar_nama ?? (optional(optional(optional($ujian->bankSoal)->guruMapel)->guru)->nama ?? '-') }}
                     </div>
                 </div>
             </div>

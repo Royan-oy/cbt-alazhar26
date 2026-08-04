@@ -481,7 +481,18 @@
 
                             {{-- Nama Bank Soal --}}
                             <td class="text-center">
-                                <div class="soal-name">{{ $bs->nama_bank_soal }}</div>
+                                <div class="soal-name d-flex align-items-center justify-content-center gap-2 flex-wrap">
+                                    <span>{{ $bs->nama_bank_soal }}</span>
+                                    @if(($bs->kategori ?? 'personal') === 'bersama')
+                                        <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-2 py-1 rounded-pill" style="font-size: 10px;">
+                                            <i class="fa-solid fa-users me-1"></i>Ujian Bersama
+                                        </span>
+                                    @else
+                                        <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 px-2 py-1 rounded-pill" style="font-size: 10px;">
+                                            <i class="fa-solid fa-user me-1"></i>Personal
+                                        </span>
+                                    @endif
+                                </div>
                             </td>
 
                             {{-- Mapel --}}

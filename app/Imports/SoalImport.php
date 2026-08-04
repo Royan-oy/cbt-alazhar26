@@ -46,7 +46,18 @@ class SoalImport implements ToCollection
                 continue;
             }
 
-            $jenisSoal = strtolower(trim((string) ($row[0] ?? '')));
+            $rawJenisSoal = strtolower(trim((string) ($row[0] ?? '')));
+            $mapJenisSoal = [
+                'pilihan ganda' => 'pilihan_ganda',
+                'pilihan ganda kompleks' => 'pilihan_ganda_kompleks',
+                'benar / salah' => 'benar_salah',
+                'benar/salah' => 'benar_salah',
+                'mencocokkan' => 'mencocokkan',
+                'isian singkat' => 'isian',
+                'isian' => 'isian',
+                'essay' => 'essay',
+            ];
+            $jenisSoal = $mapJenisSoal[$rawJenisSoal] ?? $rawJenisSoal;
             $bobotRaw = trim((string) ($row[1] ?? ''));
             $teksSoal = trim((string) ($row[2] ?? ''));
             $opsiRaw = [

@@ -505,7 +505,7 @@
                                     <span class="je-status-badge je-status-ongoing">
                                         <i class="fa-solid fa-circle-play"></i> Berlangsung
                                     </span>
-                                @elseif($ujian->status_waktu == 'belum')
+                                @elseif($ujian->status_waktu == 'belum' || $ujian->status_waktu == 'akan_datang')
                                     <span class="je-status-badge je-status-pending">
                                         <i class="fa-regular fa-clock"></i> Belum Mulai
                                     </span>

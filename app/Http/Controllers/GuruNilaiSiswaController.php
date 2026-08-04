@@ -18,43 +18,121 @@ class GuruNilaiSiswaController extends Controller
     /**
      * Memastikan bahwa user saat ini adalah guru yang memiliki wewenang
      */
-    private function checkGuruMapel()
+    /**
+     * Memastikan bahwa user saat ini adalah guru dan mengambil seluruh konteks mengajar guru (mapel & kelas)
+     */
+    private function getGuruContext()
     {
         $guru = Auth::user()->guru;
         if (!$guru) {
             abort(403, 'Akses ditolak. Anda bukan Guru.');
         }
 
-        $guruMapelIds = DB::table('guru_mapels')
+        $guruMapels = DB::table('guru_mapels')
             ->where('guru_id', $guru->id)
-            ->pluck('id');
-            
-        if ($guruMapelIds->isEmpty()) {
+            ->get();
+
+        if ($guruMapels->isEmpty()) {
             abort(403, 'Akses ditolak. Anda belum ditetapkan sebagai Guru Mata Pelajaran.');
         }
 
-        return $guruMapelIds;
+        $guruMapelIds = $guruMapels->pluck('id')->toArray();
+        $guruMapelMapelIds = $guruMapels->pluck('mata_pelajaran_id')->toArray();
+
+        // Ambil semua kelas_id yang diajar oleh guru ini
+        $guruKelasIds = DB::table('guru_mapel_kelas')
+            ->whereIn('guru_mapel_id', $guruMapelIds)
+            ->pluck('kelas_id')
+            ->toArray();
+
+        return [
+            'guru'              => $guru,
+            'guruMapelIds'      => $guruMapelIds,
+            'guruMapelMapelIds' => $guruMapelMapelIds,
+            'guruKelasIds'      => $guruKelasIds,
+        ];
     }
 
     /**
-     * Menampilkan daftar Ujian yang dibuat oleh Guru yang sedang login
+     * Memeriksa dan mengambil data Ujian jika guru berhak mengaksesnya
+     */
+    private function getAccessibleUjian($id, array $context)
+    {
+        $guruId = $context['guru']->id;
+
+        return DB::table('ujians')
+            ->join('bank_soals', 'ujians.bank_soal_id', '=', 'bank_soals.id')
+            ->join('mata_pelajarans', 'bank_soals.mata_pelajaran_id', '=', 'mata_pelajarans.id')
+            ->leftJoin('jenis_ujians', 'ujians.jenis_ujian_id', '=', 'jenis_ujians.id')
+            ->leftJoin('tahun_ajarans', 'ujians.tahun_ajaran_id', '=', 'tahun_ajarans.id')
+            ->where('ujians.id', $id)
+            ->whereExists(function($sub) use ($guruId) {
+                $sub->select(DB::raw(1))
+                    ->from('ujian_kelas')
+                    ->join('guru_mapel_kelas', 'ujian_kelas.kelas_id', '=', 'guru_mapel_kelas.kelas_id')
+                    ->join('guru_mapels', 'guru_mapel_kelas.guru_mapel_id', '=', 'guru_mapels.id')
+                    ->whereColumn('ujian_kelas.ujian_id', 'ujians.id')
+                    ->whereColumn('guru_mapels.mata_pelajaran_id', 'bank_soals.mata_pelajaran_id')
+                    ->whereColumn('guru_mapels.tahun_ajaran_id', 'ujians.tahun_ajaran_id')
+                    ->where('guru_mapels.guru_id', $guruId);
+            })
+            ->select(
+                'ujians.*',
+                'bank_soals.mata_pelajaran_id',
+                'mata_pelajarans.nama_mapel',
+                'jenis_ujians.nama as nama_jenis_ujian',
+                'tahun_ajarans.nama_tahun',
+                'bank_soals.id as bank_soal_id',
+                'bank_soals.kkm'
+            )
+            ->first();
+    }
+
+    /**
+     * Mengambil daftar ID kelas yang diajar oleh guru ini khusus untuk Mapel dan Tahun Ajaran dari Ujian tertentu
+     */
+    private function getGuruKelasForUjian($guruId, $mataPelajaranId, $tahunAjaranId)
+    {
+        return DB::table('guru_mapel_kelas')
+            ->join('guru_mapels', 'guru_mapel_kelas.guru_mapel_id', '=', 'guru_mapels.id')
+            ->where('guru_mapels.guru_id', $guruId)
+            ->where('guru_mapels.mata_pelajaran_id', $mataPelajaranId)
+            ->where('guru_mapels.tahun_ajaran_id', $tahunAjaranId)
+            ->pluck('guru_mapel_kelas.kelas_id')
+            ->toArray();
+    }
+
+    /**
+     * Menampilkan daftar Ujian yang dapat diakses oleh Guru
      */
     public function index()
     {
-        $guruMapelIds = $this->checkGuruMapel();
+        $context = $this->getGuruContext();
+        $guruId  = $context['guru']->id;
 
-        // Ambil ujian berdasarkan bank soal milik guru ini
+        // Ambil ujian yang setidaknya memiliki 1 kelas yang diajar oleh guru ini untuk mapel & tahun ajaran tsb
         $ujians = DB::table('ujians')
             ->join('bank_soals', 'ujians.bank_soal_id', '=', 'bank_soals.id')
             ->join('mata_pelajarans', 'bank_soals.mata_pelajaran_id', '=', 'mata_pelajarans.id')
             ->join('jenis_ujians', 'ujians.jenis_ujian_id', '=', 'jenis_ujians.id')
             ->join('tahun_ajarans', 'ujians.tahun_ajaran_id', '=', 'tahun_ajarans.id')
-            ->whereIn('bank_soals.guru_mapel_id', $guruMapelIds)
+            ->whereExists(function($sub) use ($guruId) {
+                $sub->select(DB::raw(1))
+                    ->from('ujian_kelas')
+                    ->join('guru_mapel_kelas', 'ujian_kelas.kelas_id', '=', 'guru_mapel_kelas.kelas_id')
+                    ->join('guru_mapels', 'guru_mapel_kelas.guru_mapel_id', '=', 'guru_mapels.id')
+                    ->whereColumn('ujian_kelas.ujian_id', 'ujians.id')
+                    ->whereColumn('guru_mapels.mata_pelajaran_id', 'bank_soals.mata_pelajaran_id')
+                    ->whereColumn('guru_mapels.tahun_ajaran_id', 'ujians.tahun_ajaran_id')
+                    ->where('guru_mapels.guru_id', $guruId);
+            })
             ->select(
                 'ujians.id',
                 'ujians.nama_ujian',
                 'ujians.waktu_mulai',
                 'ujians.waktu_selesai',
+                'ujians.tahun_ajaran_id',
+                'bank_soals.mata_pelajaran_id',
                 'mata_pelajarans.nama_mapel',
                 'jenis_ujians.nama as nama_jenis_ujian',
                 'tahun_ajarans.nama_tahun'
@@ -62,49 +140,58 @@ class GuruNilaiSiswaController extends Controller
             ->orderBy('ujians.created_at', 'desc')
             ->paginate(15);
 
-        // Ambil info tambahan untuk setiap ujian: jumlah peserta
+        // Ambil info tambahan untuk setiap ujian: jumlah peserta khusus dari kelas yang diajar guru ini untuk mapel & tahun tsb
         foreach ($ujians as $ujian) {
-            $ujian->peserta_count = DB::table('nilais')->where('ujian_id', $ujian->id)->count();
+            $allowedKelasIds = $this->getGuruKelasForUjian($context['guru']->id, $ujian->mata_pelajaran_id, $ujian->tahun_ajaran_id);
+
+            $ujian->peserta_count = DB::table('nilais')
+                ->join('siswas', 'nilais.siswa_id', '=', 'siswas.id')
+                ->join('siswa_kelas', function($join) use ($ujian) {
+                    $join->on('siswas.id', '=', 'siswa_kelas.siswa_id')
+                         ->where('siswa_kelas.tahun_ajaran_id', '=', $ujian->tahun_ajaran_id);
+                })
+                ->where('nilais.ujian_id', $ujian->id)
+                ->whereIn('siswa_kelas.kelas_id', $allowedKelasIds)
+                ->count();
         }
 
         return view('guru.nilai-siswa.index', compact('ujians'));
     }
 
     /**
-     * Menampilkan daftar peserta (siswa) dan nilainya untuk satu Ujian tertentu
+     * Menampilkan daftar peserta (siswa) dan nilainya untuk satu Ujian tertentu (Khusus Kelas Pengajar)
      */
     public function show($id)
     {
-        $guruMapelIds = $this->checkGuruMapel();
+        $context = $this->getGuruContext();
 
-        // Validasi kepemilikan ujian
-        $ujian = DB::table('ujians')
-            ->join('bank_soals', 'ujians.bank_soal_id', '=', 'bank_soals.id')
-            ->join('mata_pelajarans', 'bank_soals.mata_pelajaran_id', '=', 'mata_pelajarans.id')
-            ->where('ujians.id', $id)
-            ->whereIn('bank_soals.guru_mapel_id', $guruMapelIds)
-            ->select('ujians.*', 'mata_pelajarans.nama_mapel', 'bank_soals.id as bank_soal_id', 'bank_soals.kkm')
-            ->first();
+        // Validasi kepemilikan / hak akses ujian
+        $ujian = $this->getAccessibleUjian($id, $context);
 
         if (!$ujian) {
-            abort(404, 'Data ujian tidak ditemukan atau bukan milik Anda.');
+            abort(404, 'Data ujian tidak ditemukan atau Anda tidak memiliki akses.');
         }
+
+        // Ambil daftar kelas yang diajar guru ini khusus untuk Mapel dan Tahun Ajaran ujian ini
+        $allowedKelasIds = $this->getGuruKelasForUjian($context['guru']->id, $ujian->mata_pelajaran_id, $ujian->tahun_ajaran_id);
 
         $kelasList = DB::table('ujian_kelas')
             ->join('kelas', 'ujian_kelas.kelas_id', '=', 'kelas.id')
             ->where('ujian_kelas.ujian_id', $id)
+            ->whereIn('kelas.id', $allowedKelasIds)
             ->select('kelas.id', 'kelas.nama_kelas')
             ->orderBy('kelas.nama_kelas', 'asc')
             ->get();
 
         $pesertas = DB::table('nilais')
             ->join('siswas', 'nilais.siswa_id', '=', 'siswas.id')
-            ->leftJoin('siswa_kelas', function($join) use ($ujian) {
+            ->join('siswa_kelas', function($join) use ($ujian) {
                 $join->on('siswas.id', '=', 'siswa_kelas.siswa_id')
                      ->where('siswa_kelas.tahun_ajaran_id', '=', $ujian->tahun_ajaran_id);
             })
-            ->leftJoin('kelas', 'siswa_kelas.kelas_id', '=', 'kelas.id')
+            ->join('kelas', 'siswa_kelas.kelas_id', '=', 'kelas.id')
             ->where('nilais.ujian_id', $id)
+            ->whereIn('kelas.id', $allowedKelasIds)
             ->select(
                 'siswas.id as siswa_id',
                 'siswas.nama as nama_siswa',
@@ -144,21 +231,28 @@ class GuruNilaiSiswaController extends Controller
      */
     public function koreksi($ujian_id, $siswa_id)
     {
-        $guruMapelIds = $this->checkGuruMapel();
+        $context = $this->getGuruContext();
 
         // Validasi
-        $ujian = DB::table('ujians')
-            ->join('bank_soals', 'ujians.bank_soal_id', '=', 'bank_soals.id')
-            ->join('mata_pelajarans', 'bank_soals.mata_pelajaran_id', '=', 'mata_pelajarans.id')
-            ->where('ujians.id', $ujian_id)
-            ->whereIn('bank_soals.guru_mapel_id', $guruMapelIds)
-            ->select('ujians.*', 'mata_pelajarans.nama_mapel', 'bank_soals.id as bank_soal_id', 'bank_soals.kkm')
-            ->first();
+        $ujian = $this->getAccessibleUjian($ujian_id, $context);
 
-        if (!$ujian) abort(404, 'Ujian tidak ditemukan.');
+        if (!$ujian) abort(404, 'Ujian tidak ditemukan atau Anda tidak memiliki akses.');
+
+        $allowedKelasIds = $this->getGuruKelasForUjian($context['guru']->id, $ujian->mata_pelajaran_id, $ujian->tahun_ajaran_id);
 
         $siswa = DB::table('siswas')->where('id', $siswa_id)->first();
         if (!$siswa) abort(404, 'Siswa tidak ditemukan.');
+
+        // Pastikan siswa ini berada di kelas yang diajar oleh guru ini
+        $isSiswaInGuruKelas = DB::table('siswa_kelas')
+            ->where('siswa_id', $siswa_id)
+            ->where('tahun_ajaran_id', $ujian->tahun_ajaran_id)
+            ->whereIn('kelas_id', $allowedKelasIds)
+            ->exists();
+
+        if (!$isSiswaInGuruKelas) {
+            abort(403, 'Anda tidak memiliki wewenang untuk mengoreksi siswa dari kelas ini.');
+        }
 
         $nilai = DB::table('nilais')
             ->where('ujian_id', $ujian_id)
@@ -307,17 +401,25 @@ class GuruNilaiSiswaController extends Controller
      */
     public function storeKoreksi(Request $request, $ujian_id, $siswa_id)
     {
-        $guruMapelIds = $this->checkGuruMapel();
+        $context = $this->getGuruContext();
 
         // Security check
-        $ujian = DB::table('ujians')
-            ->join('bank_soals', 'ujians.bank_soal_id', '=', 'bank_soals.id')
-            ->where('ujians.id', $ujian_id)
-            ->whereIn('bank_soals.guru_mapel_id', $guruMapelIds)
-            ->select('ujians.*', 'bank_soals.id as bank_soal_id')
-            ->first();
+        $ujian = $this->getAccessibleUjian($ujian_id, $context);
 
-        if (!$ujian) abort(403);
+        if (!$ujian) abort(403, 'Akses ditolak.');
+
+        $allowedKelasIds = $this->getGuruKelasForUjian($context['guru']->id, $ujian->mata_pelajaran_id, $ujian->tahun_ajaran_id);
+
+        // Pastikan siswa ini berada di kelas yang diajar oleh guru ini
+        $isSiswaInGuruKelas = DB::table('siswa_kelas')
+            ->where('siswa_id', $siswa_id)
+            ->where('tahun_ajaran_id', $ujian->tahun_ajaran_id)
+            ->whereIn('kelas_id', $allowedKelasIds)
+            ->exists();
+
+        if (!$isSiswaInGuruKelas) {
+            abort(403, 'Anda tidak memiliki wewenang untuk mengoreksi siswa dari kelas ini.');
+        }
 
         $nilai = Nilai::where('ujian_id', $ujian_id)->where('siswa_id', $siswa_id)->firstOrFail();
 
@@ -436,36 +538,25 @@ class GuruNilaiSiswaController extends Controller
      */
     public function exportPdf(Request $request, $id)
     {
-        $guruMapelIds = $this->checkGuruMapel();
+        $context = $this->getGuruContext();
 
-        $ujian = DB::table('ujians')
-            ->join('bank_soals', 'ujians.bank_soal_id', '=', 'bank_soals.id')
-            ->join('mata_pelajarans', 'bank_soals.mata_pelajaran_id', '=', 'mata_pelajarans.id')
-            ->leftJoin('jenis_ujians', 'ujians.jenis_ujian_id', '=', 'jenis_ujians.id')
-            ->leftJoin('tahun_ajarans', 'ujians.tahun_ajaran_id', '=', 'tahun_ajarans.id')
-            ->where('ujians.id', $id)
-            ->whereIn('bank_soals.guru_mapel_id', $guruMapelIds)
-            ->select(
-                'ujians.*',
-                'mata_pelajarans.nama_mapel',
-                'jenis_ujians.nama as nama_jenis_ujian',
-                'tahun_ajarans.nama_tahun',
-                'bank_soals.kkm'
-            )
-            ->first();
+        $ujian = $this->getAccessibleUjian($id, $context);
 
         if (!$ujian) {
             abort(404, 'Data ujian tidak ditemukan.');
         }
 
+        $allowedKelasIds = $this->getGuruKelasForUjian($context['guru']->id, $ujian->mata_pelajaran_id, $ujian->tahun_ajaran_id);
+
         $query = DB::table('nilais')
             ->join('siswas', 'nilais.siswa_id', '=', 'siswas.id')
-            ->leftJoin('siswa_kelas', function($join) use ($ujian) {
+            ->join('siswa_kelas', function($join) use ($ujian) {
                 $join->on('siswas.id', '=', 'siswa_kelas.siswa_id')
                      ->where('siswa_kelas.tahun_ajaran_id', '=', $ujian->tahun_ajaran_id);
             })
-            ->leftJoin('kelas', 'siswa_kelas.kelas_id', '=', 'kelas.id')
+            ->join('kelas', 'siswa_kelas.kelas_id', '=', 'kelas.id')
             ->where('nilais.ujian_id', $id)
+            ->whereIn('kelas.id', $allowedKelasIds)
             ->select(
                 'siswas.id as siswa_id',
                 'siswas.nama as nama_siswa',
@@ -515,36 +606,25 @@ class GuruNilaiSiswaController extends Controller
      */
     public function exportExcel(Request $request, $id)
     {
-        $guruMapelIds = $this->checkGuruMapel();
+        $context = $this->getGuruContext();
 
-        $ujian = DB::table('ujians')
-            ->join('bank_soals', 'ujians.bank_soal_id', '=', 'bank_soals.id')
-            ->join('mata_pelajarans', 'bank_soals.mata_pelajaran_id', '=', 'mata_pelajarans.id')
-            ->leftJoin('jenis_ujians', 'ujians.jenis_ujian_id', '=', 'jenis_ujians.id')
-            ->leftJoin('tahun_ajarans', 'ujians.tahun_ajaran_id', '=', 'tahun_ajarans.id')
-            ->where('ujians.id', $id)
-            ->whereIn('bank_soals.guru_mapel_id', $guruMapelIds)
-            ->select(
-                'ujians.*',
-                'mata_pelajarans.nama_mapel',
-                'jenis_ujians.nama as nama_jenis_ujian',
-                'tahun_ajarans.nama_tahun',
-                'bank_soals.kkm'
-            )
-            ->first();
+        $ujian = $this->getAccessibleUjian($id, $context);
 
         if (!$ujian) {
             abort(404, 'Data ujian tidak ditemukan.');
         }
 
+        $allowedKelasIds = $this->getGuruKelasForUjian($context['guru']->id, $ujian->mata_pelajaran_id, $ujian->tahun_ajaran_id);
+
         $query = DB::table('nilais')
             ->join('siswas', 'nilais.siswa_id', '=', 'siswas.id')
-            ->leftJoin('siswa_kelas', function($join) use ($ujian) {
+            ->join('siswa_kelas', function($join) use ($ujian) {
                 $join->on('siswas.id', '=', 'siswa_kelas.siswa_id')
                      ->where('siswa_kelas.tahun_ajaran_id', '=', $ujian->tahun_ajaran_id);
             })
-            ->leftJoin('kelas', 'siswa_kelas.kelas_id', '=', 'kelas.id')
+            ->join('kelas', 'siswa_kelas.kelas_id', '=', 'kelas.id')
             ->where('nilais.ujian_id', $id)
+            ->whereIn('kelas.id', $allowedKelasIds)
             ->select(
                 'siswas.id as siswa_id',
                 'siswas.nama as nama_siswa',
@@ -593,20 +673,27 @@ class GuruNilaiSiswaController extends Controller
      */
     public function exportSiswaPdf($ujian_id, $siswa_id)
     {
-        $guruMapelIds = $this->checkGuruMapel();
+        $context = $this->getGuruContext();
 
-        $ujian = DB::table('ujians')
-            ->join('bank_soals', 'ujians.bank_soal_id', '=', 'bank_soals.id')
-            ->join('mata_pelajarans', 'bank_soals.mata_pelajaran_id', '=', 'mata_pelajarans.id')
-            ->where('ujians.id', $ujian_id)
-            ->whereIn('bank_soals.guru_mapel_id', $guruMapelIds)
-            ->select('ujians.*', 'mata_pelajarans.nama_mapel', 'bank_soals.id as bank_soal_id', 'bank_soals.kkm')
-            ->first();
+        $ujian = $this->getAccessibleUjian($ujian_id, $context);
 
         if (!$ujian) abort(404, 'Ujian tidak ditemukan.');
 
+        $allowedKelasIds = $this->getGuruKelasForUjian($context['guru']->id, $ujian->mata_pelajaran_id, $ujian->tahun_ajaran_id);
+
         $siswa = DB::table('siswas')->where('id', $siswa_id)->first();
         if (!$siswa) abort(404, 'Siswa tidak ditemukan.');
+
+        // Pastikan siswa ini berada di kelas yang diajar oleh guru ini
+        $isSiswaInGuruKelas = DB::table('siswa_kelas')
+            ->where('siswa_id', $siswa_id)
+            ->where('tahun_ajaran_id', $ujian->tahun_ajaran_id)
+            ->whereIn('kelas_id', $allowedKelasIds)
+            ->exists();
+
+        if (!$isSiswaInGuruKelas) {
+            abort(403, 'Anda tidak memiliki wewenang untuk melihat transkrip siswa dari kelas ini.');
+        }
 
         $nilai = DB::table('nilais')
             ->where('ujian_id', $ujian_id)
