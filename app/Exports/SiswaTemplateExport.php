@@ -8,8 +8,10 @@ use Maatwebsite\Excel\Concerns\WithStyles;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
+use Maatwebsite\Excel\Concerns\WithColumnFormatting;
 
-class SiswaTemplateExport implements FromArray, WithHeadings, WithStyles, ShouldAutoSize
+class SiswaTemplateExport implements FromArray, WithHeadings, WithStyles, ShouldAutoSize, WithColumnFormatting
 {
     public function array(): array
     {
@@ -20,7 +22,7 @@ class SiswaTemplateExport implements FromArray, WithHeadings, WithStyles, Should
                 '0012345678',
                 '123456',
                 'SMP',
-                'VII',
+                'Kelas VII',
                 'VII A'
             ],
             [
@@ -29,7 +31,7 @@ class SiswaTemplateExport implements FromArray, WithHeadings, WithStyles, Should
                 '0012345679',
                 '123456',
                 'SD',
-                'I',
+                'Kelas I',
                 '1A'
             ]
         ];
@@ -49,5 +51,14 @@ class SiswaTemplateExport implements FromArray, WithHeadings, WithStyles, Should
             ->getStartColor()->setRGB('0F172A');
 
         return [];
+    }
+
+    public function columnFormats(): array
+    {
+        return [
+            'B' => NumberFormat::FORMAT_TEXT, // nis
+            'C' => NumberFormat::FORMAT_TEXT, // nisn
+            'D' => NumberFormat::FORMAT_TEXT, // password
+        ];
     }
 }

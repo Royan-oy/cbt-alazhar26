@@ -8,8 +8,10 @@ use Maatwebsite\Excel\Concerns\WithStyles;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
+use Maatwebsite\Excel\Concerns\WithColumnFormatting;
 
-class GuruMapelTemplateExport implements FromArray, WithHeadings, WithStyles, ShouldAutoSize
+class GuruMapelTemplateExport implements FromArray, WithHeadings, WithStyles, ShouldAutoSize, WithColumnFormatting
 {
     public function array(): array
     {
@@ -45,5 +47,12 @@ class GuruMapelTemplateExport implements FromArray, WithHeadings, WithStyles, Sh
             ->getStartColor()->setRGB('0F172A');
 
         return [];
+    }
+
+    public function columnFormats(): array
+    {
+        return [
+            'A' => NumberFormat::FORMAT_TEXT, // nip_guru
+        ];
     }
 }

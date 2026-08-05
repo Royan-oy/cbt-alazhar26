@@ -191,7 +191,7 @@
                     <div class="col-md-6">
                         <label class="form-label fw-semibold">NIP</label>
                         <input
-                            type="text"
+                            type="number"
                             name="nip"
                             class="form-control form-control-custom @error('nip') is-invalid @enderror"
                             placeholder="Nomor Induk Pegawai"
