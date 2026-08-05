@@ -6,6 +6,7 @@ use App\Models\Guru;
 use App\Models\User;
 use App\Models\Jenjang;
 use App\Imports\GuruImport;
+use App\Exports\GuruTemplateExport;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -264,16 +265,16 @@ class GuruController extends Controller
 
     public function downloadTemplate()
     {
-        $path = public_path('storage/app/templates/template_import_guru.xlsx');
+        $path = storage_path('app/templates/template_import_guru.xlsx');
 
-        if (!file_exists($path)) {
-            abort(404, 'Template tidak ditemukan.');
+        if (file_exists($path)) {
+            return response()->download(
+                $path,
+                'template_import_guru.xlsx'
+            );
         }
 
-        return response()->download(
-            $path,
-            'template_import_guru.xlsx'
-        );
+        return Excel::download(new GuruTemplateExport, 'template_import_guru.xlsx');
     }
 
     /**

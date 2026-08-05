@@ -409,26 +409,51 @@
                     </div>
                 </div>
 
-                {{-- Nilai KKM --}}
-                <div class="form-group mt-3">
-                    <label class="form-label-custom">
-                        <span class="required-dot"></span>
-                        Nilai KKM (Kriteria Ketuntasan Minimal)
-                        <span class="label-hint">Dapat diubah (Skala 0 - 100)</span>
-                    </label>
-                    <input type="number"
-                           name="kkm"
-                           class="form-control-modern @error('kkm') is-invalid @enderror"
-                           placeholder="75"
-                           value="{{ old('kkm', 75) }}"
-                           min="0"
-                           max="100"
-                           required>
-                    @error('kkm')
-                        <div class="field-error">
-                            <i class="fa-solid fa-circle-exclamation"></i> {{ $message }}
+                {{-- Nilai KKM & Kategori --}}
+                <div class="row mt-3">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="form-label-custom">
+                                <span class="required-dot"></span>
+                                Nilai KKM (Kriteria Ketuntasan Minimal)
+                                <span class="label-hint">(Skala 0 - 100)</span>
+                            </label>
+                            <input type="number"
+                                   name="kkm"
+                                   class="form-control-modern @error('kkm') is-invalid @enderror"
+                                   placeholder="75"
+                                   value="{{ old('kkm', 75) }}"
+                                   min="0"
+                                   max="100"
+                                   required>
+                            @error('kkm')
+                                <div class="field-error">
+                                    <i class="fa-solid fa-circle-exclamation"></i> {{ $message }}
+                                </div>
+                            @enderror
                         </div>
-                    @enderror
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="form-label-custom">
+                                <span class="required-dot"></span>
+                                Kategori Bank Soal
+                            </label>
+                            <select name="kategori" class="form-select-modern @error('kategori') is-invalid @enderror" required>
+                                <option value="personal" {{ old('kategori', 'personal') == 'personal' ? 'selected' : '' }}>
+                                    Ujian Personal (Hanya untuk kelas yang diajar)
+                                </option>
+                                <option value="bersama" {{ old('kategori') == 'bersama' ? 'selected' : '' }}>
+                                    Ujian Bersama (Bisa dipakai Admin untuk seluruh kelas)
+                                </option>
+                            </select>
+                            @error('kategori')
+                                <div class="field-error">
+                                    <i class="fa-solid fa-circle-exclamation"></i> {{ $message }}
+                                </div>
+                            @enderror
+                        </div>
+                    </div>
                 </div>
 
                 {{-- Deskripsi --}}

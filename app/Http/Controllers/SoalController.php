@@ -217,18 +217,21 @@ class SoalController extends Controller
     private function validasiDinamisPilihan(Request $request): void
     {
         if ($request->jenis_soal === 'pilihan_ganda') {
+            $request->merge(['teks_pilihan' => array_filter((array) $request->teks_pilihan)]);
             $request->validate([
                 'teks_pilihan' => 'required|array|min:2',
                 'teks_pilihan.*' => 'required|string',
                 'jawaban_benar' => 'required|integer',
             ]);
         } elseif ($request->jenis_soal === 'pilihan_ganda_kompleks') {
+            $request->merge(['teks_pilihan' => array_filter((array) $request->teks_pilihan)]);
             $request->validate([
                 'teks_pilihan' => 'required|array|min:2',
                 'teks_pilihan.*' => 'required|string',
                 'jawaban_benar_kompleks' => 'required|array|min:1',
             ]);
         } elseif ($request->jenis_soal === 'benar_salah') {
+            $request->merge(['teks_pernyataan' => array_filter((array) $request->teks_pernyataan)]);
             $request->validate([
                 'teks_pernyataan' => 'required|array|min:1',
                 'teks_pernyataan.*' => 'required|string',

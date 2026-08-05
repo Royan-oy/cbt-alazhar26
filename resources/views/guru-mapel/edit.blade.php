@@ -482,11 +482,19 @@
 </template>
 
 <script>
+    window.takenClassesMap = @json($takenClassesMap ?? []);
+</script>
+
+<script>
 document.addEventListener('DOMContentLoaded', function () {
 
     const container     = document.getElementById('penugasanContainer');
     const templateHtml   = document.getElementById('penugasanTemplate').innerHTML;
     const btnTambah       = document.getElementById('btnTambah');
+
+    const selectedGuruId  = "{{ $guru->id }}";
+    const selectedTahunId = "{{ $tahunAjaranId }}";
+    const jenjangId       = "{{ $guru->jenjang_id }}";
 
     let index = container.querySelectorAll('.penugasan-block').length;
 
@@ -494,6 +502,52 @@ document.addEventListener('DOMContentLoaded', function () {
         container.querySelectorAll('.penugasan-block').forEach(function (block, i) {
             block.querySelector('.penugasan-number').textContent = i + 1;
         });
+    }
+
+    function applyFilter(block) {
+        const mapelSelect = block.querySelector('.mapel-select');
+        const selectedMapelId = mapelSelect ? mapelSelect.value : '';
+
+        block.querySelectorAll('.kelas-item').forEach(function (item) {
+            const checkbox = item.querySelector('input');
+            const kelasId = checkbox.value;
+
+            // 1. Filter Jenjang
+            if (jenjangId === '' || item.dataset.jenjang !== jenjangId) {
+                item.style.display = 'none';
+                checkbox.checked = false;
+                return;
+            }
+
+            // 2. Filter kelas yang sudah mempunyai guru lain untuk (tahun_ajaran_id, mata_pelajaran_id)
+            if (selectedTahunId && selectedMapelId && selectedGuruId) {
+                const key = selectedTahunId + '_' + selectedMapelId + '_' + kelasId;
+                const takenByGuruId = (window.takenClassesMap || {})[key];
+
+                if (takenByGuruId && String(takenByGuruId) !== String(selectedGuruId)) {
+                    item.style.display = 'none';
+                    checkbox.checked = false;
+                    return;
+                }
+            }
+
+            item.style.display = '';
+        });
+    }
+
+    function applyFilterToAllBlocks() {
+        container.querySelectorAll('.penugasan-block').forEach(function (block) {
+            applyFilter(block);
+        });
+    }
+
+    function bindMapelChange(block) {
+        const mapelSelect = block.querySelector('.mapel-select');
+        if (mapelSelect) {
+            mapelSelect.addEventListener('change', function () {
+                applyFilter(block);
+            });
+        }
     }
 
     function bindRemove(block) {
@@ -516,14 +570,19 @@ document.addEventListener('DOMContentLoaded', function () {
 
         container.appendChild(block);
         bindRemove(block);
+        bindMapelChange(block);
+        applyFilter(block);
         renumber();
         index++;
 
-        // Scroll ke blok baru supaya user langsung melihatnya (berguna di mobile)
         block.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
 
-    container.querySelectorAll('.penugasan-block').forEach(bindRemove);
+    container.querySelectorAll('.penugasan-block').forEach(function(block) {
+        bindRemove(block);
+        bindMapelChange(block);
+        applyFilter(block);
+    });
     renumber();
 
     btnTambah.addEventListener('click', addPenugasan);

@@ -315,9 +315,20 @@ class UjianController extends Controller
         $bankSoalKelasMap = [];
 
         foreach ($bankSoals as $bs) {
-            $bankSoalKelasMap[$bs->id] = $bs->guruMapel
-                ? $bs->guruMapel->kelas->pluck('id')->toArray()
-                : [];
+            if ($bs->kategori === 'bersama') {
+                // Bank Soal Ujian Bersama: tampilkan semua kelas di jenjang yang sama
+                $bankSoalKelasMap[$bs->id] = $kelasList
+                    ->filter(function($k) use ($bs) {
+                        return optional($k->tingkat)->jenjang_id == $bs->jenjang_id;
+                    })
+                    ->pluck('id')
+                    ->values()
+                    ->toArray();
+            } else {
+                $bankSoalKelasMap[$bs->id] = $bs->guruMapel
+                    ? $bs->guruMapel->kelas->pluck('id')->toArray()
+                    : [];
+            }
         }
 
         return compact(
@@ -361,13 +372,18 @@ class UjianController extends Controller
      */
     private function authorizeKelasSesuaiGuruBankSoal(array $kelasIds, BankSoal $bankSoal)
     {
+        // Jika kategori 'bersama', bank soal boleh dipakai untuk semua kelas di jenjang tersebut
+        if ($bankSoal->kategori === 'bersama') {
+            return;
+        }
+
         $allowedKelasIds = $bankSoal->guruMapel
             ? $bankSoal->guruMapel->kelas->pluck('id')->toArray()
             : [];
 
         foreach ($kelasIds as $kelasId) {
             if (!in_array($kelasId, $allowedKelasIds)) {
-                abort(422, 'Ada kelas yang tidak diajar oleh guru pembuat bank soal ini.');
+                abort(422, 'Bank soal ini berkategori Personal. Ada kelas yang tidak diajar oleh guru pembuat bank soal ini.');
             }
         }
     }

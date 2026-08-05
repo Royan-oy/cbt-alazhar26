@@ -14,6 +14,7 @@ use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\GuruMapelExport;
+use App\Exports\GuruMapelTemplateExport;
 use App\Imports\GuruMapelImport;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Pagination\Paginator;
@@ -235,12 +236,29 @@ class GuruMapelController extends Controller
             ->orderByDesc('nama_tahun')
             ->get();
 
+        $takenClasses = DB::table('guru_mapel_kelas')
+            ->join('guru_mapels', 'guru_mapel_kelas.guru_mapel_id', '=', 'guru_mapels.id')
+            ->select(
+                'guru_mapels.tahun_ajaran_id',
+                'guru_mapels.mata_pelajaran_id',
+                'guru_mapels.guru_id',
+                'guru_mapel_kelas.kelas_id'
+            )
+            ->get();
+
+        $takenClassesMap = [];
+        foreach ($takenClasses as $row) {
+            $key = $row->tahun_ajaran_id . '_' . $row->mata_pelajaran_id . '_' . $row->kelas_id;
+            $takenClassesMap[$key] = $row->guru_id;
+        }
+
         return view('guru-mapel.create', compact(
             'jenjangs',
             'gurus',
             'mataPelajarans',
             'kelasList',
-            'tahunAjarans'
+            'tahunAjarans',
+            'takenClassesMap'
         ));
     }
 
@@ -326,6 +344,20 @@ class GuruMapelController extends Controller
 
                         throw \Illuminate\Validation\ValidationException::withMessages([
                             'penugasan' => 'Ada kelas yang berbeda jenjang untuk mata pelajaran "' . $mapel->nama_mapel . '".'
+                        ]);
+                    }
+
+                    $alreadyTakenByOther = DB::table('guru_mapel_kelas')
+                        ->join('guru_mapels', 'guru_mapel_kelas.guru_mapel_id', '=', 'guru_mapels.id')
+                        ->where('guru_mapels.tahun_ajaran_id', $request->tahun_ajaran_id)
+                        ->where('guru_mapels.mata_pelajaran_id', $mapel->id)
+                        ->where('guru_mapel_kelas.kelas_id', $kelasId)
+                        ->where('guru_mapels.guru_id', '!=', $guru->id)
+                        ->exists();
+
+                    if ($alreadyTakenByOther) {
+                        throw \Illuminate\Validation\ValidationException::withMessages([
+                            'penugasan' => 'Kelas "' . $kelas->nama_kelas . '" sudah memiliki guru pengajar lain untuk mata pelajaran "' . $mapel->nama_mapel . '".'
                         ]);
                     }
 
@@ -451,6 +483,20 @@ class GuruMapelController extends Controller
                     if ($kelas->tingkat->jenjang_id != $guru->jenjang_id) {
                         throw \Illuminate\Validation\ValidationException::withMessages([
                             'penugasan' => 'Ada kelas yang berbeda jenjang untuk mata pelajaran "' . $mapel->nama_mapel . '".'
+                        ]);
+                    }
+    
+                    $alreadyTakenByOther = DB::table('guru_mapel_kelas')
+                        ->join('guru_mapels', 'guru_mapel_kelas.guru_mapel_id', '=', 'guru_mapels.id')
+                        ->where('guru_mapels.tahun_ajaran_id', $request->tahun_ajaran_id)
+                        ->where('guru_mapels.mata_pelajaran_id', $mapel->id)
+                        ->where('guru_mapel_kelas.kelas_id', $kelasId)
+                        ->where('guru_mapels.guru_id', '!=', $guru->id)
+                        ->exists();
+    
+                    if ($alreadyTakenByOther) {
+                        throw \Illuminate\Validation\ValidationException::withMessages([
+                            'penugasan' => 'Kelas "' . $kelas->nama_kelas . '" sudah memiliki guru pengajar lain untuk mata pelajaran "' . $mapel->nama_mapel . '".'
                         ]);
                     }
     
@@ -675,9 +721,21 @@ class GuruMapelController extends Controller
         )
         ->get();
 
+        $takenClasses = DB::table('guru_mapel_kelas')
+            ->join('guru_mapels', 'guru_mapel_kelas.guru_mapel_id', '=', 'guru_mapels.id')
+            ->select(
+                'guru_mapels.tahun_ajaran_id',
+                'guru_mapels.mata_pelajaran_id',
+                'guru_mapels.guru_id',
+                'guru_mapel_kelas.kelas_id'
+            )
+            ->get();
 
-
-
+        $takenClassesMap = [];
+        foreach ($takenClasses as $row) {
+            $key = $row->tahun_ajaran_id . '_' . $row->mata_pelajaran_id . '_' . $row->kelas_id;
+            $takenClassesMap[$key] = $row->guru_id;
+        }
 
         return compact(
 
@@ -689,7 +747,9 @@ class GuruMapelController extends Controller
 
             'kelasList',
 
-            'tahunAjarans'
+            'tahunAjarans',
+
+            'takenClassesMap'
 
         );
 
@@ -890,15 +950,15 @@ class GuruMapelController extends Controller
 
     public function downloadTemplate()
     {
-        $path = public_path('storage/app/templates/template_import_guru_mapel.xlsx');
+        $path = storage_path('app/templates/template_import_guru_mapel.xlsx');
 
-        if (!file_exists($path)) {
-            abort(404, 'Template tidak ditemukan.');
+        if (file_exists($path)) {
+            return response()->download(
+                $path,
+                'template_import_guru_mapel.xlsx'
+            );
         }
 
-        return response()->download(
-            $path,
-            'template_import_guru_mapel.xlsx'
-        );
+        return Excel::download(new GuruMapelTemplateExport, 'template_import_guru_mapel.xlsx');
     }
 }

@@ -57,6 +57,7 @@ class GuruBankSoalController extends Controller
             'nama_bank_soal' => 'required|string|max:255',
             'guru_mapel_id'  => 'required|exists:guru_mapels,id',
             'kkm'            => 'required|integer|min:0|max:100',
+            'kategori'       => 'required|in:personal,bersama',
             'deskripsi'      => 'nullable|string',
         ]);
 
@@ -71,6 +72,7 @@ class GuruBankSoalController extends Controller
             'jenjang_id'        => $guru->jenjang_id,
             'nama_bank_soal'    => $request->nama_bank_soal,
             'kkm'               => $request->kkm ?? 75,
+            'kategori'          => $request->kategori,
             'deskripsi'         => $request->deskripsi,
             'is_publish'        => false,
         ]);
@@ -113,6 +115,7 @@ class GuruBankSoalController extends Controller
             'nama_bank_soal' => 'required|string|max:255',
             'guru_mapel_id'  => 'required|exists:guru_mapels,id',
             'kkm'            => 'required|integer|min:0|max:100',
+            'kategori'       => 'required|in:personal,bersama',
             'deskripsi'      => 'nullable|string',
         ]);
 
@@ -123,6 +126,7 @@ class GuruBankSoalController extends Controller
             'mata_pelajaran_id' => $guruMapel->mata_pelajaran_id,
             'nama_bank_soal'    => $request->nama_bank_soal,
             'kkm'               => $request->kkm ?? 75,
+            'kategori'          => $request->kategori,
             'deskripsi'         => $request->deskripsi,
         ]);
 

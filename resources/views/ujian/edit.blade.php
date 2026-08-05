@@ -240,7 +240,7 @@
                                     value="{{ $bs->id }}"
                                     data-jenjang="{{ $bs->jenjang_id }}"
                                     {{ old('bank_soal_id', $ujian->bank_soal_id) == $bs->id ? 'selected' : '' }}>
-                                    {{ $bs->nama_bank_soal }} ({{ optional($bs->mataPelajaran)->nama_mapel }})
+                                    {{ $bs->nama_bank_soal }} ({{ optional($bs->mataPelajaran)->nama_mapel }}) [{{ ($bs->kategori ?? 'personal') === 'bersama' ? 'UJIAN BERSAMA' : 'PERSONAL' }}]
                                 </option>
                             @endforeach
                         </select>

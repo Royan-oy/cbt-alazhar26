@@ -233,6 +233,7 @@
 
                                     {{ $bs->nama_bank_soal }}
                                     ({{ optional($bs->mataPelajaran)->nama_mapel }})
+                                    [{{ ($bs->kategori ?? 'personal') === 'bersama' ? 'UJIAN BERSAMA' : 'PERSONAL' }}]
 
                                 </option>
                             @endforeach

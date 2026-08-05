@@ -17,6 +17,7 @@ class BankSoal extends Model
         'deskripsi',
         'kkm',
         'is_publish',
+        'kategori',
     ];
 
     protected $casts = [

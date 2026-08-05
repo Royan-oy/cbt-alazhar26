@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 use App\Exports\WaliKelasExport;
+use App\Exports\WaliKelasTemplateExport;
 use App\Imports\WaliKelasImport;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -447,5 +448,19 @@ class WaliKelasController extends Controller
                 'import_failed' => count($import->failed),
                 'import_errors' => $import->failed,
             ]);
+    }
+
+    public function downloadTemplate()
+    {
+        $path = storage_path('app/templates/template_import_wali_kelas.xlsx');
+
+        if (file_exists($path)) {
+            return response()->download(
+                $path,
+                'template_import_wali_kelas.xlsx'
+            );
+        }
+
+        return Excel::download(new WaliKelasTemplateExport, 'template_import_wali_kelas.xlsx');
     }
 }

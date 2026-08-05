@@ -6,9 +6,12 @@ use Maatwebsite\Excel\Concerns\FromArray;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use Maatwebsite\Excel\Concerns\WithColumnWidths;
+use Maatwebsite\Excel\Concerns\WithEvents;
+use Maatwebsite\Excel\Events\AfterSheet;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
+use PhpOffice\PhpSpreadsheet\Cell\DataValidation;
 
-class SoalTemplateExport implements FromArray, WithHeadings, WithStyles, WithColumnWidths
+class SoalTemplateExport implements FromArray, WithHeadings, WithStyles, WithColumnWidths, WithEvents
 {
     /**
      * Baris contoh serbaguna (Unified) untuk 6 jenis soal
@@ -17,7 +20,7 @@ class SoalTemplateExport implements FromArray, WithHeadings, WithStyles, WithCol
     {
         return [
             [
-                'pilihan_ganda',
+                'Pilihan Ganda',
                 10,
                 'Siapakah Nabi terakhir yang diutus Allah SWT?',
                 'Nabi Ibrahim AS',
@@ -29,7 +32,7 @@ class SoalTemplateExport implements FromArray, WithHeadings, WithStyles, WithCol
                 '3', // atau 'C'
             ],
             [
-                'pilihan_ganda_kompleks',
+                'Pilihan Ganda Kompleks',
                 15,
                 'Manakah yang termasuk Rukun Islam? (Pilih lebih dari satu)',
                 'Syahadat',
@@ -41,7 +44,7 @@ class SoalTemplateExport implements FromArray, WithHeadings, WithStyles, WithCol
                 '1, 3, 4', // atau 'A, C, D'
             ],
             [
-                'benar_salah',
+                'Benar / Salah',
                 15,
                 'Tentukan hukum bacaan Tajwid berikut Benar atau Salah:',
                 'Idgham Bighunnah apabila Nun Mati bertemu Mim',
@@ -53,7 +56,7 @@ class SoalTemplateExport implements FromArray, WithHeadings, WithStyles, WithCol
                 'Benar, Salah, Benar', // atau 'B, S, B'
             ],
             [
-                'mencocokkan',
+                'Mencocokkan',
                 15,
                 'Pasangkan Kitab Allah dengan Nabi penerimanya:',
                 'Kitab Taurat',
@@ -65,14 +68,14 @@ class SoalTemplateExport implements FromArray, WithHeadings, WithStyles, WithCol
                 'Nabi Musa AS | Nabi Daud AS | Nabi Isa AS', // dipisah tanda | sesuai urutan opsi
             ],
             [
-                'isian',
+                'Isian Singkat',
                 10,
                 'Kota tempat kelahiran Nabi Muhammad SAW adalah ____.',
                 '', '', '', '', '', '',
                 'Makkah; Mekkah; Kota Makkah', // Kunci alternatif dipisah semikolon ;
             ],
             [
-                'essay',
+                'Essay',
                 20,
                 'Jelaskan hikmah sholat berjamaah dalam kehidupan masyarakat!',
                 '', '', '', '', '', '',
@@ -84,7 +87,7 @@ class SoalTemplateExport implements FromArray, WithHeadings, WithStyles, WithCol
     public function headings(): array
     {
         return [
-            'Jenis Soal (pilihan_ganda / pilihan_ganda_kompleks / benar_salah / mencocokkan / isian / essay)',
+            'Jenis Soal',
             'Bobot',
             'Teks Soal',
             'Opsi 1 / Item 1',
@@ -117,6 +120,34 @@ class SoalTemplateExport implements FromArray, WithHeadings, WithStyles, WithCol
             'H' => 20,
             'I' => 20,
             'J' => 40,
+        ];
+    }
+
+    public function registerEvents(): array
+    {
+        return [
+            AfterSheet::class => function (AfterSheet $event) {
+                $sheet = $event->sheet->getDelegate();
+                
+                $validation = $sheet->getCell('A2')->getDataValidation();
+                $validation->setType(DataValidation::TYPE_LIST);
+                $validation->setErrorStyle(DataValidation::STYLE_INFORMATION);
+                $validation->setAllowBlank(false);
+                $validation->setShowInputMessage(true);
+                $validation->setShowErrorMessage(true);
+                $validation->setShowDropDown(true);
+                $validation->setErrorTitle('Input Error');
+                $validation->setError('Jenis soal tidak valid. Silakan pilih dari dropdown.');
+                $validation->setPromptTitle('Pilih Jenis Soal');
+                $validation->setPrompt('Silakan pilih salah satu dari daftar jenis soal yang tersedia.');
+                // Formula list in double quotes, comma-separated
+                $validation->setFormula1('"Pilihan Ganda,Pilihan Ganda Kompleks,Benar / Salah,Mencocokkan,Isian Singkat,Essay"');
+                
+                // Aplikasikan validasi ke baris 2 hingga 500
+                for ($i = 2; $i <= 500; $i++) {
+                    $sheet->getCell("A{$i}")->setDataValidation(clone $validation);
+                }
+            },
         ];
     }
 }

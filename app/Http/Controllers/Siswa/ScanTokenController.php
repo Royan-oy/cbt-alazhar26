@@ -56,6 +56,8 @@ class ScanTokenController extends Controller
 
         // Cek apakah siswa berhak mengikuti ujian ini berdasarkan kelasnya
         $siswa = Auth::user()->siswa;
+        $guruPengajarNama = null;
+
         if ($siswa && $siswa->kelasAktif) {
             $kelasAktifId = $siswa->kelasAktif->kelas_id;
             $berhak = $ujian->kelas()->where('kelas.id', $kelasAktifId)->exists();
@@ -65,7 +67,28 @@ class ScanTokenController extends Controller
                     ->withInput()
                     ->with('error', 'Anda tidak terdaftar di kelas yang berhak mengikuti ujian ini.');
             }
+
+            // Cari guru pengajar yang mengajar kelas siswa ini untuk mapel dan tahun ajaran ujian tsb
+            $guruMapelPengajar = \Illuminate\Support\Facades\DB::table('guru_mapel_kelas')
+                ->join('guru_mapels', 'guru_mapel_kelas.guru_mapel_id', '=', 'guru_mapels.id')
+                ->join('gurus', 'guru_mapels.guru_id', '=', 'gurus.id')
+                ->where('guru_mapel_kelas.kelas_id', $kelasAktifId)
+                ->where('guru_mapels.mata_pelajaran_id', optional($ujian->bankSoal)->mata_pelajaran_id)
+                ->where('guru_mapels.tahun_ajaran_id', $ujian->tahun_ajaran_id)
+                ->select('gurus.nama')
+                ->first();
+
+            if ($guruMapelPengajar) {
+                $guruPengajarNama = $guruMapelPengajar->nama;
+            }
         }
+
+        // Fallback jika tidak ditemukan guru pengajar spesifik kelas: gunakan pembuat bank soal
+        if (!$guruPengajarNama) {
+            $guruPengajarNama = optional(optional(optional($ujian->bankSoal)->guruMapel)->guru)->nama ?? '-';
+        }
+
+        $ujian->guru_pengajar_nama = $guruPengajarNama;
 
         // Kembalikan ke view dengan data ujian yang ditemukan,
         // frontend akan otomatis membuka modal konfirmasi

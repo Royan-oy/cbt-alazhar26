@@ -486,6 +486,10 @@
 </template>
 
 <script>
+    window.takenClassesMap = @json($takenClassesMap ?? []);
+</script>
+
+<script>
 document.addEventListener('DOMContentLoaded', function () {
 
     const container    = document.getElementById('penugasanContainer');
@@ -493,20 +497,28 @@ document.addEventListener('DOMContentLoaded', function () {
     const btnTambah      = document.getElementById('btnTambah');
     const jenjangSelect  = document.getElementById('jenjang'); // null jika bukan super_admin
     const guruSelect     = document.getElementById('guru');
+    const tahunAjaranSelect = document.querySelector('select[name="tahun_ajaran_id"]');
+
+    function getSelectedJenjangId() {
+        if (jenjangSelect) {
+            return jenjangSelect.value;
+        } else if (guruSelect && guruSelect.selectedOptions.length) {
+            return guruSelect.selectedOptions[0].dataset.jenjang || '';
+        }
+        return '';
+    }
 
     guruSelect.addEventListener('change', function () {
-
-        if (jenjangSelect) return;
-
         const option = this.selectedOptions[0];
-
-        if (!option) return;
-
-        const jenjangId = option.dataset.jenjang;
-
+        const jenjangId = jenjangSelect ? jenjangSelect.value : (option ? option.dataset.jenjang : '');
         applyJenjangFilterToAllBlocks(jenjangId);
-
     });
+
+    if (tahunAjaranSelect) {
+        tahunAjaranSelect.addEventListener('change', function () {
+            applyJenjangFilterToAllBlocks(getSelectedJenjangId());
+        });
+    }
 
     let index = container.querySelectorAll('.penugasan-block').length;
 
@@ -537,6 +549,10 @@ document.addEventListener('DOMContentLoaded', function () {
     function applyJenjangFilter(block, jenjangId) {
 
         const mapelSelect = block.querySelector('.mapel-select');
+        const selectedMapelId = mapelSelect ? mapelSelect.value : '';
+        const selectedTahunId = tahunAjaranSelect ? tahunAjaranSelect.value : '';
+        const selectedGuruId = guruSelect ? guruSelect.value : '';
+
         if (mapelSelect) {
             [...mapelSelect.options].forEach(function (option) {
                 if (option.value === '') { option.hidden = false; return; }
@@ -549,15 +565,28 @@ document.addEventListener('DOMContentLoaded', function () {
 
         block.querySelectorAll('.kelas-item').forEach(function (item) {
             const checkbox = item.querySelector('input');
-            if (jenjangId === '') {
+            const kelasId = checkbox.value;
+
+            // 1. Filter Jenjang
+            if (jenjangId === '' || item.dataset.jenjang !== jenjangId) {
                 item.style.display = 'none';
                 checkbox.checked = false;
-            } else if (item.dataset.jenjang === jenjangId) {
-                item.style.display = '';
-            } else {
-                item.style.display = 'none';
-                checkbox.checked = false;
+                return;
             }
+
+            // 2. Filter kelas yang sudah mempunyai guru lain untuk (tahun_ajaran_id, mata_pelajaran_id)
+            if (selectedTahunId && selectedMapelId && selectedGuruId) {
+                const key = selectedTahunId + '_' + selectedMapelId + '_' + kelasId;
+                const takenByGuruId = (window.takenClassesMap || {})[key];
+
+                if (takenByGuruId && String(takenByGuruId) !== String(selectedGuruId)) {
+                    item.style.display = 'none';
+                    checkbox.checked = false;
+                    return;
+                }
+            }
+
+            item.style.display = '';
         });
     }
 
@@ -565,6 +594,15 @@ document.addEventListener('DOMContentLoaded', function () {
         container.querySelectorAll('.penugasan-block').forEach(function (block) {
             applyJenjangFilter(block, jenjangId);
         });
+    }
+
+    function bindMapelChange(block) {
+        const mapelSelect = block.querySelector('.mapel-select');
+        if (mapelSelect) {
+            mapelSelect.addEventListener('change', function () {
+                applyJenjangFilter(block, getSelectedJenjangId());
+            });
+        }
     }
 
     /* =========================================================
@@ -594,25 +632,9 @@ document.addEventListener('DOMContentLoaded', function () {
         container.appendChild(block);
 
         bindRemove(block);
+        bindMapelChange(block);
 
-        // ========================================
-        // Tentukan jenjang yang dipakai
-        // ========================================
-
-        let jenjangId = '';
-
-        // Jika Super Admin
-        if (jenjangSelect) {
-
-            jenjangId = jenjangSelect.value;
-
-        }
-        // Jika Admin Jenjang
-        else if (guruSelect.selectedOptions.length) {
-
-            jenjangId = guruSelect.selectedOptions[0].dataset.jenjang;
-
-        }
+        let jenjangId = getSelectedJenjangId();
 
         applyJenjangFilter(block, jenjangId);
 
@@ -620,7 +642,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
         index++;
 
-        // Scroll ke blok baru supaya user langsung melihatnya (berguna di mobile)
         block.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
     }
@@ -628,16 +649,17 @@ document.addEventListener('DOMContentLoaded', function () {
     /* =========================================================
        Inisialisasi
     ========================================================= */
-    container.querySelectorAll('.penugasan-block').forEach(bindRemove);
+    container.querySelectorAll('.penugasan-block').forEach(function(block) {
+        bindRemove(block);
+        bindMapelChange(block);
+    });
     renumber();
 
     // Untuk Admin Jenjang
     if (!jenjangSelect && guruSelect.selectedOptions.length) {
-
         applyJenjangFilterToAllBlocks(
             guruSelect.selectedOptions[0].dataset.jenjang
         );
-
     }
 
     btnTambah.addEventListener('click', addPenugasan);
