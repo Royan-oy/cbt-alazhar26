@@ -501,19 +501,42 @@
                                     {{ \Carbon\Carbon::parse($ujian->waktu_mulai)->format('H:i') }} - {{ \Carbon\Carbon::parse($ujian->waktu_selesai)->format('H:i') }} WIB
                                 </span>
 
-                                @if($ujian->status_waktu == 'berlangsung')
-                                    <span class="je-status-badge je-status-ongoing">
-                                        <i class="fa-solid fa-circle-play"></i> Berlangsung
-                                    </span>
-                                @elseif($ujian->status_waktu == 'belum')
-                                    <span class="je-status-badge je-status-pending">
-                                        <i class="fa-regular fa-clock"></i> Belum Mulai
-                                    </span>
-                                @else
-                                    <span class="je-status-badge je-status-done">
-                                        <i class="fa-solid fa-circle-check"></i> Selesai
-                                    </span>
-                                @endif
+                                @if($ujian->filter_category == 'akan_datang')
+
+    <span class="je-status-badge je-status-pending">
+        <i class="fa-solid fa-calendar-plus"></i>
+        Akan Datang
+    </span>
+
+@elseif($ujian->filter_category == 'riwayat')
+
+    <span class="je-status-badge je-status-done">
+        <i class="fa-solid fa-clock-rotate-left"></i>
+        Selesai
+    </span>
+
+@else
+
+    @if($ujian->status_waktu == 'berlangsung')
+        <span class="je-status-badge je-status-ongoing">
+            <i class="fa-solid fa-circle-play"></i>
+            Berlangsung
+        </span>
+
+    @elseif($ujian->status_waktu == 'belum')
+        <span class="je-status-badge je-status-pending">
+            <i class="fa-regular fa-clock"></i>
+            Segera Dimulai
+        </span>
+
+    @else
+        <span class="je-status-badge je-status-done">
+            <i class="fa-solid fa-circle-check"></i>
+            Selesai Hari Ini
+        </span>
+    @endif
+
+@endif
                             </div>
 
                             <h5 class="exam-title" title="{{ $ujian->nama_ujian }}">{{ $ujian->nama_ujian }}</h5>

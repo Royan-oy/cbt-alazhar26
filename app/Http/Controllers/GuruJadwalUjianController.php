@@ -76,4 +76,4 @@ class GuruJadwalUjianController extends Controller
         return view('guru.jadwal-ujian.show', compact('ujian'));
     }
 }
-
+
