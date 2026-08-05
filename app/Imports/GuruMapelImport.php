@@ -66,6 +66,10 @@ class GuruMapelImport extends DefaultValueBinder implements ToCollection, WithHe
             $namaTahun = trim($row['tahun_ajaran'] ?? '');
             $semester = strtolower(trim($row['semester'] ?? ''));
 
+            // Kolom 'nama_guru' & 'jenjang' (jika ada, karena file berasal dari
+            // hasil export) SENGAJA tidak dipakai untuk validasi — hanya info
+            // tambahan bagi user. Identitas guru selalu ditentukan dari NIP.
+
             if ($nip == '' && $namaMapel == '') {
                 continue;
             }
@@ -91,11 +95,13 @@ class GuruMapelImport extends DefaultValueBinder implements ToCollection, WithHe
             /*
             |--------------------------------------------------------------------------
             | Cari Mata Pelajaran (harus satu jenjang dengan guru)
+            | Pencocokan case-insensitive & trim, supaya toleran terhadap
+            | perubahan kapitalisasi kecil saat file export diedit ulang.
             |--------------------------------------------------------------------------
             */
 
-            $mapel = MataPelajaran::where('nama_mapel', $namaMapel)
-                ->where('jenjang_id', $guru->jenjang_id)
+            $mapel = MataPelajaran::where('jenjang_id', $guru->jenjang_id)
+                ->whereRaw('LOWER(nama_mapel) = ?', [mb_strtolower($namaMapel)])
                 ->first();
 
             if (!$mapel) {
@@ -121,6 +127,8 @@ class GuruMapelImport extends DefaultValueBinder implements ToCollection, WithHe
             /*
             |--------------------------------------------------------------------------
             | Parse kolom kelas: "Kelas VII - VII A, Kelas VII - VII B"
+            | Format ini SAMA PERSIS dengan yang dihasilkan GuruMapelExport,
+            | jadi file export bisa langsung diimport ulang tanpa diubah.
             |--------------------------------------------------------------------------
             */
 
@@ -146,9 +154,10 @@ class GuruMapelImport extends DefaultValueBinder implements ToCollection, WithHe
                     list($namaTingkat, $namaKelas) = $parts;
 
                     $kelas = Kelas::whereHas('tingkat', function ($q) use ($namaTingkat, $guru) {
-                            $q->where('nama_tingkat', $namaTingkat)->where('jenjang_id', $guru->jenjang_id);
+                            $q->whereRaw('LOWER(nama_tingkat) = ?', [mb_strtolower($namaTingkat)])
+                            ->where('jenjang_id', $guru->jenjang_id);
                         })
-                        ->where('nama_kelas', $namaKelas)
+                        ->whereRaw('LOWER(nama_kelas) = ?', [mb_strtolower($namaKelas)])
                         ->first();
 
                     if ($kelas) {

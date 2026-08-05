@@ -242,7 +242,7 @@ class GuruController extends Controller
             }
 
             if (count($import->gagalDuplikat) > 0) {
-                $pesan .= " ".count($import->gagalDuplikat())." data dilewati karena NIP atau Email sudah ada.";
+                $pesan .= " ".count($import->gagalDuplikat)." data dilewati karena NIP atau Email sudah ada.";
             }
 
             return redirect()
