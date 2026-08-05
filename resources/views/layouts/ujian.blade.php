@@ -464,20 +464,49 @@
                 || el.msRequestFullscreen;
 
             if (request) {
-                request.call(el).then(enterExamMode).catch(function () {
+                try {
+                    const result = request.call(el);
+                    // Beberapa browser lama tidak mengembalikan Promise
+                    if (result && typeof result.then === 'function') {
+                        result.then(function() {
+                            enterExamMode();
+                        }).catch(function () {
+                            Swal.fire({
+                                icon: 'warning',
+                                title: 'Fullscreen Tidak Bisa Diaktifkan',
+                                text: 'Browser Anda menolak mode layar penuh. Ujian tetap dilanjutkan, namun pastikan Anda tidak berpindah tab.',
+                                confirmButtonColor: '#0ea5e9'
+                            }).then(function() {
+                                enterExamMode();
+                            });
+                        });
+                    } else {
+                        // requestFullscreen tidak mengembalikan Promise (browser lama)
+                        // Tunggu sebentar agar fullscreen sempat aktif
+                        setTimeout(function() {
+                            enterExamMode();
+                        }, 300);
+                    }
+                } catch (e) {
+                    // requestFullscreen melempar error langsung
+                    console.warn('Fullscreen request failed:', e);
                     Swal.fire({
                         icon: 'warning',
                         title: 'Fullscreen Tidak Bisa Diaktifkan',
                         text: 'Browser Anda menolak mode layar penuh. Ujian tetap dilanjutkan, namun pastikan Anda tidak berpindah tab.',
                         confirmButtonColor: '#0ea5e9'
-                    }).then(enterExamMode);
-                });
+                    }).then(function() {
+                        enterExamMode();
+                    });
+                }
             } else {
+                // Browser tidak mendukung Fullscreen API sama sekali
                 enterExamMode();
             }
         });
 
         function enterExamMode() {
+            if (examStarted && gate.style.display === 'none') return; // cegah double-call
             examStarted = true;
             gate.style.display = 'none';
             contentWrapper.style.display = 'block';
