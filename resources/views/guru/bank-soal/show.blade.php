@@ -198,22 +198,55 @@
     </div>
     @endif
 
+    @php
+        $isOwner = ($bank_soal->guruMapel->guru_id ?? null) === Auth::user()->guru->id;
+    @endphp
+
+    @if(!$isOwner)
+    <div class="alert border-0 shadow-sm rounded-4 p-3 mb-4 d-flex align-items-center justify-content-between flex-wrap gap-3" style="background:#f3e8ff; border:1px solid #d8b4fe;">
+        <div class="d-flex align-items-center gap-3">
+            <i class="fa-solid fa-users-rectangle fs-3 me-1" style="color:#7e22ce;"></i>
+            <div>
+                <h6 class="fw-bold mb-1" style="color:#581c87;">Bank Soal Bersama (Read-Only)</h6>
+                <p class="mb-0 small text-muted">Bank Soal ini dibuat oleh <strong>{{ $bank_soal->guruMapel->guru->nama ?? 'Koordinator' }}</strong>. Anda dapat melihat seluruh soal atau menduplikatnya ke Bank Soal Personal Anda.</p>
+            </div>
+        </div>
+        <form action="{{ route('dashboard-guru.bank-soal.duplicate', $bank_soal->id) }}" method="POST">
+            @csrf
+            <button type="submit" class="btn text-white rounded-3 fw-bold px-3 py-2" style="background:#7e22ce;">
+                <i class="fa-solid fa-copy me-1"></i> Duplikat ke Personal
+            </button>
+        </form>
+    </div>
+    @endif
+
     {{-- Detail Card --}}
     <div class="detail-card">
         <div class="detail-card-header">
             <div>
                 <h5><i class="fa-solid fa-file-lines me-2 text-primary"></i>Informasi Bank Soal</h5>
             </div>
+            @if($isOwner && !$bank_soal->isLocked())
             <a href="{{ route('dashboard-guru.bank-soal.edit', $bank_soal->id) }}" class="btn-edit">
                 <i class="fa-solid fa-pen"></i>
                 Edit
             </a>
+            @endif
         </div>
 
         <div class="detail-card-body">
             <div class="info-row">
                 <span class="info-label">Nama Bank Soal</span>
                 <span class="info-value">{{ $bank_soal->nama_bank_soal }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Pembuat / Pemilik</span>
+                <span class="info-value fw-semibold text-primary">
+                    {{ $bank_soal->guruMapel->guru->nama ?? '-' }}
+                    @if($isOwner)
+                        <span class="badge bg-success bg-opacity-10 text-success ms-1" style="font-size: 10px;">(Saya)</span>
+                    @endif
+                </span>
             </div>
             <div class="info-row">
                 <span class="info-label">Mata Pelajaran</span>

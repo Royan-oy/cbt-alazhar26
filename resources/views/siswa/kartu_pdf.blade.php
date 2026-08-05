@@ -36,8 +36,8 @@
         }
 
         .card-header {
-            background: #1f2430;
-            color: #ffffff;
+            background:     #ffffff;
+            color: #1f2430;
             padding: 8px 12px;
             border-bottom: 3px solid #0284c7;
             border-image: linear-gradient(135deg, #0284c7, #0369a1) 1;
@@ -226,12 +226,15 @@
                                 @endif
                             </td>
                             <td>
-                                <p class="school-name">SEKOLAH ISLAM AL AZHAR PEKALONGAN</p>
+                                @php
+                                    $namaJenjang = optional(optional(optional(optional($siswa->kelasAktif)->kelas)->tingkat)->jenjang)->nama_jenjang;
+                                @endphp
+                                <p class="school-name" style="color: #1f2430">{{ $namaJenjang ? strtoupper($namaJenjang) . ' ISLAM AL AZHAR PEKALONGAN' : 'SEKOLAH ISLAM AL AZHAR PEKALONGAN' }}</p>
                                 <h4 class="card-title">KARTU PESERTA UJIAN CBT</h4>
                             </td>
                             <td style="width: 40px; text-align: right;">
                                 @if(file_exists(public_path('img/sigma.png')))
-                                    <img src="{{ public_path('img/sigma.png') }}" class="card-header-logo" alt="Sigma">
+                                    <img src="{{ public_path('img/sigma.png') }}" style="width: 40px" class="card-header-logo" alt="Sigma">
                                 @endif
                             </td>
                         </tr>

@@ -473,6 +473,9 @@
                     </thead>
                     <tbody>
                         @forelse($bankSoals as $index => $bs)
+                        @php
+                            $isOwner = ($bs->guruMapel->guru_id ?? null) === Auth::user()->guru->id;
+                        @endphp
                         <tr>
                             {{-- No --}}
                             <td class="text-center">
@@ -483,7 +486,11 @@
                             <td class="text-center">
                                 <div class="soal-name d-flex align-items-center justify-content-center gap-2 flex-wrap">
                                     <span>{{ $bs->nama_bank_soal }}</span>
-                                    @if(($bs->kategori ?? 'personal') === 'bersama')
+                                    @if(!$isOwner)
+                                        <span class="badge bg-purple bg-opacity-10 text-purple border border-purple border-opacity-25 px-2 py-1 rounded-pill" style="font-size: 10px; background: #f3e8ff; color: #7e22ce; border-color: #d8b4fe;" title="Dibuat oleh {{ $bs->guruMapel->guru->nama ?? 'Koordinator' }}">
+                                            <i class="fa-solid fa-users-rectangle me-1"></i>Bersama &middot; Read-Only ({{ $bs->guruMapel->guru->nama ?? 'Guru' }})
+                                        </span>
+                                    @elseif(($bs->kategori ?? 'personal') === 'bersama')
                                         <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-2 py-1 rounded-pill" style="font-size: 10px;">
                                             <i class="fa-solid fa-users me-1"></i>Ujian Bersama
                                         </span>
@@ -576,13 +583,13 @@
                                                 @csrf
                                                 <button type="submit" class="dropdown-item d-flex align-items-center gap-2 w-100 text-start border-0 bg-transparent text-primary fw-semibold">
                                                     <i class="fa-solid fa-copy text-primary" style="width: 16px;"></i> 
-                                                    Duplikat Bank Soal
+                                                    {{ $isOwner ? 'Duplikat Bank Soal' : 'Duplikat ke Personal' }}
                                                 </button>
                                             </form>
                                         </li>
                                         
-                                        {{-- Edit --}}
-                                        @if(!$bs->isLocked())
+                                        {{-- Edit (Hanya Pemilik & Belum Terkunci) --}}
+                                        @if($isOwner && !$bs->isLocked())
                                         <li>
                                             <a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('dashboard-guru.bank-soal.edit', $bs->id) }}">
                                                 <i class="fa-solid fa-pen text-primary" style="width: 16px;"></i> 
@@ -595,12 +602,12 @@
                                         <li>
                                             <a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('dashboard-guru.bank-soal.soal.index', $bs->id) }}">
                                                 <i class="fa-solid fa-file-circle-plus text-info" style="width: 16px;"></i> 
-                                                {{ $bs->isLocked() ? 'Lihat Soal' : 'Tambah / Kelola Soal' }}
+                                                {{ ($isOwner && !$bs->isLocked()) ? 'Tambah / Kelola Soal' : 'Lihat Soal' }}
                                             </a>
                                         </li>
                                         
-                                        {{-- Publish/Unpublish --}}
-                                        @if(!$bs->isLocked())
+                                        {{-- Publish/Unpublish (Hanya Pemilik) --}}
+                                        @if($isOwner && !$bs->isLocked())
                                         <li>
                                             <form action="{{ route('dashboard-guru.bank-soal.toggle-publish', $bs->id) }}" method="POST" class="d-inline w-100">
                                                 @csrf
@@ -613,10 +620,10 @@
                                         </li>
                                         @endif
                                         
+                                        @if($isOwner && !$bs->isLocked())
                                         <li><hr class="dropdown-divider my-1"></li>
                                         
-                                        {{-- Hapus --}}
-                                        @if(!$bs->isLocked())
+                                        {{-- Hapus (Hanya Pemilik) --}}
                                         <li>
                                             <form action="{{ route('dashboard-guru.bank-soal.destroy', $bs->id) }}" method="POST" class="form-delete d-inline w-100">
                                                 @csrf
@@ -634,7 +641,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="8">
+                            <td colspan="9">
                                 <div class="empty-state">
                                     <div class="empty-icon-wrap">
                                         <i class="fa-solid fa-folder-open"></i>

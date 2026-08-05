@@ -15,14 +15,38 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class SoalController extends Controller
 {
-    private function authorizeBankSoal(BankSoal $bankSoal)
+    private function isOwner($guru, BankSoal $bankSoal): bool
+    {
+        return $guru->guruMapels()->where('id', $bankSoal->guru_mapel_id)->exists();
+    }
+
+    private function authorizeViewBankSoal(BankSoal $bankSoal)
+    {
+        $guru = Auth::user()->guru;
+
+        if ($this->isOwner($guru, $bankSoal)) {
+            return true;
+        }
+
+        $canViewShared = $bankSoal->kategori === 'bersama'
+            && $bankSoal->jenjang_id == $guru->jenjang_id
+            && $guru->guruMapels()->where('mata_pelajaran_id', $bankSoal->mata_pelajaran_id)->exists();
+
+        abort_unless(
+            $canViewShared,
+            403,
+            'Anda tidak memiliki akses ke bank soal ini.'
+        );
+    }
+
+    private function authorizeEditBankSoal(BankSoal $bankSoal)
     {
         $guru = Auth::user()->guru;
 
         abort_unless(
-            $guru->guruMapels()->where('id', $bankSoal->guru_mapel_id)->exists(),
+            $this->isOwner($guru, $bankSoal),
             403,
-            'Anda tidak memiliki akses ke bank soal ini.'
+            'Anda tidak memiliki akses edit ke bank soal ini.'
         );
     }
 
@@ -35,7 +59,7 @@ class SoalController extends Controller
 
     public function index(BankSoal $bank_soal)
     {
-        $this->authorizeBankSoal($bank_soal);
+        $this->authorizeViewBankSoal($bank_soal);
 
         $soals = $bank_soal->soals()->orderBy('urutan')->withCount('pilihanJawabans')->get();
 
@@ -44,7 +68,7 @@ class SoalController extends Controller
 
     public function create(BankSoal $bank_soal)
     {
-        $this->authorizeBankSoal($bank_soal);
+        $this->authorizeEditBankSoal($bank_soal);
         $this->authorizeNotLocked($bank_soal);
 
         return view('guru.bank-soal.soal.create', compact('bank_soal'));
@@ -52,14 +76,14 @@ class SoalController extends Controller
 
     public function downloadTemplate(BankSoal $bank_soal)
     {
-        $this->authorizeBankSoal($bank_soal);
+        $this->authorizeViewBankSoal($bank_soal);
 
         return Excel::download(new SoalTemplateExport, 'template-import-soal.xlsx');
     }
 
     public function import(Request $request, BankSoal $bank_soal)
     {
-        $this->authorizeBankSoal($bank_soal);
+        $this->authorizeEditBankSoal($bank_soal);
         $this->authorizeNotLocked($bank_soal);
 
         $request->validate([
@@ -91,7 +115,7 @@ class SoalController extends Controller
 
     public function store(Request $request, BankSoal $bank_soal)
     {
-        $this->authorizeBankSoal($bank_soal);
+        $this->authorizeEditBankSoal($bank_soal);
         $this->authorizeNotLocked($bank_soal);
 
         $request->validate([
@@ -134,7 +158,7 @@ class SoalController extends Controller
 
     public function edit(BankSoal $bank_soal, Soal $soal)
     {
-        $this->authorizeBankSoal($bank_soal);
+        $this->authorizeEditBankSoal($bank_soal);
         $this->authorizeNotLocked($bank_soal);
         abort_unless($soal->bank_soal_id === $bank_soal->id, 404);
 
@@ -147,7 +171,7 @@ class SoalController extends Controller
 
     public function update(Request $request, BankSoal $bank_soal, Soal $soal)
     {
-        $this->authorizeBankSoal($bank_soal);
+        $this->authorizeEditBankSoal($bank_soal);
         $this->authorizeNotLocked($bank_soal);
         abort_unless($soal->bank_soal_id === $bank_soal->id, 404);
 
@@ -199,7 +223,7 @@ class SoalController extends Controller
 
     public function destroy(BankSoal $bank_soal, Soal $soal)
     {
-        $this->authorizeBankSoal($bank_soal);
+        $this->authorizeEditBankSoal($bank_soal);
         $this->authorizeNotLocked($bank_soal);
         abort_unless($soal->bank_soal_id === $bank_soal->id, 404);
 

@@ -13,10 +13,32 @@ class GuruBankSoalController extends Controller
      * Dipakai di show/edit/update/destroy/togglePublish supaya guru A
      * tidak bisa akses/ubah/hapus bank soal guru B lewat DevTools/URL.
      */
-    private function authorizeOwnership($guru, BankSoal $bankSoal)
+    private function isOwner($guru, BankSoal $bankSoal): bool
+    {
+        return $guru->guruMapels()->where('id', $bankSoal->guru_mapel_id)->exists();
+    }
+
+    private function authorizeEdit($guru, BankSoal $bankSoal)
     {
         abort_unless(
-            $guru->guruMapels()->where('id', $bankSoal->guru_mapel_id)->exists(),
+            $this->isOwner($guru, $bankSoal),
+            403,
+            'Anda tidak memiliki akses edit ke bank soal ini.'
+        );
+    }
+
+    private function authorizeView($guru, BankSoal $bankSoal)
+    {
+        if ($this->isOwner($guru, $bankSoal)) {
+            return true;
+        }
+
+        $canViewShared = $bankSoal->kategori === 'bersama'
+            && $bankSoal->jenjang_id == $guru->jenjang_id
+            && $guru->guruMapels()->where('mata_pelajaran_id', $bankSoal->mata_pelajaran_id)->exists();
+
+        abort_unless(
+            $canViewShared,
             403,
             'Anda tidak memiliki akses ke bank soal ini.'
         );
@@ -26,13 +48,21 @@ class GuruBankSoalController extends Controller
     {
         $guru = Auth::user()->guru;
 
-        // Satu guru bisa punya BEBERAPA guru_mapel (lintas mapel/tahun ajaran),
-        // jadi ambil SEMUA guru_mapel_id miliknya, bukan satu id tunggal
-        // (sebelumnya: Auth::user()->guru_mapel_id, yang juga salah karena
-        // guru_mapel_id tidak ada di tabel users maupun gurus).
-        $guruMapelIds = $guru->guruMapels()->pluck('id');
+        $guruMapels = $guru->guruMapels;
+        $guruMapelIds = $guruMapels->pluck('id');
+        $mapelIds = $guruMapels->pluck('mata_pelajaran_id');
 
-        $bankSoals = BankSoal::whereIn('guru_mapel_id', $guruMapelIds)->get();
+        $bankSoals = BankSoal::with(['mataPelajaran', 'jenjang', 'guruMapel.guru'])
+            ->where(function ($query) use ($guruMapelIds, $mapelIds, $guru) {
+                $query->whereIn('guru_mapel_id', $guruMapelIds)
+                    ->orWhere(function ($q) use ($mapelIds, $guru) {
+                        $q->where('kategori', 'bersama')
+                          ->whereIn('mata_pelajaran_id', $mapelIds)
+                          ->where('jenjang_id', $guru->jenjang_id);
+                    });
+            })
+            ->latest()
+            ->get();
 
         return view('guru.bank-soal.index', compact('bankSoals'));
     }
@@ -41,13 +71,11 @@ class GuruBankSoalController extends Controller
     {
         $guru = Auth::user()->guru;
 
-        // Hanya mapel yang benar-benar diampu guru ini yang boleh dipilih,
-        // bukan MataPelajaran::all() (sebelumnya guru bisa pilih mapel siapa saja).
         $guruMapels = $guru->guruMapels()->with('mataPelajaran')->get();
 
         return view('guru.bank-soal.create', [
             'guruMapels' => $guruMapels,
-            'jenjang' => $guru->jenjang, // hanya untuk ditampilkan, TIDAK dikirim lewat form
+            'jenjang' => $guru->jenjang,
         ]);
     }
 
@@ -63,7 +91,6 @@ class GuruBankSoalController extends Controller
 
         $guru = Auth::user()->guru;
 
-        // Pastikan guru_mapel yang dipilih benar-benar milik guru yang login
         $guruMapel = $guru->guruMapels()->findOrFail($request->guru_mapel_id);
 
         BankSoal::create([
@@ -85,9 +112,9 @@ class GuruBankSoalController extends Controller
     public function show(BankSoal $bank_soal)
     {
         $guru = Auth::user()->guru;
-        $this->authorizeOwnership($guru, $bank_soal);
+        $this->authorizeView($guru, $bank_soal);
 
-        $bank_soal->load(['mataPelajaran', 'jenjang', 'soals']);
+        $bank_soal->load(['mataPelajaran', 'jenjang', 'soals', 'guruMapel.guru']);
 
         return view('guru.bank-soal.show', compact('bank_soal'));
     }
@@ -95,7 +122,7 @@ class GuruBankSoalController extends Controller
     public function edit(BankSoal $bank_soal)
     {
         $guru = Auth::user()->guru;
-        $this->authorizeOwnership($guru, $bank_soal);
+        $this->authorizeEdit($guru, $bank_soal);
 
         $guruMapels = $guru->guruMapels()->with('mataPelajaran')->get();
 
@@ -109,7 +136,7 @@ class GuruBankSoalController extends Controller
     public function update(Request $request, BankSoal $bank_soal)
     {
         $guru = Auth::user()->guru;
-        $this->authorizeOwnership($guru, $bank_soal);
+        $this->authorizeEdit($guru, $bank_soal);
 
         $request->validate([
             'nama_bank_soal' => 'required|string|max:255',
@@ -136,10 +163,9 @@ class GuruBankSoalController extends Controller
     }
 
     public function destroy(BankSoal $bank_soal)
-
     {
         $guru = Auth::user()->guru;
-        $this->authorizeOwnership($guru, $bank_soal);
+        $this->authorizeEdit($guru, $bank_soal);
 
         if ($bank_soal->isLocked()) {
             return redirect()
@@ -163,7 +189,7 @@ class GuruBankSoalController extends Controller
     public function togglePublish(BankSoal $bank_soal)
     {
         $guru = Auth::user()->guru;
-        $this->authorizeOwnership($guru, $bank_soal);
+        $this->authorizeEdit($guru, $bank_soal);
 
         if (!$bank_soal->is_publish) {
             $totalBobot = $bank_soal->soals()->sum('bobot');
@@ -185,12 +211,19 @@ class GuruBankSoalController extends Controller
     public function duplicate(BankSoal $bank_soal)
     {
         $guru = Auth::user()->guru;
-        $this->authorizeOwnership($guru, $bank_soal);
+        $this->authorizeView($guru, $bank_soal);
+
+        $guruMapel = $guru->guruMapels()->where('mata_pelajaran_id', $bank_soal->mata_pelajaran_id)->first();
+        if (!$guruMapel) {
+            return redirect()->back()->with('error', 'Anda tidak mengampu mata pelajaran ini sehingga tidak dapat menduplikat bank soal.');
+        }
 
         \Illuminate\Support\Facades\DB::beginTransaction();
         try {
             $newBankSoal = $bank_soal->replicate();
             $newBankSoal->nama_bank_soal = 'Salinan - ' . $bank_soal->nama_bank_soal;
+            $newBankSoal->guru_mapel_id = $guruMapel->id;
+            $newBankSoal->kategori = 'personal';
             $newBankSoal->is_publish = false;
             $newBankSoal->save();
 

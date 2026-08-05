@@ -412,6 +412,9 @@
 </style>
 
 <div class="container-fluid py-2">
+    @php
+        $isOwner = ($bank_soal->guruMapel->guru_id ?? null) === Auth::user()->guru->id;
+    @endphp
 
     {{-- Page Header --}}
     <div class="page-header-soal mb-4">
@@ -427,10 +430,13 @@
                 <h3 class="fw-bold mb-1" style="letter-spacing: -0.5px;">Daftar Soal</h3>
                 <p class="text-light opacity-75 mb-0 small">
                     {{ $bank_soal->nama_bank_soal }} &middot; {{ $soals->count() }} soal
+                    @if(!$isOwner)
+                        &middot; <span class="badge bg-light text-dark opacity-75 fw-normal">Dibuat oleh: {{ $bank_soal->guruMapel->guru->nama ?? 'Guru Lain' }}</span>
+                    @endif
                 </p>
             </div>
             <div class="d-flex gap-2">
-                @if(!$bank_soal->isLocked())
+                @if($isOwner && !$bank_soal->isLocked())
                     <button type="button" class="header-btn-outline" data-bs-toggle="modal" data-bs-target="#importModal">
                         <i class="fa-solid fa-file-excel"></i>
                         Import Excel
@@ -444,13 +450,32 @@
                         @csrf
                         <button type="submit" class="header-btn">
                             <i class="fa-solid fa-copy"></i>
-                            Duplikat Bank Soal
+                            {{ $isOwner ? 'Duplikat Bank Soal' : 'Duplikat ke Personal' }}
                         </button>
                     </form>
                 @endif
             </div>
         </div>
     </div>
+
+    {{-- Read-Only Banner Jika Lain Pemilik --}}
+    @if(!$isOwner)
+    <div class="alert border-0 shadow-sm rounded-4 p-3 mb-4 d-flex align-items-center justify-content-between flex-wrap gap-3" style="background:#f3e8ff; border:1px solid #d8b4fe;">
+        <div class="d-flex align-items-center gap-3">
+            <i class="fa-solid fa-users-rectangle fs-3 me-1" style="color:#7e22ce;"></i>
+            <div>
+                <h6 class="fw-bold mb-1" style="color:#581c87;">Melihat Bank Soal Bersama (Read-Only)</h6>
+                <p class="mb-0 small text-muted">Bank Soal ini dibuat oleh <strong>{{ $bank_soal->guruMapel->guru->nama ?? 'Koordinator' }}</strong>. Anda hanya dapat membaca soal. Klik Duplikat jika ingin menyesuaikan soal untuk kelas Anda.</p>
+            </div>
+        </div>
+        <form action="{{ route('dashboard-guru.bank-soal.duplicate', $bank_soal->id) }}" method="POST">
+            @csrf
+            <button type="submit" class="btn text-white rounded-3 fw-bold px-3 py-2" style="background:#7e22ce;">
+                <i class="fa-solid fa-copy me-1"></i> Duplikat ke Personal
+            </button>
+        </form>
+    </div>
+    @endif
 
     {{-- Total Bobot Indicator --}}
     @php $totalBobot = $soals->sum('bobot'); @endphp
@@ -510,7 +535,7 @@
     @endif
 
     {{-- Warning Banner Jika Terkunci --}}
-    @if($bank_soal->isLocked())
+    @if($isOwner && $bank_soal->isLocked())
     <div class="alert alert-warning border-0 shadow-sm rounded-4 p-3 mb-4 d-flex align-items-center justify-content-between flex-wrap gap-3" style="background:#fffbeb; border:1px solid #fde68a;">
         <div class="d-flex align-items-center gap-3">
             <i class="fa-solid fa-lock text-warning fs-3 me-1"></i>
@@ -538,8 +563,11 @@
         <select id="filterJenis" class="filter-select">
             <option value="">Semua Jenis</option>
             <option value="pilihan_ganda">Pilihan Ganda</option>
-            <option value="essay">Essay</option>
+            <option value="pilihan_ganda_kompleks">Pilihan Ganda Kompleks</option>
+            <option value="benar_salah">Benar / Salah</option>
+            <option value="mencocokkan">Mencocokkan</option>
             <option value="isian">Isian Singkat</option>
+            <option value="essay">Uraian / Essay</option>
         </select>
         <button type="button" id="filterReset" class="filter-reset" title="Reset filter">
             <i class="fa-solid fa-xmark"></i>
@@ -571,7 +599,7 @@
                     </div>
                 </div>
 
-                @if(!$bank_soal->isLocked())
+                @if($isOwner && !$bank_soal->isLocked())
                 <div class="soal-actions">
                     <a href="{{ route('dashboard-guru.bank-soal.soal.edit', [$bank_soal->id, $soal->id]) }}"
                        class="action-icon-btn btn-icon-edit" title="Edit">
@@ -585,6 +613,10 @@
                             <i class="fa-solid fa-trash"></i>
                         </button>
                     </form>
+                </div>
+                @elseif(!$isOwner)
+                <div class="soal-actions">
+                    <span class="badge py-2 px-3 rounded-pill" style="background:#f3e8ff; color:#7e22ce;" title="Read-Only"><i class="fa-solid fa-eye me-1"></i>Read-Only</span>
                 </div>
                 @else
                 <div class="soal-actions">
