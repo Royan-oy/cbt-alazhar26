@@ -357,7 +357,7 @@
             <i class="fa-solid fa-expand"></i>
         </div>
         @if($isReentry)
-            <h4>Ujian Sedang Berlangsung (Halaman Direfresh)</h4>
+            <h4>Ujian Sedang Berlangsung</h4>
             <p>
                 Halaman ujian telah dimuat ulang. Klik tombol di bawah untuk kembali ke mode layar penuh.<br>
                 <strong style="color: #f59e0b;">Perhatian:</strong> Berpindah tab atau membuka aplikasi lain saat berada di layar ini <u>tetap dicatat sebagai pelanggaran</u>!
