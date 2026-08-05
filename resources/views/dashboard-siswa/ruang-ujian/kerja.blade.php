@@ -990,6 +990,9 @@
                     <div class="soal-gambar-container">
                         <div class="soal-gambar-wrap" onclick="openImageModal('{{ asset('storage/' . $soal->gambar) }}', 'Soal {{ $index + 1 }}')">
                             <img src="{{ asset('storage/' . $soal->gambar) }}" alt="Gambar Soal {{ $index + 1 }}">
+                            <span class="soal-gambar-badge"><i class="fa-solid fa-search-plus"></i> Perbesar</span>
+                        </div>
+                    </div>
                 @endif
                 @php
                     $jawabanSoal = $jawaban[$soal->id] ?? null;
@@ -1309,7 +1312,10 @@
     // Mengaktifkan click-to-zoom pada semua gambar di dalam teks soal / pilihan editor
     document.addEventListener("DOMContentLoaded", function() {
         document.querySelectorAll('.soal-teks img, .option-text img').forEach(img => {
-            img.addEventListener('click', function() {
+            img.style.pointerEvents = 'auto';
+            img.addEventListener('click', function(e) {
+                e.stopPropagation();
+                e.preventDefault();
                 openImageModal(this.src, 'Soal');
             });
         });
