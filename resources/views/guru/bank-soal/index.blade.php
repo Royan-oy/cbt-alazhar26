@@ -487,7 +487,7 @@
                                 <div class="soal-name d-flex align-items-center justify-content-center gap-2 flex-wrap">
                                     <span>{{ $bs->nama_bank_soal }}</span>
                                     @if(!$isOwner)
-                                        <span class="badge bg-purple bg-opacity-10 text-purple border border-purple border-opacity-25 px-2 py-1 rounded-pill" style="font-size: 10px; background: #f3e8ff; color: #7e22ce; border-color: #d8b4fe;" title="Dibuat oleh {{ $bs->guruMapel->guru->nama ?? 'Koordinator' }}">
+                                        <span class="badge px-2 py-1 rounded-pill" style="font-size: 10px; background: #eef2ff; color: #3730a3; border: 1px solid #c7d2fe;" title="Dibuat oleh {{ $bs->guruMapel->guru->nama ?? 'Koordinator' }}">
                                             <i class="fa-solid fa-users-rectangle me-1"></i>Bersama &middot; Read-Only ({{ $bs->guruMapel->guru->nama ?? 'Guru' }})
                                         </span>
                                     @elseif(($bs->kategori ?? 'personal') === 'bersama')
@@ -545,7 +545,7 @@
                             {{-- Status --}}
                             <td class="text-center">
                                 @if($bs->isLocked())
-                                    <span class="status-badge" style="background: #f3e8ff; color: #7e22ce; border: 1px solid #d8b4fe;" title="Terkunci karena sedang/telah digunakan Ujian">
+                                    <span class="status-badge" style="background: #eef2ff; color: #3730a3; border: 1px solid #c7d2fe;" title="Terkunci karena sedang/telah digunakan Ujian">
                                         <i class="fa-solid fa-lock" style="font-size: 10px;"></i>
                                         Terkunci
                                     </span>

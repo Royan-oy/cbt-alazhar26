@@ -268,9 +268,21 @@
         margin-top: 10px; background: #e11d48; color: white; border: none; padding: 6px 14px;
         border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer;
     }
+    fieldset[disabled] .btn-remove-opsi,
+    fieldset[disabled] .btn-add-opsi,
+    fieldset[disabled] .btn-remove-image {
+        display: none !important;
+    }
+    fieldset[disabled] .upload-box {
+        pointer-events: none;
+    }
 </style>
 
 <div class="container-fluid py-2">
+    @php
+        $isReadOnly = $isReadOnly ?? false;
+        $isOwner = $isOwner ?? true;
+    @endphp
 
     {{-- Page Header --}}
     <div class="page-header-create mb-4">
@@ -279,11 +291,42 @@
             <span class="mx-2">/</span>
             <a href="{{ route('dashboard-guru.bank-soal.soal.index', $bank_soal->id) }}">{{ Str::limit($bank_soal->nama_bank_soal, 25) }}</a>
             <span class="mx-2">/</span>
-            <span class="text-white">Edit Soal</span>
+            <span class="text-white">{{ $isReadOnly ? 'Detail & Kunci Soal' : 'Edit Soal' }}</span>
         </div>
-        <h3 class="fw-bold mb-1" style="letter-spacing: -0.5px;">Edit Soal #{{ $soal->urutan }}</h3>
-        <p class="text-light opacity-75 mb-0 small">Perbarui detail soal dan opsi jawaban di bawah ini.</p>
+        <h3 class="fw-bold mb-1" style="letter-spacing: -0.5px;">{{ $isReadOnly ? 'Detail & Kunci Soal' : 'Edit Soal' }} #{{ $soal->urutan }}</h3>
+        <p class="text-light opacity-75 mb-0 small">
+            {{ $isReadOnly ? 'Melihat teks pertanyaan, opsi, dan kunci jawaban soal.' : 'Perbarui detail soal dan opsi jawaban di bawah ini.' }}
+        </p>
     </div>
+
+    {{-- Banner Mode Read Only jika lain pemilik atau terkunci --}}
+    @if($isReadOnly)
+    <div class="alert border-0 shadow-sm rounded-4 p-3 mb-4 d-flex align-items-center justify-content-between flex-wrap gap-3" style="background:#eef2ff; border:1px solid #c7d2fe;">
+        <div class="d-flex align-items-center gap-3">
+            <i class="fa-solid {{ !$isOwner ? 'fa-users-rectangle' : 'fa-lock' }} fs-3 me-1" style="color:#3730a3;"></i>
+            <div>
+                <h6 class="fw-bold mb-1" style="color:#1e1b4b;">
+                    {{ !$isOwner ? 'Mode Read-Only (Bank Soal Bersama)' : 'Mode Read-Only (Bank Soal Terkunci)' }}
+                </h6>
+                <p class="mb-0 small text-muted">
+                    @if(!$isOwner)
+                        Bank Soal ini dibuat oleh <strong>{{ $bank_soal->guruMapel->guru->nama ?? 'Koordinator' }}</strong>. Seluruh bidang input dalam keadaan terkunci (Read-Only).
+                    @else
+                        Bank Soal ini sedang/telah digunakan dalam Ujian sehingga tidak dapat diubah lagi.
+                    @endif
+                </p>
+            </div>
+        </div>
+        @if(!$isOwner)
+        <form action="{{ route('dashboard-guru.bank-soal.duplicate', $bank_soal->id) }}" method="POST">
+            @csrf
+            <button type="submit" class="btn text-white rounded-3 fw-bold px-3 py-2" style="background: linear-gradient(135deg, #0ea5e9, #0284c7);">
+                <i class="fa-solid fa-copy me-1"></i> Duplikat ke Personal
+            </button>
+        </form>
+        @endif
+    </div>
+    @endif
 
     {{-- Validation Errors --}}
     @if($errors->any())
@@ -302,13 +345,15 @@
 
     <div class="form-card">
         <div class="form-card-header">
-            <h5><i class="fa-solid fa-pen-to-square me-2 text-primary"></i>Edit Informasi Soal</h5>
-            <p>Kolom bertanda <span style="color: #ef4444;">●</span> wajib diisi.</p>
+            <h5><i class="fa-solid {{ $isReadOnly ? 'fa-eye' : 'fa-pen-to-square' }} me-2 text-primary"></i>{{ $isReadOnly ? 'Detail & Kunci Jawaban Soal' : 'Edit Informasi Soal' }}</h5>
+            <p>{{ $isReadOnly ? 'Menampilkan detail pertanyaan dan kunci jawaban pilihan.' : 'Kolom bertanda ● wajib diisi.' }}</p>
         </div>
 
         <form action="{{ route('dashboard-guru.bank-soal.soal.update', [$bank_soal->id, $soal->id]) }}" method="POST" id="formSoal" enctype="multipart/form-data">
             @csrf
             @method('PUT')
+
+            <fieldset {{ $isReadOnly ? 'disabled' : '' }}>
 
             <div class="form-card-body">
 
@@ -532,15 +577,21 @@
                     </div>
                 </div>
 
-            </div>
+            </fieldset>
 
             <div class="form-footer">
                 <a href="{{ route('dashboard-guru.bank-soal.soal.index', $bank_soal->id) }}" class="btn-back">
-                    <i class="fa-solid fa-arrow-left"></i> Kembali
+                    <i class="fa-solid fa-arrow-left"></i> Kembali ke Daftar Soal
                 </a>
+                @if(!$isReadOnly)
                 <button type="submit" class="btn-submit">
                     <i class="fa-solid fa-check"></i> Perbarui Soal
                 </button>
+                @else
+                <span class="badge py-2.5 px-3.5 rounded-pill fw-bold" style="background:#eef2ff; color:#3730a3; border: 1px solid #c7d2fe; font-size:13px;">
+                    <i class="fa-solid fa-lock me-1"></i> Mode Read-Only
+                </span>
+                @endif
             </div>
         </form>
     </div>

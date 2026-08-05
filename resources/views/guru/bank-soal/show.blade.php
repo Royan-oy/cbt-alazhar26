@@ -203,17 +203,17 @@
     @endphp
 
     @if(!$isOwner)
-    <div class="alert border-0 shadow-sm rounded-4 p-3 mb-4 d-flex align-items-center justify-content-between flex-wrap gap-3" style="background:#f3e8ff; border:1px solid #d8b4fe;">
+    <div class="alert border-0 shadow-sm rounded-4 p-3 mb-4 d-flex align-items-center justify-content-between flex-wrap gap-3" style="background:#eef2ff; border:1px solid #c7d2fe;">
         <div class="d-flex align-items-center gap-3">
-            <i class="fa-solid fa-users-rectangle fs-3 me-1" style="color:#7e22ce;"></i>
+            <i class="fa-solid fa-users-rectangle fs-3 me-1" style="color:#3730a3;"></i>
             <div>
-                <h6 class="fw-bold mb-1" style="color:#581c87;">Bank Soal Bersama (Read-Only)</h6>
+                <h6 class="fw-bold mb-1" style="color:#1e1b4b;">Bank Soal Bersama (Read-Only)</h6>
                 <p class="mb-0 small text-muted">Bank Soal ini dibuat oleh <strong>{{ $bank_soal->guruMapel->guru->nama ?? 'Koordinator' }}</strong>. Anda dapat melihat seluruh soal atau menduplikatnya ke Bank Soal Personal Anda.</p>
             </div>
         </div>
         <form action="{{ route('dashboard-guru.bank-soal.duplicate', $bank_soal->id) }}" method="POST">
             @csrf
-            <button type="submit" class="btn text-white rounded-3 fw-bold px-3 py-2" style="background:#7e22ce;">
+            <button type="submit" class="btn text-white rounded-3 fw-bold px-3 py-2" style="background: linear-gradient(135deg, #0ea5e9, #0284c7);">
                 <i class="fa-solid fa-copy me-1"></i> Duplikat ke Personal
             </button>
         </form>

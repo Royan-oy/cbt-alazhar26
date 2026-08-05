@@ -158,15 +158,18 @@ class SoalController extends Controller
 
     public function edit(BankSoal $bank_soal, Soal $soal)
     {
-        $this->authorizeEditBankSoal($bank_soal);
-        $this->authorizeNotLocked($bank_soal);
+        $this->authorizeViewBankSoal($bank_soal);
         abort_unless($soal->bank_soal_id === $bank_soal->id, 404);
+
+        $guru = Auth::user()->guru;
+        $isOwner = $this->isOwner($guru, $bank_soal);
+        $isReadOnly = !$isOwner || $bank_soal->isLocked();
 
         $soal->load(['pilihanJawabans' => function ($q) {
             $q->orderBy('urutan');
         }]);
 
-        return view('guru.bank-soal.soal.edit', compact('bank_soal', 'soal'));
+        return view('guru.bank-soal.soal.edit', compact('bank_soal', 'soal', 'isOwner', 'isReadOnly'));
     }
 
     public function update(Request $request, BankSoal $bank_soal, Soal $soal)

@@ -460,17 +460,17 @@
 
     {{-- Read-Only Banner Jika Lain Pemilik --}}
     @if(!$isOwner)
-    <div class="alert border-0 shadow-sm rounded-4 p-3 mb-4 d-flex align-items-center justify-content-between flex-wrap gap-3" style="background:#f3e8ff; border:1px solid #d8b4fe;">
+    <div class="alert border-0 shadow-sm rounded-4 p-3 mb-4 d-flex align-items-center justify-content-between flex-wrap gap-3" style="background:#eef2ff; border:1px solid #c7d2fe;">
         <div class="d-flex align-items-center gap-3">
-            <i class="fa-solid fa-users-rectangle fs-3 me-1" style="color:#7e22ce;"></i>
+            <i class="fa-solid fa-users-rectangle fs-3 me-1" style="color:#3730a3;"></i>
             <div>
-                <h6 class="fw-bold mb-1" style="color:#581c87;">Melihat Bank Soal Bersama (Read-Only)</h6>
+                <h6 class="fw-bold mb-1" style="color:#1e1b4b;">Melihat Bank Soal Bersama (Read-Only)</h6>
                 <p class="mb-0 small text-muted">Bank Soal ini dibuat oleh <strong>{{ $bank_soal->guruMapel->guru->nama ?? 'Koordinator' }}</strong>. Anda hanya dapat membaca soal. Klik Duplikat jika ingin menyesuaikan soal untuk kelas Anda.</p>
             </div>
         </div>
         <form action="{{ route('dashboard-guru.bank-soal.duplicate', $bank_soal->id) }}" method="POST">
             @csrf
-            <button type="submit" class="btn text-white rounded-3 fw-bold px-3 py-2" style="background:#7e22ce;">
+            <button type="submit" class="btn text-white rounded-3 fw-bold px-3 py-2" style="background: linear-gradient(135deg, #0ea5e9, #0284c7);">
                 <i class="fa-solid fa-copy me-1"></i> Duplikat ke Personal
             </button>
         </form>
@@ -602,7 +602,7 @@
                 @if($isOwner && !$bank_soal->isLocked())
                 <div class="soal-actions">
                     <a href="{{ route('dashboard-guru.bank-soal.soal.edit', [$bank_soal->id, $soal->id]) }}"
-                       class="action-icon-btn btn-icon-edit" title="Edit">
+                       class="action-icon-btn btn-icon-edit" title="Edit Soal & Kunci">
                         <i class="fa-solid fa-pen"></i>
                     </a>
                     <form action="{{ route('dashboard-guru.bank-soal.soal.destroy', [$bank_soal->id, $soal->id]) }}"
@@ -614,13 +614,17 @@
                         </button>
                     </form>
                 </div>
-                @elseif(!$isOwner)
-                <div class="soal-actions">
-                    <span class="badge py-2 px-3 rounded-pill" style="background:#f3e8ff; color:#7e22ce;" title="Read-Only"><i class="fa-solid fa-eye me-1"></i>Read-Only</span>
-                </div>
                 @else
-                <div class="soal-actions">
-                    <span class="badge bg-secondary opacity-75 py-2 px-3 rounded-pill" title="Bank Soal Terkunci"><i class="fa-solid fa-lock me-1"></i>Terkunci</span>
+                <div class="soal-actions d-flex align-items-center gap-2">
+                    @if(!$isOwner)
+                        <span class="badge py-1.5 px-2.5 rounded-pill" style="background:#eef2ff; color:#3730a3; border: 1px solid #c7d2fe; font-size:11px;" title="Read-Only"><i class="fa-solid fa-users-rectangle me-1"></i>Read-Only</span>
+                    @else
+                        <span class="badge bg-secondary opacity-75 py-1.5 px-2.5 rounded-pill" style="font-size:11px;" title="Bank Soal Terkunci"><i class="fa-solid fa-lock me-1"></i>Terkunci</span>
+                    @endif
+                    <a href="{{ route('dashboard-guru.bank-soal.soal.edit', [$bank_soal->id, $soal->id]) }}"
+                       class="action-icon-btn btn-icon-view" title="Lihat Kunci & Detail Soal">
+                        <i class="fa-solid fa-eye"></i>
+                    </a>
                 </div>
                 @endif
             </div>
