@@ -465,6 +465,14 @@
                         Jadwal Ujian
                     </a>
                 </li>
+
+                <li>
+                    <a href="{{ route('dashboard-siswa.hasil-nilai.index') }}"
+                    class="nav-link {{ request()->routeIs('dashboard-siswa.hasil-nilai.*') ? 'active' : '' }}">
+                        <i class="fa-solid fa-square-poll-vertical me-3"></i>
+                        Hasil Nilai
+                    </a>
+                </li>
             </ul>
 
             <span class="menu-group-label">Pengaturan</span>

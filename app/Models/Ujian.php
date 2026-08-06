@@ -21,6 +21,9 @@ class Ujian extends Model
         'token',
         'acak_soal',
         'acak_jawaban',
+        'publish_nilai',
+        'published_at',
+        'published_by',
     ];
 
     protected $casts = [
@@ -28,7 +31,14 @@ class Ujian extends Model
         'waktu_selesai'         => 'datetime',
         'acak_soal'             => 'boolean',
         'acak_jawaban'          => 'boolean',
+        'publish_nilai'         => 'boolean',
+        'published_at'          => 'datetime',
     ];
+
+    public function publishedByUser()
+    {
+        return $this->belongsTo(User::class, 'published_by');
+    }
 
     public function bankSoal()
     {

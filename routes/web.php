@@ -94,8 +94,11 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('siswa', SiswaController::class);
         
         Route::patch('ujian/{ujian}/regenerate-token', [UjianController::class, 'regenerateToken'])->name('ujian.regenerate-token');
+        Route::patch('ujian/{ujian}/publish-nilai', [UjianController::class, 'publishNilai'])->name('ujian.publish-nilai');
+        Route::patch('ujian/{ujian}/unpublish-nilai', [UjianController::class, 'unpublishNilai'])->name('ujian.unpublish-nilai');
+        Route::post('ujian/batch-publish-nilai', [UjianController::class, 'batchPublishNilai'])->name('ujian.batch-publish-nilai');
         Route::resource('ujian', UjianController::class);
-        
+
         Route::get('bank-soal', [BankSoalController::class, 'index'])->name('bank-soal.index');
         Route::get('bank-soal/{bankSoal}', [BankSoalController::class, 'show'])->name('bank-soal.show');
         Route::patch('bank-soal/{bankSoal}/toggle-publish', [BankSoalController::class, 'togglePublish'])->name('bank-soal.toggle-publish');
@@ -159,6 +162,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('scan-token/{ujian}/konfirmasi', [\App\Http\Controllers\Siswa\ScanTokenController::class, 'konfirmasi'])->name('scan-token.konfirmasi');
 
         Route::get('ujian-hari-ini', [UjianHariIniController::class, 'index'])->name('ujian-hari-ini');
+        Route::get('hasil-nilai', [\App\Http\Controllers\Siswa\HasilNilaiController::class, 'index'])->name('hasil-nilai.index');
 
         Route::get('ujian/{ujian}/mulai', [RuangUjianController::class, 'mulai'])->name('ujian.mulai');
         Route::post('ujian/{ujian}/proses-masuk', [RuangUjianController::class, 'prosesMasuk'])->name('ujian.proses-masuk');

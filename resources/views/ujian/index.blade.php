@@ -4,38 +4,73 @@
 
 @section('content')
 
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+
 <style>
     :root {
+        /* -- Netral & struktur (Slate Navy Design System) -- */
         --primary-dark: #0f172a;
         --secondary-dark: #1e293b;
-        --accent-blue: #0ea5e9;
         --surface-white: #ffffff;
         --text-muted: #64748b;
         --border-color: #e2e8f0;
+
+        /* -- Aksen utama (Sky Blue & Slate Indigo) -- */
+        --accent-blue: #0ea5e9;
+        --accent-sky: #38bdf8;
+        --accent-indigo: #0284c7;
+
+        /* -- Warna semantik khusus PUBLISH NILAI --
+           emerald = nilai sudah tayang ke siswa,
+           amber   = belum dipublish */
+        --published: #059669;
+        --published-soft: #ecfdf5;
+        --published-border: rgba(5, 150, 105, 0.22);
+
+        --pending: #d97706;
+        --pending-soft: #fffbeb;
+        --pending-border: rgba(217, 119, 6, 0.25);
     }
 
+    .display-font { font-family: 'Plus Jakarta Sans', var(--bs-body-font-family), sans-serif; }
+
     .page-header {
-        background: linear-gradient(135deg, var(--primary-dark), var(--secondary-dark));
+        background: linear-gradient(135deg, var(--primary-dark) 0%, var(--secondary-dark) 100%);
         border-radius: 24px;
         padding: 32px;
         color: white;
         position: relative;
         overflow: hidden;
-        box-shadow: 0 20px 40px rgba(15, 23, 42, 0.08);
-        border: 1px solid rgba(255, 255, 255, 0.05);
+        box-shadow: 0 20px 40px rgba(15, 23, 42, 0.14);
+        border: 1px solid rgba(255, 255, 255, 0.08);
     }
 
     .page-header::after {
         content: '';
         position: absolute;
-        width: 300px;
-        height: 300px;
+        width: 320px;
+        height: 320px;
         border-radius: 50%;
-        right: -50px;
-        top: -80px;
-        background: radial-gradient(circle, rgba(14, 165, 233, 0.15) 0%, rgba(14, 165, 233, 0) 70%);
+        right: -60px;
+        top: -100px;
+        background: radial-gradient(circle, rgba(56, 189, 248, 0.18) 0%, rgba(56, 189, 248, 0) 70%);
         pointer-events: none;
     }
+
+    .page-header::before {
+        content: '';
+        position: absolute;
+        width: 260px;
+        height: 260px;
+        border-radius: 50%;
+        left: -60px;
+        bottom: -120px;
+        background: radial-gradient(circle, rgba(2, 132, 199, 0.22) 0%, rgba(2, 132, 199, 0) 70%);
+        pointer-events: none;
+    }
+
+    .page-header h3 { font-family: 'Plus Jakarta Sans', var(--bs-body-font-family), sans-serif; }
 
     .page-header-content { position: relative; z-index: 1; }
 
@@ -88,15 +123,26 @@
     .form-control-custom:focus {
         background-color: #fff;
         border-color: var(--accent-blue);
-        box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.12);
+        box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.15);
     }
 
     .btn-add {
         border-radius: 14px;
         padding: 12px 24px;
         font-weight: 600;
-        box-shadow: 0 4px 12px rgba(14, 165, 233, 0.2);
+        box-shadow: 0 8px 20px rgba(2, 132, 199, 0.28);
         white-space: nowrap;
+    }
+
+    .page-header .btn-info {
+        background: linear-gradient(135deg, #0284c7, #0369a1);
+        border: none;
+        color: #ffffff;
+    }
+    .page-header .btn-info:hover {
+        background: linear-gradient(135deg, #0369a1, #075985);
+        color: #ffffff;
+        box-shadow: 0 10px 24px rgba(2, 132, 199, 0.38);
     }
 
     .btn-action-trigger {
@@ -104,6 +150,18 @@
         height: 46px;
         padding: 0 20px;
         font-weight: 600;
+    }
+
+    .btn-filter-submit {
+        background-color: var(--primary-dark);
+        color: #ffffff;
+        border: none;
+        transition: background-color 0.2s ease;
+    }
+
+    .btn-filter-submit:hover {
+        background-color: var(--secondary-dark);
+        color: #ffffff;
     }
 
     .table thead th {
@@ -140,6 +198,134 @@
     .status-akan-datang { background: #eff6ff; color: #2563eb; border: 1px solid rgba(37, 99, 235, 0.15); }
     .status-berlangsung { background: #ecfdf5; color: #059669; border: 1px solid rgba(5, 150, 105, 0.15); }
     .status-selesai { background: #f8fafc; color: #64748b; border: 1px solid var(--border-color); }
+
+    /* ============================================
+       BANNER "PUBLISH NILAI MASSAL"
+       Dipindah keluar dari header gelap (kontras
+       rendah) menjadi kartu terang tersendiri yang
+       lebih menonjol karena ini fitur utama halaman.
+       ============================================ */
+    .publish-banner {
+        background: linear-gradient(120deg, var(--published-soft) 0%, #f0fdf4 55%, var(--surface-white) 100%);
+        border: 1px solid var(--published-border);
+        border-radius: 22px;
+        padding: 22px 26px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+
+    .publish-banner-icon {
+        width: 52px;
+        height: 52px;
+        border-radius: 16px;
+        background: var(--published);
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        flex-shrink: 0;
+        box-shadow: 0 8px 18px rgba(5, 150, 105, 0.28);
+    }
+
+    .publish-banner-text h6 { font-family: 'Plus Jakarta Sans', var(--bs-body-font-family), sans-serif; }
+
+    .btn-publish-massal {
+        background: var(--published);
+        border: none;
+        color: #fff;
+        border-radius: 14px;
+        padding: 12px 22px;
+        font-weight: 700;
+        white-space: nowrap;
+        box-shadow: 0 8px 18px rgba(5, 150, 105, 0.22);
+        transition: transform .2s, box-shadow .2s, background .2s;
+    }
+
+    .btn-publish-massal:hover {
+        background: #047857;
+        color: #fff;
+        transform: translateY(-2px);
+        box-shadow: 0 12px 24px rgba(5, 150, 105, 0.3);
+    }
+
+    .publish-count-chip {
+        background: #fff;
+        border: 1px solid var(--pending-border);
+        color: var(--pending);
+        font-weight: 700;
+        font-size: 12px;
+        padding: 5px 12px;
+        border-radius: 999px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    /* ============================================
+       PILL STATUS "PUBLISH NILAI" per baris
+       + tombol aksi cepat (tanpa buka dropdown)
+       ============================================ */
+    .nilai-cell { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+    .nilai-pill {
+        font-size: 11.5px;
+        font-weight: 700;
+        padding: 6px 13px;
+        border-radius: 999px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        white-space: nowrap;
+    }
+
+    .nilai-pill.is-published {
+        background: var(--published);
+        color: #fff;
+    }
+
+    .nilai-pill.is-pending {
+        background: var(--pending-soft);
+        color: var(--pending);
+        border: 1px solid var(--pending-border);
+    }
+
+    .nilai-quick-toggle {
+        width: 32px;
+        height: 32px;
+        border-radius: 10px;
+        border: 1px solid var(--border-color);
+        background: #fff;
+        color: var(--text-muted);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12.5px;
+        flex-shrink: 0;
+        transition: all .15s ease;
+    }
+
+    .nilai-quick-toggle:hover { transform: translateY(-2px); }
+
+    .nilai-quick-toggle.toggle-publish {
+        color: var(--published);
+        border-color: var(--published-border);
+    }
+    .nilai-quick-toggle.toggle-publish:hover { background: var(--published-soft); }
+
+    .nilai-quick-toggle.toggle-unpublish {
+        color: var(--pending);
+        border-color: var(--pending-border);
+    }
+    .nilai-quick-toggle.toggle-unpublish:hover { background: var(--pending-soft); }
+
+    .nilai-quick-toggle:disabled {
+        opacity: .4;
+        pointer-events: none;
+    }
 
     .token-box {
         font-family: 'Courier New', monospace;
@@ -364,6 +550,9 @@
         .action-icon-btn { width: 36px; height: 36px; }
 
         .pagination { justify-content: center !important; flex-wrap: wrap; }
+
+        .publish-banner { padding: 18px; border-radius: 18px; flex-direction: column; align-items: stretch; text-align: left; }
+        .btn-publish-massal { width: 100%; justify-content: center; display: flex; }
     }
 </style>
 
@@ -373,7 +562,7 @@
     <div class="page-header mb-4">
         <div class="page-header-content d-flex justify-content-between align-items-center flex-wrap gap-3">
             <div>
-                <span class="badge bg-info bg-opacity-25 text-info px-3 py-2 rounded-pill mb-2 fw-semibold" style="font-size: 11px; letter-spacing: 0.5px;">
+                <span class="badge px-3 py-2 rounded-pill mb-2 fw-semibold" style="background: rgba(255,255,255,0.12); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.25); font-size: 11px; letter-spacing: 0.5px;">
                     UJIAN
                 </span>
                 <h3 class="fw-bold mb-1" style="letter-spacing: -0.5px;">
@@ -383,11 +572,12 @@
                     Kelola jadwal, token, dan pengaturan ujian.
                 </p>
             </div>
-
-            <a href="{{ route('ujian.create') }}" class="btn btn-info text-white btn-add d-inline-flex align-items-center">
-                <i class="fa-solid fa-plus me-2"></i>
-                Buat Jadwal Ujian
-            </a>
+            <div class="d-flex align-items-center gap-2">
+                <a href="{{ route('ujian.create') }}" class="btn btn-info text-white btn-add d-inline-flex align-items-center">
+                    <i class="fa-solid fa-plus me-2"></i>
+                    Buat Jadwal Ujian
+                </a>
+            </div>
         </div>
     </div>
 
@@ -395,7 +585,7 @@
     <div class="row g-3 mb-4">
         <div class="col-6 col-md-4">
             <div class="stat-card">
-                <div class="stat-icon bg-primary bg-opacity-10 text-primary">
+                <div class="stat-icon" style="background: rgba(2, 132, 199, 0.1); color: #0284c7;">
                     <i class="fa-solid fa-calendar-check"></i>
                 </div>
                 <div>
@@ -406,7 +596,7 @@
         </div>
         <div class="col-6 col-md-4">
             <div class="stat-card">
-                <div class="stat-icon bg-success bg-opacity-10 text-success">
+                <div class="stat-icon" style="background: rgba(5, 150, 105, 0.1); color: #059669;">
                     <i class="fa-solid fa-circle-play"></i>
                 </div>
                 <div>
@@ -417,7 +607,7 @@
         </div>
         <div class="col-12 col-md-4">
             <div class="stat-card">
-                <div class="stat-icon bg-info bg-opacity-10 text-info">
+                <div class="stat-icon" style="background: rgba(217, 119, 6, 0.1); color: #d97706;">
                     <i class="fa-solid fa-clock"></i>
                 </div>
                 <div>
@@ -425,6 +615,33 @@
                     <h4 class="fw-bold text-dark mb-0 mt-1">{{ $totalAkanDatang }}</h4>
                 </div>
             </div>
+        </div>
+    </div>
+
+    {{-- Banner aksi utama: Publish Nilai Massal --}}
+    <div class="publish-banner mb-4">
+        <div class="d-flex align-items-center gap-3">
+            <div class="publish-banner-icon">
+                <i class="fa-solid fa-bullhorn"></i>
+            </div>
+            <div class="publish-banner-text">
+                <h6 class="fw-bold text-dark mb-1">Publish Nilai Massal</h6>
+                <small class="text-muted">
+                    Umumkan nilai akhir untuk semua ujian yang sudah selesai, sesuai filter jenis ujian &amp; tahun ajaran.
+                </small>
+            </div>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            @isset($totalBelumPublish)
+                <span class="publish-count-chip">
+                    <i class="fa-solid fa-eye-slash"></i>
+                    {{ $totalBelumPublish }} belum dipublish
+                </span>
+            @endisset
+            <button type="button" class="btn btn-publish-massal d-inline-flex align-items-center" data-bs-toggle="modal" data-bs-target="#batchPublishModal">
+                <i class="fa-solid fa-paper-plane me-2"></i>
+                Publish Massal
+            </button>
         </div>
     </div>
 
@@ -508,7 +725,7 @@
 
                     <div class="col-lg-auto">
                         <div class="d-flex gap-2">
-                            <button type="submit" class="btn btn-dark btn-action-trigger">
+                            <button type="submit" class="btn btn-filter-submit btn-action-trigger">
                                 <i class="fa fa-search me-2"></i>
                                 Filter
                             </button>
@@ -534,7 +751,8 @@
                             <th>Ujian</th>
                             <th>Waktu Pelaksanaan</th>
                             <th>Token</th>
-                            <th width="130">Status</th>
+                            <th width="130">Status Ujian</th>
+                            <th width="140">Publish Nilai</th>
                             <th width="70" class="text-end">Aksi</th>
                         </tr>
                     </thead>
@@ -571,6 +789,35 @@
                                     <span class="status-badge status-selesai"><i class="fa-solid fa-circle-check"></i> Selesai</span>
                                 @endif
                             </td>
+                            <td>
+                                <div class="nilai-cell">
+                                    @if($item->publish_nilai)
+                                        <span class="nilai-pill is-published">
+                                            <i class="fa-solid fa-circle-check"></i> Published
+                                        </span>
+                                        <form action="{{ route('ujian.unpublish-nilai', $item->id) }}" method="POST" class="m-0 form-unpublish">
+                                            @csrf
+                                            @method('PATCH')
+                                            <button type="submit" class="nilai-quick-toggle toggle-unpublish" title="Tarik (unpublish) nilai">
+                                                <i class="fa-solid fa-rotate-left"></i>
+                                            </button>
+                                        </form>
+                                    @else
+                                        <span class="nilai-pill is-pending">
+                                            <i class="fa-solid fa-eye-slash"></i> Belum Dipublish
+                                        </span>
+                                        <form action="{{ route('ujian.publish-nilai', $item->id) }}" method="POST" class="m-0 form-publish">
+                                            @csrf
+                                            @method('PATCH')
+                                            <button type="submit" class="nilai-quick-toggle toggle-publish"
+                                                    title="{{ now()->lt($item->waktu_selesai) ? 'Ujian belum selesai' : 'Publish nilai ke siswa' }}"
+                                                    {{ now()->lt($item->waktu_selesai) ? 'disabled' : '' }}>
+                                                <i class="fa-solid fa-bullhorn"></i>
+                                            </button>
+                                        </form>
+                                    @endif
+                                </div>
+                            </td>
                             <td class="text-end">
                                 <div class="dropdown-action-wrap">
                                     <button type="button" class="action-icon-btn btn-icon-more dropdown-action-toggle" title="Menu Aksi">
@@ -579,13 +826,13 @@
 
                                     <div class="dropdown-action-menu">
                                         <a href="{{ route('ujian.show', $item->id) }}" class="dropdown-action-item">
-                                            <i class="fa-solid fa-eye text-primary"></i>
+                                            <i class="fa-solid fa-eye" style="color: var(--accent-indigo);"></i>
                                             Kontrol Token &amp; Detail
                                         </a>
 
                                         <a href="{{ route('ujian.edit', $item->id) }}"
                                            class="dropdown-action-item {{ $item->token_aktif ? 'is-disabled' : '' }}">
-                                            <i class="fa-solid fa-pen text-info"></i>
+                                            <i class="fa-solid fa-pen" style="color: var(--accent-blue);"></i>
                                             Edit Jadwal
                                         </a>
 
@@ -641,6 +888,50 @@ document.querySelectorAll('.form-delete').forEach(function(form){
             confirmButtonColor: '#e11d48',
             cancelButtonColor: '#64748b',
             confirmButtonText: 'Ya, Hapus',
+            cancelButtonText: 'Batal',
+            reverseButtons: true,
+            customClass: { popup: 'rounded-4' }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                form.submit();
+            }
+        });
+    });
+});
+
+document.querySelectorAll('.form-publish').forEach(function(form){
+    form.addEventListener('submit', function(e){
+        e.preventDefault();
+        Swal.fire({
+            title: 'Publish nilai ujian ini?',
+            text: 'Siswa akan langsung bisa melihat nilai akhirnya setelah dipublish.',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#059669',
+            cancelButtonColor: '#64748b',
+            confirmButtonText: 'Ya, Publish',
+            cancelButtonText: 'Batal',
+            reverseButtons: true,
+            customClass: { popup: 'rounded-4' }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                form.submit();
+            }
+        });
+    });
+});
+
+document.querySelectorAll('.form-unpublish').forEach(function(form){
+    form.addEventListener('submit', function(e){
+        e.preventDefault();
+        Swal.fire({
+            title: 'Tarik (unpublish) nilai ini?',
+            text: 'Nilai akan disembunyikan kembali dari siswa sampai dipublish ulang.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d97706',
+            cancelButtonColor: '#64748b',
+            confirmButtonText: 'Ya, Tarik',
             cancelButtonText: 'Batal',
             reverseButtons: true,
             customClass: { popup: 'rounded-4' }
@@ -742,5 +1033,52 @@ Swal.fire({
     });
 })();
 </script>
+
+<!-- Modal Batch Publish Nilai -->
+<div class="modal fade" id="batchPublishModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow-lg overflow-hidden">
+            <form action="{{ route('ujian.batch-publish-nilai') }}" method="POST">
+                @csrf
+                <div class="modal-header text-white p-4" style="background: linear-gradient(135deg, var(--primary-dark), var(--secondary-dark)); border-bottom: none;">
+                    <h5 class="modal-title fw-bold text-white fs-6">
+                        <i class="fa-solid fa-bullhorn me-2"></i> Publish Nilai Massal
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="d-flex align-items-start gap-2 border-0 rounded-3 mb-4 small p-3" style="background: var(--published-soft); color: var(--published);">
+                        <i class="fa-solid fa-circle-info mt-1"></i>
+                        <div>Fitur ini akan mempublikasikan nilai akhir seluruh ujian yang sudah selesai dilaksanakan sesuai filter jenis ujian dan tahun ajaran yang Anda pilih.</div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small text-muted">Jenis Ujian</label>
+                        <select name="jenis_ujian_id" class="form-select rounded-3">
+                            <option value="">-- Semua Jenis Ujian --</option>
+                            @foreach($jenisUjians as $ju)
+                                <option value="{{ $ju->id }}">{{ $ju->nama }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small text-muted">Tahun Ajaran</label>
+                        <select name="tahun_ajaran_id" class="form-select rounded-3">
+                            <option value="">-- Semua Tahun Ajaran --</option>
+                            @foreach($tahunAjarans as $ta)
+                                <option value="{{ $ta->id }}">{{ $ta->nama_tahun }} {{ $ta->is_aktif ? '(Aktif)' : '' }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light p-3 border-top-0">
+                    <button type="button" class="btn btn-light border rounded-3 px-4" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn text-white rounded-3 px-4" style="background: var(--published);">
+                        <i class="fa-solid fa-paper-plane me-1"></i> Publish Sekarang
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
 @endsection
