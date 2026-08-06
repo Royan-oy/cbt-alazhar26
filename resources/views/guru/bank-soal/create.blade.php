@@ -171,71 +171,6 @@
         border-color: #ef4444 !important;
     }
 
-    /* ===== RADIO OPTIONS ===== */
-    .radio-card-group {
-        display: flex;
-        flex-direction: row;
-        gap: 12px;
-        margin-top: 6px;
-    }
-
-    .radio-card-option {
-        flex: 1;
-        min-width: 0;
-        display: flex;
-        align-items: flex-start;
-        gap: 10px;
-        padding: 12px 14px;
-        border-radius: 14px;
-        border: 1.5px solid var(--border-color);
-        background-color: #f8fafc;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        margin-bottom: 0;
-    }
-
-    @media (max-width: 575.98px) {
-        .radio-card-group {
-            flex-direction: column;
-        }
-    }
-
-    .radio-card-option:hover {
-        border-color: #cbd5e1;
-        background-color: #fff;
-    }
-
-    .radio-card-option:has(input[type="radio"]:checked) {
-        background-color: #f0f9ff;
-        border-color: var(--accent-blue);
-        box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
-    }
-
-    .radio-card-option input[type="radio"] {
-        margin-top: 3px;
-        accent-color: var(--accent-blue);
-        width: 16px;
-        height: 16px;
-        cursor: pointer;
-        flex-shrink: 0;
-    }
-
-    .radio-card-label {
-        font-weight: 600;
-        color: var(--primary-dark);
-        font-size: 13.5px;
-        display: block;
-        line-height: 1.3;
-    }
-
-    .radio-card-desc {
-        font-weight: 400;
-        color: var(--text-muted);
-        font-size: 11.5px;
-        display: block;
-        margin-top: 2px;
-    }
-
     /* ===== FORM FOOTER ===== */
     .form-footer {
         padding: 20px 28px;
@@ -504,22 +439,14 @@
                                 <span class="required-dot"></span>
                                 Kategori Bank Soal
                             </label>
-                            <div class="radio-card-group">
-                                <label class="radio-card-option">
-                                    <input type="radio" name="kategori" value="personal" {{ old('kategori', 'personal') == 'personal' ? 'checked' : '' }} required>
-                                    <div>
-                                        <span class="radio-card-label">Ujian Personal</span>
-                                        <span class="radio-card-desc">Hanya untuk kelas yang diajar</span>
-                                    </div>
-                                </label>
-                                <label class="radio-card-option">
-                                    <input type="radio" name="kategori" value="bersama" {{ old('kategori') == 'bersama' ? 'checked' : '' }} required>
-                                    <div>
-                                        <span class="radio-card-label">Ujian Bersama</span>
-                                        <span class="radio-card-desc">Bisa dipakai Admin untuk seluruh kelas</span>
-                                    </div>
-                                </label>
-                            </div>
+                            <select name="kategori" class="form-select-modern @error('kategori') is-invalid @enderror" required>
+                                <option value="personal" {{ old('kategori', 'personal') == 'personal' ? 'selected' : '' }}>
+                                    Ujian Personal (Hanya untuk kelas yang diajar)
+                                </option>
+                                <option value="bersama" {{ old('kategori') == 'bersama' ? 'selected' : '' }}>
+                                    Ujian Bersama (Bisa dipakai Admin untuk seluruh kelas)
+                                </option>
+                            </select>
                             @error('kategori')
                                 <div class="field-error">
                                     <i class="fa-solid fa-circle-exclamation"></i> {{ $message }}
