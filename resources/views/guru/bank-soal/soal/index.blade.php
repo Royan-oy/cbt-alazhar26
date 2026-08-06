@@ -629,7 +629,7 @@
                 @endif
             </div>
 
-            <p class="soal-text">{{ strip_tags($soal->teks_soal) }}</p>
+            <div class="soal-text">{!! $soal->teks_soal !!}</div>
 
             <div class="soal-meta">
                 <i class="fa-regular fa-clock"></i>

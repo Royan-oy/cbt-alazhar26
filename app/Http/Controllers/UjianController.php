@@ -403,4 +403,99 @@ class UjianController extends Controller
             }
         }
     }
+
+    /**
+     * Publikasikan nilai ujian ke siswa.
+     */
+    public function publishNilai(Ujian $ujian)
+    {
+        $this->authorizeJenjang($ujian);
+
+        if (now()->lt($ujian->waktu_selesai)) {
+            return back()->with('error', 'Tidak dapat mempublikasikan nilai untuk ujian yang belum berakhir.');
+        }
+
+        $ujian->update([
+            'publish_nilai' => true,
+            'published_at'  => now(),
+            'published_by'  => Auth::id(),
+        ]);
+
+        $menungguCount = \App\Models\Nilai::where('ujian_id', $ujian->id)
+            ->where('status_penilaian', 'menunggu')
+            ->count();
+
+        $pesan = 'Nilai ujian "' . $ujian->nama_ujian . '" berhasil dipublikasikan ke siswa.';
+        if ($menungguCount > 0) {
+            $pesan .= ' (Catatan: Terdapat ' . $menungguCount . ' siswa yang jawaban essay-nya belum dikoreksi guru; nilai mereka akan otomatis dapat dilihat setelah selesai dikoreksi).';
+        }
+
+        return back()->with('success', $pesan);
+    }
+
+    /**
+     * Tarik kembali (unpublish) nilai ujian dari siswa.
+     */
+    public function unpublishNilai(Ujian $ujian)
+    {
+        $this->authorizeJenjang($ujian);
+
+        $ujian->update([
+            'publish_nilai' => false,
+            'published_at'  => null,
+            'published_by'  => null,
+        ]);
+
+        return back()->with('success', 'Publikasi nilai ujian "' . $ujian->nama_ujian . '" berhasil ditarik kembali.');
+    }
+
+    /**
+     * Batch publish nilai ujian berdasarkan filter.
+     */
+    public function batchPublishNilai(Request $request)
+    {
+        $request->validate([
+            'jenis_ujian_id'  => 'nullable|exists:jenis_ujians,id',
+            'tahun_ajaran_id' => 'nullable|exists:tahun_ajarans,id',
+        ]);
+
+        $user = Auth::user();
+        $isAdminJenjang = $user->role == 'admin_jenjang';
+        $jenjangAdmin = optional($user->admin)->jenjang_id;
+
+        $query = Ujian::where('waktu_selesai', '<=', now())
+            ->where('publish_nilai', false);
+
+        if ($isAdminJenjang) {
+            $query->whereHas('bankSoal', function ($q) use ($jenjangAdmin) {
+                $q->where('jenjang_id', $jenjangAdmin);
+            });
+        }
+
+        if ($request->filled('jenis_ujian_id')) {
+            $query->where('jenis_ujian_id', $request->jenis_ujian_id);
+        }
+
+        if ($request->filled('tahun_ajaran_id')) {
+            $query->where('tahun_ajaran_id', $request->tahun_ajaran_id);
+        }
+
+        $ujians = $query->get();
+
+        if ($ujians->isEmpty()) {
+            return back()->with('warning', 'Tidak ada ujian yang sesuai kriteria untuk dipublikasikan (atau semua ujian sesuai filter sudah dipublikasikan / belum selesai).');
+        }
+
+        $publishedCount = 0;
+        foreach ($ujians as $ujian) {
+            $ujian->update([
+                'publish_nilai' => true,
+                'published_at'  => now(),
+                'published_by'  => Auth::id(),
+            ]);
+            $publishedCount++;
+        }
+
+        return back()->with('success', "Berhasil mempublikasikan nilai untuk {$publishedCount} ujian.");
+    }
 }

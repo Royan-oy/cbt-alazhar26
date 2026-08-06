@@ -10,18 +10,21 @@
     
     <style>
         :root {
-            --sb-bg: #0f172a;
-            --sb-card: #1e293b;
-            --sb-text-muted: #64748b;
-            --sb-text-active: #38bdf8;
+            --sb-bg: #eef3fd;
+            --sb-card: #ffffff;
+            --sb-text-muted: #6d7aa6;
+            --sb-text-active: #4f7df3;
         }
 
         body {
-            background-color: #f8fafc;
+            background-color: #eef2fb;
             overflow-x: hidden;
         }
 
         /* --- LOGIKA RESPONSIVE SIDEBAR --- */
+        /* Catatan: warna & shadow detail sidebar kini didefinisikan lebih spesifik
+           lewat .cbt-sidebar di layouts/sidebar.blade.php (tema claymorphism biru).
+           Aturan di bawah ini hanya menjaga logika show/hide di mobile. */
         .sidebar {
             min-width: 280px;
             max-width: 280px;
@@ -29,7 +32,7 @@
             min-height: 100vh;
             display: flex;
             flex-direction: column;
-            border-right: 1px solid rgba(255, 255, 255, 0.03);
+            border-right: none;
             z-index: 1040;
             transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
@@ -44,7 +47,7 @@
             }
             .sidebar.mobile-show {
                 transform: translateX(0); /* Muncul geser ke kanan */
-                box-shadow: 15px 0 30px rgba(0,0,0,0.25);
+                box-shadow: 24px 0 48px rgba(79, 125, 243, 0.28);
             }
             .sidebar-overlay {
                 position: fixed;
@@ -52,7 +55,7 @@
                 left: 0;
                 width: 100vw;
                 height: 100vh;
-                background-color: rgba(15, 23, 42, 0.6);
+                background-color: rgba(31, 44, 79, 0.45);
                 backdrop-filter: blur(4px);
                 z-index: 1030;
                 display: none;
@@ -68,13 +71,76 @@
         /* Nav Link Styling & Hover CSS Premium */
         .sidebar-menu-wrapper { padding: 20px 16px; }
         .sidebar .nav-link {
-            color: #94a3b8; padding: 12px 16px; border-radius: 12px; margin-bottom: 6px; font-size: 14px; font-weight: 500; display: flex; align-items: center; transition: all 0.2s ease;
+            color: #5c6a97; padding: 12px 16px; border-radius: 16px; margin-bottom: 6px; font-size: 14px; font-weight: 500; display: flex; align-items: center; transition: all 0.2s ease;
         }
-        .sidebar .nav-link:hover { background-color: rgba(255, 255, 255, 0.05); color: #f8fafc; transform: translateX(4px); }
-        .sidebar .nav-link.active { background: linear-gradient(135deg, #0284c7, #0369a1); color: #ffffff; font-weight: 600; box-shadow: 0 8px 20px rgba(2, 132, 199, 0.25); }
+        .sidebar .nav-link:hover { background-color: #eef3fd; color: #1f2c4f; transform: translateX(2px); }
+        .sidebar .nav-link.active { background: linear-gradient(135deg, #4f7df3, #6a9bf7); color: #ffffff; font-weight: 600; box-shadow: 0 8px 20px rgba(79, 125, 243, 0.3); }
         .sidebar .nav-link.active i { color: var(--sb-text-active); }
-        .style-header .shadow-hover-danger:hover { background-color: #fff1f2; border-radius: 10px; }
+        .style-header .shadow-hover-danger:hover { background-color: #eef3fd; border-radius: 10px; }
     </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['\\(', '\\)'], ['$', '$']],
+                displayMath: [['\\[', '\\]'], ['$$', '$$']]
+            },
+            options: {
+                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+            }
+        };
+
+        function renderMathInContainer(container) {
+            if (!container) container = document.body;
+            const selectors = '.soal-teks, .option-text, .soal-text, .kx-soal-text, .table, p, td, th, span';
+            const elements = container.querySelectorAll(selectors);
+
+            elements.forEach(el => {
+                if (el.closest('.tox-tinymce') || el.closest('script') || el.closest('textarea')) return;
+
+                const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, null, false);
+                const textNodes = [];
+                let node;
+                while (node = walker.nextNode()) {
+                    textNodes.push(node);
+                }
+
+                textNodes.forEach(textNode => {
+                    let val = textNode.nodeValue;
+                    if (!val || val.includes('\\(') || val.includes('\\[') || val.includes('$')) return;
+
+                    if (/\\([a-zA-Z]+|\{|\}|[\^_])/.test(val)) {
+                        let newVal = val.replace(/(\\([a-zA-Z]+|[{}]|[0-9]+)(\{[^{}]*\}|\[[^\]]*\]|[a-zA-Z0-9\+\-\*\/\^_=\<\>\ \t\.\,\(\)\:\;\#\%\!\&\-]+)*)/g, function(match) {
+                            let trimmed = match.trim();
+                            if (trimmed.startsWith('\\') && trimmed.length > 1) {
+                                const cmdMatch = trimmed.match(/^\\([a-zA-Z]+|[{}]|[\^_])/);
+                                if (cmdMatch) {
+                                    return '\\(' + trimmed + '\\)';
+                                }
+                            }
+                            return match;
+                        });
+
+                        if (newVal !== val) {
+                            const span = document.createElement('span');
+                            span.innerHTML = newVal;
+                            if (textNode.parentNode) {
+                                textNode.parentNode.replaceChild(span, textNode);
+                            }
+                        }
+                    }
+                });
+            });
+
+            if (window.MathJax && window.MathJax.typesetPromise) {
+                window.MathJax.typesetPromise([container]).catch(err => console.log('MathJax error:', err));
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            renderMathInContainer();
+        });
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     @stack('css')
 </head>
 <body>
@@ -96,13 +162,27 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
-        function toggleSidebarMobile() {
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check localStorage for sidebar state
+            const sidebar = document.querySelector('.sidebar');
+            if (window.innerWidth >= 768 && localStorage.getItem('sidebar_mini') === 'true') {
+                sidebar.classList.add('sidebar-mini');
+            }
+        });
+
+        function toggleSidebar() {
             const sidebar = document.querySelector('.sidebar');
             const overlay = document.getElementById('sidebarOverlay');
             
-            // Toggle class show untuk memunculkan efek CSS transition slide-in
-            sidebar.classList.toggle('mobile-show');
-            overlay.classList.toggle('show');
+            if (window.innerWidth >= 768) {
+                // Desktop mode: toggle mini sidebar
+                sidebar.classList.toggle('sidebar-mini');
+                localStorage.setItem('sidebar_mini', sidebar.classList.contains('sidebar-mini'));
+            } else {
+                // Mobile mode: off-canvas drawer
+                sidebar.classList.toggle('mobile-show');
+                overlay.classList.toggle('show');
+            }
         }
     </script>
 

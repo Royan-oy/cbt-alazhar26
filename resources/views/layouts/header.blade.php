@@ -185,7 +185,7 @@
         <div class="container-fluid d-flex justify-content-between align-items-center p-0">
             
             <div class="d-flex align-items-center gap-2 gap-md-3">
-                <button class="btn btn-burger-modern d-md-none" type="button" id="sidebarToggle" onclick="toggleSidebarMobile()">
+                <button class="btn btn-burger-modern" type="button" id="sidebarToggle" onclick="toggleSidebar()">
                     <i class="fa-solid fa-bars-staggered fs-5"></i>
                 </button>
 
@@ -265,4 +265,4 @@
     </nav>
 </div>
 
-<div class="sidebar-overlay d-md-none" id="sidebarOverlay" onclick="toggleSidebarMobile()"></div>
+<div class="sidebar-overlay d-md-none" id="sidebarOverlay" onclick="toggleSidebar()"></div>

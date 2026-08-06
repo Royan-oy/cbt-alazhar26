@@ -1,6 +1,10 @@
 @extends('layouts.app')
 @section('title', 'Edit Soal')
 
+@push('css')
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/mathquill/0.10.1/mathquill.css" />
+@endpush
+
 @section('content')
 
 <style>
@@ -85,6 +89,8 @@
         outline: none;
     }
 
+    .form-control-modern::placeholder { color: #94a3b8; }
+
     .form-select-modern {
         appearance: none;
         background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748b' d='M2.22 4.47a.75.75 0 011.06 0L6 7.19l2.72-2.72a.75.75 0 011.06 1.06l-3.25 3.25a.75.75 0 01-1.06 0L2.22 5.53a.75.75 0 010-1.06z'/%3E%3C/svg%3E");
@@ -160,13 +166,13 @@
 
     .opsi-row {
         display: flex;
-        align-items: center;
+        align-items: flex-start; /* Dirubah ke flex-start agar rapi dengan textarea TinyMCE */
         gap: 10px;
         margin-bottom: 10px;
         background: #fff;
         border: 1.5px solid var(--border-color);
         border-radius: 12px;
-        padding: 8px 12px;
+        padding: 12px 12px;
     }
 
     .opsi-check-wrap {
@@ -197,16 +203,6 @@
         align-items: center;
         justify-content: center;
         flex-shrink: 0;
-    }
-
-    .opsi-row input[type="text"] {
-        border: none;
-        background: transparent;
-        flex: 1;
-        font-size: 13.5px;
-        padding: 6px 4px;
-        outline: none;
-        min-width: 0;
     }
 
     .btn-remove-opsi {
@@ -275,6 +271,23 @@
     }
     fieldset[disabled] .upload-box {
         pointer-events: none;
+    }
+
+    /* Math Editor Styles */
+    .mq-editable-field {
+        border: 1px solid #ccc;
+        padding: 8px;
+        border-radius: 4px;
+        width: 100%;
+        background: #fff;
+        font-size: 18px;
+    }
+    .math-tex {
+        padding: 0 4px;
+        background: #f1f5f9;
+        border-radius: 4px;
+        border: 1px solid #e2e8f0;
+        font-family: monospace;
     }
 </style>
 
@@ -386,7 +399,7 @@
                 {{-- Teks Soal --}}
                 <div class="form-group">
                     <label class="form-label-custom"><span class="required-dot"></span> Teks Soal / Pertanyaan</label>
-                    <textarea name="teks_soal" class="form-control-modern @error('teks_soal') is-invalid @enderror" placeholder="Tuliskan teks pertanyaan di sini...">{{ old('teks_soal', $soal->teks_soal) }}</textarea>
+                    <textarea name="teks_soal" class="tinymce-editor @error('teks_soal') is-invalid @enderror" placeholder="Tuliskan teks pertanyaan di sini...">{{ old('teks_soal', $soal->teks_soal) }}</textarea>
                     @error('teks_soal')
                         <div class="field-error"><i class="fa-solid fa-circle-exclamation"></i> {{ $message }}</div>
                     @enderror
@@ -428,21 +441,25 @@
                         @if($pilihansPG->count() > 0)
                             @foreach($pilihansPG as $i => $pj)
                                 <div class="opsi-row pg-row">
-                                    <div class="opsi-check-wrap">
+                                    <div class="opsi-check-wrap mt-2">
                                         <input type="radio" name="jawaban_benar" value="{{ $i }}" {{ $pj->is_benar ? 'checked' : '' }}>
                                     </div>
-                                    <span class="opsi-kode-badge pg-kode">{{ chr(65 + $i) }}</span>
-                                    <input type="text" name="teks_pilihan[]" value="{{ $pj->teks_pilihan }}" placeholder="Teks opsi {{ chr(65 + $i) }}...">
-                                    <button type="button" class="btn-remove-opsi" onclick="removePgRow(this)"><i class="fa-solid fa-xmark"></i></button>
+                                    <span class="opsi-kode-badge pg-kode mt-2">{{ chr(65 + $i) }}</span>
+                                    <div class="flex-grow-1" style="min-width: 0;">
+                                        <textarea name="teks_pilihan[]" class="tinymce-editor-inline" id="pg_textarea_{{ $i }}">{{ $pj->teks_pilihan }}</textarea>
+                                    </div>
+                                    <button type="button" class="btn-remove-opsi mt-2" onclick="removePgRow(this)"><i class="fa-solid fa-xmark"></i></button>
                                 </div>
                             @endforeach
                         @else
                             @for ($i = 0; $i < 4; $i++)
                                 <div class="opsi-row pg-row">
-                                    <div class="opsi-check-wrap"><input type="radio" name="jawaban_benar" value="{{ $i }}"></div>
-                                    <span class="opsi-kode-badge pg-kode">{{ chr(65 + $i) }}</span>
-                                    <input type="text" name="teks_pilihan[]" placeholder="Teks opsi {{ chr(65 + $i) }}...">
-                                    <button type="button" class="btn-remove-opsi" onclick="removePgRow(this)"><i class="fa-solid fa-xmark"></i></button>
+                                    <div class="opsi-check-wrap mt-2"><input type="radio" name="jawaban_benar" value="{{ $i }}"></div>
+                                    <span class="opsi-kode-badge pg-kode mt-2">{{ chr(65 + $i) }}</span>
+                                    <div class="flex-grow-1" style="min-width: 0;">
+                                        <textarea name="teks_pilihan[]" class="tinymce-editor-inline" id="pg_textarea_new_{{ $i }}"></textarea>
+                                    </div>
+                                    <button type="button" class="btn-remove-opsi mt-2" onclick="removePgRow(this)"><i class="fa-solid fa-xmark"></i></button>
                                 </div>
                             @endfor
                         @endif
@@ -463,21 +480,25 @@
                         @if($pilihansK->count() > 0)
                             @foreach($pilihansK as $i => $pj)
                                 <div class="opsi-row pgk-row">
-                                    <div class="opsi-check-wrap">
+                                    <div class="opsi-check-wrap mt-2">
                                         <input type="checkbox" name="jawaban_benar_kompleks[]" value="{{ $i }}" class="pgk-checkbox" {{ $pj->is_benar ? 'checked' : '' }}>
                                     </div>
-                                    <span class="opsi-kode-badge pgk-kode">{{ chr(65 + $i) }}</span>
-                                    <input type="text" name="teks_pilihan[]" value="{{ $pj->teks_pilihan }}" placeholder="Teks opsi {{ chr(65 + $i) }}...">
-                                    <button type="button" class="btn-remove-opsi" onclick="removePgkRow(this)"><i class="fa-solid fa-xmark"></i></button>
+                                    <span class="opsi-kode-badge pgk-kode mt-2">{{ chr(65 + $i) }}</span>
+                                    <div class="flex-grow-1" style="min-width: 0;">
+                                        <textarea name="teks_pilihan[]" class="tinymce-editor-inline" id="pgk_textarea_{{ $i }}">{{ $pj->teks_pilihan }}</textarea>
+                                    </div>
+                                    <button type="button" class="btn-remove-opsi mt-2" onclick="removePgkRow(this)"><i class="fa-solid fa-xmark"></i></button>
                                 </div>
                             @endforeach
                         @else
                             @for ($i = 0; $i < 4; $i++)
                                 <div class="opsi-row pgk-row">
-                                    <div class="opsi-check-wrap"><input type="checkbox" name="jawaban_benar_kompleks[]" value="{{ $i }}" class="pgk-checkbox"></div>
-                                    <span class="opsi-kode-badge pgk-kode">{{ chr(65 + $i) }}</span>
-                                    <input type="text" name="teks_pilihan[]" placeholder="Teks opsi {{ chr(65 + $i) }}...">
-                                    <button type="button" class="btn-remove-opsi" onclick="removePgkRow(this)"><i class="fa-solid fa-xmark"></i></button>
+                                    <div class="opsi-check-wrap mt-2"><input type="checkbox" name="jawaban_benar_kompleks[]" value="{{ $i }}" class="pgk-checkbox"></div>
+                                    <span class="opsi-kode-badge pgk-kode mt-2">{{ chr(65 + $i) }}</span>
+                                    <div class="flex-grow-1" style="min-width: 0;">
+                                        <textarea name="teks_pilihan[]" class="tinymce-editor-inline" id="pgk_textarea_new_{{ $i }}"></textarea>
+                                    </div>
+                                    <button type="button" class="btn-remove-opsi mt-2" onclick="removePgkRow(this)"><i class="fa-solid fa-xmark"></i></button>
                                 </div>
                             @endfor
                         @endif
@@ -498,25 +519,29 @@
                         @if($pilihansBS->count() > 0)
                             @foreach($pilihansBS as $i => $pj)
                                 <div class="opsi-row bs-row">
-                                    <span class="opsi-kode-badge bs-kode">{{ $i + 1 }}</span>
-                                    <input type="text" name="teks_pernyataan[]" value="{{ $pj->teks_pilihan }}" placeholder="Pernyataan {{ $i + 1 }}...">
-                                    <select name="kunci_bs[]" class="form-select form-select-sm" style="max-width: 140px; border-radius: 8px;">
+                                    <span class="opsi-kode-badge bs-kode mt-2">{{ $i + 1 }}</span>
+                                    <div class="flex-grow-1" style="min-width: 0;">
+                                        <textarea name="teks_pernyataan[]" class="tinymce-editor-inline" id="bs_textarea_{{ $i }}">{{ $pj->teks_pilihan }}</textarea>
+                                    </div>
+                                    <select name="kunci_bs[]" class="form-select form-select-sm mt-2" style="max-width: 140px; border-radius: 8px;">
                                         <option value="benar" {{ $pj->is_benar ? 'selected' : '' }}>Benar</option>
                                         <option value="salah" {{ !$pj->is_benar ? 'selected' : '' }}>Salah</option>
                                     </select>
-                                    <button type="button" class="btn-remove-opsi" onclick="removeBsRow(this)"><i class="fa-solid fa-xmark"></i></button>
+                                    <button type="button" class="btn-remove-opsi mt-2" onclick="removeBsRow(this)"><i class="fa-solid fa-xmark"></i></button>
                                 </div>
                             @endforeach
                         @else
                             @for ($i = 0; $i < 3; $i++)
                                 <div class="opsi-row bs-row">
-                                    <span class="opsi-kode-badge bs-kode">{{ $i + 1 }}</span>
-                                    <input type="text" name="teks_pernyataan[]" placeholder="Pernyataan {{ $i + 1 }}...">
-                                    <select name="kunci_bs[]" class="form-select form-select-sm" style="max-width: 140px; border-radius: 8px;">
+                                    <span class="opsi-kode-badge bs-kode mt-2">{{ $i + 1 }}</span>
+                                    <div class="flex-grow-1" style="min-width: 0;">
+                                        <textarea name="teks_pernyataan[]" class="tinymce-editor-inline" id="bs_textarea_new_{{ $i }}"></textarea>
+                                    </div>
+                                    <select name="kunci_bs[]" class="form-select form-select-sm mt-2" style="max-width: 140px; border-radius: 8px;">
                                         <option value="benar">Benar</option>
                                         <option value="salah">Salah</option>
                                     </select>
-                                    <button type="button" class="btn-remove-opsi" onclick="removeBsRow(this)"><i class="fa-solid fa-xmark"></i></button>
+                                    <button type="button" class="btn-remove-opsi mt-2" onclick="removeBsRow(this)"><i class="fa-solid fa-xmark"></i></button>
                                 </div>
                             @endfor
                         @endif
@@ -537,21 +562,29 @@
                         @if($pilihansM->count() > 0)
                             @foreach($pilihansM as $i => $pj)
                                 <div class="opsi-row matching-row">
-                                    <span class="opsi-kode-badge matching-kode">{{ $i + 1 }}</span>
-                                    <input type="text" name="item_kiri[]" value="{{ $pj->teks_pilihan }}" placeholder="Item Kiri {{ $i + 1 }}...">
-                                    <span class="fw-bold text-primary px-1">➔</span>
-                                    <input type="text" name="item_kanan[]" value="{{ $pj->pasangan }}" placeholder="Pasangan Kanan {{ $i + 1 }}...">
-                                    <button type="button" class="btn-remove-opsi" onclick="removeMatchingRow(this)"><i class="fa-solid fa-xmark"></i></button>
+                                    <span class="opsi-kode-badge matching-kode mt-2">{{ $i + 1 }}</span>
+                                    <div class="flex-grow-1" style="min-width: 0;">
+                                        <textarea name="item_kiri[]" class="tinymce-editor-inline" id="matching_kiri_{{ $i }}">{{ $pj->teks_pilihan }}</textarea>
+                                    </div>
+                                    <span class="fw-bold text-primary px-1 mt-2">➔</span>
+                                    <div class="flex-grow-1" style="min-width: 0;">
+                                        <textarea name="item_kanan[]" class="tinymce-editor-inline" id="matching_kanan_{{ $i }}">{{ $pj->pasangan }}</textarea>
+                                    </div>
+                                    <button type="button" class="btn-remove-opsi mt-2" onclick="removeMatchingRow(this)"><i class="fa-solid fa-xmark"></i></button>
                                 </div>
                             @endforeach
                         @else
                             @for ($i = 0; $i < 3; $i++)
                                 <div class="opsi-row matching-row">
-                                    <span class="opsi-kode-badge matching-kode">{{ $i + 1 }}</span>
-                                    <input type="text" name="item_kiri[]" placeholder="Item Kiri {{ $i + 1 }}...">
-                                    <span class="fw-bold text-primary px-1">➔</span>
-                                    <input type="text" name="item_kanan[]" placeholder="Pasangan Kanan {{ $i + 1 }}...">
-                                    <button type="button" class="btn-remove-opsi" onclick="removeMatchingRow(this)"><i class="fa-solid fa-xmark"></i></button>
+                                    <span class="opsi-kode-badge matching-kode mt-2">{{ $i + 1 }}</span>
+                                    <div class="flex-grow-1" style="min-width: 0;">
+                                        <textarea name="item_kiri[]" class="tinymce-editor-inline" id="matching_kiri_new_{{ $i }}"></textarea>
+                                    </div>
+                                    <span class="fw-bold text-primary px-1 mt-2">➔</span>
+                                    <div class="flex-grow-1" style="min-width: 0;">
+                                        <textarea name="item_kanan[]" class="tinymce-editor-inline" id="matching_kanan_new_{{ $i }}"></textarea>
+                                    </div>
+                                    <button type="button" class="btn-remove-opsi mt-2" onclick="removeMatchingRow(this)"><i class="fa-solid fa-xmark"></i></button>
                                 </div>
                             @endfor
                         @endif
@@ -597,10 +630,111 @@
     </div>
 </div>
 
+<!-- MathQuill Modal -->
+<div class="modal fade" id="mathModal" tabindex="-1" aria-labelledby="mathModalLabel" aria-hidden="true" data-bs-backdrop="static">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="border-radius: 16px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+      <div class="modal-header" style="background: #f8fafc; border-bottom: 1px solid #e2e8f0; border-radius: 16px 16px 0 0;">
+        <h5 class="modal-title fw-bold" id="mathModalLabel" style="color: #0f172a;"><i class="fa-solid fa-square-root-variable text-primary me-2"></i> Editor Rumus Matematika</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-4">
+        <p class="small text-muted mb-3">Ketikkan rumus matematika secara visual di bawah ini. Anda dapat menggunakan keyboard (contoh: ketik <code>/</code> untuk pecahan, <code>^</code> untuk pangkat).</p>
+        <div id="math-field" class="mq-editable-field mb-3"></div>
+        
+        <div class="mt-3">
+            <label class="form-label text-muted small fw-bold">Preview LaTeX (Otomatis):</label>
+            <input type="text" id="latex-output" class="form-control bg-light" readonly style="font-family: monospace; font-size: 13px;">
+        </div>
+      </div>
+      <div class="modal-footer" style="border-top: 1px solid #e2e8f0;">
+        <button type="button" class="btn btn-light rounded-3 px-4" data-bs-dismiss="modal">Batal</button>
+        <button type="button" class="btn btn-primary rounded-3 px-4" onclick="insertMath()">Sisipkan Rumus</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+@push('js')
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathquill/0.10.1/mathquill.min.js"></script>
+<script src="https://cdn.tiny.cloud/1/fcgskjgicb0gzxd866uvznq924bddu15q8yxm8kwbf9vmfh0/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+
 <script>
     const MAX_OPSI_PG = 8;
     const MAX_OPSI_BS = 10;
     const MAX_OPSI_MATCHING = 10;
+    const isReadOnly = {{ $isReadOnly ? 'true' : 'false' }};
+
+    let currentEditorForMath = null;
+    const MQ = MathQuill.getInterface(2);
+    let mathFieldSpan = document.getElementById('math-field');
+    let mathField = MQ.MathField(mathFieldSpan, {
+        spaceBehavesLikeTab: true,
+        handlers: {
+            edit: function() {
+                document.getElementById('latex-output').value = mathField.latex();
+            }
+        }
+    });
+
+    function openMathModal(editor) {
+        if (isReadOnly) return;
+        currentEditorForMath = editor;
+        mathField.latex(''); 
+        document.getElementById('latex-output').value = '';
+        var myModal = new bootstrap.Modal(document.getElementById('mathModal'));
+        myModal.show();
+        setTimeout(() => mathField.focus(), 500);
+    }
+
+    function insertMath() {
+        const latex = mathField.latex();
+        if (latex && currentEditorForMath) {
+            currentEditorForMath.insertContent('<span class="math-tex">\\(' + latex + '\\)</span>&nbsp;');
+            bootstrap.Modal.getInstance(document.getElementById('mathModal')).hide();
+        }
+    }
+
+    const tinymceConfig = {
+        selector: '.tinymce-editor',
+        height: 250,
+        menubar: false,
+        branding: false,
+        promotion: false,
+        readonly: isReadOnly,
+        plugins: 'advlist autolink lists link image charmap preview searchreplace visualblocks code table wordcount',
+        toolbar: isReadOnly ? false : 'undo redo | mathBtn | bold italic underline | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | table image | removeformat',
+        setup: function (editor) {
+            editor.ui.registry.addButton('mathBtn', {
+                text: '∑ Math',
+                tooltip: 'Insert Math Equation',
+                onAction: function (_) {
+                    openMathModal(editor);
+                }
+            });
+        }
+    };
+
+    const tinymceInlineConfig = {
+        selector: '.tinymce-editor-inline',
+        height: 150,
+        menubar: false,
+        branding: false,
+        promotion: false,
+        readonly: isReadOnly,
+        plugins: 'advlist autolink lists link charmap preview searchreplace visualblocks code',
+        toolbar: isReadOnly ? false : 'mathBtn | bold italic | alignleft aligncenter alignright | bullist numlist | removeformat',
+        setup: function (editor) {
+            editor.ui.registry.addButton('mathBtn', {
+                text: '∑ Math',
+                tooltip: 'Insert Math Equation',
+                onAction: function (_) {
+                    openMathModal(editor);
+                }
+            });
+        }
+    };
 
     function toggleJenisSoal() {
         const jenis = document.getElementById('jenisSoal').value;
@@ -619,7 +753,6 @@
         rows.forEach((row, idx) => {
             row.querySelector('input[type="radio"]').value = idx;
             row.querySelector('.pg-kode').textContent = String.fromCharCode(65 + idx);
-            row.querySelector('input[type="text"]').placeholder = `Teks opsi ${String.fromCharCode(65 + idx)}...`;
         });
         const removeBtns = document.querySelectorAll('#pgContainer .btn-remove-opsi');
         removeBtns.forEach(btn => btn.disabled = (rows.length <= 2));
@@ -629,17 +762,32 @@
     function addPgRow() {
         const rows = document.querySelectorAll('.pg-row');
         if (rows.length >= MAX_OPSI_PG) return;
-        const clone = rows[0].cloneNode(true);
-        clone.querySelector('input[type="text"]').value = '';
-        clone.querySelector('input[type="radio"]').checked = false;
-        document.getElementById('pgContainer').appendChild(clone);
+        const idx = rows.length;
+        const textareaId = 'pg_textarea_' + Date.now();
+        const html = `
+            <div class="opsi-row pg-row">
+                <div class="opsi-check-wrap mt-2">
+                    <input type="radio" name="jawaban_benar" value="${idx}">
+                </div>
+                <span class="opsi-kode-badge pg-kode mt-2">${String.fromCharCode(65 + idx)}</span>
+                <div class="flex-grow-1" style="min-width: 0;">
+                    <textarea name="teks_pilihan[]" class="tinymce-editor-inline" id="${textareaId}"></textarea>
+                </div>
+                <button type="button" class="btn-remove-opsi mt-2" onclick="removePgRow(this)"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+        `;
+        document.getElementById('pgContainer').insertAdjacentHTML('beforeend', html);
+        tinymce.init({...tinymceInlineConfig, selector: '#' + textareaId});
         renumberPg();
     }
 
     function removePgRow(btn) {
         const rows = document.querySelectorAll('.pg-row');
         if (rows.length <= 2) return;
-        btn.closest('.pg-row').remove();
+        const row = btn.closest('.pg-row');
+        const textarea = row.querySelector('textarea');
+        if (textarea && textarea.id) tinymce.remove('#' + textarea.id);
+        row.remove();
         renumberPg();
     }
 
@@ -649,7 +797,6 @@
         rows.forEach((row, idx) => {
             row.querySelector('.pgk-checkbox').value = idx;
             row.querySelector('.pgk-kode').textContent = String.fromCharCode(65 + idx);
-            row.querySelector('input[type="text"]').placeholder = `Teks opsi ${String.fromCharCode(65 + idx)}...`;
         });
         const removeBtns = document.querySelectorAll('#pgkContainer .btn-remove-opsi');
         removeBtns.forEach(btn => btn.disabled = (rows.length <= 2));
@@ -659,17 +806,32 @@
     function addPgkRow() {
         const rows = document.querySelectorAll('.pgk-row');
         if (rows.length >= MAX_OPSI_PG) return;
-        const clone = rows[0].cloneNode(true);
-        clone.querySelector('input[type="text"]').value = '';
-        clone.querySelector('.pgk-checkbox').checked = false;
-        document.getElementById('pgkContainer').appendChild(clone);
+        const idx = rows.length;
+        const textareaId = 'pgk_textarea_' + Date.now();
+        const html = `
+            <div class="opsi-row pgk-row">
+                <div class="opsi-check-wrap mt-2">
+                    <input type="checkbox" name="jawaban_benar_kompleks[]" value="${idx}" class="pgk-checkbox">
+                </div>
+                <span class="opsi-kode-badge pgk-kode mt-2">${String.fromCharCode(65 + idx)}</span>
+                <div class="flex-grow-1" style="min-width: 0;">
+                    <textarea name="teks_pilihan[]" class="tinymce-editor-inline" id="${textareaId}"></textarea>
+                </div>
+                <button type="button" class="btn-remove-opsi mt-2" onclick="removePgkRow(this)"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+        `;
+        document.getElementById('pgkContainer').insertAdjacentHTML('beforeend', html);
+        tinymce.init({...tinymceInlineConfig, selector: '#' + textareaId});
         renumberPgk();
     }
 
     function removePgkRow(btn) {
         const rows = document.querySelectorAll('.pgk-row');
         if (rows.length <= 2) return;
-        btn.closest('.pgk-row').remove();
+        const row = btn.closest('.pgk-row');
+        const textarea = row.querySelector('textarea');
+        if (textarea && textarea.id) tinymce.remove('#' + textarea.id);
+        row.remove();
         renumberPgk();
     }
 
@@ -678,7 +840,6 @@
         const rows = document.querySelectorAll('.bs-row');
         rows.forEach((row, idx) => {
             row.querySelector('.bs-kode').textContent = idx + 1;
-            row.querySelector('input[type="text"]').placeholder = `Pernyataan ${idx + 1}...`;
         });
         const removeBtns = document.querySelectorAll('#bsContainer .btn-remove-opsi');
         removeBtns.forEach(btn => btn.disabled = (rows.length <= 1));
@@ -688,17 +849,33 @@
     function addBsRow() {
         const rows = document.querySelectorAll('.bs-row');
         if (rows.length >= MAX_OPSI_BS) return;
-        const clone = rows[0].cloneNode(true);
-        clone.querySelector('input[type="text"]').value = '';
-        clone.querySelector('select').value = 'benar';
-        document.getElementById('bsContainer').appendChild(clone);
+        const idx = rows.length;
+        const textareaId = 'bs_textarea_' + Date.now();
+        const html = `
+            <div class="opsi-row bs-row">
+                <span class="opsi-kode-badge bs-kode mt-2">${idx + 1}</span>
+                <div class="flex-grow-1" style="min-width: 0;">
+                    <textarea name="teks_pernyataan[]" class="tinymce-editor-inline" id="${textareaId}"></textarea>
+                </div>
+                <select name="kunci_bs[]" class="form-select form-select-sm mt-2" style="max-width: 140px; border-radius: 8px;">
+                    <option value="benar">Benar</option>
+                    <option value="salah">Salah</option>
+                </select>
+                <button type="button" class="btn-remove-opsi mt-2" onclick="removeBsRow(this)"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+        `;
+        document.getElementById('bsContainer').insertAdjacentHTML('beforeend', html);
+        tinymce.init({...tinymceInlineConfig, selector: '#' + textareaId});
         renumberBs();
     }
 
     function removeBsRow(btn) {
         const rows = document.querySelectorAll('.bs-row');
         if (rows.length <= 1) return;
-        btn.closest('.bs-row').remove();
+        const row = btn.closest('.bs-row');
+        const textarea = row.querySelector('textarea');
+        if (textarea && textarea.id) tinymce.remove('#' + textarea.id);
+        row.remove();
         renumberBs();
     }
 
@@ -707,9 +884,6 @@
         const rows = document.querySelectorAll('.matching-row');
         rows.forEach((row, idx) => {
             row.querySelector('.matching-kode').textContent = idx + 1;
-            const inputs = row.querySelectorAll('input[type="text"]');
-            inputs[0].placeholder = `Item Kiri ${idx + 1}...`;
-            inputs[1].placeholder = `Pasangan Kanan ${idx + 1}...`;
         });
         const removeBtns = document.querySelectorAll('#matchingContainer .btn-remove-opsi');
         removeBtns.forEach(btn => btn.disabled = (rows.length <= 1));
@@ -719,18 +893,36 @@
     function addMatchingRow() {
         const rows = document.querySelectorAll('.matching-row');
         if (rows.length >= MAX_OPSI_MATCHING) return;
-        const clone = rows[0].cloneNode(true);
-        const inputs = clone.querySelectorAll('input[type="text"]');
-        inputs[0].value = '';
-        inputs[1].value = '';
-        document.getElementById('matchingContainer').appendChild(clone);
+        const idx = rows.length;
+        const textKiriId = 'matching_kiri_' + Date.now();
+        const textKananId = 'matching_kanan_' + Date.now();
+        const html = `
+            <div class="opsi-row matching-row">
+                <span class="opsi-kode-badge matching-kode mt-2">${idx + 1}</span>
+                <div class="flex-grow-1" style="min-width: 0;">
+                    <textarea name="item_kiri[]" class="tinymce-editor-inline" id="${textKiriId}"></textarea>
+                </div>
+                <span class="fw-bold text-primary px-1 mt-2">➔</span>
+                <div class="flex-grow-1" style="min-width: 0;">
+                    <textarea name="item_kanan[]" class="tinymce-editor-inline" id="${textKananId}"></textarea>
+                </div>
+                <button type="button" class="btn-remove-opsi mt-2" onclick="removeMatchingRow(this)"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+        `;
+        document.getElementById('matchingContainer').insertAdjacentHTML('beforeend', html);
+        tinymce.init({...tinymceInlineConfig, selector: '#' + textKiriId});
+        tinymce.init({...tinymceInlineConfig, selector: '#' + textKananId});
         renumberMatching();
     }
 
     function removeMatchingRow(btn) {
         const rows = document.querySelectorAll('.matching-row');
         if (rows.length <= 1) return;
-        btn.closest('.matching-row').remove();
+        const row = btn.closest('.matching-row');
+        row.querySelectorAll('textarea').forEach(textarea => {
+            if (textarea.id) tinymce.remove('#' + textarea.id);
+        });
+        row.remove();
         renumberMatching();
     }
 
@@ -741,6 +933,10 @@
         renumberPgk();
         renumberBs();
         renumberMatching();
+        
+        // Init TinyMCE
+        tinymce.init(tinymceConfig);
+        tinymce.init(tinymceInlineConfig);
     });
 
     // Image Upload Script
@@ -775,5 +971,5 @@
         uploadBox.classList.remove('has-file');
     }
 </script>
-
+@endpush
 @endsection

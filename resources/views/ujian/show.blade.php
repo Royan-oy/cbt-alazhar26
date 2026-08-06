@@ -441,6 +441,59 @@
                 </div>
             </div>
 
+            {{-- Card Publish Nilai --}}
+            <div class="content-card mb-3">
+                <div class="section-title">
+                    <i class="fa-solid fa-bullhorn text-info"></i>
+                    Publish Nilai ke Siswa
+                </div>
+
+                <div class="p-3 rounded-4 mb-3 text-center" style="background-color: #f8fafc; border: 1px solid var(--border-color);">
+                    @if($ujian->publish_nilai)
+                        <span class="badge bg-success text-white px-3 py-2 rounded-pill fs-7 fw-bold mb-2">
+                            <i class="fa-solid fa-circle-check me-1"></i> Published
+                        </span>
+                        <div class="text-muted small">
+                            Dipublikasikan pada: <br>
+                            <strong class="text-dark">{{ $ujian->published_at ? $ujian->published_at->translatedFormat('d M Y, H:i') : '-' }}</strong>
+                            @if($ujian->publishedByUser)
+                                <br>Oleh: <strong class="text-dark">{{ $ujian->publishedByUser->nama }}</strong>
+                            @endif
+                        </div>
+                    @else
+                        <span class="badge bg-secondary text-white px-3 py-2 rounded-pill fs-7 fw-bold mb-2">
+                            <i class="fa-solid fa-eye-slash me-1"></i> Belum Dipublish (Draft)
+                        </span>
+                        <div class="text-muted small">
+                            Siswa belum dapat melihat nilai hasil ujian ini.
+                        </div>
+                    @endif
+                </div>
+
+                @if($ujian->publish_nilai)
+                    <form action="{{ route('ujian.unpublish-nilai', $ujian->id) }}" method="POST">
+                        @csrf
+                        @method('PATCH')
+                        <button type="submit" class="btn btn-warning text-dark w-100 rounded-3 fw-bold py-2.5">
+                            <i class="fa-solid fa-eye-slash me-1"></i> Tarik (Unpublish) Nilai
+                        </button>
+                    </form>
+                @else
+                    <form action="{{ route('ujian.publish-nilai', $ujian->id) }}" method="POST">
+                        @csrf
+                        @method('PATCH')
+                        <button type="submit" class="btn btn-success text-white w-100 rounded-3 fw-bold py-2.5" {{ now()->lt($ujian->waktu_selesai) ? 'disabled' : '' }}>
+                            <i class="fa-solid fa-paper-plane me-1"></i> Publish Nilai Sekarang
+                        </button>
+                    </form>
+                    @if(now()->lt($ujian->waktu_selesai))
+                        <small class="text-muted text-center d-block mt-2" style="font-size: 11px;">
+                            * Nilai hanya dapat dipublikasikan setelah waktu pengerjaan ujian selesai.
+                        </small>
+                    @endif
+                @endif
+            </div>
+
             <div class="content-card mb-3">
 
                 <div class="section-title">

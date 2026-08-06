@@ -475,15 +475,20 @@
                             <div class="mt-auto">
                                 @if($ujian->status_siswa == 'selesai')
 
-
-                                <button class="btn-disabled d-flex align-items-center justify-content-center gap-2"
-                                        style="background:#dcfce7;color:#15803d;">
-
-                                    <i class="fa-solid fa-circle-check"></i>
-
-                                    Sudah Dikerjakan
-
-                                </button>
+                                    @if($ujian->publish_nilai)
+                                        <a href="{{ route('dashboard-siswa.hasil-nilai.index') }}" 
+                                           class="btn-masuk d-flex align-items-center justify-content-center gap-2 text-decoration-none"
+                                           style="background: linear-gradient(135deg, #059669, #10b981); color: #fff;">
+                                            <i class="fa-solid fa-square-poll-vertical"></i>
+                                            Sudah Dikerjakan &bull; Lihat Nilai
+                                        </a>
+                                    @else
+                                        <button class="btn-disabled d-flex align-items-center justify-content-center gap-2"
+                                                style="background:#dcfce7;color:#15803d;">
+                                            <i class="fa-solid fa-circle-check"></i>
+                                            Sudah Dikerjakan
+                                        </button>
+                                    @endif
 
 
 
