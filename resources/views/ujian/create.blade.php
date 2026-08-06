@@ -329,7 +329,16 @@
 
                     {{-- Kelas --}}
                     <div class="col-12">
-                        <div class="section-label">Kelas Peserta</div>
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <div class="section-label mb-0">Kelas Peserta</div>
+
+                            <div class="form-check" id="selectAllKelasWrapper" style="display: none;">
+                                <input class="form-check-input" type="checkbox" id="selectAllKelas">
+                                <label class="form-check-label fw-semibold text-primary" for="selectAllKelas" style="cursor: pointer; user-select: none;">
+                                    Pilih Semua Kelas
+                                </label>
+                            </div>
+                        </div>
                         <small class="text-muted d-block mb-2">Kelas yang tampil adalah kelas yang diajar oleh guru pembuat bank soal yang dipilih.</small>
                     
                         <div class="row g-2" id="kelasContainer">
@@ -484,10 +493,34 @@ document.addEventListener('DOMContentLoaded', function () {
 <script>
 document.addEventListener('DOMContentLoaded', function () {
  
-    const bankSoalSelect = document.getElementById('bankSoal');
-    const kelasItems      = document.querySelectorAll('.kelas-item');
-    const map              = window.bankSoalKelasMap || {};
+    const bankSoalSelect   = document.getElementById('bankSoal');
+    const kelasItems        = document.querySelectorAll('.kelas-item');
+    const selectAllKelas    = document.getElementById('selectAllKelas');
+    const selectAllWrapper  = document.getElementById('selectAllKelasWrapper');
+    const map                = window.bankSoalKelasMap || {};
  
+    function updateSelectAllState() {
+        const visibleItems = Array.from(kelasItems).filter(item => item.style.display !== 'none');
+        if (visibleItems.length === 0) {
+            if (selectAllWrapper) selectAllWrapper.style.display = 'none';
+            if (selectAllKelas) {
+                selectAllKelas.checked = false;
+                selectAllKelas.indeterminate = false;
+            }
+            return;
+        }
+
+        if (selectAllWrapper) selectAllWrapper.style.display = 'block';
+
+        const visibleCheckboxes = visibleItems.map(item => item.querySelector('input[type="checkbox"]')).filter(Boolean);
+        const checkedCount = visibleCheckboxes.filter(cb => cb.checked).length;
+
+        if (selectAllKelas) {
+            selectAllKelas.checked = checkedCount === visibleCheckboxes.length && visibleCheckboxes.length > 0;
+            selectAllKelas.indeterminate = checkedCount > 0 && checkedCount < visibleCheckboxes.length;
+        }
+    }
+
     function filterKelas() {
  
         const bankSoalId = bankSoalSelect ? bankSoalSelect.value : '';
@@ -496,8 +529,10 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!bankSoalId) {
             kelasItems.forEach(function (item) {
                 item.style.display = 'none';
-                item.querySelector('input').checked = false;
+                const input = item.querySelector('input');
+                if (input) input.checked = false;
             });
+            updateSelectAllState();
             return;
         }
  
@@ -510,13 +545,43 @@ document.addEventListener('DOMContentLoaded', function () {
                 item.style.display = 'block';
             } else {
                 item.style.display = 'none';
-                item.querySelector('input').checked = false;
+                const input = item.querySelector('input');
+                if (input) input.checked = false;
             }
         });
+
+        updateSelectAllState();
     }
  
     if (bankSoalSelect) {
         bankSoalSelect.addEventListener('change', filterKelas);
+    }
+
+    if (selectAllKelas) {
+        selectAllKelas.addEventListener('change', function () {
+            const isChecked = this.checked;
+            kelasItems.forEach(function (item) {
+                if (item.style.display !== 'none') {
+                    const cb = item.querySelector('input[type="checkbox"]');
+                    if (cb) cb.checked = isChecked;
+                }
+            });
+            updateSelectAllState();
+        });
+    }
+
+    kelasItems.forEach(function (item) {
+        const cb = item.querySelector('input[type="checkbox"]');
+        if (cb) {
+            cb.addEventListener('change', updateSelectAllState);
+        }
+    });
+
+    const jenjangSelect = document.getElementById('jenjang');
+    if (jenjangSelect) {
+        jenjangSelect.addEventListener('change', function () {
+            setTimeout(updateSelectAllState, 50);
+        });
     }
  
     // jalankan saat load pertama (misal ada old input / validasi gagal)
