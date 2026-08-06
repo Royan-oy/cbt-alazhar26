@@ -190,6 +190,46 @@
     }
 
     /* ========================================== */
+    /* --- SIDEBAR MOBILE STATE --- */
+    /* ========================================== */
+    .sidebar-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(15, 23, 42, 0.4);
+        backdrop-filter: blur(3px);
+        z-index: 1050; /* Di bawah sidebar, di atas konten */
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+    }
+    
+    .sidebar-overlay.show {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    @media (max-width: 767.98px) {
+        .cbt-sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            z-index: 1055; /* Di atas overlay */
+            transform: translateX(-100%);
+            box-shadow: none;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .cbt-sidebar.mobile-show {
+            transform: translateX(0);
+            box-shadow: 14px 0 34px rgba(79, 125, 243, 0.25);
+        }
+    }
+
+    /* ========================================== */
     /* --- SIDEBAR MINI STATE (DESKTOP) --- */
     /* ========================================== */
     @media (min-width: 768px) {
