@@ -1100,7 +1100,7 @@
                                 <select class="form-select matching-item-{{ $soal->id }}" style="max-width: 280px;" data-kiri="{{ $pj->teks_pilihan }}" onchange="saveMatchingAnswers({{ $ujian->id }}, {{ $soal->id }}, {{ $index }})">
                                     <option value="">-- Pilih Pasangan --</option>
                                     @foreach($soal->pilihanJawabans as $pairOpt)
-                                        <option value="{{ $pairOpt->pasangan }}" {{ $savedPair === $pairOpt->pasangan ? 'selected' : '' }}>{{ $pairOpt->pasangan }}</option>
+                                        <option value="{{ $pairOpt->pasangan }}" {{ $savedPair === $pairOpt->pasangan ? 'selected' : '' }}>{{ strip_tags($pairOpt->pasangan) }}</option>
                                     @endforeach
                                 </select>
                             </div>
@@ -1451,6 +1451,11 @@
         document.getElementById(`nav-box-${currentIdx}`).classList.add('active');
 
         updateNavigationButtons();
+        if (typeof renderMathInContainer === 'function') {
+            renderMathInContainer(document.getElementById(`card-soal-${currentIdx}`));
+        } else if (window.MathJax && window.MathJax.typesetPromise) {
+            window.MathJax.typesetPromise();
+        }
     }
 
     function updateNavigationButtons() {

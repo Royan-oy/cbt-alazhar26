@@ -75,6 +75,69 @@
         .sidebar .nav-link.active i { color: var(--sb-text-active); }
         .style-header .shadow-hover-danger:hover { background-color: #fff1f2; border-radius: 10px; }
     </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['\\(', '\\)'], ['$', '$']],
+                displayMath: [['\\[', '\\]'], ['$$', '$$']]
+            },
+            options: {
+                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+            }
+        };
+
+        function renderMathInContainer(container) {
+            if (!container) container = document.body;
+            const selectors = '.soal-teks, .option-text, .soal-text, .kx-soal-text, .table, p, td, th, span';
+            const elements = container.querySelectorAll(selectors);
+
+            elements.forEach(el => {
+                if (el.closest('.tox-tinymce') || el.closest('script') || el.closest('textarea')) return;
+
+                const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, null, false);
+                const textNodes = [];
+                let node;
+                while (node = walker.nextNode()) {
+                    textNodes.push(node);
+                }
+
+                textNodes.forEach(textNode => {
+                    let val = textNode.nodeValue;
+                    if (!val || val.includes('\\(') || val.includes('\\[') || val.includes('$')) return;
+
+                    if (/\\([a-zA-Z]+|\{|\}|[\^_])/.test(val)) {
+                        let newVal = val.replace(/(\\([a-zA-Z]+|[{}]|[0-9]+)(\{[^{}]*\}|\[[^\]]*\]|[a-zA-Z0-9\+\-\*\/\^_=\<\>\ \t\.\,\(\)\:\;\#\%\!\&\-]+)*)/g, function(match) {
+                            let trimmed = match.trim();
+                            if (trimmed.startsWith('\\') && trimmed.length > 1) {
+                                const cmdMatch = trimmed.match(/^\\([a-zA-Z]+|[{}]|[\^_])/);
+                                if (cmdMatch) {
+                                    return '\\(' + trimmed + '\\)';
+                                }
+                            }
+                            return match;
+                        });
+
+                        if (newVal !== val) {
+                            const span = document.createElement('span');
+                            span.innerHTML = newVal;
+                            if (textNode.parentNode) {
+                                textNode.parentNode.replaceChild(span, textNode);
+                            }
+                        }
+                    }
+                });
+            });
+
+            if (window.MathJax && window.MathJax.typesetPromise) {
+                window.MathJax.typesetPromise([container]).catch(err => console.log('MathJax error:', err));
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            renderMathInContainer();
+        });
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     @stack('css')
 </head>
 <body>
