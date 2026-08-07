@@ -11,20 +11,26 @@
 
     <style>
         :root {
-            --ink: #1f2c4f;
-            --muted: #6d7aa6;
-            --clay-bg: #dbe6fb;
-            --clay-surface: #eef3fd;
-            --clay-surface-2: #e1eaf9;
-            --brand: #4f7df3;
-            --brand-2: #7aa4fb;
-            --brand-deep: #2f56d1;
-            --brand-navy: #1c3a8a;
-            --shadow-dark: rgba(79, 125, 243, 0.24);
-            --shadow-dark-2: rgba(79, 125, 243, 0.14);
-            --shadow-light: rgba(255, 255, 255, 0.9);
-            --danger: #e0566a;
-            --danger-bg: #fbe7ea;
+            /* --- Dark Slate Theme --- */
+            --ink: #f8fafc;
+            --muted: #94a3b8;
+            --clay-bg: #0f172a;
+            --clay-surface: #1e293b;
+            --clay-surface-2: #0f172a;
+            
+            /* --- Sky Blue Accent --- */
+            --brand: #0ea5e9;
+            --brand-2: #38bdf8;
+            --brand-deep: #0284c7;
+            --brand-navy: #0c4a6e;
+            
+            /* --- Dark Clay Shadows --- */
+            --shadow-dark: rgba(2, 132, 199, 0.15);
+            --shadow-dark-2: rgba(0, 0, 0, 0.5);
+            --shadow-light: rgba(56, 189, 248, 0.1);
+            
+            --danger: #ef4444;
+            --danger-bg: rgba(239, 68, 68, 0.15);
             --radius: 32px;
         }
 
@@ -55,32 +61,32 @@
 
         .ambient .b1 {
             width: 320px; height: 320px;
-            background: radial-gradient(circle at 32% 28%, #ffffff 0%, #c9d3fb 55%, #b6c2f7 100%);
-            box-shadow: 24px 34px 60px rgba(79,125,243,0.18);
+            background: radial-gradient(circle at 32% 28%, rgba(56,189,248,0.3) 0%, rgba(2,132,199,0.1) 55%, transparent 100%);
+            box-shadow: 24px 34px 60px rgba(2,132,199,0.2);
             top: -90px; left: -80px;
             opacity: 0.9;
         }
 
         .ambient .b2 {
             width: 260px; height: 260px;
-            background: radial-gradient(circle at 30% 25%, #ffffff 0%, #bcd2fb 55%, #93b3f5 100%);
-            box-shadow: 20px 28px 50px rgba(79,125,243,0.22);
+            background: radial-gradient(circle at 30% 25%, rgba(56,189,248,0.25) 0%, rgba(2,132,199,0.1) 55%, transparent 100%);
+            box-shadow: 20px 28px 50px rgba(2,132,199,0.15);
             bottom: -70px; right: -60px;
             opacity: 0.85;
         }
 
         .ambient .b3 {
             width: 90px; height: 90px;
-            background: radial-gradient(circle at 30% 25%, #ffffff 0%, #a9c1fb 100%);
-            box-shadow: 10px 14px 26px rgba(79,125,243,0.25);
+            background: radial-gradient(circle at 30% 25%, rgba(129,140,248,0.3) 0%, transparent 100%);
+            box-shadow: 10px 14px 26px rgba(129,140,248,0.2);
             top: 18%; right: 12%;
             opacity: 0.8;
         }
 
         .ambient .b4 {
             width: 46px; height: 46px;
-            background: radial-gradient(circle at 30% 25%, #ffffff 0%, #a9c4fb 100%);
-            box-shadow: 8px 10px 18px rgba(79,125,243,0.25);
+            background: radial-gradient(circle at 30% 25%, rgba(129,140,248,0.25) 0%, transparent 100%);
+            box-shadow: 8px 10px 18px rgba(129,140,248,0.15);
             bottom: 20%; left: 9%;
             opacity: 0.8;
         }
@@ -97,14 +103,13 @@
             padding: 2.5rem 1.25rem;
         }
 
-        /* ---------- Lockup: embossed clay coin holding both logos ---------- */
         .lockup {
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 0.7rem;
             margin-bottom: 1.5rem;
-            background: linear-gradient(150deg, #f4f6fe, var(--clay-surface-2));
+            background: linear-gradient(150deg, #1e293b, var(--clay-bg));
             border-radius: 999px;
             padding: 0.65rem 1.4rem;
             box-shadow:
@@ -148,13 +153,13 @@
         .card-auth {
             width: 100%;
             max-width: 440px;
-            background: linear-gradient(160deg, #f5f7ff 0%, var(--clay-surface) 55%, var(--clay-surface-2) 100%);
+            background: linear-gradient(160deg, #1e293b 0%, var(--clay-surface) 55%, var(--clay-surface-2) 100%);
             border-radius: var(--radius);
             padding: 2.35rem 2.1rem;
             box-shadow:
                 16px 16px 32px var(--shadow-dark),
                 -12px -12px 26px var(--shadow-light),
-                inset 1px 1px 1px rgba(255,255,255,0.7);
+                inset 1px 1px 2px rgba(255,255,255,0.05);
         }
 
         .card-auth h1 {
@@ -163,7 +168,7 @@
             font-weight: 800;
             letter-spacing: -0.01em;
             margin-bottom: 0.35rem;
-            color: var(--brand-navy);
+            color: #f8fafc;
         }
 
         .card-auth .subtitle {
@@ -229,14 +234,14 @@
         .role-chip input:checked + label {
             color: #fff;
             box-shadow:
-                inset 4px 4px 8px rgba(0,0,0,0.18),
-                inset -3px -3px 6px rgba(255,255,255,0.25);
+                inset 4px 4px 8px rgba(0,0,0,0.4),
+                inset -3px -3px 6px rgba(255,255,255,0.1);
             transform: translateY(0);
         }
 
         .role-chip:nth-child(1) input:checked + label { background: linear-gradient(135deg, var(--brand), var(--brand-2)); }
-        .role-chip:nth-child(2) input:checked + label { background: linear-gradient(135deg, var(--brand-deep), #5f8ff5); }
-        .role-chip:nth-child(3) input:checked + label { background: linear-gradient(135deg, #4f7df3, #6a9bf7); }
+        .role-chip:nth-child(2) input:checked + label { background: linear-gradient(135deg, var(--brand-deep), var(--brand)); }
+        .role-chip:nth-child(3) input:checked + label { background: linear-gradient(135deg, #0ea5e9, #38bdf8); }
         .role-chip:nth-child(4) input:checked + label { background: linear-gradient(135deg, var(--brand-navy), var(--brand-deep)); }
 
         .role-chip input:focus-visible + label {
@@ -254,16 +259,16 @@
             border-radius: 18px;
             background: var(--clay-bg);
             box-shadow:
-                inset 5px 5px 10px var(--shadow-dark-2),
-                inset -4px -4px 8px rgba(255,255,255,0.85);
+                inset 5px 5px 10px rgba(0,0,0,0.4),
+                inset -4px -4px 8px rgba(255,255,255,0.05);
             transition: box-shadow 0.15s ease;
         }
 
         .input-shell:focus-within {
             box-shadow:
-                inset 5px 5px 10px rgba(79,125,243,0.28),
-                inset -4px -4px 8px rgba(255,255,255,0.9),
-                0 0 0 3px rgba(79,125,243,0.15);
+                inset 5px 5px 10px rgba(2,132,199,0.3),
+                inset -4px -4px 8px rgba(255,255,255,0.08),
+                0 0 0 3px rgba(2,132,199,0.25);
         }
 
         .input-shell i.leading-icon {
@@ -283,6 +288,16 @@
         }
 
         .input-shell input:focus { outline: none; box-shadow: none; }
+
+        /* Override autofill background styles */
+        .input-shell input:-webkit-autofill,
+        .input-shell input:-webkit-autofill:hover, 
+        .input-shell input:-webkit-autofill:focus, 
+        .input-shell input:-webkit-autofill:active{
+            /* -webkit-box-shadow: 0 0 0 30px #fffff inset !important; */
+            -webkit-text-fill-color: var(--ink) !important;
+            transition: background-color 5000s ease-in-out 0s;
+        }
 
         .input-shell .toggle-btn {
             border: none;
@@ -312,23 +327,23 @@
             gap: 0.5rem;
             margin-top: 0.5rem;
             box-shadow:
-                8px 10px 18px rgba(79,125,243,0.4),
-                -4px -4px 10px rgba(255,255,255,0.5);
+                8px 10px 18px rgba(2,132,199,0.3),
+                -4px -4px 10px rgba(255,255,255,0.05);
             transition: transform 0.15s ease, box-shadow 0.15s ease;
         }
 
         .btn-submit:hover {
             transform: translateY(-2px);
             box-shadow:
-                10px 14px 22px rgba(79,125,243,0.45),
-                -4px -4px 10px rgba(255,255,255,0.55);
+                10px 14px 22px rgba(2,132,199,0.4),
+                -4px -4px 10px rgba(255,255,255,0.08);
         }
 
         .btn-submit:active {
             transform: translateY(1px);
             box-shadow:
                 inset 4px 4px 10px rgba(0,0,0,0.25),
-                inset -3px -3px 6px rgba(255,255,255,0.2);
+                inset -3px -3px 6px rgba(255,255,255,0.1);
         }
 
         /* ---------- Alert: soft clay warning ---------- */
@@ -345,7 +360,7 @@
             margin-bottom: 1.25rem;
             box-shadow:
                 inset 3px 3px 6px rgba(224,86,106,0.12),
-                -3px -3px 8px rgba(255,255,255,0.7);
+                -3px -3px 8px rgba(255,255,255,0.05);
         }
 
         .alert-modern i { margin-top: 0.15rem; }

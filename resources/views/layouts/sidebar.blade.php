@@ -4,14 +4,14 @@
         width: 280px;
         min-width: 280px;
         max-width: 280px;
-        background: linear-gradient(165deg, #f5f8ff 0%, #eef3fd 55%, #e1eaf9 100%);
+        background: linear-gradient(165deg, #0f172a 0%, #1e293b 55%, #0f172a 100%);
         height: 100vh;
         position: sticky;
         top: 0;
         display: flex;
         flex-direction: column;
         border-right: none;
-        box-shadow: 14px 0 34px rgba(79, 125, 243, 0.14);
+        box-shadow: 14px 0 34px rgba(0, 0, 0, 0.2);
         z-index: 1040;
         transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
@@ -30,10 +30,10 @@
     .sidebar-brand-section > .brand-logo-img,
     .sidebar-brand-section > #fallback-logo {
         box-shadow:
-            8px 8px 18px rgba(79, 125, 243, 0.2),
-            -6px -6px 14px rgba(255, 255, 255, 0.9);
+            8px 8px 18px rgba(0, 0, 0, 0.4),
+            -6px -6px 14px rgba(255, 255, 255, 0.05);
         border-radius: 22px;
-        background: linear-gradient(160deg, #ffffff, #eef3fd);
+        background: linear-gradient(160deg, #1e293b, #0f172a);
         padding: 10px;
     }
 
@@ -45,7 +45,7 @@
     }
 
     .sidebar-brand-section h6 {
-        color: #1f2c4f !important;
+        color: #f8fafc !important;
     }
 
     /* --- AREA MENU UTAMA (BISA DI-SCROLL) --- */
@@ -66,12 +66,12 @@
     }
 
     .sidebar-menu-scroll::-webkit-scrollbar-thumb {
-        background: rgba(79, 125, 243, 0.35);
+        background: rgba(2, 132, 199, 0.35);
         border-radius: 10px;
     }
 
     .sidebar-menu-scroll:hover::-webkit-scrollbar-thumb {
-        background: rgba(79, 125, 243, 0.55);
+        background: rgba(2, 132, 199, 0.55);
     }
 
     /* --- GROUP LABEL --- */
@@ -80,7 +80,7 @@
         font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 1.5px;
-        color: #6d7aa6;
+        color: #64748b;
         padding-left: 12px;
         margin-top: 20px;
         margin-bottom: 8px;
@@ -93,52 +93,48 @@
 
     /* --- NAV LINK STYLING: chip clay --- */
     .cbt-sidebar .nav-link {
-        color: #5c6a97;
+        color: #94a3b8;
         padding: 12px 16px;
         border-radius: 16px;
         margin-bottom: 6px;
         font-size: 14px;
-        font-weight: 500;
+        font-weight: 600;
         display: flex;
         align-items: center;
         background: transparent;
-        box-shadow: none;
         transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     .cbt-sidebar .nav-link i {
-        font-size: 16px;
+        font-size: 18px;
         width: 24px;
-        color: #8b96c4;
-        transition: transform 0.2s ease, color 0.2s ease;
+        text-align: center;
+        margin-right: 12px;
+        color: #64748b;
+        transition: color 0.2s ease;
     }
 
     .cbt-sidebar .nav-link:hover {
-        background: #eef3fd;
-        color: #1f2c4f;
-        box-shadow:
-            5px 5px 10px rgba(79, 125, 243, 0.14),
-            -4px -4px 9px rgba(255, 255, 255, 0.9);
-        transform: translateX(2px);
+        background: #1e293b;
+        color: #f8fafc;
+        transform: translateX(4px);
     }
 
     .cbt-sidebar .nav-link:hover i {
-        transform: scale(1.1);
-        color: #4f7df3;
+        color: #0ea5e9;
     }
 
     .cbt-sidebar .nav-link.active {
-        background: linear-gradient(135deg, #4f7df3, #6a9bf7);
-        color: #ffffff;
-        font-weight: 600;
-        border: none;
+        background: linear-gradient(135deg, #1e293b, #0f172a);
+        color: #fff;
         box-shadow:
-            inset 3px 3px 7px rgba(0, 0, 0, 0.15),
-            inset -2px -2px 5px rgba(255, 255, 255, 0.25);
+            inset 4px 4px 10px rgba(0, 0, 0, 0.3),
+            inset -3px -3px 8px rgba(255, 255, 255, 0.05),
+            4px 6px 12px rgba(2, 132, 199, 0.2);
     }
 
     .cbt-sidebar .nav-link.active i {
-        color: #ffffff;
+        color: #0ea5e9;
     }
 
     /* --- FLOATING PROFILE AT BOTTOM: clay card --- */
@@ -150,7 +146,7 @@
     }
 
     .profile-floating-box {
-        background: linear-gradient(160deg, #ffffff, #eef3fd);
+        background: linear-gradient(160deg, #1e293b, #0f172a);
         border: none;
         border-radius: 18px;
         padding: 10px 12px;
@@ -158,14 +154,14 @@
         align-items: center;
         gap: 12px;
         box-shadow:
-            6px 6px 14px rgba(79, 125, 243, 0.16),
-            -5px -5px 12px rgba(255, 255, 255, 0.9);
+            6px 6px 14px rgba(0, 0, 0, 0.4),
+            -5px -5px 12px rgba(255, 255, 255, 0.03);
     }
 
     .avatar-circle-premium {
         width: 38px;
         height: 38px;
-        background: linear-gradient(135deg, #4f7df3, #2f56d1);
+        background: linear-gradient(135deg, #0ea5e9, #0284c7);
         color: #ffffff;
         font-weight: 700;
         font-size: 13px;
@@ -173,11 +169,11 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        box-shadow: 3px 4px 8px rgba(47, 86, 209, 0.35);
+        box-shadow: 3px 4px 8px rgba(2, 132, 199, 0.35);
     }
 
     .role-badge-glow {
-        background: linear-gradient(135deg, #4f7df3, #7aa4fb);
+        background: linear-gradient(135deg, #0ea5e9, #38bdf8);
         color: #ffffff;
         font-size: 8px;
         font-weight: 700;
@@ -225,7 +221,7 @@
 
         .cbt-sidebar.mobile-show {
             transform: translateX(0);
-            box-shadow: 14px 0 34px rgba(79, 125, 243, 0.25);
+            box-shadow: 14px 0 34px rgba(0, 0, 0, 0.4);
         }
     }
 
@@ -288,7 +284,7 @@
     .clay-tooltip {
         position: fixed;
         transform: translateY(-50%);
-        background: linear-gradient(135deg, #4f7df3, #6a9bf7);
+        background: linear-gradient(135deg, #0ea5e9, #38bdf8);
         color: white;
         padding: 6px 12px;
         border-radius: 8px;
@@ -296,7 +292,7 @@
         font-weight: 600;
         white-space: nowrap;
         z-index: 9999; /* Selalu di atas segalanya */
-        box-shadow: 4px 4px 10px rgba(79, 125, 243, 0.2), -2px -2px 6px rgba(255, 255, 255, 0.8);
+        box-shadow: 4px 4px 10px rgba(2, 132, 199, 0.2), -2px -2px 6px rgba(255, 255, 255, 0.1);
         pointer-events: none;
         opacity: 0;
         visibility: hidden;
@@ -315,14 +311,14 @@
         <img src="{{ asset('img/logo-alazhar.png') }}" alt="Logo Al Azhar" class="brand-logo-img" onerror="this.style.display='none'; document.getElementById('fallback-logo').classList.remove('d-none')">
 
         <div id="fallback-logo" class="brand-logo-box-secondary d-none d-flex align-items-center justify-content-center text-white font-black rounded-3 mb-3" 
-                 style="width: 60px; height: 60px; background: linear-gradient(135deg, #4f7df3, #2f56d1); transition: all 0.3s ease;">
+                 style="width: 60px; height: 60px; background: linear-gradient(135deg, #0ea5e9, #0284c7); transition: all 0.3s ease;">
                 <i class="fa-solid fa-mosque fs-4"></i>
         </div>
 
         <div class="brand-text-wrapper text-center">
-            <h6 class="fw-bold tracking-wide mb-0" style="font-size: 14px; letter-spacing: 0.3px; color: #1f2c4f;">CBT SMART ONLINE</h6>
-            <span class="text-uppercase fw-bold d-block mt-1" style="font-size: 10px; color: #4f7df3; letter-spacing: 0.5px;">Sekolah Islam Al Azhar</span>
-            <span class="font-semibold d-block mt-0.5" style="font-size: 10px; color: #8b96c4;">Pekalongan</span>
+            <h6 class="fw-bold tracking-wide mb-0" style="font-size: 14px; letter-spacing: 0.3px; color: #f8fafc;">CBT SMART ONLINE</h6>
+            <span class="text-uppercase fw-bold d-block mt-1" style="font-size: 10px; color: #0ea5e9; letter-spacing: 0.5px;">Sekolah Islam Al Azhar</span>
+            <span class="font-semibold d-block mt-0.5" style="font-size: 10px; color: #94a3b8;">Pekalongan</span>
         </div>
     </div>
 
@@ -631,7 +627,7 @@
             </div>
 
             <div class="profile-info-wrapper overflow-hidden flex-grow-1">
-                <p class="mb-0 fw-bold text-truncate" style="color: #1f2c4f;">
+                <p class="mb-0 fw-bold text-truncate" style="color: #d9dff1;">
                     {{ $nama }}
                 </p>
 
