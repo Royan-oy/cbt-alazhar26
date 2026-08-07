@@ -79,68 +79,46 @@
         .style-header .shadow-hover-danger:hover { background-color: #eef3fd; border-radius: 10px; }
     </style>
     <script>
-        MathJax = {
+        // Konfigurasi delimiter: guru WAJIB pakai $...$ / \(...\) untuk inline,
+        // $$...$$ / \[...\] untuk block. Ini satu-satunya sumber kebenaran
+        // "apa yang dianggap rumus" -> tidak ada lagi deteksi manual via regex.
+        window.MathJax = {
             tex: {
                 inlineMath: [['\\(', '\\)'], ['$', '$']],
                 displayMath: [['\\[', '\\]'], ['$$', '$$']]
             },
             options: {
-                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+                // skip elemen yang memang bukan tempat konten soal
+                // (mis. textarea editor TinyMCE, script, dsb)
+                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+                ignoreHtmlClass: 'tox-tinymce|no-mathjax'
             }
         };
 
+        /**
+         * Render ulang MathJax pada sebuah container (dipanggil setelah
+         * konten baru di-inject via AJAX/preview, dsb).
+         * TIDAK melakukan manipulasi teks manual apapun -> aman dari XSS,
+         * tidak akan "menelan" teks biasa, dan otomatis dukung nested {}.
+         */
         function renderMathInContainer(container) {
             if (!container) container = document.body;
-            const selectors = '.soal-teks, .option-text, .soal-text, .kx-soal-text, .table, p, td, th, span';
-            const elements = container.querySelectorAll(selectors);
-
-            elements.forEach(el => {
-                if (el.closest('.tox-tinymce') || el.closest('script') || el.closest('textarea')) return;
-
-                const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, null, false);
-                const textNodes = [];
-                let node;
-                while (node = walker.nextNode()) {
-                    textNodes.push(node);
-                }
-
-                textNodes.forEach(textNode => {
-                    let val = textNode.nodeValue;
-                    if (!val || val.includes('\\(') || val.includes('\\[') || val.includes('$')) return;
-
-                    if (/\\([a-zA-Z]+|\{|\}|[\^_])/.test(val)) {
-                        let newVal = val.replace(/(\\([a-zA-Z]+|[{}]|[0-9]+)(\{[^{}]*\}|\[[^\]]*\]|[a-zA-Z0-9\+\-\*\/\^_=\<\>\ \t\.\,\(\)\:\;\#\%\!\&\-]+)*)/g, function(match) {
-                            let trimmed = match.trim();
-                            if (trimmed.startsWith('\\') && trimmed.length > 1) {
-                                const cmdMatch = trimmed.match(/^\\([a-zA-Z]+|[{}]|[\^_])/);
-                                if (cmdMatch) {
-                                    return '\\(' + trimmed + '\\)';
-                                }
-                            }
-                            return match;
-                        });
-
-                        if (newVal !== val) {
-                            const span = document.createElement('span');
-                            span.innerHTML = newVal;
-                            if (textNode.parentNode) {
-                                textNode.parentNode.replaceChild(span, textNode);
-                            }
-                        }
-                    }
-                });
-            });
-
             if (window.MathJax && window.MathJax.typesetPromise) {
-                window.MathJax.typesetPromise([container]).catch(err => console.log('MathJax error:', err));
+                // Bersihkan cache typeset lama di container ini dulu supaya
+                // tidak error saat di-render ulang berkali-kali (mis. live preview)
+                if (window.MathJax.typesetClear) {
+                    window.MathJax.typesetClear([container]);
+                }
+                window.MathJax.typesetPromise([container])
+                    .catch(err => console.error('MathJax render error:', err));
             }
         }
 
-        document.addEventListener('DOMContentLoaded', function() {
-            renderMathInContainer();
+        document.addEventListener('DOMContentLoaded', function () {
+            renderMathInContainer(document.body);
         });
     </script>
-    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>    
     @stack('css')
 </head>
 <body>
