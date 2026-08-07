@@ -335,6 +335,19 @@
         -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
         overflow: hidden;
+        word-break: break-word;
+        overflow-wrap: break-word;
+    }
+
+    .soal-text img {
+        max-width: 100%;
+        height: auto;
+    }
+
+    .soal-text table {
+        max-width: 100%;
+        display: block;
+        overflow-x: auto;
     }
 
     .soal-meta {

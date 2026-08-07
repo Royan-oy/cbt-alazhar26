@@ -222,6 +222,15 @@
         gap: 8px;
     }
 
+    .jawaban-list p,
+    .bs-pernyataan p,
+    .m-kiri p,
+    .m-kanan p,
+    .soal-teks p {
+        display: inline;
+        margin-bottom: 0;
+    }
+
     .jawaban-list li:last-child { border-bottom: none; }
 
     .jawaban-list li.is-correct {
@@ -232,8 +241,10 @@
 
     .jawaban-list li.is-wrong { color: var(--text-muted); }
 
-    .soal-img {
+    .soal-img,
+    .soal-teks img {
         margin-top: 10px;
+        margin-bottom: 10px;
         max-width: 220px;
         width: 100%;
         height: auto;
@@ -310,7 +321,8 @@
 
         .jawaban-list li { font-size: 12.5px; padding: 8px 12px; }
 
-        .soal-img { max-width: 100%; }
+        .soal-img,
+        .soal-teks img { max-width: 100%; }
 
         .rekap-jenis-item { padding: 10px 8px; }
 
@@ -415,7 +427,7 @@
 
         {{-- Kolom Kiri: Info --}}
         <div class="col-lg-4">
-            <div class="content-card h-100 info-sidebar">
+            <div class="content-card  info-sidebar">
 
                 <div class="mb-3">
                     @if($bankSoal->is_publish)
@@ -516,7 +528,7 @@
                                     <span class="jenis-badge">{{ \App\Models\Soal::jenisLabel($soal->jenis_soal) }}</span>
                                     <span class="text-muted small">Bobot: {{ $soal->bobot }}</span>
                                 </div>
-                                <div class="soal-teks mb-1">{{ \Illuminate\Support\Str::limit(strip_tags($soal->teks_soal), 200) }}</div>
+                                <div class="soal-teks mb-2">{!! $soal->teks_soal !!}</div>
 
                                 @if(in_array($soal->jenis_soal, ['pilihan_ganda', 'pilihan_ganda_kompleks']))
                                     <ul class="list-unstyled jawaban-list mb-0">
@@ -527,7 +539,7 @@
                                             @else
                                                 <i class="fa-regular fa-circle"></i>
                                             @endif
-                                            {{ $pilihan->kode ? $pilihan->kode.'. ' : '' }}{{ $pilihan->teks_pilihan }}
+                                            <span><strong>{{ $pilihan->kode ? $pilihan->kode.'. ' : '' }}</strong>{!! $pilihan->teks_pilihan !!}</span>
                                         </li>
                                         @endforeach
                                     </ul>
@@ -536,7 +548,7 @@
                                     <div class="jawaban-list mb-0">
                                         @foreach($soal->pilihanJawabans as $pilihan)
                                         <div class="bs-table-row">
-                                            <span class="bs-pernyataan">{{ $pilihan->kode ? $pilihan->kode.'. ' : '' }}{{ $pilihan->teks_pilihan }}</span>
+                                            <span class="bs-pernyataan"><strong>{{ $pilihan->kode ? $pilihan->kode.'. ' : '' }}</strong>{!! $pilihan->teks_pilihan !!}</span>
                                             <span class="bs-kunci-pill {{ $pilihan->is_benar ? 'benar' : 'salah' }}">
                                                 <i class="fa-solid {{ $pilihan->is_benar ? 'fa-check' : 'fa-xmark' }}"></i>
                                                 {{ $pilihan->is_benar ? 'Benar' : 'Salah' }}
@@ -549,9 +561,9 @@
                                     <div class="jawaban-list mb-0">
                                         @foreach($soal->pilihanJawabans as $pilihan)
                                         <div class="matching-row">
-                                            <span class="m-kiri">{{ $pilihan->teks_pilihan }}</span>
+                                            <span class="m-kiri">{!! $pilihan->teks_pilihan !!}</span>
                                             <i class="fa-solid fa-arrow-right-long text-muted"></i>
-                                            <span class="m-kanan">{{ $pilihan->pasangan }}</span>
+                                            <span class="m-kanan">{!! $pilihan->pasangan !!}</span>
                                         </div>
                                         @endforeach
                                     </div>
@@ -560,7 +572,7 @@
                                     <div class="jawaban-list mb-0">
                                         <div class="isian-kunci-row">
                                             <i class="fa-solid fa-key"></i>
-                                            Kunci: {{ optional($soal->pilihanJawabans->first())->teks_pilihan ?? '-' }}
+                                            Kunci: {!! optional($soal->pilihanJawabans->first())->teks_pilihan ?? '-' !!}
                                         </div>
                                     </div>
 

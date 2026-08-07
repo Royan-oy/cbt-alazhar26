@@ -256,6 +256,112 @@
         line-height: 1.5;
     }
 
+    /* ===== CATEGORY RADIO CARDS ===== */
+    .kategori-radio-group {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 16px;
+    }
+
+    .kategori-radio-wrapper {
+        position: relative;
+        cursor: pointer;
+        margin-bottom: 0;
+    }
+
+    .kategori-radio-input {
+        position: absolute;
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .kategori-card {
+        border: 2px solid var(--border-color);
+        border-radius: 16px;
+        padding: 16px 18px;
+        background: #f8fafc;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        height: 100%;
+    }
+
+    .kategori-radio-wrapper:hover .kategori-card {
+        border-color: #cbd5e1;
+        background: #ffffff;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(15, 23, 42, 0.04);
+    }
+
+    .kategori-icon-box {
+        width: 44px;
+        height: 44px;
+        border-radius: 14px;
+        background: #e2e8f0;
+        color: var(--text-muted);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        flex-shrink: 0;
+        transition: all 0.25s ease;
+    }
+
+    .kategori-details {
+        flex-grow: 1;
+    }
+
+    .kategori-title {
+        font-weight: 700;
+        font-size: 14px;
+        color: var(--primary-dark);
+        display: block;
+        margin-bottom: 2px;
+    }
+
+    .kategori-desc {
+        font-size: 12px;
+        color: var(--text-muted);
+        line-height: 1.4;
+        margin: 0;
+    }
+
+    .check-badge {
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        border: 2px solid #cbd5e1;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        color: transparent;
+        transition: all 0.25s ease;
+        background: #fff;
+    }
+
+    /* Checked State */
+    .kategori-radio-input:checked + .kategori-card {
+        border-color: var(--accent-blue);
+        background: #f0f9ff;
+        box-shadow: 0 8px 24px rgba(14, 165, 233, 0.12);
+    }
+
+    .kategori-radio-input:checked + .kategori-card .kategori-icon-box {
+        background: linear-gradient(135deg, #0ea5e9, #0284c7);
+        color: #ffffff;
+        box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
+    }
+
+    .kategori-radio-input:checked + .kategori-card .check-badge {
+        border-color: var(--accent-blue);
+        background: var(--accent-blue);
+        color: #ffffff;
+    }
+
     /* ===== MOBILE RESPONSIVE ===== */
     @media (max-width: 767.98px) {
         .page-header-create {
@@ -410,7 +516,7 @@
                     </div>
                 </div>
 
-                {{-- Nilai KKM & Kategori --}}
+                {{-- Nilai KKM --}}
                 <div class="row mt-3">
                     <div class="col-md-6">
                         <div class="form-group">
@@ -434,27 +540,52 @@
                             @enderror
                         </div>
                     </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label class="form-label-custom">
-                                <span class="required-dot"></span>
-                                Kategori Bank Soal
-                            </label>
-                            <select name="kategori" class="form-select-modern @error('kategori') is-invalid @enderror" required>
-                                <option value="personal" {{ old('kategori', $bankSoal->kategori ?? 'personal') == 'personal' ? 'selected' : '' }}>
-                                    Ujian Personal (Hanya untuk kelas yang diajar)
-                                </option>
-                                <option value="bersama" {{ old('kategori', $bankSoal->kategori ?? 'personal') == 'bersama' ? 'selected' : '' }}>
-                                    Ujian Bersama (Bisa dipakai Admin untuk seluruh kelas)
-                                </option>
-                            </select>
-                            @error('kategori')
-                                <div class="field-error">
-                                    <i class="fa-solid fa-circle-exclamation"></i> {{ $message }}
+                </div>
+
+                {{-- Kategori Bank Soal (Radio Card) --}}
+                <div class="form-group mt-3">
+                    <label class="form-label-custom mb-3">
+                        <span class="required-dot"></span>
+                        Kategori Bank Soal
+                    </label>
+                    <div class="kategori-radio-group">
+                        <label class="kategori-radio-wrapper">
+                            <input type="radio" name="kategori" value="personal" class="kategori-radio-input" {{ old('kategori', $bankSoal->kategori ?? 'personal') == 'personal' ? 'checked' : '' }} required>
+                            <div class="kategori-card">
+                                <div class="kategori-icon-box">
+                                    <i class="fa-solid fa-user-lock"></i>
                                 </div>
-                            @enderror
-                        </div>
+                                <div class="kategori-details">
+                                    <span class="kategori-title">Ujian Personal</span>
+                                    <p class="kategori-desc">Hanya berlaku & dapat digunakan untuk kelas yang Anda ajar.</p>
+                                </div>
+                                <div class="check-badge">
+                                    <i class="fa-solid fa-check"></i>
+                                </div>
+                            </div>
+                        </label>
+
+                        <label class="kategori-radio-wrapper">
+                            <input type="radio" name="kategori" value="bersama" class="kategori-radio-input" {{ old('kategori', $bankSoal->kategori ?? 'personal') == 'bersama' ? 'checked' : '' }} required>
+                            <div class="kategori-card">
+                                <div class="kategori-icon-box">
+                                    <i class="fa-solid fa-users-rectangle"></i>
+                                </div>
+                                <div class="kategori-details">
+                                    <span class="kategori-title">Ujian Bersama</span>
+                                    <p class="kategori-desc">Dapat diakses & digunakan oleh Admin/Guru lain untuk seluruh kelas.</p>
+                                </div>
+                                <div class="check-badge">
+                                    <i class="fa-solid fa-check"></i>
+                                </div>
+                            </div>
+                        </label>
                     </div>
+                    @error('kategori')
+                        <div class="field-error mt-2">
+                            <i class="fa-solid fa-circle-exclamation"></i> {{ $message }}
+                        </div>
+                    @enderror
                 </div>
 
                 {{-- Deskripsi --}}
