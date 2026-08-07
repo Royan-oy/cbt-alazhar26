@@ -593,20 +593,30 @@
         </div>
         <div class="ticket-perf"></div>
         @php
+            $totalBelum = $pesertas->where('status', 'belum')->count();
+            $totalMengerjakan = $pesertas->where('status', 'mengerjakan')->count();
             $totalSelesai = $pesertas->where('status', 'selesai')->count();
             $totalBelumDikoreksi = $pesertas->where('belum_dikoreksi', '>', 0)->count();
         @endphp
         <div class="ticket-tally">
             <div class="tally-item">
-                <span class="tally-num">{{ $pesertas->count() }}</span>
+                <span class="tally-num" id="tallyTotal">{{ $pesertas->count() }}</span>
                 <span class="tally-label">Total Peserta</span>
             </div>
-            <div class="tally-item is-good">
-                <span class="tally-num">{{ $totalSelesai }}</span>
-                <span class="tally-label">Selesai Mengerjakan</span>
+            <div class="tally-item" style="color: var(--ink-600);">
+                <span class="tally-num" id="tallyBelum" style="color: inherit;">{{ $totalBelum }}</span>
+                <span class="tally-label">Belum Mulai</span>
             </div>
-            <div class="tally-item {{ $totalBelumDikoreksi > 0 ? 'is-alert' : '' }}">
-                <span class="tally-num">{{ $totalBelumDikoreksi }}</span>
+            <div class="tally-item" style="color: var(--accent);">
+                <span class="tally-num" id="tallyMengerjakan" style="color: inherit;">{{ $totalMengerjakan }}</span>
+                <span class="tally-label">Sedang Mengerjakan</span>
+            </div>
+            <div class="tally-item is-good">
+                <span class="tally-num" id="tallySelesai">{{ $totalSelesai }}</span>
+                <span class="tally-label">Selesai</span>
+            </div>
+            <div class="tally-item {{ $totalBelumDikoreksi > 0 ? 'is-alert' : '' }}" id="tallyItemKoreksi">
+                <span class="tally-num" id="tallyKoreksi">{{ $totalBelumDikoreksi }}</span>
                 <span class="tally-label">Butuh Koreksi Manual</span>
             </div>
         </div>
@@ -664,7 +674,7 @@
                         </thead>
                         <tbody>
                             @forelse($pesertas as $i => $p)
-                            <tr class="peserta-row" data-kelas-id="{{ $p->kelas_id }}">
+                            <tr class="peserta-row" data-kelas-id="{{ $p->kelas_id }}" data-status="{{ $p->status }}" data-koreksi="{{ $p->belum_dikoreksi }}">
                                 <td class="idx col-no">{{ str_pad($i + 1, 2, '0', STR_PAD_LEFT) }}</td>
                                 <td class="col-student">
                                     <div class="stu-row">
@@ -719,8 +729,14 @@
                                                 <i class="fa-solid fa-eye"></i> Detail
                                             </a>
                                         @endif
+                                    @elseif($p->status === 'mengerjakan')
+                                        <span class="action-link" style="background: var(--paper); color: var(--accent); border: 1px solid var(--accent); cursor: default;">
+                                            <i class="fa-solid fa-spinner fa-spin"></i> Mengerjakan
+                                        </span>
                                     @else
-                                        <span class="action-muted">Belum Selesai</span>
+                                        <span class="action-link" style="background: var(--paper); color: var(--ink-600); border: 1px solid var(--line); cursor: default;">
+                                            <i class="fa-regular fa-clock"></i> Belum Mulai
+                                        </span>
                                     @endif
                                 </td>
                             </tr>
@@ -736,6 +752,10 @@
                             @endforelse
                         </tbody>
                     </table>
+                </div>
+                <div id="paginationControls" style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.25rem; border-top: 1px solid var(--line); font-size: 0.85rem; background: var(--surface);">
+                    <div id="paginationInfo" style="color: var(--ink-600); font-weight: 500;">Menampilkan 0-0 dari 0 data</div>
+                    <div id="paginationButtons" style="display: flex; gap: 0.35rem; flex-wrap: wrap;"></div>
                 </div>
             </div>
         </div>
@@ -753,7 +773,11 @@ document.addEventListener('DOMContentLoaded', function () {
     const btnExportExcel = document.getElementById('btnExportExcel');
     const basePdfUrl = "{{ route('dashboard-guru.nilai-siswa.export-pdf', $ujian->id) }}";
     const baseExcelUrl = "{{ route('dashboard-guru.nilai-siswa.export-excel', $ujian->id) }}";
+    
     let activeKelas = 'all';
+    let currentPage = 1;
+    const itemsPerPage = 5;
+    let filteredRows = [];
 
     function updateExportUrls() {
         const searchQuery = searchSiswa ? searchSiswa.value.trim() : '';
@@ -770,35 +794,139 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
+    function renderPaginationButtons() {
+        const btnContainer = document.getElementById('paginationButtons');
+        if (!btnContainer) return;
+        btnContainer.innerHTML = '';
+        
+        const totalPages = Math.ceil(filteredRows.length / itemsPerPage);
+        if (totalPages <= 1) return;
+        
+        const createBtn = (text, page, disabled = false, active = false) => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.innerHTML = text;
+            btn.style.cssText = `
+                padding: 0.25rem 0.6rem;
+                font-size: 0.8rem;
+                font-weight: 500;
+                border: 1px solid var(--line);
+                background: ${active ? 'var(--accent)' : 'var(--surface)'};
+                color: ${active ? '#fff' : 'var(--ink-600)'};
+                border-radius: 0.35rem;
+                cursor: ${disabled ? 'not-allowed' : 'pointer'};
+                opacity: ${disabled ? '0.5' : '1'};
+                transition: all 0.15s;
+            `;
+            if (!disabled && !active) {
+                btn.onmouseover = () => { btn.style.background = 'var(--paper)'; btn.style.color = 'var(--accent)'; };
+                btn.onmouseout = () => { btn.style.background = 'var(--surface)'; btn.style.color = 'var(--ink-600)'; };
+                btn.onclick = () => {
+                    currentPage = page;
+                    renderPage();
+                };
+            }
+            return btn;
+        };
+        
+        btnContainer.appendChild(createBtn('<i class="fa-solid fa-angle-left"></i>', currentPage - 1, currentPage === 1));
+        
+        for (let i = 1; i <= totalPages; i++) {
+            if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
+                btnContainer.appendChild(createBtn(i, i, false, i === currentPage));
+            } else if (i === currentPage - 2 || i === currentPage + 2) {
+                const elipsis = document.createElement('span');
+                elipsis.innerHTML = '...';
+                elipsis.style.padding = '0.25rem 0.1rem';
+                elipsis.style.color = 'var(--ink-600)';
+                btnContainer.appendChild(elipsis);
+            }
+        }
+        
+        btnContainer.appendChild(createBtn('<i class="fa-solid fa-angle-right"></i>', currentPage + 1, currentPage === totalPages));
+    }
+
+    function renderPage() {
+        filteredRows.forEach(row => row.style.display = 'none');
+        
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        const endIndex = Math.min(startIndex + itemsPerPage, filteredRows.length);
+        
+        for (let i = startIndex; i < endIndex; i++) {
+            filteredRows[i].style.display = '';
+        }
+        
+        const infoEl = document.getElementById('paginationInfo');
+        if (infoEl) {
+            if (filteredRows.length === 0) {
+                infoEl.textContent = 'Menampilkan 0 data';
+            } else {
+                infoEl.textContent = `Menampilkan ${startIndex + 1}-${endIndex} dari ${filteredRows.length} data`;
+            }
+        }
+        
+        renderPaginationButtons();
+    }
+
     function filterTable() {
         const searchQuery = searchSiswa ? searchSiswa.value.toLowerCase().trim() : '';
-        let visibleCount = 0;
+        filteredRows = [];
+        let cTotal = 0, cBelum = 0, cMengerjakan = 0, cSelesai = 0, cKoreksi = 0;
 
         rows.forEach(row => {
             const rowKelasId = row.getAttribute('data-kelas-id');
             const textContent = row.textContent.toLowerCase();
+            const status = row.getAttribute('data-status');
+            const koreksi = parseInt(row.getAttribute('data-koreksi') || '0');
 
             const matchKelas = (activeKelas === 'all' || rowKelasId === activeKelas);
             const matchSearch = (searchQuery === '' || textContent.includes(searchQuery));
 
             if (matchKelas && matchSearch) {
-                row.style.display = '';
-                visibleCount++;
-            } else {
-                row.style.display = 'none';
+                filteredRows.push(row);
+                cTotal++;
+                if (status === 'belum') cBelum++;
+                else if (status === 'mengerjakan') cMengerjakan++;
+                else if (status === 'selesai') cSelesai++;
+                
+                if (koreksi > 0) cKoreksi++;
             }
+            row.style.display = 'none';
         });
 
+        const tTotal = document.getElementById('tallyTotal');
+        const tBelum = document.getElementById('tallyBelum');
+        const tMengerjakan = document.getElementById('tallyMengerjakan');
+        const tSelesai = document.getElementById('tallySelesai');
+        const tKoreksi = document.getElementById('tallyKoreksi');
+        const tItemKoreksi = document.getElementById('tallyItemKoreksi');
+        const pControls = document.getElementById('paginationControls');
+        
+        if (tTotal) tTotal.textContent = cTotal;
+        if (tBelum) tBelum.textContent = cBelum;
+        if (tMengerjakan) tMengerjakan.textContent = cMengerjakan;
+        if (tSelesai) tSelesai.textContent = cSelesai;
+        if (tKoreksi) tKoreksi.textContent = cKoreksi;
+        
+        if (tItemKoreksi) {
+            if (cKoreksi > 0) tItemKoreksi.classList.add('is-alert');
+            else tItemKoreksi.classList.remove('is-alert');
+        }
+
         if (noResult && table) {
-            if (rows.length > 0 && visibleCount === 0) {
+            if (rows.length > 0 && filteredRows.length === 0) {
                 noResult.style.display = 'block';
                 table.style.display = 'none';
+                if (pControls) pControls.style.display = 'none';
             } else {
                 noResult.style.display = 'none';
                 table.style.display = '';
+                if (pControls) pControls.style.display = 'flex';
             }
         }
 
+        currentPage = 1;
+        renderPage();
         updateExportUrls();
     }
 
@@ -812,6 +940,9 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     if (searchSiswa) searchSiswa.addEventListener('input', filterTable);
+    
+    // Initialize the table once on load
+    filterTable();
 });
 </script>
 @endsection

@@ -183,14 +183,16 @@ class GuruNilaiSiswaController extends Controller
             ->orderBy('kelas.nama_kelas', 'asc')
             ->get();
 
-        $pesertas = DB::table('nilais')
-            ->join('siswas', 'nilais.siswa_id', '=', 'siswas.id')
+        $pesertas = DB::table('siswas')
             ->join('siswa_kelas', function($join) use ($ujian) {
                 $join->on('siswas.id', '=', 'siswa_kelas.siswa_id')
                      ->where('siswa_kelas.tahun_ajaran_id', '=', $ujian->tahun_ajaran_id);
             })
             ->join('kelas', 'siswa_kelas.kelas_id', '=', 'kelas.id')
-            ->where('nilais.ujian_id', $id)
+            ->leftJoin('nilais', function($join) use ($id) {
+                $join->on('nilais.siswa_id', '=', 'siswas.id')
+                     ->where('nilais.ujian_id', '=', $id);
+            })
             ->whereIn('kelas.id', $allowedKelasIds)
             ->select(
                 'siswas.id as siswa_id',
@@ -205,6 +207,13 @@ class GuruNilaiSiswaController extends Controller
                 'nilais.violation_count',
                 'nilais.nilai_akhir'
             )
+            ->orderByRaw("
+                CASE 
+                    WHEN nilais.status = 'selesai' THEN 1
+                    WHEN nilais.status = 'mengerjakan' THEN 2
+                    ELSE 3
+                END ASC
+            ")
             ->orderBy('kelas.nama_kelas', 'asc')
             ->orderBy('siswas.nama', 'asc')
             ->get();
@@ -212,7 +221,7 @@ class GuruNilaiSiswaController extends Controller
         // Cek berapa banyak jawaban essay per siswa yang belum dinilai (is_benar is null)
         $unscoredAnswers = DB::table('jawaban_siswas')
             ->join('soals', 'jawaban_siswas.soal_id', '=', 'soals.id')
-            ->whereIn('jawaban_siswas.nilai_id', $pesertas->pluck('nilai_id'))
+            ->whereIn('jawaban_siswas.nilai_id', $pesertas->pluck('nilai_id')->filter()->toArray())
             ->whereIn('soals.jenis_soal', ['essay', 'isian'])
             ->whereNull('jawaban_siswas.is_benar')
             ->select('jawaban_siswas.nilai_id', DB::raw('count(*) as count'))
@@ -220,7 +229,8 @@ class GuruNilaiSiswaController extends Controller
             ->pluck('count', 'nilai_id');
 
         foreach ($pesertas as $p) {
-            $p->belum_dikoreksi = $unscoredAnswers->get($p->nilai_id, 0);
+            $p->status = $p->status ?? 'belum';
+            $p->belum_dikoreksi = $p->nilai_id ? $unscoredAnswers->get($p->nilai_id, 0) : 0;
         }
 
         return view('guru.nilai-siswa.show', compact('ujian', 'pesertas', 'kelasList'));
