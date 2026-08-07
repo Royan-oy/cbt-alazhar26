@@ -11,26 +11,26 @@
 
     <style>
         :root {
-            /* --- Dark Slate Theme --- */
-            --ink: #f8fafc;
-            --muted: #94a3b8;
-            --clay-bg: #0f172a;
-            --clay-surface: #1e293b;
-            --clay-surface-2: #0f172a;
+            /* --- Light Theme (with Dark Slate Accents) --- */
+            --ink: #1e293b;
+            --muted: #64748b;
+            --clay-bg: #dbe6fb;
+            --clay-surface: #eef3fd;
+            --clay-surface-2: #e1eaf9;
             
-            /* --- Sky Blue Accent --- */
+            /* --- Sky Blue & Dark Slate Accent --- */
             --brand: #0ea5e9;
             --brand-2: #38bdf8;
             --brand-deep: #0284c7;
-            --brand-navy: #0c4a6e;
+            --brand-navy: #0f172a; /* Dark Slate */
             
-            /* --- Dark Clay Shadows --- */
+            /* --- Light Clay Shadows --- */
             --shadow-dark: rgba(2, 132, 199, 0.15);
-            --shadow-dark-2: rgba(0, 0, 0, 0.5);
-            --shadow-light: rgba(56, 189, 248, 0.1);
+            --shadow-dark-2: rgba(2, 132, 199, 0.08);
+            --shadow-light: rgba(255, 255, 255, 0.9);
             
             --danger: #ef4444;
-            --danger-bg: rgba(239, 68, 68, 0.15);
+            --danger-bg: #fbe7ea;
             --radius: 32px;
         }
 
@@ -61,32 +61,32 @@
 
         .ambient .b1 {
             width: 320px; height: 320px;
-            background: radial-gradient(circle at 32% 28%, rgba(56,189,248,0.3) 0%, rgba(2,132,199,0.1) 55%, transparent 100%);
-            box-shadow: 24px 34px 60px rgba(2,132,199,0.2);
+            background: radial-gradient(circle at 32% 28%, #ffffff 0%, #c9d3fb 55%, #b6c2f7 100%);
+            box-shadow: 24px 34px 60px rgba(2,132,199,0.18);
             top: -90px; left: -80px;
             opacity: 0.9;
         }
 
         .ambient .b2 {
             width: 260px; height: 260px;
-            background: radial-gradient(circle at 30% 25%, rgba(56,189,248,0.25) 0%, rgba(2,132,199,0.1) 55%, transparent 100%);
-            box-shadow: 20px 28px 50px rgba(2,132,199,0.15);
+            background: radial-gradient(circle at 30% 25%, #ffffff 0%, #bcd2fb 55%, #93b3f5 100%);
+            box-shadow: 20px 28px 50px rgba(2,132,199,0.22);
             bottom: -70px; right: -60px;
             opacity: 0.85;
         }
 
         .ambient .b3 {
             width: 90px; height: 90px;
-            background: radial-gradient(circle at 30% 25%, rgba(129,140,248,0.3) 0%, transparent 100%);
-            box-shadow: 10px 14px 26px rgba(129,140,248,0.2);
+            background: radial-gradient(circle at 30% 25%, #ffffff 0%, #a9c1fb 100%);
+            box-shadow: 10px 14px 26px rgba(2,132,199,0.25);
             top: 18%; right: 12%;
             opacity: 0.8;
         }
 
         .ambient .b4 {
             width: 46px; height: 46px;
-            background: radial-gradient(circle at 30% 25%, rgba(129,140,248,0.25) 0%, transparent 100%);
-            box-shadow: 8px 10px 18px rgba(129,140,248,0.15);
+            background: radial-gradient(circle at 30% 25%, #ffffff 0%, #a9c4fb 100%);
+            box-shadow: 8px 10px 18px rgba(2,132,199,0.25);
             bottom: 20%; left: 9%;
             opacity: 0.8;
         }
@@ -109,7 +109,7 @@
             justify-content: center;
             gap: 0.7rem;
             margin-bottom: 1.5rem;
-            background: linear-gradient(150deg, #1e293b, var(--clay-bg));
+            background: linear-gradient(150deg, #f4f6fe, var(--clay-surface-2));
             border-radius: 999px;
             padding: 0.65rem 1.4rem;
             box-shadow:
@@ -140,7 +140,7 @@
             letter-spacing: 0.06em;
             text-transform: uppercase;
             color: #fff;
-            background: linear-gradient(135deg, var(--brand), var(--brand-2));
+            background: linear-gradient(135deg, #1e293b, #0f172a);
             padding: 0.42rem 0.9rem;
             border-radius: 999px;
             margin-bottom: 1rem;
@@ -153,13 +153,13 @@
         .card-auth {
             width: 100%;
             max-width: 440px;
-            background: linear-gradient(160deg, #1e293b 0%, var(--clay-surface) 55%, var(--clay-surface-2) 100%);
+            background: linear-gradient(160deg, #f5f7ff 0%, var(--clay-surface) 55%, var(--clay-surface-2) 100%);
             border-radius: var(--radius);
             padding: 2.35rem 2.1rem;
             box-shadow:
                 16px 16px 32px var(--shadow-dark),
                 -12px -12px 26px var(--shadow-light),
-                inset 1px 1px 2px rgba(255,255,255,0.05);
+                inset 1px 1px 1px rgba(255,255,255,0.7);
         }
 
         .card-auth h1 {
@@ -168,7 +168,7 @@
             font-weight: 800;
             letter-spacing: -0.01em;
             margin-bottom: 0.35rem;
-            color: #f8fafc;
+            color: var(--brand-navy);
         }
 
         .card-auth .subtitle {
@@ -234,15 +234,15 @@
         .role-chip input:checked + label {
             color: #fff;
             box-shadow:
-                inset 4px 4px 8px rgba(0,0,0,0.4),
-                inset -3px -3px 6px rgba(255,255,255,0.1);
+                inset 4px 4px 8px rgba(0,0,0,0.15),
+                inset -3px -3px 6px rgba(255,255,255,0.15);
             transform: translateY(0);
         }
 
-        .role-chip:nth-child(1) input:checked + label { background: linear-gradient(135deg, var(--brand), var(--brand-2)); }
-        .role-chip:nth-child(2) input:checked + label { background: linear-gradient(135deg, var(--brand-deep), var(--brand)); }
-        .role-chip:nth-child(3) input:checked + label { background: linear-gradient(135deg, #0ea5e9, #38bdf8); }
-        .role-chip:nth-child(4) input:checked + label { background: linear-gradient(135deg, var(--brand-navy), var(--brand-deep)); }
+        .role-chip:nth-child(1) input:checked + label { background: linear-gradient(135deg, var(--brand-navy), #1e293b); }
+        .role-chip:nth-child(2) input:checked + label { background: linear-gradient(135deg, #1e293b, var(--brand-navy)); }
+        .role-chip:nth-child(3) input:checked + label { background: linear-gradient(135deg, #334155, #1e293b); }
+        .role-chip:nth-child(4) input:checked + label { background: linear-gradient(135deg, #020617, var(--brand-navy)); }
 
         .role-chip input:focus-visible + label {
             outline: 2px solid var(--brand);
@@ -259,16 +259,16 @@
             border-radius: 18px;
             background: var(--clay-bg);
             box-shadow:
-                inset 5px 5px 10px rgba(0,0,0,0.4),
-                inset -4px -4px 8px rgba(255,255,255,0.05);
+                inset 5px 5px 10px var(--shadow-dark-2),
+                inset -4px -4px 8px rgba(255,255,255,0.85);
             transition: box-shadow 0.15s ease;
         }
 
         .input-shell:focus-within {
             box-shadow:
-                inset 5px 5px 10px rgba(2,132,199,0.3),
-                inset -4px -4px 8px rgba(255,255,255,0.08),
-                0 0 0 3px rgba(2,132,199,0.25);
+                inset 5px 5px 10px rgba(15, 23, 42, 0.15),
+                inset -4px -4px 8px rgba(255,255,255,0.9),
+                0 0 0 3px rgba(15, 23, 42, 0.15);
         }
 
         .input-shell i.leading-icon {
@@ -294,7 +294,7 @@
         .input-shell input:-webkit-autofill:hover, 
         .input-shell input:-webkit-autofill:focus, 
         .input-shell input:-webkit-autofill:active{
-            /* -webkit-box-shadow: 0 0 0 30px #fffff inset !important; */
+            -webkit-box-shadow: 0 0 0 30px #fffff inset !important;
             -webkit-text-fill-color: var(--ink) !important;
             transition: background-color 5000s ease-in-out 0s;
         }
@@ -327,23 +327,23 @@
             gap: 0.5rem;
             margin-top: 0.5rem;
             box-shadow:
-                8px 10px 18px rgba(2,132,199,0.3),
-                -4px -4px 10px rgba(255,255,255,0.05);
+                8px 10px 18px rgba(2,132,199,0.25),
+                -4px -4px 10px rgba(255,255,255,0.8);
             transition: transform 0.15s ease, box-shadow 0.15s ease;
         }
 
         .btn-submit:hover {
             transform: translateY(-2px);
             box-shadow:
-                10px 14px 22px rgba(2,132,199,0.4),
-                -4px -4px 10px rgba(255,255,255,0.08);
+                10px 14px 22px rgba(2,132,199,0.35),
+                -4px -4px 10px rgba(255,255,255,0.9);
         }
 
         .btn-submit:active {
             transform: translateY(1px);
             box-shadow:
-                inset 4px 4px 10px rgba(0,0,0,0.25),
-                inset -3px -3px 6px rgba(255,255,255,0.1);
+                inset 4px 4px 10px rgba(0,0,0,0.2),
+                inset -3px -3px 6px rgba(255,255,255,0.2);
         }
 
         /* ---------- Alert: soft clay warning ---------- */
@@ -360,7 +360,7 @@
             margin-bottom: 1.25rem;
             box-shadow:
                 inset 3px 3px 6px rgba(224,86,106,0.12),
-                -3px -3px 8px rgba(255,255,255,0.05);
+                -3px -3px 8px rgba(255,255,255,0.7);
         }
 
         .alert-modern i { margin-top: 0.15rem; }

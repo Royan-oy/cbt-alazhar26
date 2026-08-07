@@ -2,9 +2,9 @@
     /* --- CORE NAVBAR STYLE (MODERN FLOATING & STICKY) --- */
     .cbt-header-container {
         padding: 15px 24px 5px 24px;
-        background-color: #f8fafcaf; /* Menyamai background main content */
+        background-color: #f8fafc3e; /* Menyamai background main content */
         -webkit-backdrop-filter: blur();
-        backdrop-filter: blur(10px);
+        backdrop-filter: blur(5px);
         /* Tambahkan 3 baris kode di bawah ini agar sticky saat di-scroll */
         position: sticky;
         top: 0;
