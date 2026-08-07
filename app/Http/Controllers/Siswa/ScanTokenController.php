@@ -83,9 +83,9 @@ class ScanTokenController extends Controller
             }
         }
 
-        // Fallback jika tidak ditemukan guru pengajar spesifik kelas: gunakan pembuat bank soal
+        // Fallback jika tidak ditemukan guru pengajar spesifik kelas: tampilkan '-' agar akurat
         if (!$guruPengajarNama) {
-            $guruPengajarNama = optional(optional(optional($ujian->bankSoal)->guruMapel)->guru)->nama ?? '-';
+            $guruPengajarNama = '-';
         }
 
         $ujian->guru_pengajar_nama = $guruPengajarNama;

@@ -11,6 +11,7 @@ use App\Models\Jenjang;
 use App\Models\GuruMapel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class UjianController extends Controller
 {
@@ -136,6 +137,13 @@ class UjianController extends Controller
 
         $this->authorizeKelasSesuaiGuruBankSoal($request->kelas_id, $bankSoal);
 
+        $unassignedKelas = $this->checkKelasHasGuruMapel($request->kelas_id, $bankSoal, $request->tahun_ajaran_id);
+        if (!empty($unassignedKelas)) {
+            return back()->withInput()->withErrors([
+                'kelas_id' => 'Gagal menyimpan jadwal ujian! Kelas berikut belum memiliki Guru Mata Pelajaran (' . optional($bankSoal->mataPelajaran)->nama_mapel . ') untuk Tahun Ajaran terpilih: ' . implode(', ', $unassignedKelas) . '. Silakan atur Guru Mapel terlebih dahulu di menu Pengguna > Guru Mapel.',
+            ]);
+        }
+
         $ujian = Ujian::create([
             'bank_soal_id'         => $request->bank_soal_id,
             'jenis_ujian_id'       => $request->jenis_ujian_id,
@@ -220,6 +228,13 @@ class UjianController extends Controller
         $this->authorizeJenjangKelas($request->kelas_id, $bankSoal->jenjang_id);
 
         $this->authorizeKelasSesuaiGuruBankSoal($request->kelas_id, $bankSoal);
+
+        $unassignedKelas = $this->checkKelasHasGuruMapel($request->kelas_id, $bankSoal, $request->tahun_ajaran_id);
+        if (!empty($unassignedKelas)) {
+            return back()->withInput()->withErrors([
+                'kelas_id' => 'Gagal memperbarui jadwal ujian! Kelas berikut belum memiliki Guru Mata Pelajaran (' . optional($bankSoal->mataPelajaran)->nama_mapel . ') untuk Tahun Ajaran terpilih: ' . implode(', ', $unassignedKelas) . '. Silakan atur Guru Mapel terlebih dahulu di menu Pengguna > Guru Mapel.',
+            ]);
+        }
 
         if ($ujian->token_aktif) {
             return back()->withInput()->withErrors([
@@ -331,8 +346,27 @@ class UjianController extends Controller
             }
         }
 
+        // mapping tambahan bankSoalKelasGuruMap[bsId][taId] => [kelas_id, ...]
+        $guruMapelKelasData = DB::table('guru_mapel_kelas')
+            ->join('guru_mapels', 'guru_mapel_kelas.guru_mapel_id', '=', 'guru_mapels.id')
+            ->select('guru_mapels.mata_pelajaran_id', 'guru_mapels.tahun_ajaran_id', 'guru_mapel_kelas.kelas_id')
+            ->get();
+
+        $mapelTahunKelasGuruMap = [];
+        foreach ($guruMapelKelasData as $row) {
+            $mapelTahunKelasGuruMap[$row->mata_pelajaran_id][$row->tahun_ajaran_id][] = $row->kelas_id;
+        }
+
+        $bankSoalKelasGuruMap = [];
+        foreach ($bankSoals as $bs) {
+            $mapelId = $bs->mata_pelajaran_id;
+            foreach ($tahunAjarans as $ta) {
+                $bankSoalKelasGuruMap[$bs->id][$ta->id] = array_values(array_unique($mapelTahunKelasGuruMap[$mapelId][$ta->id] ?? []));
+            }
+        }
+
         return compact(
-            'jenjangs', 'bankSoals', 'kelasList', 'jenisUjians', 'tahunAjarans', 'bankSoalKelasMap'
+            'jenjangs', 'bankSoals', 'kelasList', 'jenisUjians', 'tahunAjarans', 'bankSoalKelasMap', 'bankSoalKelasGuruMap'
         );
     }
 
@@ -386,6 +420,31 @@ class UjianController extends Controller
                 abort(422, 'Bank soal ini berkategori Personal. Ada kelas yang tidak diajar oleh guru pembuat bank soal ini.');
             }
         }
+    }
+
+    /**
+     * Memeriksa apakah setiap kelas yang dipilih memiliki Guru Mapel
+     * untuk Mata Pelajaran bank soal & Tahun Ajaran terpilih.
+     */
+    private function checkKelasHasGuruMapel(array $kelasIds, BankSoal $bankSoal, $tahunAjaranId)
+    {
+        $mapelId = $bankSoal->mata_pelajaran_id;
+
+        $kelasWithGuru = DB::table('guru_mapel_kelas')
+            ->join('guru_mapels', 'guru_mapel_kelas.guru_mapel_id', '=', 'guru_mapels.id')
+            ->where('guru_mapels.mata_pelajaran_id', $mapelId)
+            ->where('guru_mapels.tahun_ajaran_id', $tahunAjaranId)
+            ->whereIn('guru_mapel_kelas.kelas_id', $kelasIds)
+            ->pluck('guru_mapel_kelas.kelas_id')
+            ->toArray();
+
+        $unassignedIds = array_diff($kelasIds, $kelasWithGuru);
+
+        if (empty($unassignedIds)) {
+            return [];
+        }
+
+        return Kelas::whereIn('id', $unassignedIds)->pluck('nama_kelas')->toArray();
     }
 
     /**

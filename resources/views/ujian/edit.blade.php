@@ -350,6 +350,9 @@
                                                 {{ optional($kelas->tingkat)->nama_tingkat }} - {{ $kelas->nama_kelas }}
                                             </label>
                                         </div>
+                                        <span class="guru-mapel-warning text-danger fw-bold d-block mt-1 small d-none" style="font-size: 11px;">
+                                            <i class="fa-solid fa-triangle-exclamation me-1"></i>Belum ada Guru Mapel
+                                        </span>
                                     </div>
                                 </div>
                             @empty
@@ -420,51 +423,67 @@
 {{-- mapping bank_soal_id => [kelas_id, ...], dikirim dari controller --}}
 <script>
     window.bankSoalKelasMap = @json($bankSoalKelasMap ?? []);
+    window.bankSoalKelasGuruMap = @json($bankSoalKelasGuruMap ?? []);
 </script>
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
 
-    const bankSoalSelect = document.getElementById('bankSoal');
-    const jenjangSelect   = document.getElementById('jenjang'); // hanya ada untuk super_admin
-    const kelasItems      = document.querySelectorAll('.kelas-item');
-    const map              = window.bankSoalKelasMap || {};
+    const bankSoalSelect   = document.getElementById('bankSoal');
+    const jenjangSelect     = document.getElementById('jenjang'); // hanya ada untuk super_admin
+    const tahunAjaranSelect  = document.querySelector('select[name="tahun_ajaran_id"]');
+    const kelasItems        = document.querySelectorAll('.kelas-item');
+    const map                = window.bankSoalKelasMap || {};
+    const guruMap            = window.bankSoalKelasGuruMap || {};
 
-    // Satu fungsi yang menerapkan SEMUA filter kelas sekaligus:
-    // 1) harus diajar oleh guru mapel pembuat bank soal yang dipilih
-    // 2) (khusus super_admin) harus satu jenjang dengan yang dipilih
     function applyKelasFilters() {
 
         const bankSoalId = bankSoalSelect ? bankSoalSelect.value : '';
         const jenjangId   = jenjangSelect ? jenjangSelect.value : null;
+        const taId       = tahunAjaranSelect ? tahunAjaranSelect.value : '';
 
         if (!bankSoalId) {
             kelasItems.forEach(function (item) {
                 item.style.display = 'none';
                 item.querySelector('input').checked = false;
+                const badge = item.querySelector('.guru-mapel-warning');
+                if (badge) badge.classList.add('d-none');
             });
             return;
         }
 
-        const allowedKelasIds = (map[bankSoalId] || []).map(String);
+        const allowedKelasIds   = (map[bankSoalId] || []).map(String);
+        const kelasGuruAssigned = ((guruMap[bankSoalId] && guruMap[bankSoalId][taId]) || []).map(String);
 
         kelasItems.forEach(function (item) {
             const kelasId = item.dataset.kelasId;
+            const badge   = item.querySelector('.guru-mapel-warning');
 
             const cocokGuruMapel = allowedKelasIds.includes(kelasId);
             const cocokJenjang   = jenjangSelect ? item.dataset.jenjang === jenjangId : true;
 
             if (cocokGuruMapel && cocokJenjang) {
                 item.style.display = 'block';
+
+                if (taId && !kelasGuruAssigned.includes(kelasId)) {
+                    if (badge) badge.classList.remove('d-none');
+                } else {
+                    if (badge) badge.classList.add('d-none');
+                }
             } else {
                 item.style.display = 'none';
                 item.querySelector('input').checked = false;
+                if (badge) badge.classList.add('d-none');
             }
         });
     }
 
     if (bankSoalSelect) {
         bankSoalSelect.addEventListener('change', applyKelasFilters);
+    }
+
+    if (tahunAjaranSelect) {
+        tahunAjaranSelect.addEventListener('change', applyKelasFilters);
     }
 
     if (jenjangSelect) {
