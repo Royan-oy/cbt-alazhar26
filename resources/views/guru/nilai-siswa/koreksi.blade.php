@@ -209,7 +209,41 @@
         font-size: 1rem; line-height: 1.6; color: var(--ink); font-weight: 500;
         margin-bottom: 1.25rem;
     }
-    .kx-soal-img { max-width: 100%; border-radius: 8px; border: 1px solid var(--rule); margin-bottom: 1.25rem; }
+    .kx-soal-text p,
+    .kx-answer-text p,
+    .kx-opt p,
+    .table td p {
+        display: inline;
+        margin-bottom: 0;
+    }
+
+    .kx-soal-img,
+    .kx-soal-text img,
+    .kx-answer-text img,
+    .kx-opt img,
+    .table img {
+        max-width: 240px;
+        max-height: 240px;
+        width: auto;
+        height: auto;
+        object-fit: contain;
+        border-radius: 10px;
+        border: 1px solid var(--rule);
+        margin-top: 0.5rem;
+        margin-bottom: 1rem;
+        display: block;
+        box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .kx-soal-img:hover,
+    .kx-soal-text img:hover,
+    .kx-answer-text img:hover,
+    .kx-opt img:hover,
+    .table img:hover {
+        transform: scale(1.02);
+        box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
+    }
 
     .kx-answer {
         background: var(--paper); border-left: 4px solid var(--accent-blue);
@@ -696,8 +730,8 @@
                                                             @endphp
                                                             <tr>
                                                                 <td class="fw-semibold">{!! $itemKiri !!}</td>
-                                                                <td class="fw-bold text-success">{{ $pasanganKunci }}</td>
-                                                                <td class="fw-bold {{ $isMatch ? 'text-success' : 'text-danger' }}">{{ $pasanganSiswa ? $pasanganSiswa : '(Belum Dijodohkan)' }}</td>
+                                                                <td class="fw-bold text-success">{!! $pasanganKunci !!}</td>
+                                                                <td class="fw-bold {{ $isMatch ? 'text-success' : 'text-danger' }}">{!! $pasanganSiswa ? $pasanganSiswa : '(Belum Dijodohkan)' !!}</td>
                                                                 <td class="text-center">
                                                                     @if($isMatch)
                                                                         <span class="badge bg-success"><i class="fa-solid fa-check"></i></span>
