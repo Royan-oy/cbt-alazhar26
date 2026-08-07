@@ -587,31 +587,23 @@
                     @enderror
                 </div>
 
-                {{-- Deskripsi (boleh mengandung rumus matematika, contoh: $\frac{1}{2}+\frac{2}{1}=$) --}}
+                {{-- Deskripsi --}}
                 <div class="form-group mt-3">
                     <label class="form-label-custom">
                         Deskripsi
-                        <span class="label-hint">Opsional • bisa berisi rumus, mis. $\frac{1}{2}+\frac{2}{1}=$</span>
+                        <span class="label-hint">Opsional</span>
                     </label>
                     <textarea name="deskripsi"
-                              id="deskripsiInput"
                               class="form-control-modern @error('deskripsi') is-invalid @enderror"
                               rows="4"
-                              placeholder="Tambahkan deskripsi atau catatan tentang bank soal ini... boleh sisipkan rumus dengan $...$">{{ old('deskripsi') }}</textarea>
+                              placeholder="Tambahkan deskripsi atau catatan tentang bank soal ini...">{{ old('deskripsi') }}</textarea>
                     @error('deskripsi')
                         <div class="field-error">
                             <i class="fa-solid fa-circle-exclamation"></i> {{ $message }}
                         </div>
                     @enderror
-
-                    {{-- Live preview: menampilkan hasil render rumus, bukan teks mentah --}}
-                    <div class="math-preview-box">
-                        <div class="math-preview-label">
-                            <i class="fa-solid fa-eye me-1"></i>Preview
-                        </div>
-                        <div id="deskripsiPreview"></div>
-                    </div>
                 </div>
+
 
             </div>
 
@@ -630,76 +622,5 @@
     </div>
 
 </div>
-
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    const input   = document.getElementById('deskripsiInput');
-    const preview = document.getElementById('deskripsiPreview');
-    if (!input || !preview) return;
-
-    let debounceTimer;
-
-    // 1) PASTE HANDLER
-    //    Memaksa apapun yang di-paste (dari Word, PDF, halaman web, dsb)
-    //    masuk sebagai PLAIN TEXT saja -> supaya rumus $\frac{1}{2}$ yang
-    //    di-copy dari sumber lain tetap utuh kode LaTeX-nya, tanpa
-    //    ikut bawa formatting/HTML tersembunyi yang bisa merusak tampilan.
-    //    Catatan: kalau yang di-copy dari Word adalah OBJEK Equation
-    //    (gambar/OMML, bukan teks), ini tidak bisa otomatis jadi LaTeX -
-    //    guru tetap perlu ketik ulang kodenya, mis. $\frac{1}{2}$.
-    input.addEventListener('paste', function (e) {
-        e.preventDefault();
-        const clipboard = e.clipboardData || window.clipboardData;
-        const text = clipboard.getData('text/plain');
-
-        const start = input.selectionStart;
-        const end   = input.selectionEnd;
-        const before = input.value.substring(0, start);
-        const after  = input.value.substring(end);
-
-        input.value = before + text + after;
-        const cursorPos = start + text.length;
-        input.setSelectionRange(cursorPos, cursorPos);
-
-        renderPreview();
-    });
-
-    // 2) LIVE PREVIEW
-    //    Menampilkan hasil RENDER (bukan teks mentah) setiap guru berhenti
-    //    mengetik sejenak. Escape HTML dulu (anti-XSS), baru panggil MathJax.
-    function renderPreview() {
-        const raw = input.value.trim();
-
-        if (!raw) {
-            preview.innerHTML = '<span class="math-preview-empty">Preview akan muncul di sini...</span>';
-            return;
-        }
-
-        const escaped = raw
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;');
-
-        // pertahankan newline supaya enak dibaca di preview
-        preview.innerHTML = escaped.replace(/\n/g, '<br>');
-
-        if (window.MathJax && window.MathJax.typesetPromise) {
-            if (window.MathJax.typesetClear) {
-                window.MathJax.typesetClear([preview]);
-            }
-            window.MathJax.typesetPromise([preview])
-                .catch(err => console.error('MathJax preview error:', err));
-        }
-    }
-
-    input.addEventListener('input', function () {
-        clearTimeout(debounceTimer);
-        debounceTimer = setTimeout(renderPreview, 250);
-    });
-
-    // render pertama kali (menangani kasus old('deskripsi') setelah validasi gagal)
-    renderPreview();
-});
-</script>
 
 @endsection
