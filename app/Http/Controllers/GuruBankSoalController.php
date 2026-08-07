@@ -71,7 +71,13 @@ class GuruBankSoalController extends Controller
     {
         $guru = Auth::user()->guru;
 
-        $guruMapels = $guru->guruMapels()->with('mataPelajaran')->get();
+        $activeTahunAjaran = \App\Models\TahunAjaran::where('is_aktif', true)->first();
+
+        $guruMapelsQuery = $guru->guruMapels()->with('mataPelajaran');
+        if ($activeTahunAjaran) {
+            $guruMapelsQuery->where('tahun_ajaran_id', $activeTahunAjaran->id);
+        }
+        $guruMapels = $guruMapelsQuery->get();
 
         return view('guru.bank-soal.create', [
             'guruMapels' => $guruMapels,
@@ -124,7 +130,16 @@ class GuruBankSoalController extends Controller
         $guru = Auth::user()->guru;
         $this->authorizeEdit($guru, $bank_soal);
 
-        $guruMapels = $guru->guruMapels()->with('mataPelajaran')->get();
+        $activeTahunAjaran = \App\Models\TahunAjaran::where('is_aktif', true)->first();
+
+        $guruMapelsQuery = $guru->guruMapels()->with('mataPelajaran');
+        if ($activeTahunAjaran) {
+            $guruMapelsQuery->where(function($q) use ($activeTahunAjaran, $bank_soal) {
+                $q->where('tahun_ajaran_id', $activeTahunAjaran->id)
+                  ->orWhere('id', $bank_soal->guru_mapel_id);
+            });
+        }
+        $guruMapels = $guruMapelsQuery->get();
 
         return view('guru.bank-soal.edit', [
             'bankSoal'   => $bank_soal,

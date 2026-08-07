@@ -128,10 +128,10 @@
     <div class="d-flex">
         @include('layouts.sidebar')
 
-        <div class="w-100 d-flex flex-column min-w-0">
+        <div class="w-100 d-flex flex-column" style="min-width: 0; overflow-x: hidden;">
             @include('layouts.header')
 
-            <main class="p-4 flex-grow-1">
+            <main class="p-4 flex-grow-1" style="min-width: 0;">
                 @yield('content')
             </main>
         </div>
